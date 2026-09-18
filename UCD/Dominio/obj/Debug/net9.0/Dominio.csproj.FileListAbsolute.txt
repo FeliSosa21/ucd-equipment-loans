@@ -1,0 +1,12 @@
+/Users/felipesosa/RiderProjects/303959_296341_341556/UCD/Dominio/bin/Debug/net9.0/Dominio.deps.json
+/Users/felipesosa/RiderProjects/303959_296341_341556/UCD/Dominio/bin/Debug/net9.0/Dominio.dll
+/Users/felipesosa/RiderProjects/303959_296341_341556/UCD/Dominio/bin/Debug/net9.0/Dominio.pdb
+/Users/felipesosa/RiderProjects/303959_296341_341556/UCD/Dominio/obj/Debug/net9.0/Dominio.GeneratedMSBuildEditorConfig.editorconfig
+/Users/felipesosa/RiderProjects/303959_296341_341556/UCD/Dominio/obj/Debug/net9.0/Dominio.AssemblyInfoInputs.cache
+/Users/felipesosa/RiderProjects/303959_296341_341556/UCD/Dominio/obj/Debug/net9.0/Dominio.AssemblyInfo.cs
+/Users/felipesosa/RiderProjects/303959_296341_341556/UCD/Dominio/obj/Debug/net9.0/Dominio.csproj.CoreCompileInputs.cache
+/Users/felipesosa/RiderProjects/303959_296341_341556/UCD/Dominio/obj/Debug/net9.0/Dominio.sourcelink.json
+/Users/felipesosa/RiderProjects/303959_296341_341556/UCD/Dominio/obj/Debug/net9.0/Dominio.dll
+/Users/felipesosa/RiderProjects/303959_296341_341556/UCD/Dominio/obj/Debug/net9.0/refint/Dominio.dll
+/Users/felipesosa/RiderProjects/303959_296341_341556/UCD/Dominio/obj/Debug/net9.0/Dominio.pdb
+/Users/felipesosa/RiderProjects/303959_296341_341556/UCD/Dominio/obj/Debug/net9.0/ref/Dominio.dll
