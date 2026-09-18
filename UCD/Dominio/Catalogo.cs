@@ -1,15 +1,17 @@
 namespace Dominio;
 
-public class Catalogo {
-    
+public class Catalogo
+{
     public string Nombre { get; private set; }
-    public Catalogo(string nombre) {
-        
+
+    public Catalogo(string nombre)
+    {
         ValidarNombre(nombre);
         Nombre = nombre;
     }
-    public void ModificarNombre(string nombre) {
-        
+
+    public void ModificarNombre(string nombre)
+    {
         ValidarNombre(nombre);
         Nombre = nombre;
     }
