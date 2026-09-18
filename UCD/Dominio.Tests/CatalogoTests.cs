@@ -30,6 +30,17 @@ public sealed class CatalogoTests {
             var catalogo = new Catalogo(nombre);
         });
     }
+    
+    [TestMethod]
+    public void ModificarNombre_NombreMuyCorto_LanzaArgumentException()
+    {
+        Assert.ThrowsException<ArgumentException>(() =>
+        {
+            var catalogo = new Catalogo("CatalogoViejo");
+
+            catalogo.ModificarNombre("Ca");
+        });
+    }
 }
 
 
