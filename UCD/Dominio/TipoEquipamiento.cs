@@ -25,6 +25,10 @@ public class TipoEquipamiento
         RequiereAprobacion = requiereAprobacion;
         Categoria = categoria;
     }
+    public void Discontinuar()
+    {
+        throw new NotImplementedException();
+    }
 
     private static void ValidarNombre(string nombre)
     {

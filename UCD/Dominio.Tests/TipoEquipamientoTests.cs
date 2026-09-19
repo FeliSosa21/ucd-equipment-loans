@@ -123,6 +123,15 @@ public sealed class TipoEquipamientoTests
 
         Assert.AreEqual(1, tipo.DuracionMaximaDias);
     }
+    [TestMethod]
+    public void Discontinuar_TipoActivo_QuedaDiscontinuado()
+    {
+        var tipo = CrearTipo();
+
+        tipo.Discontinuar();
+
+        Assert.AreEqual(EstadoTipoEquipamiento.Discontinuado, tipo.Estado);
+    }
 
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
