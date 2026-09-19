@@ -35,4 +35,12 @@ public sealed class TipoEquipamientoTests
 
         Assert.AreEqual(5, tipo.DuracionMaximaDias);
     }
+    [TestMethod]
+    public void Constructor_ConAprobacionPrevia_GuardaQueRequiereAprobacion()
+    {
+        var tipo = new TipoEquipamiento("Proyector Epson PowerLite", "Proyector para aulas",
+            5, true, Categoria.Audiovisual);
+
+        Assert.IsTrue(tipo.RequiereAprobacion);
+    }
 }
