@@ -106,6 +106,23 @@ public sealed class TipoEquipamientoTests
     {
         Assert.ThrowsException<DominioException>(() => CrearTipo(duracionMaximaDias: -1));
     }
+    [TestMethod]
+    public void Constructor_DescripcionDe300Caracteres_GuardaLaDescripcion()
+    {
+        var descripcion = new string('a', 300);
+
+        var tipo = CrearTipo(descripcion: descripcion);
+
+        Assert.AreEqual(descripcion, tipo.Descripcion);
+    }
+
+    [TestMethod]
+    public void Constructor_DuracionDe1Dia_GuardaLaDuracion()
+    {
+        var tipo = CrearTipo(duracionMaximaDias: 1);
+
+        Assert.AreEqual(1, tipo.DuracionMaximaDias);
+    }
 
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
