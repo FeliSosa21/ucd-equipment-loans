@@ -18,6 +18,10 @@ public class Catalogo
 
     private void ValidarNombre(string nombre)
     {
+        if (nombre == null)
+        {
+            throw new ArgumentException("El nombre del catalogo no debe ser nulo");
+        }
         if(nombre.Length<3)
         {
             throw new ArgumentException("El nombre del catalogo debe tener al menos 3 caracteres");
