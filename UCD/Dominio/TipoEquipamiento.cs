@@ -12,9 +12,17 @@ public class TipoEquipamiento
         public TipoEquipamiento(string nombre, string descripcion, int duracionMaximaDias,
         bool requiereAprobacion, Categoria categoria)
     {
+        if (string.IsNullOrWhiteSpace(nombre))
+        {
+            throw new DominioException("El nombre del tipo de equipamiento no puede ser vacío");
+        }
         if (nombre.Length < 3)
         {
             throw new DominioException("El nombre del tipo de equipamiento debe tener al menos 3 caracteres");
+        }
+        if (nombre.Length > 80)
+        {
+            throw new DominioException("El nombre del tipo de equipamiento no puede superar los 80 caracteres");
         }
 
         Nombre = nombre;
