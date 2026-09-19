@@ -55,6 +55,19 @@ public sealed class TipoEquipamientoTests
     {
         Assert.ThrowsException<DominioException>(() => CrearTipo(nombre: "TV"));
     }
+    [TestMethod]
+    public void Constructor_NombreDe81Caracteres_LanzaDominioException()
+    {
+        var nombre = new string('a', 81);
+
+        Assert.ThrowsException<DominioException>(() => CrearTipo(nombre: nombre));
+    }
+
+    [TestMethod]
+    public void Constructor_NombreSoloEspacios_LanzaDominioException()
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(nombre: "     "));
+    }
 
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
