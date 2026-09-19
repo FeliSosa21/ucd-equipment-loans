@@ -3,6 +3,7 @@
 public class TipoEquipamiento
 {
     public string Nombre { get; private set; }
+    public string Descripcion => throw new NotImplementedException();
     public EstadoTipoEquipamiento Estado { get; private set; } = EstadoTipoEquipamiento.Activo;
 
     public TipoEquipamiento(string nombre, string descripcion, int duracionMaximaDias,
