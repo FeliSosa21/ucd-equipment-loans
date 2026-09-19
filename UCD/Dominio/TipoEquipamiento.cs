@@ -27,7 +27,7 @@ public class TipoEquipamiento
     }
     public void Discontinuar()
     {
-        throw new NotImplementedException();
+        Estado = EstadoTipoEquipamiento.Discontinuado;
     }
 
     private static void ValidarNombre(string nombre)
