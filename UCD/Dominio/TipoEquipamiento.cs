@@ -28,6 +28,10 @@ public class TipoEquipamiento
         {
             throw new DominioException("La descripción del tipo de equipamiento no puede superar los 300 caracteres");
         }
+        if (duracionMaximaDias <= 0)
+        {
+            throw new DominioException("La duración máxima de préstamo debe ser mayor que cero");
+        }
 
         Nombre = nombre;
         Descripcion = descripcion;
