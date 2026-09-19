@@ -132,6 +132,22 @@ public sealed class TipoEquipamientoTests
 
         Assert.AreEqual(EstadoTipoEquipamiento.Discontinuado, tipo.Estado);
     }
+    [TestMethod]
+    public void EstaActivo_TipoNuevo_DevuelveTrue()
+    {
+        var tipo = CrearTipo();
+
+        Assert.IsTrue(tipo.EstaActivo);
+    }
+
+    [TestMethod]
+    public void EstaActivo_TipoDiscontinuado_DevuelveFalse()
+    {
+        var tipo = CrearTipo();
+        tipo.Discontinuar();
+
+        Assert.IsFalse(tipo.EstaActivo);
+    }
 
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
