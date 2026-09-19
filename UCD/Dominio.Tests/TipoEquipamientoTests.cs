@@ -162,6 +162,30 @@ public sealed class TipoEquipamientoTests
         Assert.IsTrue(tipo.RequiereAprobacion);
         Assert.AreEqual(Categoria.Computacion, tipo.Categoria);
     }
+    [TestMethod]
+    public void Modificar_NombreInvalido_LanzaDominioException()
+    {
+        var tipo = CrearTipo();
+
+        Assert.ThrowsException<DominioException>(() => ModificarTipo(tipo, nombre: "TV"));
+    }
+
+    [TestMethod]
+    public void Modificar_DescripcionInvalida_LanzaDominioException()
+    {
+        var tipo = CrearTipo();
+        var descripcion = new string('a', 301);
+
+        Assert.ThrowsException<DominioException>(() => ModificarTipo(tipo, descripcion: descripcion));
+    }
+
+    [TestMethod]
+    public void Modificar_DuracionInvalida_LanzaDominioException()
+    {
+        var tipo = CrearTipo();
+
+        Assert.ThrowsException<DominioException>(() => ModificarTipo(tipo, duracionMaximaDias: 0));
+    }
 
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
@@ -171,5 +195,15 @@ public sealed class TipoEquipamientoTests
         Categoria categoria = Categoria.Audiovisual)
     {
         return new TipoEquipamiento(nombre, descripcion, duracionMaximaDias, requiereAprobacion, categoria);
+    }
+    private static void ModificarTipo(
+        TipoEquipamiento tipo,
+        string nombre = "Proyector Epson PowerLite",
+        string descripcion = "Proyector para aulas",
+        int duracionMaximaDias = 5,
+        bool requiereAprobacion = false,
+        Categoria categoria = Categoria.Audiovisual)
+    {
+        tipo.Modificar(nombre, descripcion, duracionMaximaDias, requiereAprobacion, categoria);
     }
 }
