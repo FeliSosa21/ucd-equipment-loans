@@ -27,6 +27,10 @@ public class TipoEquipamiento
     }
     public void Modificar(string nombre, string descripcion, int duracionMaximaDias, bool requiereAprobacion, Categoria categoria)
     {
+        ValidarNombre(nombre);
+        ValidarDescripcion(descripcion);
+        ValidarDuracion(duracionMaximaDias);
+
         Nombre = nombre;
         Descripcion = descripcion;
         DuracionMaximaDias = duracionMaximaDias;
