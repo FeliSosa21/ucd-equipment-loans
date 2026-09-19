@@ -68,6 +68,26 @@ public sealed class TipoEquipamientoTests
     {
         Assert.ThrowsException<DominioException>(() => CrearTipo(nombre: "     "));
     }
+    
+    [TestMethod]
+    public void Constructor_NombreDe3Caracteres_GuardaElNombre()
+    {
+        var nombre = new string('a', 3);
+
+        var tipo = CrearTipo(nombre: nombre);
+
+        Assert.AreEqual(nombre, tipo.Nombre);
+    }
+
+    [TestMethod]
+    public void Constructor_NombreDe80Caracteres_GuardaElNombre()
+    {
+        var nombre = new string('a', 80);
+
+        var tipo = CrearTipo(nombre: nombre);
+
+        Assert.AreEqual(nombre, tipo.Nombre);
+    }
 
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
