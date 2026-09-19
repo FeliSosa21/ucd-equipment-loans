@@ -29,7 +29,7 @@ public class TipoEquipamiento
     {
         Estado = EstadoTipoEquipamiento.Discontinuado;
     }
-    public bool EstaActivo => throw new NotImplementedException();
+    public bool EstaActivo => Estado == EstadoTipoEquipamiento.Activo;
     private static void ValidarNombre(string nombre)
     {
         if (string.IsNullOrWhiteSpace(nombre))
