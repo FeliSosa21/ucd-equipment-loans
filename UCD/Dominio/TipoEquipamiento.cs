@@ -25,10 +25,13 @@ public class TipoEquipamiento
         RequiereAprobacion = requiereAprobacion;
         Categoria = categoria;
     }
-    public void Modificar(string nombre, string descripcion, int duracionMaximaDias,
-        bool requiereAprobacion, Categoria categoria)
+    public void Modificar(string nombre, string descripcion, int duracionMaximaDias, bool requiereAprobacion, Categoria categoria)
     {
-        throw new NotImplementedException();
+        Nombre = nombre;
+        Descripcion = descripcion;
+        DuracionMaximaDias = duracionMaximaDias;
+        RequiereAprobacion = requiereAprobacion;
+        Categoria = categoria;
     }
     public void Discontinuar()
     {
