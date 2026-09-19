@@ -50,6 +50,11 @@ public sealed class TipoEquipamientoTests
 
         Assert.AreEqual(Categoria.Audiovisual, tipo.Categoria);
     }
+    [TestMethod]
+    public void Constructor_NombreDe2Caracteres_LanzaDominioException()
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(nombre: "TV"));
+    }
 
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
