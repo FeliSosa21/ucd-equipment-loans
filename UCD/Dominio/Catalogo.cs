@@ -20,15 +20,15 @@ public class Catalogo
     {
         if (string.IsNullOrWhiteSpace(nombre))
         {
-            throw new ArgumentException("El nombre del catalogo no puede ser vacio");
+            throw new DominioException("El nombre del catalogo no puede ser vacio");
         }
         if (nombre.Length < 3)
         {
-            throw new ArgumentException("El nombre del catalogo debe tener al menos 3 caracteres");
+            throw new DominioException("El nombre del catalogo debe tener al menos 3 caracteres");
         }
         if (nombre.Length > 80)
         {
-            throw new ArgumentException("El nombre del catalogo debe tener menos de 81 caracteres");
+            throw new DominioException("El nombre del catalogo debe tener menos de 81 caracteres");
         }
     }
 }
