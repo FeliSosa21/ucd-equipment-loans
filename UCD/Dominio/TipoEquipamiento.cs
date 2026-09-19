@@ -24,6 +24,10 @@ public class TipoEquipamiento
         {
             throw new DominioException("El nombre del tipo de equipamiento no puede superar los 80 caracteres");
         }
+        if (descripcion.Length > 300)
+        {
+            throw new DominioException("La descripción del tipo de equipamiento no puede superar los 300 caracteres");
+        }
 
         Nombre = nombre;
         Descripcion = descripcion;
