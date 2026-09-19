@@ -43,4 +43,12 @@ public sealed class TipoEquipamientoTests
 
         Assert.IsTrue(tipo.RequiereAprobacion);
     }
+    [TestMethod]
+    public void Constructor_DatosValidos_GuardaLaCategoria()
+    {
+        var tipo = new TipoEquipamiento("Proyector Epson PowerLite", "Proyector para aulas",
+            5, false, Categoria.Audiovisual);
+
+        Assert.AreEqual(Categoria.Audiovisual, tipo.Categoria);
+    }
 }
