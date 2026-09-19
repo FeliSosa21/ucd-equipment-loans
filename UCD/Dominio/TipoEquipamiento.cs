@@ -25,6 +25,11 @@ public class TipoEquipamiento
         RequiereAprobacion = requiereAprobacion;
         Categoria = categoria;
     }
+    public void Modificar(string nombre, string descripcion, int duracionMaximaDias,
+        bool requiereAprobacion, Categoria categoria)
+    {
+        throw new NotImplementedException();
+    }
     public void Discontinuar()
     {
         Estado = EstadoTipoEquipamiento.Discontinuado;

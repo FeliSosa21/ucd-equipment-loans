@@ -148,6 +148,20 @@ public sealed class TipoEquipamientoTests
 
         Assert.IsFalse(tipo.EstaActivo);
     }
+    [TestMethod]
+    public void Modificar_DatosValidos_ActualizaLosDatos()
+    {
+        var tipo = CrearTipo();
+
+        tipo.Modificar("Notebook Lenovo", "Notebook para préstamo en aula",
+            10, true, Categoria.Computacion);
+
+        Assert.AreEqual("Notebook Lenovo", tipo.Nombre);
+        Assert.AreEqual("Notebook para préstamo en aula", tipo.Descripcion);
+        Assert.AreEqual(10, tipo.DuracionMaximaDias);
+        Assert.IsTrue(tipo.RequiereAprobacion);
+        Assert.AreEqual(Categoria.Computacion, tipo.Categoria);
+    }
 
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
