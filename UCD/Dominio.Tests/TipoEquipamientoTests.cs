@@ -186,6 +186,16 @@ public sealed class TipoEquipamientoTests
 
         Assert.ThrowsException<DominioException>(() => ModificarTipo(tipo, duracionMaximaDias: 0));
     }
+    [TestMethod]
+    public void Modificar_DatosInvalidos_ConservaLosDatosAnteriores()
+    {
+        var tipo = CrearTipo(nombre: "Proyector Epson PowerLite");
+
+        Assert.ThrowsException<DominioException>(
+            () => ModificarTipo(tipo, nombre: "Notebook Lenovo ThinkPad T14", duracionMaximaDias: 0));
+
+        Assert.AreEqual("Proyector Epson PowerLite", tipo.Nombre);
+    }
 
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
