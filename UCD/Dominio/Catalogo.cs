@@ -18,9 +18,9 @@ public class Catalogo
 
     private void ValidarNombre(string nombre)
     {
-        if (nombre == null)
+        if (string.IsNullOrWhiteSpace(nombre))
         {
-            throw new ArgumentException("El nombre del catalogo no debe ser nulo");
+            throw new ArgumentException("El nombre del catalogo no puede ser vacio");
         }
         if(nombre.Length<3)
         {

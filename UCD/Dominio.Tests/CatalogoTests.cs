@@ -41,13 +41,13 @@ public sealed class CatalogoTests {
             catalogo.ModificarNombre("Ca");
         });
     }
-
+    
     [TestMethod]
     public void Constructor_NombreVacio_LanzaArgumentException()
     {
         Assert.ThrowsException<ArgumentException>(() =>
-        {   
-        var catalogo = new Catalogo(null);
+        {
+            var catalogo = new Catalogo("     ");
         });
     }
 }
