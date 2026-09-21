@@ -5,6 +5,7 @@ public class UnidadFisica
     public string IdInstitucional { get; private set; }
     public string UbiFisica { get; private  set; }
     public string NumSerie { get; private set; }
+    public string? Observaciones { get; private set; }
 
 
     public UnidadFisica(string idInstitucional, string ubiFisica, string numSerie)
@@ -51,6 +52,13 @@ public class UnidadFisica
         {
             throw new DominioException("El id institucional debe tener el formato AAA-0000");
         }
+    }
+
+    public void ModificarInfo(string ubiFisica,string observaciones)
+    {
+        ValidarUbiFisica(ubiFisica);
+        UbiFisica = ubiFisica;
+        Observaciones = observaciones;
     }
 
 }

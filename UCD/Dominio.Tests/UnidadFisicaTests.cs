@@ -52,6 +52,18 @@ public sealed class UnidadFisicaTests
         });
     }
     
+    [TestMethod]
+    public void ModificarInfo_InfoValido_ActualizaInfo()
+    {
+        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Viejo", "PF3A7X21");
+
+        unidadFisica.ModificarInfo("Laboratorio Nuevo","");
+
+        Assert.AreEqual("Laboratorio Nuevo", unidadFisica.UbiFisica);
+        Assert.AreEqual("", unidadFisica.Observaciones);
+    }
+    
+    
     
 }
 
