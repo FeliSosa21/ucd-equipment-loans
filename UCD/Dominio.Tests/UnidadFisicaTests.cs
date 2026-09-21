@@ -25,5 +25,26 @@ public sealed class UnidadFisicaTests
         });
     }
     
+    [TestMethod]
+    public void Constructor_UbiFisicaMuyCorta_LanzaDominioException()
+    {
+        Assert.ThrowsException<DominioException>(() =>
+        {
+            var unidadFisica = new UnidadFisica("EQP-0042", "AA", "PF3A7X21");
+        });
+    }
+    
+    [TestMethod]
+    public void Constructor_UbiFisicaMuyLarga_LanzaDominioException()
+    {
+        Assert.ThrowsException<DominioException>(() =>
+        {
+            string ubiFisica = new string('a', 81);
+            var unidadFisica = new UnidadFisica("EQP-0042", ubiFisica, "PF3A7X21");
+        });
+    }
+    
+    
+    
 }
 

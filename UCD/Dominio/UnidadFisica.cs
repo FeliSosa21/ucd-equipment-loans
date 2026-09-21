@@ -13,6 +13,16 @@ public class UnidadFisica
         {
             throw new DominioException("La ubicacion fisica no puede estar vacia");
         }
+
+        if (ubiFisica.Length < 3)
+        {
+            throw new DominioException("La ubicacion fisica no puede tener menos de 3 caracteres"); 
+        }
+
+        if (ubiFisica.Length>80)
+        {
+            throw new DominioException("La ubicacion fisica no puede tener mas de 80 caracteres"); 
+        }
         IdInstitucional= idInstitucional;
         UbiFisica = ubiFisica;
         NumSerie = numSerie;
