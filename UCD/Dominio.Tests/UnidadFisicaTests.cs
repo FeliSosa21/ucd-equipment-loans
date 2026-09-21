@@ -14,6 +14,7 @@ public sealed class UnidadFisicaTests
         Assert.AreEqual("EQP-0042", unidadFisica.IdInstitucional);
         Assert.AreEqual("Laboratorio Prueba", unidadFisica.UbiFisica);
         Assert.AreEqual("PF3A7X21", unidadFisica.NumSerie);
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, unidadFisica.Estado);
     }
     
     [TestMethod]

@@ -6,6 +6,7 @@ public class UnidadFisica
     public string UbiFisica { get; private  set; }
     public string NumSerie { get; private set; }
     public string? Observaciones { get; private set; }
+    public EstadoUnidadFisica Estado { get; private set; }
 
 
     public UnidadFisica(string idInstitucional, string ubiFisica, string numSerie)
@@ -17,6 +18,8 @@ public class UnidadFisica
         UbiFisica = ubiFisica;
         
         NumSerie = numSerie;
+        
+        Estado = EstadoUnidadFisica.Disponible;
     }
 
     private void ValidarUbiFisica(string ubiFisica)
