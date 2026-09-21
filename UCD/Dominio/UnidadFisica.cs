@@ -63,5 +63,8 @@ public class UnidadFisica
         UbiFisica = ubiFisica;
         Observaciones = observaciones;
     }
-
+    public bool EstaDisponible()
+    {
+        return Estado == EstadoUnidadFisica.Disponible;
+    }
 }

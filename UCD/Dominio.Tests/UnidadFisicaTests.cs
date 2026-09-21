@@ -64,6 +64,15 @@ public sealed class UnidadFisicaTests
         Assert.AreEqual("", unidadFisica.Observaciones);
     }
     
+    [TestMethod]
+    public void EstaDisponible_UnidadRecienCreada_DevuelveTrue()
+    {
+        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
+
+        bool resultado = unidadFisica.EstaDisponible();
+
+        Assert.IsTrue(resultado);
+    }
     
     
 }
