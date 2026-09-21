@@ -67,4 +67,8 @@ public class UnidadFisica
     {
         return Estado == EstadoUnidadFisica.Disponible;
     }
+    public void Prestada()
+    {
+        Estado = EstadoUnidadFisica.Prestada;
+    }
 }
