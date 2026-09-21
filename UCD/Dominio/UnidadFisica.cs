@@ -69,6 +69,11 @@ public class UnidadFisica
     }
     public void Prestada()
     {
+        if (!EstaDisponible())
+        {
+            throw new DominioException("La unidad debe estar disponible para prestarse");
+        }
+        
         Estado = EstadoUnidadFisica.Prestada;
     }
 }
