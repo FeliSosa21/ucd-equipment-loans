@@ -9,6 +9,15 @@ public class UnidadFisica
 
     public UnidadFisica(string idInstitucional, string ubiFisica, string numSerie)
     {
+        
+        IdInstitucional= idInstitucional;
+        ValidarUbiFisica(ubiFisica);
+        UbiFisica = ubiFisica;
+        NumSerie = numSerie;
+    }
+
+    private void ValidarUbiFisica(string ubiFisica)
+    {
         if (string.IsNullOrWhiteSpace(ubiFisica))
         {
             throw new DominioException("La ubicacion fisica no puede estar vacia");
@@ -16,17 +25,13 @@ public class UnidadFisica
 
         if (ubiFisica.Length < 3)
         {
-            throw new DominioException("La ubicacion fisica no puede tener menos de 3 caracteres"); 
+            throw new DominioException("La ubicacion fisica no puede tener menos de 3 caracteres");
         }
 
-        if (ubiFisica.Length>80)
+        if (ubiFisica.Length > 80)
         {
-            throw new DominioException("La ubicacion fisica no puede tener mas de 80 caracteres"); 
+            throw new DominioException("La ubicacion fisica no puede tener mas de 80 caracteres");
         }
-        IdInstitucional= idInstitucional;
-        UbiFisica = ubiFisica;
-        NumSerie = numSerie;
     }
-    
-    
+
 }
