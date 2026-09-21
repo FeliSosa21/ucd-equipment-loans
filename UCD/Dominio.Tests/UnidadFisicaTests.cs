@@ -43,7 +43,14 @@ public sealed class UnidadFisicaTests
             var unidadFisica = new UnidadFisica("EQP-0042", ubiFisica, "PF3A7X21");
         });
     }
-    
+    [TestMethod]
+    public void Constructor_IdInstitucionalMalFormato_LanzaDominioException()
+    {
+        Assert.ThrowsException<DominioException>(() =>
+        {
+            var unidadFisica = new UnidadFisica("Eq-0a2", "aaaaa", "PF3A7X21");
+        });
+    }
     
     
 }

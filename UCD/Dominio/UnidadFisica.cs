@@ -9,10 +9,12 @@ public class UnidadFisica
 
     public UnidadFisica(string idInstitucional, string ubiFisica, string numSerie)
     {
-        
+        ValidarIdInstitucional(idInstitucional);
         IdInstitucional= idInstitucional;
+        
         ValidarUbiFisica(ubiFisica);
         UbiFisica = ubiFisica;
+        
         NumSerie = numSerie;
     }
 
@@ -31,6 +33,23 @@ public class UnidadFisica
         if (ubiFisica.Length > 80)
         {
             throw new DominioException("La ubicacion fisica no puede tener mas de 80 caracteres");
+        }
+    }
+    private void ValidarIdInstitucional(string idInstitucional)
+    {
+        bool formatoValido = idInstitucional.Length == 8
+                             && char.IsUpper(idInstitucional[0])
+                             && char.IsUpper(idInstitucional[1])
+                             && char.IsUpper(idInstitucional[2])
+                             && idInstitucional[3] == '-'
+                             && char.IsDigit(idInstitucional[4])
+                             && char.IsDigit(idInstitucional[5])
+                             && char.IsDigit(idInstitucional[6])
+                             && char.IsDigit(idInstitucional[7]);
+
+        if (!formatoValido)
+        {
+            throw new DominioException("El id institucional debe tener el formato AAA-0000");
         }
     }
 
