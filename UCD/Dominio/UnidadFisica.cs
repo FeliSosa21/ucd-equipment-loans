@@ -2,24 +2,79 @@ namespace Dominio;
 
 public class UnidadFisica
 {
+    private const int LargoIdInstitucional = 8;
+    private const int PosicionGuion = 3;
+
     public string IdInstitucional { get; private set; }
-    public string UbiFisica { get; private  set; }
+    public string UbiFisica { get; private set; }
     public string NumSerie { get; private set; }
     public string? Observaciones { get; private set; }
     public EstadoUnidadFisica Estado { get; private set; }
 
-
     public UnidadFisica(string idInstitucional, string ubiFisica, string numSerie)
     {
         ValidarIdInstitucional(idInstitucional);
-        IdInstitucional= idInstitucional;
-        
+        IdInstitucional = idInstitucional;
+
         ValidarUbiFisica(ubiFisica);
         UbiFisica = ubiFisica;
-        
+
+        ValidarNumSerie(numSerie);
         NumSerie = numSerie;
-        
+
         Estado = EstadoUnidadFisica.Disponible;
+    }
+
+    public void ModificarInfo(string ubiFisica, string observaciones)
+    {
+        ValidarUbiFisica(ubiFisica);
+        UbiFisica = ubiFisica;
+        Observaciones = observaciones;
+    }
+
+    public bool EstaDisponible()
+    {
+        return Estado == EstadoUnidadFisica.Disponible;
+    }
+
+    public void Prestada()
+    {
+        if (!EstaDisponible())
+        {
+            throw new DominioException("La unidad debe estar disponible para prestarse");
+        }
+
+        Estado = EstadoUnidadFisica.Prestada;
+    }
+
+    public void Disponible()
+    {
+        if (Estado != EstadoUnidadFisica.Prestada && Estado != EstadoUnidadFisica.EnMantenimiento)
+        {
+            throw new DominioException("La unidad debe estar prestada o en mantenimiento para pasar a disponible");
+        }
+
+        Estado = EstadoUnidadFisica.Disponible;
+    }
+
+    public void AMantenimiento()
+    {
+        if (Estado != EstadoUnidadFisica.Prestada)
+        {
+            throw new DominioException("La unidad debe estar prestada para pasar a mantenimiento");
+        }
+
+        Estado = EstadoUnidadFisica.EnMantenimiento;
+    }
+
+    public void DarDeBaja()
+    {
+        if (Estado == EstadoUnidadFisica.Prestada)
+        {
+            throw new DominioException("La unidad prestada no puede darse de baja directamente");
+        }
+
+        Estado = EstadoUnidadFisica.DadaDeBaja;
     }
 
     private void ValidarUbiFisica(string ubiFisica)
@@ -39,69 +94,33 @@ public class UnidadFisica
             throw new DominioException("La ubicacion fisica no puede tener mas de 80 caracteres");
         }
     }
+
     private void ValidarIdInstitucional(string idInstitucional)
     {
-        bool formatoValido = idInstitucional.Length == 8
-                             && char.IsUpper(idInstitucional[0])
-                             && char.IsUpper(idInstitucional[1])
-                             && char.IsUpper(idInstitucional[2])
-                             && idInstitucional[3] == '-'
-                             && char.IsDigit(idInstitucional[4])
-                             && char.IsDigit(idInstitucional[5])
-                             && char.IsDigit(idInstitucional[6])
-                             && char.IsDigit(idInstitucional[7]);
-
-        if (!formatoValido)
+        if (string.IsNullOrWhiteSpace(idInstitucional) || !TieneFormatoValido(idInstitucional))
         {
             throw new DominioException("El id institucional debe tener el formato AAA-0000");
         }
     }
 
-    public void ModificarInfo(string ubiFisica,string observaciones)
+    private static bool TieneFormatoValido(string idInstitucional)
     {
-        ValidarUbiFisica(ubiFisica);
-        UbiFisica = ubiFisica;
-        Observaciones = observaciones;
-    }
-    public bool EstaDisponible()
-    {
-        return Estado == EstadoUnidadFisica.Disponible;
-    }
-    public void Prestada()
-    {
-        if (!EstaDisponible())
+        if (idInstitucional.Length != LargoIdInstitucional || idInstitucional[PosicionGuion] != '-')
         {
-            throw new DominioException("La unidad debe estar disponible para prestarse");
+            return false;
         }
-        
-        Estado = EstadoUnidadFisica.Prestada;
-    }
-    
-    public void Disponible()
-    {
-        if (Estado != EstadoUnidadFisica.Prestada && Estado != EstadoUnidadFisica.EnMantenimiento)
-        {
-            throw new DominioException("La unidad debe estar prestada o en mantenimiento para pasar a disponible");
-        }
-        Estado = EstadoUnidadFisica.Disponible;
-    }
-    
-    public void AMantenimiento()
-    {
-        if (Estado != EstadoUnidadFisica.Prestada)
-        {
-            throw new DominioException("La unidad debe estar prestada para pasar a mantenimiento");
-        }
-        
-        Estado = EstadoUnidadFisica.EnMantenimiento;
+
+        string letras = idInstitucional[..PosicionGuion];
+        string numeros = idInstitucional[(PosicionGuion + 1)..];
+
+        return letras.All(char.IsUpper) && numeros.All(char.IsDigit);
     }
 
-    public void DarDeBaja()
+    private void ValidarNumSerie(string numSerie)
     {
-        if (Estado == EstadoUnidadFisica.Prestada)
+        if (string.IsNullOrWhiteSpace(numSerie))
         {
-            throw new DominioException("La unidad prestada no puede darse de baja directamente");  
+            throw new DominioException("El numero de serie no puede estar vacio");
         }
-        Estado = EstadoUnidadFisica.DadaDeBaja;
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Dominio;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Dominio;
 
 public class TipoEquipamiento
 {
@@ -15,16 +17,9 @@ public class TipoEquipamiento
 
     public TipoEquipamiento(string nombre, string descripcion, int duracionMaximaDias, bool requiereAprobacion, Categoria categoria)
     {
-        ValidarNombre(nombre);
-        ValidarDescripcion(descripcion);
-        ValidarDuracion(duracionMaximaDias);
-
-        Nombre = nombre;
-        Descripcion = descripcion;
-        DuracionMaximaDias = duracionMaximaDias;
-        RequiereAprobacion = requiereAprobacion;
-        Categoria = categoria;
+        Modificar(nombre, descripcion, duracionMaximaDias, requiereAprobacion, categoria);
     }
+    [MemberNotNull(nameof(Nombre), nameof(Descripcion))]
     public void Modificar(string nombre, string descripcion, int duracionMaximaDias, bool requiereAprobacion, Categoria categoria)
     {
         ValidarNombre(nombre);
@@ -39,6 +34,11 @@ public class TipoEquipamiento
     }
     public void Discontinuar()
     {
+        if (Estado == EstadoTipoEquipamiento.Discontinuado)
+        {
+            throw new DominioException("El tipo de equipamiento ya esta discontinuado");
+        }
+
         Estado = EstadoTipoEquipamiento.Discontinuado;
     }
     public bool EstaActivo => Estado == EstadoTipoEquipamiento.Activo;
