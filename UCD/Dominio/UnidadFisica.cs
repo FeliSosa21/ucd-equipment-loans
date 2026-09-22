@@ -19,7 +19,7 @@ public class UnidadFisica
         ValidarUbiFisica(ubiFisica);
         UbiFisica = ubiFisica;
 
-        ValidarNumSerie(numSerie);
+      
         NumSerie = numSerie;
 
         Estado = EstadoUnidadFisica.Disponible;
@@ -116,11 +116,6 @@ public class UnidadFisica
         return letras.All(char.IsUpper) && numeros.All(char.IsDigit);
     }
 
-    private void ValidarNumSerie(string numSerie)
-    {
-        if (string.IsNullOrWhiteSpace(numSerie))
-        {
-            throw new DominioException("El numero de serie no puede estar vacio");
-        }
-    }
+    
 }
+
