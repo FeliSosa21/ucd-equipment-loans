@@ -4,175 +4,182 @@ namespace Dominio.Tests;
 public sealed class UnidadFisicaTests
 {
     [TestMethod]
-    public void Constructor_DatosValidos_ActualizaLosDatos()
+    public void Constructor_DatosValidos_GuardaElIdInstitucional()
     {
-        string id = "EQP-0042";
-        string ubiFisica = "Laboratorio Prueba";
-        string numSerie = "PF3A7X21";
-        var unidadFisica = new UnidadFisica(id, ubiFisica, numSerie);
+        var unidad = CrearUnidad(idInstitucional: "EQP-0042");
 
-        Assert.AreEqual("EQP-0042", unidadFisica.IdInstitucional);
-        Assert.AreEqual("Laboratorio Prueba", unidadFisica.UbiFisica);
-        Assert.AreEqual("PF3A7X21", unidadFisica.NumSerie);
-        Assert.AreEqual(EstadoUnidadFisica.Disponible, unidadFisica.Estado);
+        Assert.AreEqual("EQP-0042", unidad.IdInstitucional);
     }
-    
+
+    [TestMethod]
+    public void Constructor_DatosValidos_GuardaLaUbicacionFisica()
+    {
+        var unidad = CrearUnidad(ubiFisica: "Laboratorio Prueba");
+
+        Assert.AreEqual("Laboratorio Prueba", unidad.UbiFisica);
+    }
+
+    [TestMethod]
+    public void Constructor_DatosValidos_GuardaElNumeroDeSerie()
+    {
+        var unidad = CrearUnidad(numSerie: "PF3A7X21");
+
+        Assert.AreEqual("PF3A7X21", unidad.NumSerie);
+    }
+
+    [TestMethod]
+    public void Constructor_DatosValidos_QuedaDisponible()
+    {
+        var unidad = CrearUnidad();
+
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado);
+    }
+
     [TestMethod]
     public void Constructor_UbiFisicaVacia_LanzaDominioException()
     {
-        Assert.ThrowsException<DominioException>(() =>
-        {
-            var unidadFisica = new UnidadFisica("EQP-0042", "", "PF3A7X21");
-        });
+        Assert.ThrowsException<DominioException>(() => CrearUnidad(ubiFisica: ""));
     }
-    
+
     [TestMethod]
     public void Constructor_UbiFisicaMuyCorta_LanzaDominioException()
     {
-        Assert.ThrowsException<DominioException>(() =>
-        {
-            var unidadFisica = new UnidadFisica("EQP-0042", "AA", "PF3A7X21");
-        });
+        Assert.ThrowsException<DominioException>(() => CrearUnidad(ubiFisica: "AA"));
     }
-    
+
     [TestMethod]
     public void Constructor_UbiFisicaMuyLarga_LanzaDominioException()
     {
-        Assert.ThrowsException<DominioException>(() =>
-        {
-            string ubiFisica = new string('a', 81);
-            var unidadFisica = new UnidadFisica("EQP-0042", ubiFisica, "PF3A7X21");
-        });
+        var ubiFisica = new string('a', 81);
+
+        Assert.ThrowsException<DominioException>(() => CrearUnidad(ubiFisica: ubiFisica));
     }
+
     [TestMethod]
     public void Constructor_IdInstitucionalMalFormato_LanzaDominioException()
     {
-        Assert.ThrowsException<DominioException>(() =>
-        {
-            var unidadFisica = new UnidadFisica("Eq-0a2", "aaaaa", "PF3A7X21");
-        });
+        Assert.ThrowsException<DominioException>(() => CrearUnidad(idInstitucional: "Eq-0a2"));
     }
-    
+
     [TestMethod]
-    public void ModificarInfo_InfoValido_ActualizaInfo()
+    public void ModificarInfo_InfoValida_ActualizaLaUbicacionFisica()
     {
-        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Viejo", "PF3A7X21");
+        var unidad = CrearUnidad(ubiFisica: "Laboratorio Viejo");
 
-        unidadFisica.ModificarInfo("Laboratorio Nuevo","");
+        unidad.ModificarInfo("Laboratorio Nuevo", "");
 
-        Assert.AreEqual("Laboratorio Nuevo", unidadFisica.UbiFisica);
-        Assert.AreEqual("", unidadFisica.Observaciones);
+        Assert.AreEqual("Laboratorio Nuevo", unidad.UbiFisica);
     }
-    
+
+    [TestMethod]
+    public void ModificarInfo_InfoValida_ActualizaLasObservaciones()
+    {
+        var unidad = CrearUnidad();
+
+        unidad.ModificarInfo("Laboratorio Nuevo", "");
+
+        Assert.AreEqual("", unidad.Observaciones);
+    }
+
     [TestMethod]
     public void EstaDisponible_UnidadRecienCreada_DevuelveTrue()
     {
-        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
+        var unidad = CrearUnidad();
 
-        bool resultado = unidadFisica.EstaDisponible();
-
-        Assert.IsTrue(resultado);
+        Assert.IsTrue(unidad.EstaDisponible());
     }
-    
+
     [TestMethod]
     public void Prestada_UnidadDisponible_CambiaEstadoAPrestada()
     {
-        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
+        var unidad = CrearUnidad();
 
-        unidadFisica.Prestada();
+        unidad.Prestada();
 
-        Assert.AreEqual(EstadoUnidadFisica.Prestada, unidadFisica.Estado);
+        Assert.AreEqual(EstadoUnidadFisica.Prestada, unidad.Estado);
     }
-    
+
     [TestMethod]
     public void Prestada_UnidadNoDisponible_LanzaDominioException()
     {
-        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
-        unidadFisica.Prestada();
+        var unidad = CrearUnidad();
+        unidad.Prestada();
 
-        Assert.ThrowsException<DominioException>(() =>
-        {
-            unidadFisica.Prestada();
-        });
+        Assert.ThrowsException<DominioException>(() => unidad.Prestada());
     }
-    
+
     [TestMethod]
     public void Disponible_UnidadPrestada_CambiaEstadoADisponible()
     {
-        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
-        unidadFisica.Prestada();
+        var unidad = CrearUnidad();
+        unidad.Prestada();
 
-        unidadFisica.Disponible();
+        unidad.Disponible();
 
-        Assert.AreEqual(EstadoUnidadFisica.Disponible, unidadFisica.Estado);
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado);
     }
+
     [TestMethod]
     public void Disponible_UnidadYaDisponible_LanzaDominioException()
     {
-        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
+        var unidad = CrearUnidad();
 
-        Assert.ThrowsException<DominioException>(() =>
-        {
-            unidadFisica.Disponible();
-        });
+        Assert.ThrowsException<DominioException>(() => unidad.Disponible());
     }
-    
+
     [TestMethod]
     public void Disponible_UnidadEnMantenimiento_CambiaEstadoADisponible()
     {
-        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
-        unidadFisica.Prestada();
-        unidadFisica.AMantenimiento();
+        var unidad = CrearUnidad();
+        unidad.Prestada();
+        unidad.AMantenimiento();
 
-        unidadFisica.Disponible();
+        unidad.Disponible();
 
-        Assert.AreEqual(EstadoUnidadFisica.Disponible, unidadFisica.Estado);
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado);
     }
-    
+
     [TestMethod]
     public void AMantenimiento_UnidadNoPrestada_LanzaDominioException()
     {
-        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
+        var unidad = CrearUnidad();
 
-        Assert.ThrowsException<DominioException>(() =>
-        {
-            unidadFisica.AMantenimiento();
-        });
+        Assert.ThrowsException<DominioException>(() => unidad.AMantenimiento());
     }
-    
+
     [TestMethod]
     public void DarDeBaja_UnidadDisponible_CambiaEstadoADadaDeBaja()
     {
-        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
-        
-        unidadFisica.DarDeBaja();
+        var unidad = CrearUnidad();
 
-        Assert.AreEqual(EstadoUnidadFisica.DadaDeBaja, unidadFisica.Estado);
+        unidad.DarDeBaja();
+
+        Assert.AreEqual(EstadoUnidadFisica.DadaDeBaja, unidad.Estado);
     }
-    
+
     [TestMethod]
-    
     public void DarDeBaja_UnidadPrestada_LanzaDominioException()
     {
-        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
-        unidadFisica.Prestada();
+        var unidad = CrearUnidad();
+        unidad.Prestada();
 
-        Assert.ThrowsException<DominioException>(() =>
-        {
-            unidadFisica.DarDeBaja();
-        });
+        Assert.ThrowsException<DominioException>(() => unidad.DarDeBaja());
     }
-    
+
     [TestMethod]
     public void Disponible_UnidadDadaDeBaja_LanzaDominioException()
     {
-        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
-        unidadFisica.DarDeBaja();
+        var unidad = CrearUnidad();
+        unidad.DarDeBaja();
 
-        Assert.ThrowsException<DominioException>(() =>
-        {
-            unidadFisica.Disponible();
-        });
+        Assert.ThrowsException<DominioException>(() => unidad.Disponible());
+    }
+
+    private static UnidadFisica CrearUnidad(
+        string idInstitucional = "EQP-0042",
+        string ubiFisica = "Laboratorio Prueba",
+        string numSerie = "PF3A7X21")
+    {
+        return new UnidadFisica(idInstitucional, ubiFisica, numSerie);
     }
 }
-

@@ -10,25 +10,25 @@ public class TipoEquipamiento
 
     public string Nombre { get; private set; }
     public string Descripcion { get; private set; }
-    public int DuracionMaximaDias { get; private set; }
+    public int DuracionMaxPrestamo { get; private set; }
     public bool RequiereAprobacion { get; private set; }
     public Categoria Categoria { get; private set; }
     public EstadoTipoEquipamiento Estado { get; private set; } = EstadoTipoEquipamiento.Activo;
 
-    public TipoEquipamiento(string nombre, string descripcion, int duracionMaximaDias, bool requiereAprobacion, Categoria categoria)
+    public TipoEquipamiento(string nombre, string descripcion, int duracionMaxPrestamo, bool requiereAprobacion, Categoria categoria)
     {
-        Modificar(nombre, descripcion, duracionMaximaDias, requiereAprobacion, categoria);
+        Modificar(nombre, descripcion, duracionMaxPrestamo, requiereAprobacion, categoria);
     }
     [MemberNotNull(nameof(Nombre), nameof(Descripcion))]
-    public void Modificar(string nombre, string descripcion, int duracionMaximaDias, bool requiereAprobacion, Categoria categoria)
+    public void Modificar(string nombre, string descripcion, int duracionMaxPrestamo, bool requiereAprobacion, Categoria categoria)
     {
         ValidarNombre(nombre);
         ValidarDescripcion(descripcion);
-        ValidarDuracion(duracionMaximaDias);
+        ValidarDuracion(duracionMaxPrestamo);
 
         Nombre = nombre;
         Descripcion = descripcion;
-        DuracionMaximaDias = duracionMaximaDias;
+        DuracionMaxPrestamo = duracionMaxPrestamo;
         RequiereAprobacion = requiereAprobacion;
         Categoria = categoria;
     }
@@ -69,9 +69,9 @@ public class TipoEquipamiento
         }
     }
 
-    private static void ValidarDuracion(int duracionMaximaDias)
+    private static void ValidarDuracion(int duracionMaxPrestamo)
     {
-        if (duracionMaximaDias <= 0)
+        if (duracionMaxPrestamo <= 0)
         {
             throw new DominioException("La duración máxima de préstamo debe ser mayor que cero");
         }
