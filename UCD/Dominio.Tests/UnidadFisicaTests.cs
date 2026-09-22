@@ -106,7 +106,16 @@ public sealed class UnidadFisicaTests
 
         Assert.AreEqual(EstadoUnidadFisica.Disponible, unidadFisica.Estado);
     }
-    
+    [TestMethod]
+    public void Disponible_UnidadYaDisponible_LanzaDominioException()
+    {
+        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
+
+        Assert.ThrowsException<DominioException>(() =>
+        {
+            unidadFisica.Disponible();
+        });
+    }
     
 }
 
