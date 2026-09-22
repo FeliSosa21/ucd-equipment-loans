@@ -98,6 +98,10 @@ public class UnidadFisica
 
     public void DarDeBaja()
     {
+        if (Estado == EstadoUnidadFisica.Prestada)
+        {
+            throw new DominioException("La unidad prestada no puede darse de baja directamente");  
+        }
         Estado = EstadoUnidadFisica.DadaDeBaja;
     }
 }

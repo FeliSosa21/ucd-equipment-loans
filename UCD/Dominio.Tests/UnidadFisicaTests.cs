@@ -149,5 +149,18 @@ public sealed class UnidadFisicaTests
 
         Assert.AreEqual(EstadoUnidadFisica.DadaDeBaja, unidadFisica.Estado);
     }
+    
+    [TestMethod]
+    
+    public void DarDeBaja_UnidadPrestada_LanzaDominioException()
+    {
+        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
+        unidadFisica.Prestada();
+
+        Assert.ThrowsException<DominioException>(() =>
+        {
+            unidadFisica.DarDeBaja();
+        });
+    }
 }
 
