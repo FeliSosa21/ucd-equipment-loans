@@ -95,4 +95,9 @@ public class UnidadFisica
         
         Estado = EstadoUnidadFisica.EnMantenimiento;
     }
+
+    public void DarDeBaja()
+    {
+        Estado = EstadoUnidadFisica.DadaDeBaja;
+    }
 }

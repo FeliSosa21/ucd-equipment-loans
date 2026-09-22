@@ -140,5 +140,14 @@ public sealed class UnidadFisicaTests
         });
     }
     
+    [TestMethod]
+    public void DarDeBaja_UnidadDisponible_CambiaEstadoADadaDeBaja()
+    {
+        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
+        
+        unidadFisica.DarDeBaja();
+
+        Assert.AreEqual(EstadoUnidadFisica.DadaDeBaja, unidadFisica.Estado);
+    }
 }
 
