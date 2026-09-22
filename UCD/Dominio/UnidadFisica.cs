@@ -76,4 +76,9 @@ public class UnidadFisica
         
         Estado = EstadoUnidadFisica.Prestada;
     }
+    
+    public void Disponible()
+    {
+        Estado = EstadoUnidadFisica.Disponible;
+    }
 }

@@ -96,6 +96,17 @@ public sealed class UnidadFisicaTests
         });
     }
     
+    [TestMethod]
+    public void Disponible_UnidadPrestada_CambiaEstadoADisponible()
+    {
+        var unidadFisica = new UnidadFisica("EQP-0042", "Laboratorio Prueba", "PF3A7X21");
+        unidadFisica.Prestada();
+
+        unidadFisica.Disponible();
+
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, unidadFisica.Estado);
+    }
+    
     
 }
 
