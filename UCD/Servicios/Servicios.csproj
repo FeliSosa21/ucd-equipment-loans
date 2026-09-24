@@ -11,7 +11,6 @@
       <ProjectReference Include="..\Data\Data.csproj" />
       <ProjectReference Include="..\Dominio\Dominio.csproj" />
       <ProjectReference Include="..\DTOs\DTOs.csproj" />
-      <ProjectReference Include="..\Servicios.Tests\Servicios.Tests.csproj" />
     </ItemGroup>
 
 </Project>
