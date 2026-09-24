@@ -1,9 +1,11 @@
 ---
 name: csharp-code-quality-review
-description: Revisa clases C# contra los lineamientos de Clean Code (capítulos 1-10 y 12) y las convenciones de codificación de C# de Microsoft. Usar cuando el usuario pida revisar calidad de código, chequear Clean Code, o antes de commitear una clase nueva o modificada del proyecto UCD (Obligatorio 1, DA1).
+description: Revisa clases C#, tests MSTest y componentes Razor contra los lineamientos de Clean Code (capítulos 1-10 y 12) y las convenciones de codificación de C# de Microsoft. Usar cuando el usuario pida revisar calidad de código, chequear Clean Code, o antes de commitear una clase nueva o modificada del proyecto UCD (Obligatorio 1, DA1).
 ---
 
 # Revisión de calidad de código C# (Clean Code + convenciones .NET)
+
+Cubre los capítulos de Clean Code que pide la letra: 1 al 10 y 12.
 
 ## Restricción importante — leer primero
 
@@ -63,11 +65,46 @@ menores solo para tener algo que decir.
 - Mensajes de excepción descriptivos (no genéricos tipo "Error")
 - No tragarse excepciones con catch vacíos
 
-### 7. Límites y clases (Clean Code cap. 10)
-- Clases con responsabilidad única (¿esta clase hace más de una cosa? ¿debería dividirse?)
-- Alta cohesión (los métodos de la clase usan la mayoría de sus atributos)
+### 7. Límites (Clean Code cap. 8)
+- El código propio no depende directamente de detalles de terceros o de otras capas
+  (ej. la UI no debería conocer cómo guarda los datos el repositorio)
+- Las dependencias entre proyectos van en un solo sentido: UI → Servicios → Dominio,
+  y Servicios → Data. Señalar cualquier referencia al revés (ej. un proyecto de
+  producción que referencia un proyecto de tests)
+- Interfaces en los bordes entre capas cuando ayudan a desacoplar (ej. repositorios)
 
-### 8. Convenciones de C# (Microsoft, linkeadas en la letra)
+### 8. Tests unitarios (Clean Code cap. 9)
+Aplicar a los archivos de `*.Tests`:
+- Un concepto por test: si un test verifica dos comportamientos distintos, dividirlo
+- Nombre descriptivo con el patrón que ya usa el proyecto:
+  `Metodo_Escenario_ResultadoEsperado` (ej. `Constructor_FechaValida_GuardaLaFecha`)
+- Estructura Arrange / Act / Assert clara, separada por líneas en blanco
+- F.I.R.S.T.: rápidos, independientes entre sí (sin estado compartido que dependa
+  del orden), repetibles (sin `DateTime.Now` ni datos aleatorios sin controlar),
+  autovalidados (un Assert que decide, sin revisar la consola) y escritos antes
+  del código (TDD)
+- Tests limpios como código de producción: sin duplicación, usar métodos de ayuda
+  para crear objetos (ej. `CrearDevolucion(...)`) en vez de repetir constructores
+- Para excepciones, verificar el tipo concreto (`DominioException`) y, si aporta,
+  el mensaje
+- Bordes cubiertos: valores límite (ej. 2 y 50 caracteres, y también 1 y 51),
+  vacío, null y espacios en blanco
+
+### 9. Clases (Clean Code cap. 10)
+- Clases chicas con responsabilidad única (¿esta clase hace más de una cosa? ¿debería dividirse?)
+- Alta cohesión (los métodos de la clase usan la mayoría de sus atributos)
+- Validaciones agrupadas en métodos privados con nombres claros (ej. `ValidarNombre`)
+
+### 10. Diseño emergente (Clean Code cap. 12)
+Las cuatro reglas del diseño simple, en orden de prioridad:
+1. Pasa todos los tests
+2. No tiene duplicación (misma validación o constante repetida en varias clases → señalar)
+3. Expresa la intención del programador (nombres, constantes con nombre en vez de
+   números mágicos como `80` o `300`)
+4. Minimiza la cantidad de clases y métodos (no crear abstracciones que todavía
+   no se necesitan)
+
+### 11. Convenciones de C# (Microsoft, linkeadas en la letra)
 - PascalCase: clases, métodos, propiedades, eventos, namespaces
 - camelCase: variables locales, parámetros
 - `_camelCase` con guion bajo: campos privados (si el proyecto los usa; si no aparecen
@@ -76,6 +113,19 @@ menores solo para tener algo que decir.
 - `namespace` file-scoped (`namespace Dominio;`) — es el estilo que ya usa este proyecto,
   mantenerlo consistente en archivos nuevos
 - Usar `var` cuando el tipo es obvio por el contexto (lado derecho de la asignación)
+
+### 12. Componentes Razor (UI de Blazor)
+Aplicar a los archivos `.razor` y `.razor.css`:
+- Lógica de negocio fuera de la UI: las páginas llaman a servicios, no validan
+  reglas del dominio por su cuenta (validaciones de formulario como "las
+  contraseñas no coinciden" sí son de la UI)
+- Bloque `@code` corto; si crece mucho, pasar a un archivo `.razor.cs` o a un componente hijo
+- Markup repetido en varias páginas → extraer a un componente en `Components/Shared`
+- Campos privados con `_camelCase`, handlers con verbos (`Registrar`, `IniciarSesion`)
+- Un método no puede llamarse igual que la página (ej. método `Ingresar` en `Ingresar.razor`)
+- Estilos en el `.razor.css` de cada componente o en `app.css` usando las variables
+  de color (`var(--navy)`), no colores sueltos
+- Accesibilidad básica: cada input con su `<label for>`, mensajes de error con `role="alert"`
 
 ## Formato del reporte
 
