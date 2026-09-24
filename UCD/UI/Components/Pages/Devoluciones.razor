@@ -1,0 +1,18 @@
+@page "/devoluciones"
+
+<PageTitle>UCD · Devoluciones</PageTitle>
+
+<div class="page-header">
+    <h1>Devoluciones</h1>
+    <p>Buscá un préstamo activo y registrá la condición de cada unidad al recibirla.</p>
+</div>
+
+<div class="toolbar">
+    <input class="field" type="search" placeholder="Buscar por equipo o usuario"
+           aria-label="Buscar préstamo" style="min-width: 320px" />
+</div>
+
+<div class="card">
+    <EstadoVacio Titulo="No hay préstamos activos"
+                 Mensaje="Los préstamos que estén en curso van a aparecer acá para registrar su devolución." />
+</div>

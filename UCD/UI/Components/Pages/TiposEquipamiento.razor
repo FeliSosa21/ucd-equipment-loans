@@ -1,0 +1,37 @@
+@page "/tipos-equipamiento"
+
+<PageTitle>UCD · Tipos de equipamiento</PageTitle>
+
+<div class="page-header">
+    <h1>Tipos de equipamiento</h1>
+    <p>Registrá, modificá o discontinuá los modelos de equipamiento del catálogo.</p>
+</div>
+
+<div class="toolbar">
+    <input class="field" type="search" placeholder="Buscar por nombre" aria-label="Buscar por nombre" />
+    <select class="field" aria-label="Categoría">
+                <option value="">Todas las categorías</option>
+                <option>Computación</option>
+                <option>Audiovisual</option>
+                <option>Laboratorio</option>
+                <option>Electrónica</option>
+                <option>Accesorios</option>
+    </select>
+    <span class="espacio"></span>
+    <button class="btn btn-primary" disabled title="Disponible cuando esté el servicio">Nuevo tipo</button>
+</div>
+
+<div class="card table-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Duración máxima</th>
+                <th>Requiere aprobación</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+    </table>
+    <EstadoVacio Titulo="Todavía no hay tipos de equipamiento" />
+</div>

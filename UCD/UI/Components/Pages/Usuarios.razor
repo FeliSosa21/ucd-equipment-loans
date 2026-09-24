@@ -1,0 +1,28 @@
+@page "/usuarios"
+
+<PageTitle>UCD · Usuarios</PageTitle>
+
+<div class="page-header">
+    <h1>Usuarios</h1>
+    <p>Asigná el tipo de usuario y activá o desactivá cuentas.</p>
+</div>
+
+<div class="toolbar">
+    <input class="field" type="search" placeholder="Buscar por nombre, CI o correo"
+           aria-label="Buscar usuario" style="min-width: 320px" />
+</div>
+
+<div class="card table-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Usuario</th>
+                <th>Cédula</th>
+                <th>Correo</th>
+                <th>Tipo de usuario</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+    </table>
+    <EstadoVacio Titulo="No hay usuarios registrados" />
+</div>
