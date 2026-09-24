@@ -31,11 +31,31 @@ o está mal. Si el código está limpio, decilo brevemente y no inventes objecio
 menores solo para tener algo que decir.
 
 ### 1. Nombres (Clean Code cap. 2)
-- Nombres que revelan intención (`cantSolicitada`, no `n` o `cant`)
-- Sin abreviaturas crípticas, sin nombres de una sola letra salvo índices de loop cortos
-- Clases: sustantivos en PascalCase (`Prestamo`, no `prestamo` ni `Prestamos_Class`)
-- Métodos: verbos en PascalCase (`ModificarNombre`, no `modificar_nombre` ni `Nombre`)
-- Sin espacios, sin tildes, sin ñ (convención propia del proyecto, ver contexto UML)
+Fuente principal: diapositivas del curso "04.10e Clean Code 1" (G. Mousqués).
+- Nombres que revelan intención: por qué existe, qué hace y cómo se usa
+- Evitar la desinformación (ej. no llamar `lista` a algo que no es una lista)
+- Distinciones significativas: nada de palabras de ruido como Info, Datos, Procesador,
+  Sistema (ej. `ModificarInfo` → preferir `Modificar`)
+- Nombres pronunciables y fáciles de buscar: sin abreviaturas (`UbicacionFisica`, no
+  `UbiFisica`; `CantidadSolicitada`, no `CantSolicitada`)
+- Largo según el alcance:
+  - Variables locales de alcance chico pueden ser cortas; atributos y propiedades
+    de clase, largos y significativos
+  - Métodos públicos: cortos y significativos. Métodos privados o muy específicos:
+    más largos y descriptivos
+  - Clases públicas: nombres cortos (un par de palabras), sustantivos del dominio del
+    cliente (`Prestamo`, `UnidadFisica`), nunca verbos
+- Métodos: siempre incluyen un verbo (`Prestar`, no `Prestada`; `EnviarAMantenimiento`,
+  no `AMantenimiento`). Para preguntas y accesores, la convención is/get/set
+  (`EstaDisponible`)
+- La misma palabra para métodos equivalentes en distintas clases (si `TipoEquipamiento`
+  usa `Modificar`, las demás también), y nunca el mismo término para dos propósitos
+- Evitar encodings: sin prefijos ni información de tipo o alcance en el nombre. Las
+  interfaces con `I` se aceptan porque es la convención de C# (la diapositiva dice
+  "si la convención del lenguaje lo requiere, respetarlo"). El prefijo `_` en campos
+  privados está en duda: ver sección 11
+- PascalCase para clases y métodos (`Prestamo`, `ModificarNombre`)
+- Sin espacios, sin tildes, sin ñ (compatibilidad con C#, convención del proyecto)
 
 ### 2. Funciones (Clean Code cap. 3)
 - Chicas — si un método no entra en una pantalla sin scrollear, sospechar
@@ -107,9 +127,10 @@ Las cuatro reglas del diseño simple, en orden de prioridad:
 ### 11. Convenciones de C# (Microsoft, linkeadas en la letra)
 - PascalCase: clases, métodos, propiedades, eventos, namespaces
 - camelCase: variables locales, parámetros
-- `_camelCase` con guion bajo: campos privados (si el proyecto los usa; si no aparecen
-  campos privados directos, ver si todo pasa por propiedades autoimplementadas, que es
-  el estilo que ya viene usando el proyecto)
+- Campos privados: la convención de Microsoft usa `_camelCase`, pero la diapositiva de
+  "encodings" del curso muestra `private string _name;` como ejemplo a evitar. Pendiente
+  de confirmar en el foro. Mientras tanto, no marcarlo como error; solo señalar si el
+  proyecto mezcla los dos estilos. El proyecto prefiere propiedades autoimplementadas
 - `namespace` file-scoped (`namespace Dominio;`) — es el estilo que ya usa este proyecto,
   mantenerlo consistente en archivos nuevos
 - Usar `var` cuando el tipo es obvio por el contexto (lado derecho de la asignación)
@@ -121,7 +142,7 @@ Aplicar a los archivos `.razor` y `.razor.css`:
   contraseñas no coinciden" sí son de la UI)
 - Bloque `@code` corto; si crece mucho, pasar a un archivo `.razor.cs` o a un componente hijo
 - Markup repetido en varias páginas → extraer a un componente en `Components/Shared`
-- Campos privados con `_camelCase`, handlers con verbos (`Registrar`, `IniciarSesion`)
+- Handlers con verbos (`Registrar`, `IniciarSesion`); para los campos privados ver sección 11
 - Un método no puede llamarse igual que la página (ej. método `Ingresar` en `Ingresar.razor`)
 - Estilos en el `.razor.css` de cada componente o en `app.css` usando las variables
   de color (`var(--navy)`), no colores sueltos
