@@ -1,0 +1,8 @@
+.pendiente { padding: 2rem 1.75rem; text-align: center; }
+.icono {
+    width: 56px; height: 56px; margin: 0 auto 1.25rem; border-radius: 14px;
+    background: var(--amber-soft); color: var(--amber);
+    display: flex; align-items: center; justify-content: center;
+}
+h1 { font-size: 1.1rem; font-weight: 700; margin: 0 0 .5rem; }
+p { color: var(--ink-soft); font-size: .88rem; line-height: 1.55; margin: 0 0 1.5rem; }

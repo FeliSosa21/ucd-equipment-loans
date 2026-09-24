@@ -1,0 +1,75 @@
+@page "/cambiar-contrasena"
+@rendermode InteractiveServer
+
+<PageTitle>UCD · Cambiar contraseña</PageTitle>
+
+<div class="page-header">
+    <h1>Cambiar contraseña</h1>
+    <p>Ingresá tu contraseña actual y elegí una nueva.</p>
+</div>
+
+<div class="card formulario">
+    <form class="form-grid" @onsubmit="Cambiar" novalidate>
+        <div>
+            <label class="lbl" for="actual">Contraseña actual</label>
+            <input id="actual" type="password" class="field" autocomplete="current-password"
+                   @bind="_actual" @bind:event="oninput" />
+        </div>
+        <div>
+            <label class="lbl" for="nueva">Nueva contraseña</label>
+            <input id="nueva" type="password" class="field" autocomplete="new-password"
+                   @bind="_nueva" @bind:event="oninput" />
+        </div>
+        <div>
+            <label class="lbl" for="repetir">Repetir nueva contraseña</label>
+            <input id="repetir" type="password" class="field" autocomplete="new-password"
+                   @bind="_repetir" @bind:event="oninput" />
+        </div>
+
+        @if (_error is not null)
+        {
+            <div class="alert alert-error" role="alert">@_error</div>
+        }
+        @if (_exito)
+        {
+            <div class="alert alert-success" role="status">Tu contraseña se cambió correctamente.</div>
+        }
+
+        <button type="submit" class="btn btn-primary" disabled="@(!FormularioCompleto)">
+            Guardar contraseña
+        </button>
+    </form>
+</div>
+
+@code {
+    private string _actual = string.Empty;
+    private string _nueva = string.Empty;
+    private string _repetir = string.Empty;
+    private string? _error;
+    private bool _exito;
+
+    private bool FormularioCompleto =>
+        !string.IsNullOrEmpty(_actual) && !string.IsNullOrEmpty(_nueva) && !string.IsNullOrEmpty(_repetir);
+
+    private void Cambiar()
+    {
+        _error = null;
+        _exito = false;
+
+        if (_nueva != _repetir)
+        {
+            _error = "Las contraseñas nuevas no coinciden.";
+            return;
+        }
+
+        try
+        {
+            // TODO: llamar al servicio de cambio de contraseña.
+            _exito = true;
+        }
+        catch (Exception ex) // TODO: cambiar por la excepción que tire el servicio
+        {
+            _error = ex.Message;
+        }
+    }
+}

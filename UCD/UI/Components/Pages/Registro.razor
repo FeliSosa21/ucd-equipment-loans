@@ -1,0 +1,112 @@
+@page "/registro"
+@layout UI.Components.Layout.AuthLayout
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+
+<PageTitle>UCD · Crear cuenta</PageTitle>
+
+<div class="card registro">
+    <div class="page-header">
+        <h1>Crear cuenta</h1>
+        <p>Completá tus datos para registrarte en UCD.</p>
+    </div>
+
+    <form class="form-grid" @onsubmit="Registrar" novalidate>
+        <div>
+            <label class="lbl" for="ci">Cédula de identidad</label>
+            <input id="ci" class="field mono" inputmode="numeric" autocomplete="off"
+                   placeholder="12345672" @bind="_ci" @bind:event="oninput" />
+            <div class="hint">Sin puntos ni guion, incluyendo el dígito verificador.</div>
+        </div>
+
+        <div class="form-row">
+            <div>
+                <label class="lbl" for="nombre">Nombre</label>
+                <input id="nombre" class="field" autocomplete="given-name"
+                       @bind="_nombre" @bind:event="oninput" />
+                <div class="hint">Entre 2 y 50 caracteres.</div>
+            </div>
+            <div>
+                <label class="lbl" for="apellido">Apellido</label>
+                <input id="apellido" class="field" autocomplete="family-name"
+                       @bind="_apellido" @bind:event="oninput" />
+                <div class="hint">Entre 2 y 50 caracteres.</div>
+            </div>
+        </div>
+
+        <div>
+            <label class="lbl" for="correo">Correo electrónico</label>
+            <input id="correo" type="email" class="field" autocomplete="email"
+                   placeholder="nombre@ejemplo.com" @bind="_correo" @bind:event="oninput" />
+        </div>
+
+        <div class="form-row">
+            <div>
+                <label class="lbl" for="contrasena">Contraseña</label>
+                <input id="contrasena" type="password" class="field" autocomplete="new-password"
+                       @bind="_contrasena" @bind:event="oninput" />
+            </div>
+            <div>
+                <label class="lbl" for="repetir">Repetir contraseña</label>
+                <input id="repetir" type="password" class="field" autocomplete="new-password"
+                       @bind="_repetirContrasena" @bind:event="oninput" />
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            Al registrarte tu cuenta queda <strong>sin permisos</strong> hasta que un administrador
+            te asigne un tipo de usuario.
+        </div>
+
+        @if (_error is not null)
+        {
+            <div class="alert alert-error" role="alert">@_error</div>
+        }
+
+        <button type="submit" class="btn btn-primary btn-block" disabled="@(!FormularioCompleto)">
+            Crear cuenta
+        </button>
+
+        <p class="volver">¿Ya tenés cuenta? <a href="ingresar">Ingresá</a> · <a href="">Volver al inicio</a></p>
+    </form>
+</div>
+
+@code {
+    private string _ci = string.Empty;
+    private string _nombre = string.Empty;
+    private string _apellido = string.Empty;
+    private string _correo = string.Empty;
+    private string _contrasena = string.Empty;
+    private string _repetirContrasena = string.Empty;
+    private string? _error;
+
+    private bool FormularioCompleto =>
+        !string.IsNullOrWhiteSpace(_ci) &&
+        !string.IsNullOrWhiteSpace(_nombre) &&
+        !string.IsNullOrWhiteSpace(_apellido) &&
+        !string.IsNullOrWhiteSpace(_correo) &&
+        !string.IsNullOrEmpty(_contrasena) &&
+        !string.IsNullOrEmpty(_repetirContrasena);
+
+    private void Registrar()
+    {
+        _error = null;
+
+        if (_contrasena != _repetirContrasena)
+        {
+            _error = "Las contraseñas no coinciden.";
+            return;
+        }
+
+        try
+        {
+            // TODO (Felipe): llamar al servicio de registro cuando esté implementado. Por ejemplo:
+            // _usuarioServicio.Registrar(new RegistroUsuarioDto(_ci, _nombre, _apellido, _correo, _contrasena));
+            Navigation.NavigateTo("/pendiente-activacion");
+        }
+        catch (Exception ex) // TODO: cambiar por la excepción que tire el servicio (ej. DominioException)
+        {
+            _error = ex.Message;
+        }
+    }
+}
