@@ -7,11 +7,11 @@ public class UnidadFisica
 
     public string IdInstitucional { get; private set; }
     public string UbiFisica { get; private set; }
-    public string NumSerie { get; private set; }
+    public string? NumSerie { get; private set; }
     public string? Observaciones { get; private set; }
     public EstadoUnidadFisica Estado { get; private set; }
 
-    public UnidadFisica(string idInstitucional, string ubiFisica, string numSerie)
+    public UnidadFisica(string idInstitucional, string ubiFisica, string? numSerie)
     {
         ValidarIdInstitucional(idInstitucional);
         IdInstitucional = idInstitucional;

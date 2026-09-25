@@ -175,10 +175,17 @@ public sealed class UnidadFisicaTests
         Assert.ThrowsException<DominioException>(() => unidad.Disponible());
     }
 
+    [TestMethod]
+    public void Constructor_SinNumeroDeSerie_QuedaSinNumeroDeSerie()
+    {
+        var unidad = CrearUnidad(numSerie: null);
+        Assert.IsNull(unidad.NumSerie);
+    }
+
     private static UnidadFisica CrearUnidad(
         string idInstitucional = "EQP-0042",
         string ubiFisica = "Laboratorio Prueba",
-        string numSerie = "PF3A7X21")
+        string? numSerie = "PF3A7X21")
     {
         return new UnidadFisica(idInstitucional, ubiFisica, numSerie);
     }
