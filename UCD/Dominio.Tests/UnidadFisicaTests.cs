@@ -182,6 +182,15 @@ public sealed class UnidadFisicaTests
         Assert.IsNull(unidad.NumSerie);
     }
 
+    [TestMethod]
+    public void Constructor_NumSerieMuyLargo_LanzaDominioException()
+    {
+        var numSerie = new string('A', 51);
+        
+        Assert.ThrowsException<DominioException>(() => CrearUnidad(numSerie: numSerie));
+    }
+    
+
     private static UnidadFisica CrearUnidad(
         string idInstitucional = "EQP-0042",
         string ubiFisica = "Laboratorio Prueba",
