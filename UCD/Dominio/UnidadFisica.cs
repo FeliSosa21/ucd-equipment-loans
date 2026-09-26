@@ -30,6 +30,7 @@ public class UnidadFisica
     {
         ValidarUbiFisica(ubiFisica);
         UbiFisica = ubiFisica;
+        ValidarLargoObservaciones(observaciones);
         Observaciones = observaciones;
     }
 
@@ -122,6 +123,14 @@ public class UnidadFisica
         if (numSerie != null && numSerie.Length > LargoMaxNumSerie)
         {
             throw new DominioException($"El numero de serie no puede tener mas de {LargoMaxNumSerie} caracteres");
+        }
+    }
+
+    private static void ValidarLargoObservaciones(string? observaciones)
+    {
+        if (observaciones != null && observaciones.Length > 300)
+        {
+            throw new DominioException("La observacion no puede tener mas de 300 caracteres");
         }
     }
 }
