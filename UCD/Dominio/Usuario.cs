@@ -20,7 +20,12 @@ public class Usuario
         
         ValidarNombreOApellido(apellido,"apellido");
         Apellido = apellido;
-        
+
+        if (string.IsNullOrWhiteSpace(correo))
+        {
+            throw new DominioException("Correo no puede estar vacio");
+            
+        }
         Correo = correo;
         Contrasena = contrasena;
         Estado = EstadoUsuario.Activo;
@@ -45,7 +50,6 @@ public class Usuario
         }
         
     }
-        
     
     
     
