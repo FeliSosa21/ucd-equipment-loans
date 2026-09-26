@@ -18,7 +18,6 @@ public class Usuario
         Correo = correo;
         Contrasena = contrasena;
         Estado = EstadoUsuario.Activo;
-        
     }
     
 }
