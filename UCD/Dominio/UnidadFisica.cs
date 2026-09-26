@@ -4,6 +4,7 @@ public class UnidadFisica
 {
     private const int LargoIdInstitucional = 8;
     private const int PosicionGuion = 3;
+    private const int LargoMaxNumSerie = 50;
 
     public string IdInstitucional { get; private set; }
     public string UbiFisica { get; private set; }
@@ -116,11 +117,11 @@ public class UnidadFisica
         return letras.All(char.IsUpper) && numeros.All(char.IsDigit);
     }
 
-    private void ValidarLargoNumSerie(string numSerie)
+    private static void ValidarLargoNumSerie(string? numSerie)
     {
-        if (numSerie != null && numSerie.Length > 50)
+        if (numSerie != null && numSerie.Length > LargoMaxNumSerie)
         {
-            throw new DominioException("El numero de serie no puede tener mas de 50 caracteres");
+            throw new DominioException($"El numero de serie no puede tener mas de {LargoMaxNumSerie} caracteres");
         }
     }
 }
