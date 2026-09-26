@@ -20,6 +20,11 @@ public class Usuario
         {
             throw new DominioException("El apellido no puede ser vacio");
         }
+
+        if (apellido.Length < 2)
+        {
+            throw new DominioException("El apellido debe tener minimo 2 caracteres");
+        }
         Apellido = apellido;
         Correo = correo;
         Contrasena = contrasena;

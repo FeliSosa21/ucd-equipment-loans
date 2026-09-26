@@ -61,6 +61,12 @@ public sealed class UsuarioTests
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(apellido:"S"));
     }
+    [TestMethod]
+    public void CrearUsuario_ApellidoCon51Caracteres_LanzaExcepcion()
+    {
+        string apellidoLargo = new string('A', 51);
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(apellido:apellidoLargo));
+    }
     
 
     private static Usuario CrearUsuario(string nombre = NombreValido, string apellido = ApellidoValido,
