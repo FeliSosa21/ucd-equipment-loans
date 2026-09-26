@@ -212,6 +212,16 @@ public sealed class UnidadFisicaTests
         Assert.IsNull(unidad.Observaciones);
     }
 
+    [TestMethod]
+    public void ModificarInfo_NumSerieNuevo_ActualizaElNumSerie()
+    {
+        var unidad = CrearUnidad();
+        var numSerieNuevo = "PF5A7J22";
+        unidad.ModificarInfo("Laboratorio Prueba", numSerieNuevo, null);
+        
+        Assert.AreEqual(numSerieNuevo, unidad.NumSerie);
+    }
+    
     private static UnidadFisica CrearUnidad(
         string idInstitucional = "EQP-0042",
         string ubiFisica = "Laboratorio Prueba",
