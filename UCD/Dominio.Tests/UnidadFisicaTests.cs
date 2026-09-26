@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices.JavaScript;
+
 namespace Dominio.Tests;
 
 [TestClass]
@@ -66,7 +68,7 @@ public sealed class UnidadFisicaTests
     {
         var unidad = CrearUnidad(ubiFisica: "Laboratorio Viejo");
 
-        unidad.ModificarInfo("Laboratorio Nuevo", null, "");
+        unidad.ModificarInfo("Laboratorio Nuevo", "PF3A7X21", "");
 
         Assert.AreEqual("Laboratorio Nuevo", unidad.UbiFisica);
     }
@@ -76,7 +78,7 @@ public sealed class UnidadFisicaTests
     {
         var unidad = CrearUnidad();
 
-        unidad.ModificarInfo("Laboratorio Nuevo", null, "");
+        unidad.ModificarInfo("Laboratorio Nuevo", "PF3A7X21", "");
 
         Assert.AreEqual("", unidad.Observaciones);
     }
@@ -197,7 +199,7 @@ public sealed class UnidadFisicaTests
         var ubiFisica = "Laboratorio Prueba";
         var observaciones = new string('B', 301);
         
-        Assert.ThrowsException<DominioException>(() => unidad.ModificarInfo(ubiFisica, null, observaciones));
+        Assert.ThrowsException<DominioException>(() => unidad.ModificarInfo(ubiFisica, "PF3A7X21", observaciones));
     }
 
     [TestMethod]
@@ -205,9 +207,9 @@ public sealed class UnidadFisicaTests
     {
         var unidad = CrearUnidad();
         var ubiFisica = "Laboratorio Prueba";
-        unidad.ModificarInfo(ubiFisica, null, "Pantalla rayada");
+        unidad.ModificarInfo(ubiFisica, "PF3A7X21", "Pantalla rayada");
         
-        unidad.ModificarInfo(ubiFisica, null, null);
+        unidad.ModificarInfo(ubiFisica, "PF3A7X21", null);
         
         Assert.IsNull(unidad.Observaciones);
     }
@@ -220,6 +222,15 @@ public sealed class UnidadFisicaTests
         unidad.ModificarInfo("Laboratorio Prueba", numSerieNuevo, null);
         
         Assert.AreEqual(numSerieNuevo, unidad.NumSerie);
+    }
+
+    [TestMethod]
+    public void ModificarInfo_NumSerieMuyLargo_LanzaDominioException()
+    {
+        var unidad = CrearUnidad();
+        var NumSerieMuyLargo = new string('A', 51);
+        Assert.ThrowsException<DominioException>(() =>
+            unidad.ModificarInfo("Laboratorio Prueba", NumSerieMuyLargo, null));
     }
     
     private static UnidadFisica CrearUnidad(
