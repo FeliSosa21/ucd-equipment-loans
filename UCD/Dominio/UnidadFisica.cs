@@ -33,7 +33,7 @@ public class UnidadFisica
         UbiFisica = ubiFisica;
         ValidarLargoObservaciones(observaciones);
         Observaciones = observaciones;
-        
+        ValidarLargoNumSerie(numSerie);
         NumSerie = numSerie;
     }
 
