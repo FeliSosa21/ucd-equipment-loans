@@ -5,6 +5,7 @@ public class UnidadFisica
     private const int LargoIdInstitucional = 8;
     private const int PosicionGuion = 3;
     private const int LargoMaxNumSerie = 50;
+    private const int LargoMaxObservaciones = 300;
 
     public string IdInstitucional { get; private set; }
     public string UbiFisica { get; private set; }
@@ -26,10 +27,11 @@ public class UnidadFisica
         Estado = EstadoUnidadFisica.Disponible;
     }
 
-    public void ModificarInfo(string ubiFisica, string observaciones)
+    public void ModificarInfo(string ubiFisica, string? observaciones)
     {
         ValidarUbiFisica(ubiFisica);
         UbiFisica = ubiFisica;
+        ValidarLargoObservaciones(observaciones);
         Observaciones = observaciones;
     }
 
@@ -124,5 +126,14 @@ public class UnidadFisica
             throw new DominioException($"El numero de serie no puede tener mas de {LargoMaxNumSerie} caracteres");
         }
     }
+
+    private static void ValidarLargoObservaciones(string? observaciones)
+    {
+        if (observaciones != null && observaciones.Length > LargoMaxObservaciones)
+        {
+            throw new DominioException($"Las observaciones no pueden tener mas de {LargoMaxObservaciones} caracteres");
+        }
+    }
+    
 }
 

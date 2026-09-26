@@ -189,7 +189,28 @@ public sealed class UnidadFisicaTests
         
         Assert.ThrowsException<DominioException>(() => CrearUnidad(numSerie: numSerie));
     }
-    
+
+    [TestMethod]
+    public void ModificarInfo_ObservacionesMuyLargas_LanzaDominioException()
+    {
+        var unidad = CrearUnidad();
+        var ubiFisica = "Laboratorio Prueba";
+        var observaciones = new string('B', 301);
+        
+        Assert.ThrowsException<DominioException>(() => unidad.ModificarInfo(ubiFisica, observaciones));
+    }
+
+    [TestMethod]
+    public void ModificarInfo_ObservacionesNulas_QuedaSinObservaciones()
+    {
+        var unidad = CrearUnidad();
+        var ubiFisica = "Laboratorio Prueba";
+        unidad.ModificarInfo(ubiFisica, "Pantalla rayada");
+        
+        unidad.ModificarInfo(ubiFisica, null);
+        
+        Assert.IsNull(unidad.Observaciones);
+    }
 
     private static UnidadFisica CrearUnidad(
         string idInstitucional = "EQP-0042",
