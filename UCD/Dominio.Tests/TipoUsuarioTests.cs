@@ -27,4 +27,14 @@ public sealed class TipoUsuarioTests
         Assert.IsTrue(resultado);
     }
 
+    [TestMethod]
+
+    public void Estudiante_PermisosRepetidos_DeveuelveLaMismaInstancia()
+    {
+        var primero = TipoUsuario.Estudiante;
+        var segundo = TipoUsuario.Estudiante;
+
+        Assert.AreSame(primero, segundo);
+    }
+
 }
