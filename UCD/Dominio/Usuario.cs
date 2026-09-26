@@ -14,18 +14,13 @@ public class Usuario
     {
         
         Dni = dni;
+        
         validarNombre(nombre);
         Nombre = nombre;
-        if (string.IsNullOrWhiteSpace(apellido))
-        {
-            throw new DominioException("El apellido no puede ser vacio");
-        }
-
-        if (apellido.Length < 2)
-        {
-            throw new DominioException("El apellido debe tener minimo 2 caracteres");
-        }
+        
+        validarApellido(apellido);
         Apellido = apellido;
+        
         Correo = correo;
         Contrasena = contrasena;
         Estado = EstadoUsuario.Activo;
@@ -48,6 +43,23 @@ public class Usuario
             throw new DominioException("El nombre debe tener como maximo 50 caracteres");
         }
         
+    }
+    public void validarApellido(string apellido)
+    {
+        if (string.IsNullOrWhiteSpace(apellido))
+        {
+            throw new DominioException("El apellido no puede ser vacio");
+        }
+
+        if (apellido.Length < 2)
+        {
+            throw new DominioException("El apellido debe tener minimo 2 caracteres");
+        }
+
+        if (apellido.Length > 50)
+        {
+            throw new DominioException("El apellido debe tener maximo 50 caracteres");
+        }
     }
     
     
