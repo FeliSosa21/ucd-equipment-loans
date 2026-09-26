@@ -19,7 +19,7 @@ public class UnidadFisica
         ValidarUbiFisica(ubiFisica);
         UbiFisica = ubiFisica;
 
-      
+        ValidarLargoNumSerie(numSerie);
         NumSerie = numSerie;
 
         Estado = EstadoUnidadFisica.Disponible;
@@ -116,6 +116,12 @@ public class UnidadFisica
         return letras.All(char.IsUpper) && numeros.All(char.IsDigit);
     }
 
-    
+    private void ValidarLargoNumSerie(string numSerie)
+    {
+        if (numSerie != null && numSerie.Length > 50)
+        {
+            throw new DominioException("El numero de serie no puede tener mas de 50 caracteres");
+        }
+    }
 }
 
