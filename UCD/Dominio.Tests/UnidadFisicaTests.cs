@@ -66,7 +66,7 @@ public sealed class UnidadFisicaTests
     {
         var unidad = CrearUnidad(ubiFisica: "Laboratorio Viejo");
 
-        unidad.ModificarInfo("Laboratorio Nuevo", "");
+        unidad.ModificarInfo("Laboratorio Nuevo", null, "");
 
         Assert.AreEqual("Laboratorio Nuevo", unidad.UbiFisica);
     }
@@ -76,7 +76,7 @@ public sealed class UnidadFisicaTests
     {
         var unidad = CrearUnidad();
 
-        unidad.ModificarInfo("Laboratorio Nuevo", "");
+        unidad.ModificarInfo("Laboratorio Nuevo", null, "");
 
         Assert.AreEqual("", unidad.Observaciones);
     }
@@ -197,7 +197,7 @@ public sealed class UnidadFisicaTests
         var ubiFisica = "Laboratorio Prueba";
         var observaciones = new string('B', 301);
         
-        Assert.ThrowsException<DominioException>(() => unidad.ModificarInfo(ubiFisica, observaciones));
+        Assert.ThrowsException<DominioException>(() => unidad.ModificarInfo(ubiFisica, null, observaciones));
     }
 
     [TestMethod]
@@ -205,9 +205,9 @@ public sealed class UnidadFisicaTests
     {
         var unidad = CrearUnidad();
         var ubiFisica = "Laboratorio Prueba";
-        unidad.ModificarInfo(ubiFisica, "Pantalla rayada");
+        unidad.ModificarInfo(ubiFisica, null, "Pantalla rayada");
         
-        unidad.ModificarInfo(ubiFisica, null);
+        unidad.ModificarInfo(ubiFisica, null, null);
         
         Assert.IsNull(unidad.Observaciones);
     }
