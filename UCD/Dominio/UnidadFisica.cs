@@ -5,6 +5,7 @@ public class UnidadFisica
     private const int LargoIdInstitucional = 8;
     private const int PosicionGuion = 3;
     private const int LargoMaxNumSerie = 50;
+    private const int LargoMaxObservaciones = 300;
 
     public string IdInstitucional { get; private set; }
     public string UbiFisica { get; private set; }
@@ -128,9 +129,9 @@ public class UnidadFisica
 
     private static void ValidarLargoObservaciones(string? observaciones)
     {
-        if (observaciones != null && observaciones.Length > 300)
+        if (observaciones != null && observaciones.Length > LargoMaxObservaciones)
         {
-            throw new DominioException("La observacion no puede tener mas de 300 caracteres");
+            throw new DominioException($"La observaciones no pueden tener mas de {LargoMaxObservaciones} caracteres");
         }
     }
 }
