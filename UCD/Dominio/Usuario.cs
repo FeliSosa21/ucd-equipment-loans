@@ -12,6 +12,11 @@ public class Usuario
 
     public Usuario(string dni, string nombre, string apellido, string correo, string contrasena)
     {
+        if (nombre.Length < 2)
+        {
+            throw  new DominioException("El nombre debe tener mas de 2 caracteres");
+        }
+        
         Dni = dni;
         Nombre = nombre;
         Apellido = apellido;
