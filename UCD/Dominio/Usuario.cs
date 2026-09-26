@@ -21,7 +21,12 @@ public class Usuario
         {
             throw new DominioException("El nombre debe tener como maximo 50 caracteres");
         }
-        
+
+        if (string.IsNullOrWhiteSpace(nombre))
+        {
+            throw new DominioException("El nombre no puede ser vacio");
+        }
+            
         Dni = dni;
         Nombre = nombre;
         Apellido = apellido;
