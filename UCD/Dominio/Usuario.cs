@@ -16,6 +16,11 @@ public class Usuario
         {
             throw new DominioException("El nombre debe tener mas de 1 caracter");
         }
+
+        if (nombre.Length > 50)
+        {
+            throw new DominioException("El nombre debe tener como maximo 50 caracteres");
+        }
         
         Dni = dni;
         Nombre = nombre;
