@@ -4,14 +4,15 @@ public class UnidadFisica
 {
     private const int LargoIdInstitucional = 8;
     private const int PosicionGuion = 3;
+    private const int LargoMaxNumSerie = 50;
 
     public string IdInstitucional { get; private set; }
     public string UbiFisica { get; private set; }
-    public string NumSerie { get; private set; }
+    public string? NumSerie { get; private set; }
     public string? Observaciones { get; private set; }
     public EstadoUnidadFisica Estado { get; private set; }
 
-    public UnidadFisica(string idInstitucional, string ubiFisica, string numSerie)
+    public UnidadFisica(string idInstitucional, string ubiFisica, string? numSerie)
     {
         ValidarIdInstitucional(idInstitucional);
         IdInstitucional = idInstitucional;
@@ -19,7 +20,7 @@ public class UnidadFisica
         ValidarUbiFisica(ubiFisica);
         UbiFisica = ubiFisica;
 
-      
+        ValidarLargoNumSerie(numSerie);
         NumSerie = numSerie;
 
         Estado = EstadoUnidadFisica.Disponible;
@@ -116,6 +117,12 @@ public class UnidadFisica
         return letras.All(char.IsUpper) && numeros.All(char.IsDigit);
     }
 
-    
+    private static void ValidarLargoNumSerie(string? numSerie)
+    {
+        if (numSerie != null && numSerie.Length > LargoMaxNumSerie)
+        {
+            throw new DominioException($"El numero de serie no puede tener mas de {LargoMaxNumSerie} caracteres");
+        }
+    }
 }
 
