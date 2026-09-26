@@ -27,7 +27,7 @@ public class UnidadFisica
         Estado = EstadoUnidadFisica.Disponible;
     }
 
-    public void ModificarInfo(string ubiFisica, string observaciones)
+    public void ModificarInfo(string ubiFisica, string? observaciones)
     {
         ValidarUbiFisica(ubiFisica);
         UbiFisica = ubiFisica;
@@ -131,8 +131,9 @@ public class UnidadFisica
     {
         if (observaciones != null && observaciones.Length > LargoMaxObservaciones)
         {
-            throw new DominioException($"La observaciones no pueden tener mas de {LargoMaxObservaciones} caracteres");
+            throw new DominioException($"Las observaciones no pueden tener mas de {LargoMaxObservaciones} caracteres");
         }
     }
+    
 }
 

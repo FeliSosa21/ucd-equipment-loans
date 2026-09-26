@@ -200,6 +200,18 @@ public sealed class UnidadFisicaTests
         Assert.ThrowsException<DominioException>(() => unidad.ModificarInfo(ubiFisica, observaciones));
     }
 
+    [TestMethod]
+    public void ModificarInfo_ObservacionesNulas_QuedaSinObservaciones()
+    {
+        var unidad = CrearUnidad();
+        var ubiFisica = "Laboratorio Prueba";
+        unidad.ModificarInfo(ubiFisica, "Pantalla rayada");
+        
+        unidad.ModificarInfo(ubiFisica, null);
+        
+        Assert.IsNull(unidad.Observaciones);
+    }
+
     private static UnidadFisica CrearUnidad(
         string idInstitucional = "EQP-0042",
         string ubiFisica = "Laboratorio Prueba",
