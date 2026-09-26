@@ -20,4 +20,5 @@ public class Usuario
         Estado = EstadoUsuario.Activo;
     }
     
+    
 }
