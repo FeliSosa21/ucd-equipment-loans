@@ -14,7 +14,7 @@ public class Usuario
     {
         if (nombre.Length < 2)
         {
-            throw  new DominioException("El nombre debe tener mas de 2 caracteres");
+            throw new DominioException("El nombre debe tener mas de 1 caracter");
         }
         
         Dni = dni;
