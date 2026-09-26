@@ -16,7 +16,10 @@ public class Usuario
         Dni = dni;
         validarNombre(nombre);
         Nombre = nombre;
-        
+        if (string.IsNullOrWhiteSpace(apellido))
+        {
+            throw new DominioException("El apellido no puede ser vacio");
+        }
         Apellido = apellido;
         Correo = correo;
         Contrasena = contrasena;
