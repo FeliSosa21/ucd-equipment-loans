@@ -47,10 +47,14 @@ public sealed class UsuarioTests
     [TestMethod]
     public void CrearUsuario_NombreVacioONulo_LanzaExcepcion()
     {
-        
         Assert.ThrowsException<DominioException>(() => CrearUsuario(nombre: null));
     }
-    
+
+    [TestMethod]
+    public void CrearUsuario_ApellidoNuloOVacio_LanzaExcepcion()
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(apellido: null));
+    }
 
     private static Usuario CrearUsuario(string nombre = NombreValido, string apellido = ApellidoValido,
         string dni = DniValido, string correo = CorreoValido, string contrasena = ContrasenaValida)

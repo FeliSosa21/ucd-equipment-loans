@@ -16,6 +16,7 @@ public class Usuario
         Dni = dni;
         validarNombre(nombre);
         Nombre = nombre;
+        
         Apellido = apellido;
         Correo = correo;
         Contrasena = contrasena;
