@@ -26,6 +26,11 @@ public class Usuario
             throw new DominioException("Correo no puede estar vacio");
             
         }
+
+        if (!correo.Contains("@"))
+        {
+            throw new DominioException("Correo debe tener @");
+        }
         Correo = correo;
         Contrasena = contrasena;
         Estado = EstadoUsuario.Activo;

@@ -80,7 +80,14 @@ public sealed class UsuarioTests
         string correoSinArroba = "felipehotmail.com";
         Assert.ThrowsException<DominioException>(() => CrearUsuario(correo:correoSinArroba));
     }
-    
+
+    [TestMethod]
+    public void CrearUsuario_CorreoCon2Arrobas_LanzaExcepcion()
+    {
+        string correoCon2Arroba = "feli@peho@tmail.com";
+        Assert.ThrowsException<DominioException>(() =>CrearUsuario(correo: correoCon2Arroba));
+        
+    }
 
     private static Usuario CrearUsuario(string nombre = NombreValido, string apellido = ApellidoValido,
         string dni = DniValido, string correo = CorreoValido, string contrasena = ContrasenaValida)
