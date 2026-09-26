@@ -12,6 +12,18 @@ public class Usuario
 
     public Usuario(string dni, string nombre, string apellido, string correo, string contrasena)
     {
+        
+        Dni = dni;
+        validarNombre(nombre);
+        Nombre = nombre;
+        Apellido = apellido;
+        Correo = correo;
+        Contrasena = contrasena;
+        Estado = EstadoUsuario.Activo;
+    }
+
+    public void validarNombre(string nombre)
+    {
         if (string.IsNullOrWhiteSpace(nombre))
         {
             throw new DominioException("El nombre no puede ser vacio");
@@ -26,15 +38,7 @@ public class Usuario
         {
             throw new DominioException("El nombre debe tener como maximo 50 caracteres");
         }
-
-       
-            
-        Dni = dni;
-        Nombre = nombre;
-        Apellido = apellido;
-        Correo = correo;
-        Contrasena = contrasena;
-        Estado = EstadoUsuario.Activo;
+        
     }
     
     
