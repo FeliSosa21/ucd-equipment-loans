@@ -16,4 +16,15 @@ public sealed class TipoUsuarioTests
 
     }
 
+    [TestMethod]
+
+    public void TienePermiso_EstudianteConsultarCatalogo_DevuelveTrue()
+    {
+        var usuario = TipoUsuario.Estudiante;
+        
+        var resultado =  usuario.TienePermiso(Permiso.ConsultarCatalogo);
+
+        Assert.IsTrue(resultado);
+    }
+
 }
