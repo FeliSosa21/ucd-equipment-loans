@@ -12,7 +12,6 @@ public class Usuario
 
     public Usuario(string dni, string nombre, string apellido, string correo, string contrasena)
     {
-        
         Dni = dni;
         
         ValidarNombreOApellido(nombre,"nombre");
@@ -24,13 +23,19 @@ public class Usuario
         if (string.IsNullOrWhiteSpace(correo))
         {
             throw new DominioException("Correo no puede estar vacio");
-            
         }
 
         if (!correo.Contains("@"))
         {
             throw new DominioException("Correo debe tener @");
         }
+
+        string [] partes = correo.Split('@');
+        if (partes.Length != 2 )
+        {
+            throw new DominioException("El correo no puede tener 2 arrobas");
+        }
+        
         Correo = correo;
         Contrasena = contrasena;
         Estado = EstadoUsuario.Activo;
