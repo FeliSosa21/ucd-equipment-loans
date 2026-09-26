@@ -31,10 +31,10 @@ public class UnidadFisica
     {
         ValidarUbiFisica(ubiFisica);
         UbiFisica = ubiFisica;
-        ValidarLargoObservaciones(observaciones);
-        Observaciones = observaciones;
         ValidarLargoNumSerie(numSerie);
         NumSerie = numSerie;
+        ValidarLargoObservaciones(observaciones);
+        Observaciones = observaciones;
     }
 
     public bool EstaDisponible()
