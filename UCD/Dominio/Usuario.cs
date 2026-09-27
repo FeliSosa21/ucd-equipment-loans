@@ -222,7 +222,7 @@ public class Usuario
 
         foreach (char c in dni)
         {
-            if (c < '0' && c > '9')
+            if (c < '0' || c > '9')
             {
                 throw new DominioException("EL DNI solo puede contener numeros");
             }
