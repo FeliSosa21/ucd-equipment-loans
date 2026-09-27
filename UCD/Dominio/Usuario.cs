@@ -199,6 +199,12 @@ public class Usuario
         {
             throw new DominioException("La contrasena debe tener una mayuscula");
         }
+        
+        if (!contrasena.Any(char.IsLower))
+        {
+            throw new DominioException("La contrasena debe tener una minuscula");
+        }
+        
     }
 
     private static bool EsCaracterEspecial(char c)
