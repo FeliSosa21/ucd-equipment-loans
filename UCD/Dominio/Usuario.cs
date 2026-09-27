@@ -7,8 +7,7 @@ public class Usuario
     private const int LargoMinimoTld = 2;
     private const int LargoMaximoTld = 63;
     private const int LargoMinimoContrasena = 8;
-    private const int LargoMinimoDni = 7 ;
-    private const int LargoMaximoDni = 8;
+    private const int LargoDni = 8;
     private static readonly int [] PesosCedula = { 2, 9, 8, 7, 6, 3, 4 };
 
     public string Dni { get; private set; }
@@ -233,9 +232,9 @@ public class Usuario
             }
         }
 
-        if (dni.Length < LargoMinimoDni || dni.Length > LargoMaximoDni)
+        if (dni.Length != LargoDni)
         {
-            throw new DominioException("El DNI debe tener entre {LargoMinimoDni} y {LargoMaximoDni} digitos");
+            throw new DominioException($"El DNI debe tener {LargoDni} digitos");
         }
         int verificador = dni[^1] - '0';
         int suma = 0;
