@@ -356,8 +356,16 @@ public sealed class UsuarioTests
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: dni));
     }
-    
 
+    [TestMethod]
+    [DataRow("123456")]
+    [DataRow("123456789")]
+    public void CrearUsuario_DniConLargoInvalidos_LanzaExcepcion(string dni)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: dni));
+    }
+    
+    
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {

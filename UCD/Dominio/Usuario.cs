@@ -7,6 +7,8 @@ public class Usuario
     private const int LargoMinimoTld = 2;
     private const int LargoMaximoTld = 63;
     private const int LargoMinimoContrasena = 8;
+    private const int LargoMinimoDni = 7 ;
+    private const int LargoMaximoDni = 8;
 
     public string Dni { get; private set; }
     public string Nombre { get; private set; }
@@ -227,6 +229,11 @@ public class Usuario
                 throw new DominioException("EL DNI solo puede contener numeros");
             }
         }
+
+        if (dni.Length < LargoMinimoDni || dni.Length > LargoMaximoDni)
+        {
+            throw new DominioException("El DNI debe tener entre {LargoMinimoDni} y {LargoMaximoDni} digitos");
+        }
     }
 
     private static bool EsCaracterEspecial(char c)
@@ -238,4 +245,5 @@ public class Usuario
     {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
     }
+    
 }
