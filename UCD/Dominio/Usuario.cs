@@ -65,12 +65,13 @@ public class Usuario
         }
 
         string [] partes = correo.Split('@');
+        var parteLocal = partes[0];
         if (partes.Length != 2 )
         {
             throw new DominioException("El correo no puede tener 2 arrobas");
         }
 
-        if (partes[0] == "")
+        if (parteLocal == "")
         {
             throw new DominioException("La parte local del correo no puede estar vacio");
         }
@@ -94,6 +95,14 @@ public class Usuario
                     throw new DominioException("El correo no puede tener 2 caracteres especiales consecutivos");
             }
         }
+
+        if (EsCaracterEspecial(parteLocal[0]) || EsCaracterEspecial(parteLocal[^1]))
+           
+        {
+            throw new DominioException("La parte local del correo no puede comenzar ni terminar" +
+                                       "con un caracter especial");
+        }
+            
     }
     
     
