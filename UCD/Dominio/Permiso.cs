@@ -9,5 +9,8 @@ public enum Permiso
     ConsultarMisSolicitudes,
     GestionarUnidades,
     RealizarPrestamo,
-    RegistrarDevolucion
+    RegistrarDevolucion,
+    GestionarCatalogo,
+    EvaluarSolicitud,
+    ConsultarPrestamos
 }
