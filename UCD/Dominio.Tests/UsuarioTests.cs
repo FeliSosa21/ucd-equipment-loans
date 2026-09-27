@@ -341,7 +341,7 @@ public sealed class UsuarioTests
     [DataRow(null)]
     [DataRow("")]
     [DataRow("   ")]
-    public void CrearUsuario_DNINulaVaciaOEspacios_LanzaExcepcion(string dni)
+    public void CrearUsuario_DniNuloVacioOEspacios_LanzaExcepcion(string? dni)
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: dni));
     }
@@ -352,7 +352,7 @@ public sealed class UsuarioTests
     [DataRow("1234.567")]
     [DataRow("12345-72")]
     [DataRow("1234 567")]
-    public void CrearUsuario_DniConCarecteresNoNumericos_LanzaExcepcion(string dni)
+    public void CrearUsuario_DniConCaracteresNoNumericos_LanzaExcepcion(string dni)
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: dni));
     }
@@ -361,7 +361,7 @@ public sealed class UsuarioTests
     [DataRow("123456")]
     [DataRow("1234560")]
     [DataRow("123456789")]
-    public void CrearUsuario_DniConLargoInvalidos_LanzaExcepcion(string dni)
+    public void CrearUsuario_DniConLargoInvalido_LanzaExcepcion(string dni)
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: dni));
     }
@@ -371,7 +371,8 @@ public sealed class UsuarioTests
     [DataRow("45678901")]
     [DataRow("30000005")]
     [DataRow("01234562")]
-    public void CrearUsuario_DniConDigitoVerificadorIncorrectos_LanzaExcepcion(string dni)
+    [DataRow("12345601")]
+    public void CrearUsuario_DniConDigitoVerificadorIncorrecto_LanzaExcepcion(string dni)
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: dni));
     }
@@ -382,12 +383,21 @@ public sealed class UsuarioTests
     [DataRow("30000004")]
     [DataRow("01234561")]
     [DataRow("99999999")]
-    public void CrearUsuario_DniValido_NoLanzaExcepcion(string dni)
+    [DataRow("12345600")]
+    [DataRow("10000020")]
+    public void CrearUsuario_DniValido_SeCrea(string dni)
     {
-       Usuario usuario = CrearUsuario(dni: dni);
-       Assert.AreEqual(dni, usuario.Dni);
+        Usuario usuario = CrearUsuario(dni: dni);
+
+        Assert.AreEqual(dni, usuario.Dni);
     }
-    
+
+    [TestMethod]
+    public void CrearUsuario_DniTodosCeros_LanzaExcepcion()
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: "00000000"));
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {

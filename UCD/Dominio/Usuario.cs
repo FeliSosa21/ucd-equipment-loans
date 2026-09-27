@@ -8,7 +8,7 @@ public class Usuario
     private const int LargoMaximoTld = 63;
     private const int LargoMinimoContrasena = 8;
     private const int LargoDni = 8;
-    private static readonly int [] PesosCedula = { 2, 9, 8, 7, 6, 3, 4 };
+    private static readonly int[] PesosDni = { 2, 9, 8, 7, 6, 3, 4 };
 
     public string Dni { get; private set; }
     public string Nombre { get; private set; }
@@ -19,11 +19,11 @@ public class Usuario
 
     public Usuario(string dni, string nombre, string apellido, string correo, string contrasena)
     {
+        ValidarDni(dni);
         ValidarNombreOApellido(nombre, "nombre");
         ValidarNombreOApellido(apellido, "apellido");
         ValidarCorreo(correo);
         ValidarFormatoContrasena(contrasena);
-        ValidarDni(dni);
 
         Dni = dni;
         Nombre = nombre;
@@ -215,20 +215,18 @@ public class Usuario
         }
     }
 
-    
-
     private static void ValidarDni(string dni)
     {
         if (string.IsNullOrWhiteSpace(dni))
         {
-            throw new DominioException("EL DNI no puede ser vacio");
+            throw new DominioException("El DNI no puede ser vacio");
         }
 
         foreach (char c in dni)
         {
             if (c < '0' || c > '9')
             {
-                throw new DominioException("EL DNI solo puede contener numeros");
+                throw new DominioException("El DNI solo puede contener numeros");
             }
         }
 
@@ -236,20 +234,25 @@ public class Usuario
         {
             throw new DominioException($"El DNI debe tener {LargoDni} digitos");
         }
-        int verificador = dni[^1] - '0';
-        int suma = 0;
-        for (int i = 0; i < dni.Length - 1; i++)
-        {
-            suma = suma + (dni[i] - '0')* PesosCedula[i];
-        }
 
-        int numEsperado = (10 - suma % 10) % 10;
-        if (numEsperado != verificador)
+        if (!TieneDigitoVerificadorValido(dni))
         {
             throw new DominioException("El digito verificador del DNI es incorrecto");
         }
+    }
 
+    private static bool TieneDigitoVerificadorValido(string dni)
+    {
+        int suma = 0;
+        for (int i = 0; i < PesosDni.Length; i++)
+        {
+            suma += (dni[i] - '0') * PesosDni[i];
+        }
 
+        int verificadorCalculado = (10 - suma % 10) % 10;
+        int verificadorRecibido = dni[^1] - '0';
+
+        return verificadorCalculado == verificadorRecibido;
     }
 
     private static bool EsCaracterEspecial(char c)
@@ -261,5 +264,4 @@ public class Usuario
     {
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
     }
-    
 }
