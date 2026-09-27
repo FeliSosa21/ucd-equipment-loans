@@ -2,5 +2,6 @@
 
 public enum Permiso
 {
-    ConsultarCatalogo
+    ConsultarCatalogo,
+    ConsultarHistorico
 }

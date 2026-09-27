@@ -2,17 +2,18 @@
 
 public class TipoUsuario
 {
-    public static TipoUsuario SinPermisos { get; } = new TipoUsuario();
-    public static TipoUsuario Estudiante { get; } = new TipoUsuario();
+    private readonly List<Permiso> permisos;
+    
+    public static TipoUsuario SinPermisos { get; } = new TipoUsuario(new List<Permiso>());
+    public static TipoUsuario Estudiante { get; } = new TipoUsuario(new List<Permiso> { Permiso.ConsultarCatalogo });
 
-    private TipoUsuario()
+    private TipoUsuario(List<Permiso> permisos)
     {
+        this.permisos = permisos;
     }
 
     public bool TienePermiso(Permiso permiso)
     {
-        return this == Estudiante;
+        return permisos.Contains(permiso);
     }
-    
-    
 }
