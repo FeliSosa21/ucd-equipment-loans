@@ -45,6 +45,14 @@ public sealed class CatalogoTests
     {
         return new Catalogo(nombre);
     }
+
+    [TestMethod]
+    public void Constructor_CatalogoNuevo_NoTieneTipos()
+    {
+        var catalogo = CrearCatalogo();
+        
+        Assert.AreEqual(0, catalogo.Tipos.Count);
+    }
 }
 
 
