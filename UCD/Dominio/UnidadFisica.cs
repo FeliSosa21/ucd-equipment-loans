@@ -30,10 +30,10 @@ public class UnidadFisica
     public void ModificarInfo(string ubiFisica, string? numSerie, string? observaciones)
     {
         ValidarUbiFisica(ubiFisica);
-        UbiFisica = ubiFisica;
         ValidarLargoNumSerie(numSerie);
-        NumSerie = numSerie;
         ValidarLargoObservaciones(observaciones);
+        UbiFisica = ubiFisica;
+        NumSerie = numSerie;
         Observaciones = observaciones;
     }
 
