@@ -235,6 +235,12 @@ public class Usuario
             throw new DominioException($"El DNI debe tener {LargoDni} digitos");
         }
 
+        string todosCeros = "00000000";
+        if (dni == todosCeros)
+        {
+            throw new DominioException("El DNI no puede ser todo ceros");
+        }
+
         if (!TieneDigitoVerificadorValido(dni))
         {
             throw new DominioException("El digito verificador del DNI es incorrecto");
