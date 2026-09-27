@@ -269,6 +269,12 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void CrearUsuario_CorreoConGuioEnTLD_LanzaExcepcion()
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario("felipe@hotmail.c-m"));
+    }
+
+    [TestMethod]
     [DataRow("feli.pe@hotmail.com")]
     [DataRow("feli_pe@hotmail.com")]
     [DataRow("feli-pe@hotmail.com")]
@@ -279,6 +285,8 @@ public sealed class UsuarioTests
     [DataRow("felipe@a-b-c.com")]
     [DataRow("felipe@MAIL.COM")]
     [DataRow("felipe@hotmail.uy")]
+    [DataRow("felipe@hotmail.c0m")]
+    
     public void CrearUsuario_CorreoValido_SeCrea(string correo)
     {
         Usuario usuario = CrearUsuario(correo: correo);
