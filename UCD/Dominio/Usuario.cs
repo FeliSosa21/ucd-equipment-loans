@@ -224,7 +224,7 @@ public class Usuario
 
         foreach (char c in dni)
         {
-            if (c < '0' || c > '9')
+            if (!char.IsAsciiDigit(c))
             {
                 throw new DominioException("El DNI solo puede contener numeros");
             }
@@ -252,13 +252,18 @@ public class Usuario
         int suma = 0;
         for (int i = 0; i < PesosDni.Length; i++)
         {
-            suma += (dni[i] - '0') * PesosDni[i];
+            suma += ValorDigito(dni[i]) * PesosDni[i];
         }
 
         int verificadorCalculado = (10 - suma % 10) % 10;
-        int verificadorRecibido = dni[^1] - '0';
+        int verificadorRecibido = ValorDigito(dni[^1]);
 
         return verificadorCalculado == verificadorRecibido;
+    }
+
+    private static int ValorDigito(char c)
+    {
+        return c - '0';
     }
 
     private static bool EsCaracterEspecial(char c)
