@@ -144,6 +144,14 @@ public class Usuario
         {
             throw new DominioException("El TLD del correo debe contener al menos una letra");
         }
+
+        foreach (char c in tld)
+        {
+            if (!EsLetraODigitoAscii(c))
+            {
+                throw new DominioException("El TLD del correo solo puede contener letras y numeros");
+            }
+        }
     }
 
     private static void ValidarPartesDominio(string[] partesDominio)

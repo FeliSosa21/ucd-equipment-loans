@@ -269,9 +269,9 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
-    public void CrearUsuario_CorreoConGuioEnTLD_LanzaExcepcion()
+    public void CrearUsuario_CorreoConGuionEnTLD_LanzaExcepcion()
     {
-        Assert.ThrowsException<DominioException>(() => CrearUsuario("felipe@hotmail.c-m"));
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: "felipe@hotmail.c-m"));
     }
 
     [TestMethod]
