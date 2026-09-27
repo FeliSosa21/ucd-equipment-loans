@@ -5,14 +5,16 @@
 public sealed class TipoUsuarioTests
 {
     [TestMethod]
-    public void TienePermiso_SinPermisosYConsultarCatalogo_DevuelveFalse()
+    public void TienePermiso_SinPermisosYCualquierPermiso_DevuelveFalse()
     {
         var tipo = TipoUsuario.SinPermisos;
 
-        var resultado = tipo.TienePermiso(Permiso.ConsultarCatalogo);
+        foreach (var permiso in Enum.GetValues<Permiso>())
+        {
+            var resultado = tipo.TienePermiso(permiso);
 
-        Assert.IsFalse(resultado);
-
+            Assert.IsFalse(resultado, $"SinPermisos no deberia tener el permiso: {permiso}");
+        }
     }
     [TestMethod]
     public void Estudiante_AccesosRepetidos_DevuelveLaMismaInstancia()
