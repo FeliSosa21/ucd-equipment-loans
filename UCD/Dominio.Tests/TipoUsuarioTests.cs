@@ -5,36 +5,33 @@
 public sealed class TipoUsuarioTests
 {
     [TestMethod]
-
     public void TienePermiso_SinPermisosYConsultarCatalogo_DevuelveFalse()
     {
-        var usuario = TipoUsuario.SinPermisos;
+        var tipo = TipoUsuario.SinPermisos;
 
-        var resultado = usuario.TienePermiso(Permiso.ConsultarCatalogo);
+        var resultado = tipo.TienePermiso(Permiso.ConsultarCatalogo);
 
         Assert.IsFalse(resultado);
 
     }
-
     [TestMethod]
-
-    public void TienePermiso_EstudianteConsultarCatalogo_DevuelveTrue()
+    public void TienePermiso_EstudianteYConsultarCatalogo_DevuelveTrue()
     {
-        var usuario = TipoUsuario.Estudiante;
+        var tipo = TipoUsuario.Estudiante;
         
-        var resultado =  usuario.TienePermiso(Permiso.ConsultarCatalogo);
+        var resultado =  tipo.TienePermiso(Permiso.ConsultarCatalogo);
 
         Assert.IsTrue(resultado);
     }
-
     [TestMethod]
-
-    public void Estudiante_PermisosRepetidos_DeveuelveLaMismaInstancia()
+    public void Estudiante_AccesosRepetidos_DevuelveLaMismaInstancia()
     {
         var primero = TipoUsuario.Estudiante;
         var segundo = TipoUsuario.Estudiante;
 
         Assert.AreSame(primero, segundo);
     }
+    
+    
 
 }
