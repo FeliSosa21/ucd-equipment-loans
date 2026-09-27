@@ -20,10 +20,16 @@ public class TipoUsuario
 
     public static TipoUsuario FuncionarioCE { get; } = new TipoUsuario(new List<Permiso>
     {
-        Permiso.ConsultarCatalogo, Permiso.GestionarUnidades, Permiso.RealizarPrestamo, Permiso.RegistrarDevolucion
+        Permiso.ConsultarCatalogo, Permiso.GestionarUnidades, Permiso.RealizarPrestamo, 
+        Permiso.RegistrarDevolucion
     });
 
-    public static TipoUsuario Supervisor { get; } = new TipoUsuario(new List<Permiso>());
+    public static TipoUsuario Supervisor { get; } = new TipoUsuario(new List<Permiso>
+    {
+        Permiso.ConsultarCatalogo, Permiso.ConsultarHistorico, Permiso.GestionarCatalogo,
+        Permiso.GestionarUnidades, Permiso.EvaluarSolicitud, Permiso.RegistrarDevolucion,
+        Permiso.ConsultarPrestamos
+    });
 
 private TipoUsuario(List<Permiso> permisos)
     {
