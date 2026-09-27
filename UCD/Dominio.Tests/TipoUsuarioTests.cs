@@ -15,15 +15,6 @@ public sealed class TipoUsuarioTests
 
     }
     [TestMethod]
-    public void TienePermiso_EstudianteYConsultarCatalogo_DevuelveTrue()
-    {
-        var tipo = TipoUsuario.Estudiante;
-        
-        var resultado =  tipo.TienePermiso(Permiso.ConsultarCatalogo);
-
-        Assert.IsTrue(resultado);
-    }
-    [TestMethod]
     public void Estudiante_AccesosRepetidos_DevuelveLaMismaInstancia()
     {
         var primero = TipoUsuario.Estudiante;
@@ -40,6 +31,21 @@ public sealed class TipoUsuarioTests
         Assert.IsFalse(resultado);  
         
     }
+
+    [TestMethod]
+    [DataRow(Permiso.ConsultarCatalogo)]
+    [DataRow(Permiso.ConsultarDisponibilidad)]
+    [DataRow(Permiso.SolicitarPrestamo)]
+    [DataRow(Permiso.ConsultarMisSolicitudes)]
+    public void TienePermiso_EstudianteYPermisosPropios_DevuelveTrue(Permiso permiso)
+    {
+        var tipo = TipoUsuario.Estudiante;  
+        
+        var resultado = tipo.TienePermiso(permiso);
+        
+        Assert.IsTrue(resultado);
+    }
+    
 
 
 
