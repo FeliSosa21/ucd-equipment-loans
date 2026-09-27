@@ -84,6 +84,14 @@ public class Usuario
             throw new DominioException(
                 "El dominio del correo no puede empezar ni terminar con punto, ni tener puntos consecutivos");
         }
+
+        for (int i = 0; i < partesDominio.Length; i++)
+        {
+            if (partesDominio[i].StartsWith("-") || partesDominio[i].EndsWith("-"))
+            {
+                throw new DominioException("Las partes del dominio del correo no pueden comenzar ni terminar con guion");
+            }
+        }
     }
 
     private static void ValidarDominio(string dominio)
