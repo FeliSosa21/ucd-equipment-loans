@@ -337,6 +337,17 @@ public sealed class UsuarioTests
         Assert.IsNotNull(usuario);
     }
 
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void CrearUsuario_DNINulaVaciaOEspacios_LanzaExcepcion(string dni)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: dni));
+    }
+    
+    
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
