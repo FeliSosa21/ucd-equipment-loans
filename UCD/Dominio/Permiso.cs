@@ -12,5 +12,6 @@ public enum Permiso
     RegistrarDevolucion,
     GestionarCatalogo,
     EvaluarSolicitud,
-    ConsultarPrestamos
+    ConsultarPrestamos,
+    GestionarUsuarios
 }

@@ -73,6 +73,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.GestionarCatalogo)]
     [DataRow(Permiso.EvaluarSolicitud)]
     [DataRow(Permiso.ConsultarPrestamos)]
+    [DataRow(Permiso.GestionarUsuarios)]
     public void TienePermiso_FuncionarioCEYPermisosAjenos_DevuelveFalse(Permiso permiso)
     {
         var tipo = TipoUsuario.FuncionarioCE;
@@ -90,6 +91,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.GestionarCatalogo)]
     [DataRow(Permiso.EvaluarSolicitud)]
     [DataRow(Permiso.ConsultarPrestamos)]
+    [DataRow(Permiso.GestionarUsuarios)]
     public void TienePermiso_EstudianteYPermisosAjenos_DevuelveFalse(Permiso permiso)
     {
         var tipo = TipoUsuario.Estudiante;
@@ -106,6 +108,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.GestionarCatalogo)]
     [DataRow(Permiso.EvaluarSolicitud)]
     [DataRow(Permiso.ConsultarPrestamos)]
+    [DataRow(Permiso.GestionarUsuarios)]
     public void TienePermiso_DocenteYPermisosAjenos_DevuelveFalse(Permiso permiso)
     {
         var tipo = TipoUsuario.Docente;
@@ -123,6 +126,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.EvaluarSolicitud)]
     [DataRow(Permiso.RegistrarDevolucion)]
     [DataRow(Permiso.ConsultarPrestamos)]
+    
     public void TienePermiso_SupervisorYPermisosPropios_DevuelveTrue(Permiso permiso)
     {
         var tipo = TipoUsuario.Supervisor;
@@ -137,6 +141,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.SolicitarPrestamo)]
     [DataRow(Permiso.ConsultarMisSolicitudes)] 
     [DataRow(Permiso.RealizarPrestamo)]
+    [DataRow(Permiso.GestionarUsuarios)]
     public void TienePermiso_SupervisorYPermisosAjenos_DevuelveFalse(Permiso permiso)
     {
         var tipo = TipoUsuario.Supervisor;
