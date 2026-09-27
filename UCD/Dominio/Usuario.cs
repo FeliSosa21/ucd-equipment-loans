@@ -104,10 +104,16 @@ public class Usuario
         string[] partesDominio = dominio.Split('.');
         ValidarPartesDominio(partesDominio);
         string tld = partesDominio[^1];
+        
 
         if (tld.Length < 2 || tld.Length > 63)
         {
             throw new DominioException("El TLD del correo debe tener entre 2 y 63 caracteres");
+        }
+
+        if (!tld.Any(char.IsLetter))
+        {
+            throw new DominioException("El TLD del correo debe contener al menos una letra");
         }
     }
 
