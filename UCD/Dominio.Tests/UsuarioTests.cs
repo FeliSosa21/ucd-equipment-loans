@@ -312,6 +312,12 @@ public sealed class UsuarioTests
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(contrasena: "hola4444"));
     }
+    [TestMethod]
+    public void CrearUsuario_ContrasenaSinMinusccula_LanzaExcepcion()
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(contrasena: "HOLA4444"));
+    }
+    
 
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
