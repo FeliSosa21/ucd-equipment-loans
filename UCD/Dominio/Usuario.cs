@@ -194,6 +194,11 @@ public class Usuario
         {
             throw new DominioException("La contrasena debe tener mas de  8 caracteres");
         }
+
+        if (!contrasena.Any(char.IsUpper))
+        {
+            throw new DominioException("La contrasena debe tener una mayuscula");
+        }
     }
 
     private static bool EsCaracterEspecial(char c)
