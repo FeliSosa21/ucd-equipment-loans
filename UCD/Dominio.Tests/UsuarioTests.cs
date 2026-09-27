@@ -322,6 +322,16 @@ public sealed class UsuarioTests
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(contrasena: "HOLAchau"));
     }
+    
+    [TestMethod]
+    [DataRow("Abcdefg1")]
+    [DataRow("Abc123!@")]
+    [DataRow("VivalaOrt2026")]
+    public void CrearUsuario_ContrasenaValida_SeCrea(string contrasena)
+    {
+        Usuario usuario = CrearUsuario(contrasena: contrasena);
+        Assert.IsNotNull(usuario);
+    }
 
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
