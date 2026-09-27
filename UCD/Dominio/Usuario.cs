@@ -21,7 +21,7 @@ public class Usuario
         ValidarNombreOApellido(apellido, "apellido");
         ValidarCorreo(correo);
         ValidarFormatoContrasena(contrasena);
-        
+
         Dni = dni;
         Nombre = nombre;
         Apellido = apellido;

@@ -292,11 +292,12 @@ public sealed class UsuarioTests
 
         Assert.AreEqual(correo, usuario.Correo);
     }
+
     [TestMethod]
     [DataRow(null)]
     [DataRow("")]
     [DataRow("   ")]
-    public void CrearUsuario_ContrasenaNulaVaciaOEspaciones_LanzaExcepcion(string contrasena)
+    public void CrearUsuario_ContrasenaNulaVaciaOEspacios_LanzaExcepcion(string? contrasena)
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(contrasena: contrasena));
     }
@@ -312,24 +313,27 @@ public sealed class UsuarioTests
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(contrasena: "hola4444"));
     }
+
     [TestMethod]
-    public void CrearUsuario_ContrasenaSinMinusccula_LanzaExcepcion()
+    public void CrearUsuario_ContrasenaSinMinuscula_LanzaExcepcion()
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(contrasena: "HOLA4444"));
     }
+
     [TestMethod]
-    public void CrearUsuario_ContrasenaSinNumeros_LanzaExcepcion()
+    public void CrearUsuario_ContrasenaSinNumero_LanzaExcepcion()
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(contrasena: "HOLAchau"));
     }
-    
+
     [TestMethod]
     [DataRow("Abcdefg1")]
     [DataRow("Abc123!@")]
     [DataRow("VivalaOrt2026")]
-    public void CrearUsuario_ContrasenaValida_SeCrea(string contrasena)
+    public void CrearUsuario_ContrasenaValida_NoLanzaExcepcion(string contrasena)
     {
         Usuario usuario = CrearUsuario(contrasena: contrasena);
+
         Assert.IsNotNull(usuario);
     }
 
