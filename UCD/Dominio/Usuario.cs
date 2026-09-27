@@ -217,7 +217,15 @@ public class Usuario
     {
         if (string.IsNullOrWhiteSpace(dni))
         {
-            throw new DominioException("La dni no puede ser vacia");
+            throw new DominioException("EL DNI no puede ser vacio");
+        }
+
+        foreach (char c in dni)
+        {
+            if (c < '0' && c > '9')
+            {
+                throw new DominioException("EL DNI solo puede contener numeros");
+            }
         }
     }
 

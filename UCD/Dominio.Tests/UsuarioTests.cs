@@ -345,7 +345,17 @@ public sealed class UsuarioTests
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: dni));
     }
-    
+
+    [TestMethod]
+    [DataRow("1234567a")]
+    [DataRow("a2345672")]
+    [DataRow("1234.567")]
+    [DataRow("12345-72")]
+    [DataRow("1234 567")]
+    public void CrearUsuario_DniConCarecteresNoNumericos_LanzaExcepcion(string dni)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: dni));
+    }
     
 
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
