@@ -19,7 +19,7 @@ public class Usuario
         ValidarNombreOApellido(nombre, "nombre");
         ValidarNombreOApellido(apellido, "apellido");
         ValidarCorreo(correo);
-
+        
         Dni = dni;
         Nombre = nombre;
         Apellido = apellido;
@@ -181,6 +181,8 @@ public class Usuario
             }
         }
     }
+
+    
 
     private static bool EsCaracterEspecial(char c)
     {

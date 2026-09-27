@@ -292,6 +292,14 @@ public sealed class UsuarioTests
 
         Assert.AreEqual(correo, usuario.Correo);
     }
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void CrearUsuario_ContrasenaNulaVaciaOEspaciones_LanzaExcepcion(string contrasena)
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => CrearUsuario(contrasena: contrasena));
+    }
 
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)

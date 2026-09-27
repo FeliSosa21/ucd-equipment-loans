@@ -115,7 +115,6 @@ public class UnidadFisica
 
         return letras.All(char.IsUpper) && numeros.All(char.IsDigit);
     }
-
     
 }
 
