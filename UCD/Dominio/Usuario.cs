@@ -9,6 +9,7 @@ public class Usuario
     private const int LargoMinimoContrasena = 8;
     private const int LargoMinimoDni = 7 ;
     private const int LargoMaximoDni = 8;
+    private static readonly int [] PesosCedula = { 2, 9, 8, 7, 6, 3, 4 };
 
     public string Dni { get; private set; }
     public string Nombre { get; private set; }
@@ -215,6 +216,8 @@ public class Usuario
         }
     }
 
+    
+
     private static void ValidarDni(string dni)
     {
         if (string.IsNullOrWhiteSpace(dni))
@@ -234,6 +237,20 @@ public class Usuario
         {
             throw new DominioException("El DNI debe tener entre {LargoMinimoDni} y {LargoMaximoDni} digitos");
         }
+        int verificador = dni[^1] - '0';
+        int suma = 0;
+        for (int i = 0; i < dni.Length - 1; i++)
+        {
+            suma = suma + (dni[i] - '0')* PesosCedula[i];
+        }
+
+        int numEsperado = (10 - suma % 10) % 10;
+        if (numEsperado != verificador)
+        {
+            throw new DominioException("El digito verificador del DNI es incorrecto");
+        }
+
+
     }
 
     private static bool EsCaracterEspecial(char c)
