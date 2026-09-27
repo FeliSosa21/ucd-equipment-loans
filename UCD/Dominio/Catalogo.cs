@@ -6,13 +6,14 @@ public class Catalogo
     private const int LargoMaximoNombre = 80;
         
     public string Nombre { get; private set; }
+    public List<TipoEquipamiento> Tipos { get; private set; } = new();
 
     public Catalogo(string nombre)
     {
         ValidarNombre(nombre);
         Nombre = nombre;
     }
-
+    
     public void ModificarNombre(string nombre)
     {
         ValidarNombre(nombre);
@@ -30,9 +31,11 @@ public class Catalogo
         {
             throw new DominioException($"El nombre del catalogo debe tener al menos {LargoMinimoNombre} caracteres");
         }
+
         if (nombre.Length > LargoMaximoNombre)
         {
             throw new DominioException($"El nombre del catalogo debe tener como maximo {LargoMaximoNombre} caracteres");
         }
     }
+    
 }
