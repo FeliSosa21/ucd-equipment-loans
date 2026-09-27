@@ -72,7 +72,12 @@ public class Usuario
 
         if (partes[0] == "")
         {
-            throw new DominioException("El correo previo al @ no puede estar vacio");
+            throw new DominioException("La parte local del correo no puede estar vacio");
+        }
+
+        if (partes[1] == "")
+        {
+            throw new DominioException("El dominio del correo  puede estar vacio");
         }
 
         if (correo.Contains(" "))
