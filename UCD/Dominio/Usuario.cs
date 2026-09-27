@@ -6,35 +6,35 @@ public class Usuario
     public string Nombre { get; private set; }
     public string Apellido { get; private set; }
     public string Correo { get; private set; }
-    private string Contrasena { get;  set; }
+    private string Contrasena { get; set; }
     public EstadoUsuario Estado { get; private set; }
-    
+
 
     public Usuario(string dni, string nombre, string apellido, string correo, string contrasena)
     {
         Dni = dni;
-        
-        ValidarNombreOApellido(nombre,"nombre");
+
+        ValidarNombreOApellido(nombre, "nombre");
         Nombre = nombre;
-        
-        ValidarNombreOApellido(apellido,"apellido");
+
+        ValidarNombreOApellido(apellido, "apellido");
         Apellido = apellido;
 
         ValidarCorreo(correo);
         Correo = correo;
-        
+
         Contrasena = contrasena;
         Estado = EstadoUsuario.Activo;
     }
 
-    
+
     private static void ValidarNombreOApellido(string valor, string campo)
     {
         if (string.IsNullOrWhiteSpace(valor))
         {
             throw new DominioException($"El {campo} no puede ser vacío");
         }
-        
+
         if (valor.Length < 2)
         {
             throw new DominioException($"El {campo} debe tener mas de 1 caracter");
@@ -44,14 +44,13 @@ public class Usuario
         {
             throw new DominioException($"El {campo} debe tener como maximo 50 caracteres");
         }
-        
     }
 
     private static bool EsCaracterEspecial(char c)
     {
         return c == '-' || c == '.' || c == '_';
     }
-    
+
     private static void ValidarCorreo(string correo)
     {
         if (string.IsNullOrWhiteSpace(correo))
@@ -64,21 +63,22 @@ public class Usuario
             throw new DominioException("Correo debe tener @");
         }
 
-        string [] partes = correo.Split('@');
+        string[] partes = correo.Split('@');
         var parteLocal = partes[0];
-        if (partes.Length != 2 )
+        var parteDominio = partes[1];
+        if (partes.Length != 2)
         {
             throw new DominioException("El correo no puede tener 2 arrobas");
         }
 
         if (parteLocal == "")
         {
-            throw new DominioException("La parte local del correo no puede estar vacio");
+            throw new DominioException("La parte local del correo no puede estar vacia");
         }
 
-        if (partes[1] == "")
+        if (parteDominio == "")
         {
-            throw new DominioException("El dominio del correo  puede estar vacio");
+            throw new DominioException("El dominio del correo no puede estar vacio");
         }
 
         if (correo.Contains(" "))
@@ -89,21 +89,18 @@ public class Usuario
         for (int i = 0; i < correo.Length; i++)
         {
             if (correo[i] == '@') break;
-                
-            if (EsCaracterEspecial(correo[i]) && EsCaracterEspecial(correo[i+1]))
+
+            if (EsCaracterEspecial(correo[i]) && EsCaracterEspecial(correo[i + 1]))
             {
-                    throw new DominioException("El correo no puede tener 2 caracteres especiales consecutivos");
+                throw new DominioException("El correo no puede tener 2 caracteres especiales consecutivos");
             }
         }
 
         if (EsCaracterEspecial(parteLocal[0]) || EsCaracterEspecial(parteLocal[^1]))
-           
+
         {
-            throw new DominioException("La parte local del correo no puede comenzar ni terminar" +
-                                       "con un caracter especial");
+            throw new DominioException(
+                "La parte local del correo no puede comenzar ni terminar con un caracter especial");
         }
-            
     }
-    
-    
 }

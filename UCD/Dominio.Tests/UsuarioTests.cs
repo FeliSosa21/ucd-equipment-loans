@@ -130,6 +130,12 @@ public sealed class UsuarioTests
         Assert.ThrowsException<DominioException>(() =>CrearUsuario(correo: correo));
     }
 
+    [TestMethod]
+    public void CrarUsuario_CorreoDominioSinPunt0_LanzaExcepcion()
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: "felipe@hotmail"));
+    }
+
     private static Usuario CrearUsuario(string nombre = NombreValido, string apellido = ApellidoValido,
         string dni = DniValido, string correo = CorreoValido, string contrasena = ContrasenaValida)
     {
