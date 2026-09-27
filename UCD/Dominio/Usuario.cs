@@ -115,13 +115,7 @@ public class Usuario
             throw new DominioException("El dominio del correo no puede estar vacio");
         }
 
-        foreach (char c in dominio)
-        {
-            if (!EsLetraODigitoAscii(c) && c != '-' && c != '.')
-            {
-                throw new DominioException("El dominio del correo no puede contener caracteres invalidos");
-            }
-        }
+        ValidarCaracteresDominio(dominio);
 
         string[] partesDominio = dominio.Split('.');
 
@@ -132,24 +126,13 @@ public class Usuario
         ValidarTld(tld);
     }
 
-    private static void ValidarTld(string tld)
+    private static void ValidarCaracteresDominio(string dominio)
     {
-        if (tld.Length < LargoMinimoTld || tld.Length > LargoMaximoTld)
+        foreach (char c in dominio)
         {
-            throw new DominioException(
-                $"El TLD del correo debe tener entre {LargoMinimoTld} y {LargoMaximoTld} caracteres");
-        }
-
-        if (!tld.Any(char.IsLetter))
-        {
-            throw new DominioException("El TLD del correo debe contener al menos una letra");
-        }
-
-        foreach (char c in tld)
-        {
-            if (!EsLetraODigitoAscii(c))
+            if (!EsLetraODigitoAscii(c) && c != '-' && c != '.')
             {
-                throw new DominioException("El TLD del correo solo puede contener letras y numeros");
+                throw new DominioException("El dominio del correo no puede contener caracteres invalidos");
             }
         }
     }
@@ -173,6 +156,28 @@ public class Usuario
             {
                 throw new DominioException(
                     "Las partes del dominio del correo no pueden comenzar ni terminar con guion");
+            }
+        }
+    }
+
+    private static void ValidarTld(string tld)
+    {
+        if (tld.Length < LargoMinimoTld || tld.Length > LargoMaximoTld)
+        {
+            throw new DominioException(
+                $"El TLD del correo debe tener entre {LargoMinimoTld} y {LargoMaximoTld} caracteres");
+        }
+
+        if (!tld.Any(char.IsLetter))
+        {
+            throw new DominioException("El TLD del correo debe contener al menos una letra");
+        }
+
+        foreach (char c in tld)
+        {
+            if (!EsLetraODigitoAscii(c))
+            {
+                throw new DominioException("El TLD del correo solo puede contener letras y numeros");
             }
         }
     }

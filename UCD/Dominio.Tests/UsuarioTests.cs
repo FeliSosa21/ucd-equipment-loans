@@ -29,7 +29,7 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
-    public void CrearUsuario_NombreConUnCaracter_LanzaExcepcion()
+    public void CrearUsuario_NombreCon1Caracter_LanzaExcepcion()
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(nombre: "F"));
     }
@@ -37,9 +37,9 @@ public sealed class UsuarioTests
     [TestMethod]
     public void CrearUsuario_NombreConMasDe50Caracteres_LanzaExcepcion()
     {
-        string nombreExtenso = new string('A', 51);
+        string nombreLargo = new string('A', 51);
 
-        Assert.ThrowsException<DominioException>(() => CrearUsuario(nombre: nombreExtenso));
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(nombre: nombreLargo));
     }
 
     [TestMethod]
@@ -81,7 +81,7 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
-    public void CrearUsuario_ApellidoConUnCaracter_LanzaExcepcion()
+    public void CrearUsuario_ApellidoCon1Caracter_LanzaExcepcion()
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(apellido: "S"));
     }
@@ -134,9 +134,9 @@ public sealed class UsuarioTests
     [TestMethod]
     public void CrearUsuario_CorreoCon2Arrobas_LanzaExcepcion()
     {
-        string correoCon2Arroba = "feli@peho@tmail.com";
+        string correoCon2Arrobas = "feli@peho@tmail.com";
 
-        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correoCon2Arroba));
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correoCon2Arrobas));
     }
 
     [TestMethod]
@@ -235,13 +235,13 @@ public sealed class UsuarioTests
     [TestMethod]
     [DataRow("felipe@hotmail.c")]
     [DataRow("felipe@mail.ort.edu.u")]
-    public void CrearUsuario_CorreoConTLDMuyCorto_LanzaExcepcion(string correo)
+    public void CrearUsuario_CorreoConTLDDeMenosDe2Caracteres_LanzaExcepcion(string correo)
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correo));
     }
 
     [TestMethod]
-    public void CrearUsuario_CorreoConTLDMuyLargo_LanzaExcepcion()
+    public void CrearUsuario_CorreoConTLDDeMasDe63Caracteres_LanzaExcepcion()
     {
         string tld = new string('a', 64);
         string correoLargo = "felipe@hotmail." + tld;
@@ -286,7 +286,6 @@ public sealed class UsuarioTests
     [DataRow("felipe@MAIL.COM")]
     [DataRow("felipe@hotmail.uy")]
     [DataRow("felipe@hotmail.c0m")]
-    
     public void CrearUsuario_CorreoValido_SeCrea(string correo)
     {
         Usuario usuario = CrearUsuario(correo: correo);
