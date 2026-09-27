@@ -189,6 +189,11 @@ public class Usuario
         {
             throw new DominioException("La contrasena no puede ser vacia");
         }
+
+        if (contrasena.Length < 8)
+        {
+            throw new DominioException("La contrasena debe tener mas de  8 caracteres");
+        }
     }
 
     private static bool EsCaracterEspecial(char c)
