@@ -6,5 +6,8 @@ public enum Permiso
     ConsultarHistorico,
     ConsultarDisponibilidad,
     SolicitarPrestamo,
-    ConsultarMisSolicitudes
+    ConsultarMisSolicitudes,
+    GestionarUnidades,
+    RealizarPrestamo,
+    RegistrarDevolucion
 }
