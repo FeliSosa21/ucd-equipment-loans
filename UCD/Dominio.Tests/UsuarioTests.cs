@@ -29,6 +29,14 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void CrearUsuario_Autorregistro_NoDebeCambiarContrasena()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.IsFalse(usuario.DebeCambiarContrasena);
+    }
+
+    [TestMethod]
     public void CrearUsuario_NombreCon1Caracter_LanzaExcepcion()
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(nombre: "F"));
@@ -396,14 +404,6 @@ public sealed class UsuarioTests
         Usuario usuario = CrearUsuario(dni: dni);
 
         Assert.AreEqual(dni, usuario.Dni);
-    }
-
-    [TestMethod]
-    public void CrearUsuario_Autorregistro_NoDebeCambiarContrasena()
-    {
-        Usuario usuario = CrearUsuario();
-        
-        Assert.IsFalse(usuario.DebeCambiarContrasena);
     }
 
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
