@@ -359,6 +359,7 @@ public sealed class UsuarioTests
 
     [TestMethod]
     [DataRow("123456")]
+    [DataRow("1234560")]
     [DataRow("123456789")]
     public void CrearUsuario_DniConLargoInvalidos_LanzaExcepcion(string dni)
     {
@@ -369,7 +370,7 @@ public sealed class UsuarioTests
     [DataRow("12345678")]
     [DataRow("45678901")]
     [DataRow("30000005")]
-    [DataRow("1234562")]
+    [DataRow("01234562")]
     public void CrearUsuario_DniConDigitoVerificadorIncorrectos_LanzaExcepcion(string dni)
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: dni));
