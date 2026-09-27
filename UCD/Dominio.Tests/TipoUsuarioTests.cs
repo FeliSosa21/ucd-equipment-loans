@@ -122,6 +122,20 @@ public sealed class TipoUsuarioTests
         
         Assert.IsTrue(resultado);
     }
-    
+
+    [TestMethod]
+    [DataRow(Permiso.ConsultarDisponibilidad)]
+    [DataRow(Permiso.SolicitarPrestamo)]
+    [DataRow(Permiso.ConsultarMisSolicitudes)] 
+    [DataRow(Permiso.RealizarPrestamo)]
+    public void TienePermiso_SupervisorYPermisosAjenos_DevuelveFalse(Permiso permiso)
+    {
+        var tipo = TipoUsuario.Supervisor;
+        
+        var resultado = tipo.TienePermiso(permiso);
+        
+        Assert.IsFalse(resultado);
+        
+    }
 
 }
