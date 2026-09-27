@@ -3,5 +3,8 @@
 public enum Permiso
 {
     ConsultarCatalogo,
-    ConsultarHistorico
+    ConsultarHistorico,
+    ConsultarDisponibilidad,
+    SolicitarPrestamo,
+    ConsultarMisSolicitudes
 }

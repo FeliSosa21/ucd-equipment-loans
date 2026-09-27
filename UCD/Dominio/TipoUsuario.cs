@@ -5,7 +5,7 @@ public class TipoUsuario
     private readonly List<Permiso> permisos;
     
     public static TipoUsuario SinPermisos { get; } = new TipoUsuario(new List<Permiso>());
-    public static TipoUsuario Estudiante { get; } = new TipoUsuario(new List<Permiso> { Permiso.ConsultarCatalogo });
+    public static TipoUsuario Estudiante { get; } = new TipoUsuario(new List<Permiso> { Permiso.ConsultarCatalogo, Permiso.ConsultarDisponibilidad, Permiso.SolicitarPrestamo, Permiso.ConsultarMisSolicitudes});
 
     private TipoUsuario(List<Permiso> permisos)
     {
