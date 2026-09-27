@@ -1,6 +1,6 @@
 namespace Dominio.Tests;
-[TestClass]
 
+[TestClass]
 public sealed class UsuarioTests
 {
     private const string NombreValido = "Felipe";
@@ -8,13 +8,12 @@ public sealed class UsuarioTests
     private const string DniValido = "12345672";
     private const string CorreoValido = "felipeservetto@hotmail.com";
     private const string ContrasenaValida = "VivalaOrt2026";
-    
-    
+
     [TestMethod]
     public void CrearUsuario_DatosValidos_QuedaActivo()
     {
         Usuario usuario = CrearUsuario();
-        
+
         Assert.AreEqual(EstadoUsuario.Activo, usuario.Estado);
     }
 
@@ -22,86 +21,128 @@ public sealed class UsuarioTests
     public void CrearUsuario_DatosValidos_AsignaDatosCorrectamente()
     {
         Usuario usuario = CrearUsuario();
-        
+
         Assert.AreEqual(NombreValido, usuario.Nombre);
         Assert.AreEqual(ApellidoValido, usuario.Apellido);
         Assert.AreEqual(DniValido, usuario.Dni);
         Assert.AreEqual(CorreoValido, usuario.Correo);
-        
     }
 
     [TestMethod]
     public void CrearUsuario_NombreConUnCaracter_LanzaExcepcion()
     {
-        
         Assert.ThrowsException<DominioException>(() => CrearUsuario(nombre: "F"));
     }
-    
+
     [TestMethod]
     public void CrearUsuario_NombreConMasDe50Caracteres_LanzaExcepcion()
     {
         string nombreExtenso = new string('A', 51);
+
         Assert.ThrowsException<DominioException>(() => CrearUsuario(nombre: nombreExtenso));
-    }
-    
-    [TestMethod]
-    public void CrearUsuario_NombreVacioONulo_LanzaExcepcion()
-    {
-        Assert.ThrowsException<DominioException>(() => CrearUsuario(nombre: null));
     }
 
     [TestMethod]
-    public void CrearUsuario_ApellidoNuloOVacio_LanzaExcepcion()
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void CrearUsuario_NombreVacioONulo_LanzaExcepcion(string? nombre)
     {
-        Assert.ThrowsException<DominioException>(() => CrearUsuario(apellido: null));
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(nombre: nombre));
+    }
+
+    [TestMethod]
+    public void CrearUsuario_NombreCon2Caracteres_SeCrea()
+    {
+        string nombre = "aa";
+        Usuario usuario = CrearUsuario(nombre: nombre);
+        Assert.AreEqual(nombre, usuario.Nombre);
+    }
+
+    [TestMethod]
+    public void CrearUsuario_NombreCon50Caracteres_SeCrea()
+    {
+        string nombre = new string('A', 50);
+        Usuario usuario = CrearUsuario(nombre: nombre);
+        Assert.AreEqual(nombre, usuario.Nombre);
+    }
+
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void CrearUsuario_ApellidoNuloOVacio_LanzaExcepcion(string? apellido)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(apellido: apellido));
     }
 
     [TestMethod]
     public void CrearUsuario_ApellidoConUnCaracter_LanzaExcepcion()
     {
-        Assert.ThrowsException<DominioException>(() => CrearUsuario(apellido:"S"));
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(apellido: "S"));
     }
+
     [TestMethod]
     public void CrearUsuario_ApellidoCon51Caracteres_LanzaExcepcion()
     {
         string apellidoLargo = new string('A', 51);
-        Assert.ThrowsException<DominioException>(() => CrearUsuario(apellido:apellidoLargo));
+
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(apellido: apellidoLargo));
     }
 
     [TestMethod]
-    public void CrearUsuario_CorreoNuloOVacio_LanzaExcepcion()
+    public void CrearUsuario_ApellidoCon2Caracteres_SeCrea()
     {
-        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: null));
+        string apellido = "aa";
+        Usuario usuario = CrearUsuario(apellido: apellido);
+        Assert.AreEqual(apellido, usuario.Apellido);
     }
 
     [TestMethod]
-    public void CreaUsuario_CorreoSinArroba_LanzaExcepcion()
+    public void CrearUsuario_ApellidoCon50Caracteres_SeCrea()
+    {
+        string apellido = new string('A', 50);
+        Usuario usuario = CrearUsuario(apellido: apellido);
+        Assert.AreEqual(apellido, usuario.Apellido);
+    }
+
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void CrearUsuario_CorreoNuloOVacio_LanzaExcepcion(string? correo)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correo));
+    }
+
+    [TestMethod]
+    public void CrearUsuario_CorreoSinArroba_LanzaExcepcion()
     {
         string correoSinArroba = "felipehotmail.com";
-        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo:correoSinArroba));
+
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correoSinArroba));
     }
 
     [TestMethod]
     public void CrearUsuario_CorreoCon2Arrobas_LanzaExcepcion()
     {
         string correoCon2Arroba = "feli@peho@tmail.com";
-        Assert.ThrowsException<DominioException>(() =>CrearUsuario(correo: correoCon2Arroba));
-        
+
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correoCon2Arroba));
     }
 
     [TestMethod]
     public void CrearUsuario_CorreoSinParteLocal_LanzaExcepcion()
     {
-        Assert.ThrowsException<DominioException>(() =>CrearUsuario(correo:"@hotmail.com"));
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: "@hotmail.com"));
     }
 
     [TestMethod]
     public void CrearUsuario_CorreoConEspacios_LanzaExcepcion()
     {
-        Assert.ThrowsException<DominioException>(() =>CrearUsuario(correo:"fe lipe@hotmail.com"));
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: "fe lipe@hotmail.com"));
     }
-    
-    
+
     [TestMethod]
     [DataRow("feli..pe@hotmail.com")]
     [DataRow("feli._pe@hotmail.com")]
@@ -112,9 +153,9 @@ public sealed class UsuarioTests
     [DataRow("feli-.pe@hotmail.com")]
     [DataRow("feli-_pe@hotmail.com")]
     [DataRow("feli--pe@hotmail.com")]
-    public void CrearUsuario_CorreoConCaracteresConsecutivos_LanzaExcepcion(string correoEspecial)
+    public void CrearUsuario_CorreoConCaracteresConsecutivos_LanzaExcepcion(string correo)
     {
-        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correoEspecial));
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correo));
     }
 
     [TestMethod]
@@ -122,16 +163,21 @@ public sealed class UsuarioTests
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: "felipe@"));
     }
+
     [TestMethod]
     [DataRow(".feli@gmail.com")]
+    [DataRow("_feli@gmail.com")]
+    [DataRow("-feli@gmail.com")]
     [DataRow("felipe.@hotmail.com")]
-    public void CrearUsuario_CorreoTerminaOComienzaEnCaracterEspecial(string correo)
+    [DataRow("felipe_@hotmail.com")]
+    [DataRow("felipe-@hotmail.com")]
+    public void CrearUsuario_CorreoTerminaOComienzaEnCaracterEspecial_LanzaExcepcion(string correo)
     {
-        Assert.ThrowsException<DominioException>(() =>CrearUsuario(correo: correo));
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correo));
     }
 
     [TestMethod]
-    public void CrarUsuario_CorreoDominioSinPunt0_LanzaExcepcion()
+    public void CrearUsuario_CorreoDominioSinPunto_LanzaExcepcion()
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: "felipe@hotmail"));
     }
@@ -140,7 +186,7 @@ public sealed class UsuarioTests
     [DataRow("felipe@hotmail..com")]
     [DataRow("felipe@hotmail.com.")]
     [DataRow("felipe@.hotmail.com")]
-    public void CrearUsuario_CorreoConDosPuntos_LanzaExcepcion(string correo)
+    public void CrearUsuario_CorreoConDominioMalFormado_LanzaExcepcion(string correo)
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correo));
     }
@@ -159,18 +205,6 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
-    [DataRow("feli.pe@hotmail.com")]
-    [DataRow("feli_pe@hotmail.com")]
-    [DataRow("feli-pe@hotmail.com")]
-    [DataRow("f.e_l-i@hotmail.com")]
-    [DataRow("felipe@mail.ort.edu.uy")]
-    [DataRow("felipe@mi-dominio.com")]
-    public void CrearUsuario_CorreoValidoConCaracteresEspeciales_SeCrea(string correo)
-    {
-        Usuario usuario = CrearUsuario(correo: correo);
-        Assert.AreEqual(correo, usuario.Correo);
-    }
-    [TestMethod]
     [DataRow("felipe@hot_mail.com")]
     [DataRow("felipe@hot#mail.com")]
     [DataRow("felipe@hot!mail.com")]
@@ -182,45 +216,52 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
-    [DataRow("felipe@dominio123.com")]
-    [DataRow("felipe@a-b-c.com")]
-    [DataRow("felipe@MAIL.COM")]
-    public void CrearUsuario_CorreoValidoConCaracteresEspecialesEnDominio_SeCrea(string correo)
-    {
-        Usuario usuario = CrearUsuario(correo: correo);
-        Assert.AreEqual(correo, usuario.Correo);
-    }
     [DataRow("felipe@hotmail.c")]
     [DataRow("felipe@mail.ort.edu.u")]
-    [TestMethod]
-    public void CrearUsuario_ConTDLMuyCorto_LanzaExcepcion(string correo)
+    public void CrearUsuario_ConTLDMuyCorto_LanzaExcepcion(string correo)
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correo));
     }
 
     [TestMethod]
-    public void CrearUsuario_ConTDLMuyCorto_SeCrea()
-    {
-        var correo = "felipe@hotmail.uy";
-        Usuario usuario = CrearUsuario(correo:correo);
-        Assert.AreEqual(correo, usuario.Correo);
-    }
-    
-    [TestMethod]
     public void CrearUsuario_ConTLDMuyLargo_LanzaExcepcion()
     {
         string tld = new string('a', 64);
         string correoLargo = "felipe@hotmail." + tld;
+
         Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correoLargo));
     }
-    
-    
 
+    [TestMethod]
+    public void CrearUsuario_CorreoConTLDDe63Caracteres_SeCrea()
+    {
+        string tld = new string('a', 63);
+        string correo = "felipe@hotmail." + tld;
+        Usuario usuario = CrearUsuario(correo: correo);
+        Assert.AreEqual(correo, usuario.Correo);
+    }
+
+    [TestMethod]
+    [DataRow("feli.pe@hotmail.com")]
+    [DataRow("feli_pe@hotmail.com")]
+    [DataRow("feli-pe@hotmail.com")]
+    [DataRow("f.e_l-i@hotmail.com")]
+    [DataRow("felipe@mail.ort.edu.uy")]
+    [DataRow("felipe@mi-dominio.com")]
+    [DataRow("felipe@dominio123.com")]
+    [DataRow("felipe@a-b-c.com")]
+    [DataRow("felipe@MAIL.COM")]
+    [DataRow("felipe@hotmail.uy")]
+    public void CrearUsuario_CorreoValido_SeCrea(string correo)
+    {
+        Usuario usuario = CrearUsuario(correo: correo);
+
+        Assert.AreEqual(correo, usuario.Correo);
+    }
 
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
-        return new Usuario(dni!, nombre!, apellido!, correo!, contrasena!); 
+        return new Usuario(dni!, nombre!, apellido!, correo!, contrasena!);
     }
-
 }
