@@ -375,6 +375,18 @@ public sealed class UsuarioTests
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: dni));
     }
+
+    [TestMethod]
+    [DataRow("12345672")]
+    [DataRow("45678905")]
+    [DataRow("30000004")]
+    [DataRow("01234561")]
+    [DataRow("99999999")]
+    public void CrearUsuario_DniValido_NoLanzaExcepcion(string dni)
+    {
+       Usuario usuario = CrearUsuario(dni: dni);
+       Assert.AreEqual(dni, usuario.Dni);
+    }
     
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
