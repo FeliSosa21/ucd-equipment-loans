@@ -145,6 +145,21 @@ public sealed class UsuarioTests
         Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correo));
     }
 
+    [TestMethod]
+    [DataRow("feli#pe@hotmail.com")]
+    [DataRow("feli!pe@hotmail.com")]
+    [DataRow("feli+pe@hotmail.com")]
+    [DataRow("feli,pe@hotmail.com")]
+    [DataRow("feli(pe@hotmail.com")]
+    [DataRow("feli/pe@hotmail.com")]
+    [DataRow("feliñe@hotmail.com")]
+    public void CrearUsuario_CorreoConCaracterInvalidoEnParteLocal_LanzaExcepcion(string correo)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correo));
+    }
+    
+    
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
