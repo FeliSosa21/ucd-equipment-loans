@@ -146,6 +146,19 @@ public sealed class TipoUsuarioTests
         Assert.IsFalse(resultado);
         
     }
+
+    [TestMethod]
+    public void TienePermiso_AdministradorYCualquierPermiso_DevuelveTrue()
+    {
+        var tipo = TipoUsuario.Administrador;
+
+        foreach (var permiso in Enum.GetValues<Permiso>())
+        {
+            var resultado = tipo.TienePermiso(permiso);
+
+            Assert.IsTrue(resultado, $"El administrador deberia tener {permiso}");
+        }
+    }
     
 
 }

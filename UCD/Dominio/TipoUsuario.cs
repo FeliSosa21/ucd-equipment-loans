@@ -42,6 +42,8 @@ public class TipoUsuario
         Permiso.ConsultarPrestamos
     });
 
+    public static TipoUsuario Administrador { get; } = new TipoUsuario(new HashSet<Permiso>());
+
 private TipoUsuario(HashSet<Permiso> permisos)
     {
         this.permisos = permisos;
