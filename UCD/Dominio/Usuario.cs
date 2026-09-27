@@ -204,6 +204,11 @@ public class Usuario
         {
             throw new DominioException("La contrasena debe tener una minuscula");
         }
+
+        if (!contrasena.Any(char.IsDigit))
+        {
+            throw new DominioException("La contrasena debe contener al menos un numero");
+        }
         
     }
 
