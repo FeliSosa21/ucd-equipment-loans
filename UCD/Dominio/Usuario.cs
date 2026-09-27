@@ -124,9 +124,16 @@ public class Usuario
         }
 
         string[] partesDominio = dominio.Split('.');
+
         ValidarPartesDominio(partesDominio);
+
         string tld = partesDominio[^1];
 
+        ValidarTld(tld);
+    }
+
+    private static void ValidarTld(string tld)
+    {
         if (tld.Length < LargoMinimoTld || tld.Length > LargoMaximoTld)
         {
             throw new DominioException(
