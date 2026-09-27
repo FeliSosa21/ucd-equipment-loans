@@ -51,6 +51,11 @@ public class Usuario
         return c == '-' || c == '.' || c == '_';
     }
 
+    private static bool esAscii(char c)
+    {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'); 
+    }
+
     private static void ValidarCorreo(string correo)
     {
         if (string.IsNullOrWhiteSpace(correo))
@@ -113,6 +118,15 @@ public class Usuario
         if (partesDominio.Contains(""))
         {
             throw new DominioException("El correo no puede tener 2 puntos");
+        }
+
+        for (int i = 0; i < parteLocal.Length; i++)
+        {
+            if (!esAscii(parteLocal[i]) && !EsCaracterEspecial(parteLocal[i]))
+            {
+                throw new DominioException("La parte local del correo no puede contener caracteres invalidos");
+                
+            }
         }
         
     }
