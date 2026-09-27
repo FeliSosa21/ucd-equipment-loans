@@ -396,6 +396,7 @@ public sealed class UsuarioTests
     public void CrearUsuario_DniTodosCeros_LanzaExcepcion()
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: "00000000"));
+        
     }
 
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
