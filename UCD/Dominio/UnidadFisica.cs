@@ -27,11 +27,13 @@ public class UnidadFisica
         Estado = EstadoUnidadFisica.Disponible;
     }
 
-    public void ModificarInfo(string ubiFisica, string? observaciones)
+    public void ModificarInfo(string ubiFisica, string? numSerie, string? observaciones)
     {
         ValidarUbiFisica(ubiFisica);
-        UbiFisica = ubiFisica;
+        ValidarLargoNumSerie(numSerie);
         ValidarLargoObservaciones(observaciones);
+        UbiFisica = ubiFisica;
+        NumSerie = numSerie;
         Observaciones = observaciones;
     }
 
