@@ -240,6 +240,22 @@ public sealed class UsuarioTests
         Usuario usuario = CrearUsuario(correo: correo);
         Assert.AreEqual(correo, usuario.Correo);
     }
+    [TestMethod]
+    [DataRow("felipe@hotmail.12")]
+    [DataRow("felipe@hotmail.123")]
+    public void CrearUsuario_CorreoConTLDNumerico_LanzaExcepcion(string correo)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correo));
+    }
+
+    [TestMethod]
+    [DataRow("felipe@-hotmail.com")]
+    [DataRow("felipe@hotmail-.com")]
+    [DataRow("felipe@mail.-ort.com")]
+    public void CrearUsuario_CorreoConGuionEnBordeDeEtiquetaDeDominio_LanzaExcepcion(string correo)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correo));
+    }
 
     [TestMethod]
     [DataRow("feli.pe@hotmail.com")]
