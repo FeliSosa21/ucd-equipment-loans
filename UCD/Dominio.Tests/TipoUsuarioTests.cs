@@ -79,7 +79,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.SolicitarPrestamo)]
     [DataRow(Permiso.ConsultarMisSolicitudes)]
     [DataRow(Permiso.ConsultarHistorico)]
-    public static void TienePermiso_FuncionarioCEYPermisosAjenos_DevuelveFalse(Permiso permiso)
+    public void TienePermiso_FuncionarioCEYPermisosAjenos_DevuelveFalse(Permiso permiso)
     {
         var tipo = TipoUsuario.Funcionario;
 
@@ -93,12 +93,25 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.GestionarUnidades)]
     [DataRow(Permiso.RealizarPrestamo)]
     [DataRow(Permiso.RegistrarDevolucion)]
-    public static void TienePermiso_EstudianteYPermisosAjenos_DevuelveFalse(Permiso permiso)
+    public void TienePermiso_EstudianteYPermisosAjenos_DevuelveFalse(Permiso permiso)
     {
         var tipo = TipoUsuario.Estudiante;
 
         var resultado = tipo.TienePermiso(permiso);
 
+        Assert.IsFalse(resultado);
+    }
+
+    [TestMethod]
+    [DataRow(Permiso.GestionarUnidades)]
+    [DataRow(Permiso.RealizarPrestamo)]
+    [DataRow(Permiso.RegistrarDevolucion)]
+    public void TienePermiso_DocenteYPermisosAjenos_DevuelveFalse(Permiso permiso)
+    {
+        var tipo = TipoUsuario.Docente;
+        
+        var resultado = tipo.TienePermiso(permiso);
+        
         Assert.IsFalse(resultado);
     }
 
