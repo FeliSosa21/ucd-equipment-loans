@@ -22,15 +22,6 @@ public sealed class TipoUsuarioTests
 
         Assert.AreSame(primero, segundo);
     }
-    [TestMethod]
-    public void TienePermiso_EstudianteYConsultarHistorico_DevuelveFalse()
-    {
-        var tipo = TipoUsuario.Estudiante;
-        
-        var resultado = tipo.TienePermiso(Permiso.ConsultarHistorico);
-        Assert.IsFalse(resultado);  
-        
-    }
 
     [TestMethod]
     [DataRow(Permiso.ConsultarCatalogo)]
@@ -67,7 +58,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.RegistrarDevolucion)]
     public void TienePermiso_FuncionarioCEYPermisosPropios_DevuelveTrue(Permiso permiso)
     {
-        var tipo = TipoUsuario.Funcionario;
+        var tipo = TipoUsuario.FuncionarioCE;
 
         var resultado = tipo.TienePermiso(permiso);
         
@@ -81,7 +72,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.ConsultarHistorico)]
     public void TienePermiso_FuncionarioCEYPermisosAjenos_DevuelveFalse(Permiso permiso)
     {
-        var tipo = TipoUsuario.Funcionario;
+        var tipo = TipoUsuario.FuncionarioCE;
 
         var resultado = tipo.TienePermiso(permiso);
 

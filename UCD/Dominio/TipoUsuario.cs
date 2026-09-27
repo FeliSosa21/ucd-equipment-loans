@@ -18,7 +18,7 @@ public class TipoUsuario
         Permiso.ConsultarMisSolicitudes, Permiso.ConsultarHistorico
     });
 
-    public static TipoUsuario Funcionario { get; } = new TipoUsuario(new List<Permiso>{Permiso.ConsultarCatalogo, Permiso.GestionarUnidades, Permiso.RealizarPrestamo, Permiso.RegistrarDevolucion });
+    public static TipoUsuario FuncionarioCE { get; } = new TipoUsuario(new List<Permiso>{Permiso.ConsultarCatalogo, Permiso.GestionarUnidades, Permiso.RealizarPrestamo, Permiso.RegistrarDevolucion });
 
 private TipoUsuario(List<Permiso> permisos)
     {
