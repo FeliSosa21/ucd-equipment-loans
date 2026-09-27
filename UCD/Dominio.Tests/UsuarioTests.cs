@@ -94,6 +94,28 @@ public sealed class UsuarioTests
     {
         Assert.ThrowsException<DominioException>(() =>CrearUsuario(correo:"@hotmail.com"));
     }
+
+    [TestMethod]
+    public void CrearUsuario_CorreoConEspacios_LanzaExcepcion()
+    {
+        Assert.ThrowsException<DominioException>(() =>CrearUsuario(correo:"fe lipe@hotmail.com"));
+    }
+    
+    
+    [TestMethod]
+    [DataRow("feli..pe@hotmail.com")]
+    [DataRow("feli._pe@hotmail.com")]
+    [DataRow("feli.-pe@hotmail.com")]
+    [DataRow("feli_.pe@hotmail.com")]
+    [DataRow("feli__pe@hotmail.com")]
+    [DataRow("feli_-pe@hotmail.com")]
+    [DataRow("feli-.pe@hotmail.com")]
+    [DataRow("feli-_pe@hotmail.com")]
+    [DataRow("feli--pe@hotmail.com")]
+    public void CrearUsuario_CorreoConCaracteresConsecutivos_LanzaExcepcion(string correoEspecial)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correoEspecial));
+    }
     
 
     private static Usuario CrearUsuario(string nombre = NombreValido, string apellido = ApellidoValido,

@@ -35,6 +35,17 @@ public class Usuario
         {
             throw new DominioException("El correo no puede tener 2 arrobas");
         }
+
+        if (partes[0] == "")
+        {
+            throw new DominioException("El correo previo al @ no puede estar vacio");
+        }
+
+        if (correo.Contains(" "))
+        {
+            throw new DominioException("El correo no puede tener espacios");
+        }
+        
         
         Correo = correo;
         Contrasena = contrasena;
@@ -60,7 +71,5 @@ public class Usuario
         }
         
     }
-    
-    
     
 }
