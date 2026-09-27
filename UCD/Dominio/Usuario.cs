@@ -72,6 +72,7 @@ public class Usuario
         var parteLocal = partes[0];
         var dominio = partes[1];
         string[] partesDominio = dominio.Split('.');
+        string tld = partesDominio[^1];
         
         if (partes.Length != 2)
         {
@@ -137,6 +138,12 @@ public class Usuario
                 
             }
         }
+
+        if (tld.Length <2 || tld.Length > 63)
+        {
+            throw new DominioException("El largo del TlD debe estar entre 2 a 63 caracteres");
+        }
+        
         
         
     }
