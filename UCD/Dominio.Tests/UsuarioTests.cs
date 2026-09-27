@@ -398,6 +398,14 @@ public sealed class UsuarioTests
         Assert.AreEqual(dni, usuario.Dni);
     }
 
+    [TestMethod]
+    public void CrearUsuario_Autorregistro_NoDebeCambiarContrasena()
+    {
+        Usuario usuario = CrearUsuario();
+        
+        Assert.IsFalse(usuario.DebeCambiarContrasena);
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
