@@ -6,6 +6,7 @@ public class Usuario
     private const int LargoMaximoNombreOApellido = 50;
     private const int LargoMinimoTld = 2;
     private const int LargoMaximoTld = 63;
+    private const int LargoMinimoContrasena = 8;
 
     public string Dni { get; private set; }
     public string Nombre { get; private set; }
@@ -190,26 +191,25 @@ public class Usuario
             throw new DominioException("La contrasena no puede ser vacia");
         }
 
-        if (contrasena.Length < 8)
+        if (contrasena.Length < LargoMinimoContrasena)
         {
-            throw new DominioException("La contrasena debe tener mas de  8 caracteres");
+            throw new DominioException($"La contrasena debe tener al menos {LargoMinimoContrasena} caracteres");
         }
 
         if (!contrasena.Any(char.IsUpper))
         {
-            throw new DominioException("La contrasena debe tener una mayuscula");
+            throw new DominioException("La contrasena debe tener al menos una mayuscula");
         }
-        
+
         if (!contrasena.Any(char.IsLower))
         {
-            throw new DominioException("La contrasena debe tener una minuscula");
+            throw new DominioException("La contrasena debe tener al menos una minuscula");
         }
 
         if (!contrasena.Any(char.IsDigit))
         {
-            throw new DominioException("La contrasena debe contener al menos un numero");
+            throw new DominioException("La contrasena debe tener al menos un numero");
         }
-        
     }
 
     private static bool EsCaracterEspecial(char c)
