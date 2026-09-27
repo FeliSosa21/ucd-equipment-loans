@@ -232,6 +232,18 @@ public sealed class UnidadFisicaTests
         Assert.ThrowsException<DominioException>(() =>
             unidad.ModificarInfo("Laboratorio Prueba", NumSerieMuyLargo, null));
     }
+
+    [TestMethod]
+    public void ModificarInfo_ObservacionesInvalidas_NoModificaLaUbicacion()
+    {
+        var unidad = CrearUnidad(ubiFisica: "Laboratorio Viejo");
+        var observacionesInvalidas = new string('B', 301);
+
+        Assert.ThrowsException<DominioException>(
+            () => unidad.ModificarInfo("Laboratorio Nuevo", "PF3A7X21", observacionesInvalidas));
+
+        Assert.AreEqual("Laboratorio Viejo", unidad.UbiFisica);
+    }
     
     private static UnidadFisica CrearUnidad(
         string idInstitucional = "EQP-0042",
