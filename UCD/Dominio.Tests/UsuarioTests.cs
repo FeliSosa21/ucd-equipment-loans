@@ -298,7 +298,7 @@ public sealed class UsuarioTests
     [DataRow("   ")]
     public void CrearUsuario_ContrasenaNulaVaciaOEspaciones_LanzaExcepcion(string contrasena)
     {
-        Assert.ThrowsException<ArgumentNullException>(() => CrearUsuario(contrasena: contrasena));
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(contrasena: contrasena));
     }
 
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,

@@ -19,6 +19,7 @@ public class Usuario
         ValidarNombreOApellido(nombre, "nombre");
         ValidarNombreOApellido(apellido, "apellido");
         ValidarCorreo(correo);
+        ValidarFormatoContrasena(contrasena);
         
         Dni = dni;
         Nombre = nombre;
@@ -182,7 +183,13 @@ public class Usuario
         }
     }
 
-    
+    private static void ValidarFormatoContrasena(string contrasena)
+    {
+        if (string.IsNullOrWhiteSpace(contrasena))
+        {
+            throw new DominioException("La contrasena no puede ser vacia");
+        }
+    }
 
     private static bool EsCaracterEspecial(char c)
     {
