@@ -190,7 +190,31 @@ public sealed class UsuarioTests
         Usuario usuario = CrearUsuario(correo: correo);
         Assert.AreEqual(correo, usuario.Correo);
     }
+    [DataRow("felipe@hotmail.c")]
+    [DataRow("felipe@mail.ort.edu.u")]
+    [TestMethod]
+    public void CrearUsuario_ConTDLMuyCorto_LanzaExcepcion(string correo)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correo));
+    }
 
+    [TestMethod]
+    public void CrearUsuario_ConTDLMuyCorto_SeCrea()
+    {
+        var correo = "felipe@hotmail.uy";
+        Usuario usuario = CrearUsuario(correo:correo);
+        Assert.AreEqual(correo, usuario.Correo);
+    }
+    
+    [TestMethod]
+    public void CrearUsuario_ConTLDMuyLargo_LanzaExcepcion()
+    {
+        string tld = new string('a', 64);
+        string correoLargo = "felipe@hotmail." + tld;
+        Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correoLargo));
+    }
+    
+    
 
 
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
