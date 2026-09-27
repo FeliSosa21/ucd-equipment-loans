@@ -87,6 +87,19 @@ public sealed class TipoUsuarioTests
 
         Assert.IsFalse(resultado);
     }
-    
+
+    [TestMethod]
+    [DataRow(Permiso.ConsultarHistorico)]
+    [DataRow(Permiso.GestionarUnidades)]
+    [DataRow(Permiso.RealizarPrestamo)]
+    [DataRow(Permiso.RegistrarDevolucion)]
+    public static void TienePermiso_EstudianteYPermisosAjenos_DevuelveFalse(Permiso permiso)
+    {
+        var tipo = TipoUsuario.Estudiante;
+
+        var resultado = tipo.TienePermiso(permiso);
+
+        Assert.IsFalse(resultado);
+    }
 
 }
