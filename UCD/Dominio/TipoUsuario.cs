@@ -42,7 +42,20 @@ public class TipoUsuario
         Permiso.ConsultarPrestamos
     });
 
-    public static TipoUsuario Administrador { get; } = new TipoUsuario(new HashSet<Permiso>());
+    public static TipoUsuario Administrador { get; } = new TipoUsuario(new HashSet<Permiso>
+    {
+        Permiso.ConsultarCatalogo,
+        Permiso.ConsultarHistorico,
+        Permiso.ConsultarDisponibilidad,
+        Permiso.SolicitarPrestamo,
+        Permiso.ConsultarMisSolicitudes,
+        Permiso.GestionarUnidades,
+        Permiso.RealizarPrestamo,
+        Permiso.RegistrarDevolucion,
+        Permiso.GestionarCatalogo,
+        Permiso.EvaluarSolicitud,
+        Permiso.ConsultarPrestamos
+    });
 
 private TipoUsuario(HashSet<Permiso> permisos)
     {
