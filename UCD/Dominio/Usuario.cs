@@ -21,6 +21,7 @@ public class Usuario
         ValidarNombreOApellido(apellido, "apellido");
         ValidarCorreo(correo);
         ValidarFormatoContrasena(contrasena);
+        ValidarDni(dni);
 
         Dni = dni;
         Nombre = nombre;
@@ -209,6 +210,14 @@ public class Usuario
         if (!contrasena.Any(char.IsDigit))
         {
             throw new DominioException("La contrasena debe tener al menos un numero");
+        }
+    }
+
+    private static void ValidarDni(string dni)
+    {
+        if (string.IsNullOrWhiteSpace(dni))
+        {
+            throw new DominioException("La dni no puede ser vacia");
         }
     }
 
