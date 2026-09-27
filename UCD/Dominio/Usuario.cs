@@ -65,8 +65,8 @@ public class Usuario
 
         string[] partes = correo.Split('@');
         var parteLocal = partes[0];
-        var parteDominio = partes[1];
-        string[] partePunto = parteDominio.Split('.');
+        var dominio = partes[1];
+        string[] partesDominio = dominio.Split('.');
         
         if (partes.Length != 2)
         {
@@ -78,7 +78,7 @@ public class Usuario
             throw new DominioException("La parte local del correo no puede estar vacia");
         }
 
-        if (parteDominio == "")
+        if (dominio == "")
         {
             throw new DominioException("El dominio del correo no puede estar vacio");
         }
@@ -105,9 +105,14 @@ public class Usuario
                 "La parte local del correo no puede comenzar ni terminar con un caracter especial");
         }
 
-        if (partePunto.Length < 2)
+        if (partesDominio.Length < 2)
         {
             throw new DominioException("El dominio del correo debe contener al menos un punto");
+        }
+
+        if (partesDominio.Contains(""))
+        {
+            throw new DominioException("El correo no puede tener 2 puntos");
         }
         
     }
