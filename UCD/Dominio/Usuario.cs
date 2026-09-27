@@ -129,5 +129,15 @@ public class Usuario
             }
         }
         
+        for (int i = 0; i < dominio.Length; i++)
+        {
+            if (!esAscii(dominio[i]) && dominio[i] != '-' && dominio[i] != '.')
+            {
+                throw new DominioException("La dominio del correo no puede contener caracteres invalidos");
+                
+            }
+        }
+        
+        
     }
 }
