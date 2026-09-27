@@ -235,7 +235,8 @@ public class Usuario
             throw new DominioException($"El DNI debe tener {LargoDni} digitos");
         }
 
-        string todosCeros = "00000000";
+        string todosCeros = new string('0', LargoDni);
+
         if (dni == todosCeros)
         {
             throw new DominioException("El DNI no puede ser todo ceros");
