@@ -31,7 +31,16 @@ public sealed class TipoUsuarioTests
 
         Assert.AreSame(primero, segundo);
     }
-    
-    
+    [TestMethod]
+    public void TienePermiso_EstudianteYConsultarHistorico_DevuelveFalse()
+    {
+        var tipo = TipoUsuario.Estudiante;
+        
+        var resultado = tipo.TienePermiso(Permiso.ConsultarHistorico);
+        Assert.IsFalse(resultado);  
+        
+    }
+
+
 
 }
