@@ -12,7 +12,8 @@ public class RepositorioUsuarioTests
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        Usuario usuario = new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa", correo: "felipe@hotmail.com", contrasena: "VivaLaOrt2026");
+        Usuario usuario = new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa", correo: "felipe@hotmail.com",
+            contrasena: "VivaLaOrt2026");
 
         repositorio.AgregarUsuario(usuario);
 
@@ -24,11 +25,26 @@ public class RepositorioUsuarioTests
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        Usuario usuario = new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa", correo: "felipe@hotmail.com", contrasena: "VivaLaOrt2026");
+        Usuario usuario = new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa", correo: "felipe@hotmail.com",
+            contrasena: "VivaLaOrt2026");
         repositorio.AgregarUsuario(usuario);
 
         Usuario? resultado = repositorio.ObtenerUsuarioPorDni(dni: "12345672");
 
         Assert.AreEqual(usuario, resultado);
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarioPorDni_DniInexistente_DevuelveNulo()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        Usuario usuario = new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa", correo: "felipe@hotmail.com",
+            contrasena: "VivaLaOrt2026");
+        repositorio.AgregarUsuario(usuario);
+
+        Usuario? resultado = repositorio.ObtenerUsuarioPorDni(dni: "45678905");
+
+        Assert.IsNull(resultado);
     }
 }
