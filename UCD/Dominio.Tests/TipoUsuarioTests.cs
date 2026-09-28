@@ -294,6 +294,18 @@ public sealed class TipoUsuarioTests
 
         Assert.IsFalse(resultado);
     }
+
+    [TestMethod]
+    [DataRow(0)]
+    [DataRow(1000)]
+    public void PuedeAgregarPrestamo_AdministradorConCualquierCantidad_DevuelveTrue(int prestamosVigentes)
+    {
+        var tipo = TipoUsuario.Administrador;
+        
+        var resultado = tipo.PuedeAgregarPrestamo(prestamosVigentes);
+        
+        Assert.IsTrue(resultado);
+    }
     
 }
     
