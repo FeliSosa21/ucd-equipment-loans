@@ -80,6 +80,16 @@ public sealed class CatalogoTests
         
         Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamientoNombreRepetido));
     }
+
+    [TestMethod]
+    public void AgregarTipo_NombreRepetidoConDistintasMayusculas_LanzaDominioException()
+    {
+        var catalogo = CrearCatalogo();
+        var tipoEquipamiento = CrearTipo(nombre: "Proyector Epson EB-770FI");
+        var tipoEquipamientoNombreEnMayusculas = CrearTipo(nombre: "PROYECTOR EPSON EB-770Fi");
+        catalogo.AgregarTipo(tipoEquipamiento);
+        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamientoNombreEnMayusculas));
+    }
     
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
