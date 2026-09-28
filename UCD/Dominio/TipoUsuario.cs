@@ -5,14 +5,17 @@ namespace Dominio;
 public class TipoUsuario
 {
     public string Nombre { get; }
+    private readonly int MaxPrestamosConcurrentes;
     private readonly HashSet<Permiso> permisos;
 
     public static TipoUsuario SinPermisos { get; } = new TipoUsuario(
         "Sin permisos",
+        0,
         new HashSet<Permiso>());
 
     public static TipoUsuario Estudiante { get; } = new TipoUsuario(
         "Estudiante",
+        2,
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -23,6 +26,7 @@ public class TipoUsuario
 
     public static TipoUsuario Docente { get; } = new TipoUsuario(
         "Docente",
+        3,
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -34,6 +38,7 @@ public class TipoUsuario
 
     public static TipoUsuario FuncionarioCE { get; } = new TipoUsuario(
         "Funcionario del centro de equipamiento",
+        0,
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -44,6 +49,7 @@ public class TipoUsuario
 
     public static TipoUsuario Supervisor { get; } = new TipoUsuario(
         "Supervisor",
+        0,
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -56,6 +62,7 @@ public class TipoUsuario
         });
     public static TipoUsuario Administrador { get; } = new TipoUsuario(
         "Administrador",
+            0,
         new HashSet<Permiso>(Enum.GetValues<Permiso>()));
     public static IReadOnlyList<TipoUsuario> Todos()
     {
@@ -72,11 +79,12 @@ public class TipoUsuario
 
     public bool PuedeAgregarPrestamo(int prestamosVigentes)
     {
-        return (prestamosVigentes < 2) || !(prestamosVigentes>1);
+        return prestamosVigentes < MaxPrestamosConcurrentes;
     }
-    private TipoUsuario(string nombre, HashSet<Permiso> permisos)
+    private TipoUsuario(string nombre, int maxPrestamosConcurrentes,HashSet<Permiso> permisos)
     {
         this.Nombre = nombre;
+        this.MaxPrestamosConcurrentes = maxPrestamosConcurrentes;
         this.permisos = permisos;
     }
 
