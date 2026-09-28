@@ -18,6 +18,11 @@ public class CatalogoRepositorio
 
     public void Guardar(Catalogo catalogo)
     {
+        if (catalogo == null)
+        {
+            throw new DominioException("El catalogo no puede ser nulo");
+        }
+        
         _BaseDeDatos.Catalogo = catalogo;
     }
 }
