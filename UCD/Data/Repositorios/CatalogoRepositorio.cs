@@ -4,20 +4,20 @@ namespace Data.Repositorios;
 
 public class CatalogoRepositorio
 {
-    private Catalogo? _catalogo;
+    private readonly BaseDeDatosEnMemoria _catalogo;
     
     public CatalogoRepositorio(BaseDeDatosEnMemoria baseDeDatosEnMemoria)
     {
-        
+        _catalogo = baseDeDatosEnMemoria;
     }
 
     public Catalogo? Obtener()
     {
-        return _catalogo;
+        return _catalogo.Catalogo;
     }
 
     public void Guardar(Catalogo catalogo)
     {
-        _catalogo = catalogo;
+        _catalogo.Catalogo = catalogo;
     }
 }
