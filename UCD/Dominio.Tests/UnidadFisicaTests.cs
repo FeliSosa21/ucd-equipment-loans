@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices.JavaScript;
+
 namespace Dominio.Tests;
 
 [TestClass]
@@ -66,7 +68,7 @@ public sealed class UnidadFisicaTests
     {
         var unidad = CrearUnidad(ubiFisica: "Laboratorio Viejo");
 
-        unidad.ModificarInfo("Laboratorio Nuevo", "");
+        unidad.ModificarInfo("Laboratorio Nuevo", "PF3A7X21", "");
 
         Assert.AreEqual("Laboratorio Nuevo", unidad.UbiFisica);
     }
@@ -76,7 +78,7 @@ public sealed class UnidadFisicaTests
     {
         var unidad = CrearUnidad();
 
-        unidad.ModificarInfo("Laboratorio Nuevo", "");
+        unidad.ModificarInfo("Laboratorio Nuevo", "PF3A7X21", "");
 
         Assert.AreEqual("", unidad.Observaciones);
     }
@@ -175,10 +177,78 @@ public sealed class UnidadFisicaTests
         Assert.ThrowsException<DominioException>(() => unidad.Disponible());
     }
 
+    [TestMethod]
+    public void Constructor_SinNumeroDeSerie_QuedaSinNumeroDeSerie()
+    {
+        var unidad = CrearUnidad(numSerie: null);
+        Assert.IsNull(unidad.NumSerie);
+    }
+
+    [TestMethod]
+    public void Constructor_NumSerieMuyLargo_LanzaDominioException()
+    {
+        var numSerie = new string('A', 51);
+        
+        Assert.ThrowsException<DominioException>(() => CrearUnidad(numSerie: numSerie));
+    }
+
+    [TestMethod]
+    public void ModificarInfo_ObservacionesMuyLargas_LanzaDominioException()
+    {
+        var unidad = CrearUnidad();
+        var ubiFisica = "Laboratorio Prueba";
+        var observaciones = new string('B', 301);
+        
+        Assert.ThrowsException<DominioException>(() => unidad.ModificarInfo(ubiFisica, "PF3A7X21", observaciones));
+    }
+
+    [TestMethod]
+    public void ModificarInfo_ObservacionesNulas_QuedaSinObservaciones()
+    {
+        var unidad = CrearUnidad();
+        var ubiFisica = "Laboratorio Prueba";
+        unidad.ModificarInfo(ubiFisica, "PF3A7X21", "Pantalla rayada");
+        
+        unidad.ModificarInfo(ubiFisica, "PF3A7X21", null);
+        
+        Assert.IsNull(unidad.Observaciones);
+    }
+
+    [TestMethod]
+    public void ModificarInfo_NumSerieNuevo_ActualizaElNumSerie()
+    {
+        var unidad = CrearUnidad();
+        var numSerieNuevo = "PF5A7J22";
+        unidad.ModificarInfo("Laboratorio Prueba", numSerieNuevo, null);
+        
+        Assert.AreEqual(numSerieNuevo, unidad.NumSerie);
+    }
+
+    [TestMethod]
+    public void ModificarInfo_NumSerieMuyLargo_LanzaDominioException()
+    {
+        var unidad = CrearUnidad();
+        var NumSerieMuyLargo = new string('A', 51);
+        Assert.ThrowsException<DominioException>(() =>
+            unidad.ModificarInfo("Laboratorio Prueba", NumSerieMuyLargo, null));
+    }
+
+    [TestMethod]
+    public void ModificarInfo_ObservacionesInvalidas_NoModificaLaUbicacion()
+    {
+        var unidad = CrearUnidad(ubiFisica: "Laboratorio Viejo");
+        var observacionesInvalidas = new string('B', 301);
+
+        Assert.ThrowsException<DominioException>(
+            () => unidad.ModificarInfo("Laboratorio Nuevo", "PF3A7X21", observacionesInvalidas));
+
+        Assert.AreEqual("Laboratorio Viejo", unidad.UbiFisica);
+    }
+    
     private static UnidadFisica CrearUnidad(
         string idInstitucional = "EQP-0042",
         string ubiFisica = "Laboratorio Prueba",
-        string numSerie = "PF3A7X21")
+        string? numSerie = "PF3A7X21")
     {
         return new UnidadFisica(idInstitucional, ubiFisica, numSerie);
     }
