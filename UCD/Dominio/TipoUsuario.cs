@@ -4,7 +4,7 @@ namespace Dominio;
 
 public class TipoUsuario
 {
-    public string Nombre { get; set; }
+    public string Nombre { get; }
     private readonly HashSet<Permiso> permisos;
 
     public static TipoUsuario SinPermisos { get; } = new TipoUsuario(
