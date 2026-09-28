@@ -4,11 +4,11 @@ namespace Data.Repositorios;
 
 public class CatalogoRepositorio
 {
+
     private readonly BaseDeDatosEnMemoria _baseDeDatos;
-    
-    public CatalogoRepositorio(BaseDeDatosEnMemoria basedeDatos)
+    public CatalogoRepositorio(BaseDeDatosEnMemoria baseDeDatos)
     {
-        _baseDeDatos = basedeDatos;
+        _baseDeDatos = baseDeDatos;
     }
 
     public Catalogo? Obtener()
@@ -19,7 +19,7 @@ public class CatalogoRepositorio
     public void Guardar(Catalogo catalogo)
     {
         ValidarQueSePuedaGuardar(catalogo);
-        
+
         _baseDeDatos.Catalogo = catalogo;
     }
 
