@@ -37,22 +37,32 @@ public class Catalogo
             throw new DominioException($"El nombre del catalogo debe tener como maximo {LargoMaximoNombre} caracteres");
         }
     }
-
+    
     public void AgregarTipo(TipoEquipamiento tipo)
     {
         if (tipo is null)
         {
-            throw new DominioException("El tipo no puede ser vacio");
+            throw new DominioException("El tipo no puede ser nulo");
         }
 
-        foreach (var tipoExistente in Tipos)
+        if (ChequearNombreExistente(tipo.Nombre))
         {
-            if (tipoExistente.Nombre == tipo.Nombre)
-            {
-                throw new DominioException("Ya existe un tipo de equipamiento con ese nombre");
-            }
+            throw new DominioException("Ya existe un tipo de equipamiento con ese nombre");
         }
         
         Tipos.Add(tipo);
+    }
+    
+    private bool ChequearNombreExistente(string nombre)
+    {
+        foreach (var tipoExistente in Tipos)
+        {
+            if (tipoExistente.Nombre == nombre)
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }
