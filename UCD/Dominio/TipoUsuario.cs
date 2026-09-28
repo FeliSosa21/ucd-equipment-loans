@@ -5,7 +5,7 @@ namespace Dominio;
 public class TipoUsuario
 {
     public string Nombre { get; }
-    private readonly int MaxPrestamosConcurrentes;
+    private readonly int? MaxPrestamosConcurrentes;
     private readonly HashSet<Permiso> permisos;
 
     public static TipoUsuario SinPermisos { get; } = new TipoUsuario(
@@ -62,7 +62,7 @@ public class TipoUsuario
         });
     public static TipoUsuario Administrador { get; } = new TipoUsuario(
         "Administrador",
-        maxPrestamosConcurrentes: 0,
+        maxPrestamosConcurrentes: null,
         new HashSet<Permiso>(Enum.GetValues<Permiso>()));
     public static IReadOnlyList<TipoUsuario> Todos()
     {
@@ -79,9 +79,9 @@ public class TipoUsuario
 
     public bool PuedeAgregarPrestamo(int prestamosVigentes)
     {
-        return prestamosVigentes < MaxPrestamosConcurrentes;
+        return MaxPrestamosConcurrentes is null || prestamosVigentes < MaxPrestamosConcurrentes;
     }
-    private TipoUsuario(string nombre, int maxPrestamosConcurrentes,HashSet<Permiso> permisos)
+    private TipoUsuario(string nombre, int? maxPrestamosConcurrentes,HashSet<Permiso> permisos)
     {
         this.Nombre = nombre;
         this.MaxPrestamosConcurrentes = maxPrestamosConcurrentes;
