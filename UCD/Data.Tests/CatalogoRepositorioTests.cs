@@ -16,6 +16,19 @@ public sealed class CatalogoRepositorioTests
         
         Assert.IsNull(resultado);
     }
+
+    [TestMethod]
+    public void Guardar_CatalogoValido_ObtenerDevuelveElMismoCatalogo()
+    {
+        var memoria = new BaseDeDatosEnMemoria();
+        var repositorio = new CatalogoRepositorio(memoria);
+        var catalogo = CrearCatalogo();
+
+        repositorio.Guardar(catalogo);
+        var resultado = repositorio.Obtener();
+        
+        Assert.AreSame(catalogo, resultado);
+    }
     
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
