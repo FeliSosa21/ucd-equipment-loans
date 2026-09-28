@@ -9,8 +9,8 @@ public sealed class RepositorioCatalogoTests
     [TestMethod]
     public void Obtener_BaseNueva_DevuelveNull()
     {
-        var baseDeDatos = new Memoria();
-        var repositorio = new RepositorioCatalogo(baseDeDatos);
+        var memoria = new Memoria();
+        var repositorio = new RepositorioCatalogo(memoria);
 
         var resultado = repositorio.Obtener();
 
@@ -20,8 +20,8 @@ public sealed class RepositorioCatalogoTests
     [TestMethod]
     public void Guardar_CatalogoValido_ObtenerDevuelveElMismoCatalogo()
     {
-        var baseDeDatos = new Memoria();
-        var repositorio = new RepositorioCatalogo(baseDeDatos);
+        var memoria = new Memoria();
+        var repositorio = new RepositorioCatalogo(memoria);
         var catalogo = CrearCatalogo();
 
         repositorio.Guardar(catalogo);
@@ -33,9 +33,9 @@ public sealed class RepositorioCatalogoTests
     [TestMethod]
     public void Obtener_OtroRepositorioConLaMismaBase_DevuelveElCatalogoGuardado()
     {
-        var baseDeDatos = new Memoria();
-        var primerRepositorio = new RepositorioCatalogo(baseDeDatos);
-        var segundoRepositorio = new RepositorioCatalogo(baseDeDatos);
+        var memoria = new Memoria();
+        var primerRepositorio = new RepositorioCatalogo(memoria);
+        var segundoRepositorio = new RepositorioCatalogo(memoria);
         var catalogo = CrearCatalogo();
 
         primerRepositorio.Guardar(catalogo);
@@ -47,8 +47,8 @@ public sealed class RepositorioCatalogoTests
     [TestMethod]
     public void Guardar_CatalogoNull_LanzaDominioException()
     {
-        var baseDeDatos = new Memoria();
-        var repositorio = new RepositorioCatalogo(baseDeDatos);
+        var memoria = new Memoria();
+        var repositorio = new RepositorioCatalogo(memoria);
 
         Assert.ThrowsException<DominioException>(() => repositorio.Guardar(null!));
     }
@@ -56,8 +56,8 @@ public sealed class RepositorioCatalogoTests
     [TestMethod]
     public void Guardar_YaExisteUnCatalogo_LanzaDominioException()
     {
-        var baseDeDatos = new Memoria();
-        var repositorio = new RepositorioCatalogo(baseDeDatos);
+        var memoria = new Memoria();
+        var repositorio = new RepositorioCatalogo(memoria);
         var catalogoExistente = CrearCatalogo();
         repositorio.Guardar(catalogoExistente);
         var catalogoNuevo = CrearCatalogo(nombre: "catalogo nuevo");
