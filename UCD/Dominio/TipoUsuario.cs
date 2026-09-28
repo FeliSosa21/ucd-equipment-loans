@@ -6,10 +6,6 @@ public class TipoUsuario
 {
     public string Nombre { get; }
     private readonly HashSet<Permiso> permisos;
-    public static IReadOnlyList<TipoUsuario> Todos()
-    {
-        return Array.Empty<TipoUsuario>();
-    }
 
     public static TipoUsuario SinPermisos { get; } = new TipoUsuario(
         "Sin permisos",
@@ -61,8 +57,19 @@ public class TipoUsuario
     public static TipoUsuario Administrador { get; } = new TipoUsuario(
         "Administrador",
         new HashSet<Permiso>(Enum.GetValues<Permiso>()));
-
-private TipoUsuario(string nombre, HashSet<Permiso> permisos)
+    public static IReadOnlyList<TipoUsuario> Todos()
+    {
+        return new []
+        {
+            SinPermisos,
+            Estudiante,
+            Docente,
+            FuncionarioCE,
+            Supervisor,
+            Administrador
+        };
+    }
+    private TipoUsuario(string nombre, HashSet<Permiso> permisos)
     {
         this.Nombre = nombre;
         this.permisos = permisos;
