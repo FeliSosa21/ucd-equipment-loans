@@ -4,5 +4,5 @@ namespace Data;
 
 public class BaseDeDatosEnMemoria
 {
-    public Catalogo? Catalogo { get; set; }
+    internal Catalogo? Catalogo { get; set; }
 }

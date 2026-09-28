@@ -6,9 +6,9 @@ public class CatalogoRepositorio
 {
     private readonly BaseDeDatosEnMemoria _baseDeDatos;
     
-    public CatalogoRepositorio(BaseDeDatosEnMemoria baseDeDatosEnMemoria)
+    public CatalogoRepositorio(BaseDeDatosEnMemoria basedeDatos)
     {
-        _baseDeDatos = baseDeDatosEnMemoria;
+        _baseDeDatos = basedeDatos;
     }
 
     public Catalogo? Obtener()
