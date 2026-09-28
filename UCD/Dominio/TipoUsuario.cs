@@ -72,7 +72,7 @@ public class TipoUsuario
 
     public bool PuedeAgregarPrestamo(int prestamosVigentes)
     {
-        return false;
+        return (prestamosVigentes < 2) || !(prestamosVigentes>1);
     }
     private TipoUsuario(string nombre, HashSet<Permiso> permisos)
     {
