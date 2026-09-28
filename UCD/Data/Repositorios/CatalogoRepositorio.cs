@@ -27,7 +27,7 @@ public class CatalogoRepositorio
     {
         if (catalogo is null)
         {
-            throw new DominioException("El catalogo no puede ser nulo");
+            throw new DominioException("El catálogo no puede ser nulo");
         }
 
         if (_baseDeDatos.Catalogo is not null)

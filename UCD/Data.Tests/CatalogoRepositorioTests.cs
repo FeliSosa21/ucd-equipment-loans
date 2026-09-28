@@ -40,6 +40,7 @@ public sealed class CatalogoRepositorioTests
         
         primerRepositorio.Guardar(catalogo);
         var resultado = segundoRepositorio.Obtener();
+        
         Assert.AreSame(catalogo, resultado);
     }
 
@@ -57,10 +58,8 @@ public sealed class CatalogoRepositorioTests
     {
         var memoria = new BaseDeDatosEnMemoria();
         var repositorio = new CatalogoRepositorio(memoria);
-        
-        var catalogo = CrearCatalogo();
-        repositorio.Guardar(catalogo);
-        
+        var catalogoExistente = CrearCatalogo();
+        repositorio.Guardar(catalogoExistente);
         var catalogoNuevo = CrearCatalogo(nombre: "catalogo nuevo");
         
         Assert.ThrowsException<DominioException>(() => repositorio.Guardar(catalogoNuevo));
