@@ -6,16 +6,19 @@ public class TipoUsuario
 {
     public string Nombre { get; }
     private readonly int? MaxPrestamosConcurrentes;
+    private readonly int? maxUnidadesPorPrestamo;
     private readonly HashSet<Permiso> permisos;
 
     public static TipoUsuario SinPermisos { get; } = new TipoUsuario(
         "Sin permisos",
         maxPrestamosConcurrentes: 0,
+        maxUnidadesPorPrestamo: 0,
         new HashSet<Permiso>());
 
     public static TipoUsuario Estudiante { get; } = new TipoUsuario(
         "Estudiante",
         maxPrestamosConcurrentes: 2,
+        maxUnidadesPorPrestamo: 2,
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -27,6 +30,7 @@ public class TipoUsuario
     public static TipoUsuario Docente { get; } = new TipoUsuario(
         "Docente",
         maxPrestamosConcurrentes: 3,
+        maxUnidadesPorPrestamo: 40,
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -39,6 +43,7 @@ public class TipoUsuario
     public static TipoUsuario FuncionarioCE { get; } = new TipoUsuario(
         "Funcionario del centro de equipamiento",
         maxPrestamosConcurrentes: 0,
+        maxUnidadesPorPrestamo: 0,
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -50,6 +55,7 @@ public class TipoUsuario
     public static TipoUsuario Supervisor { get; } = new TipoUsuario(
         "Supervisor",
         maxPrestamosConcurrentes: 0,
+        maxUnidadesPorPrestamo: 0,
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -63,6 +69,7 @@ public class TipoUsuario
     public static TipoUsuario Administrador { get; } = new TipoUsuario(
         "Administrador",
         maxPrestamosConcurrentes: null,
+        maxUnidadesPorPrestamo: null,
         new HashSet<Permiso>(Enum.GetValues<Permiso>()));
     public static IReadOnlyList<TipoUsuario> Todos()
     {
@@ -84,12 +91,13 @@ public class TipoUsuario
 
     public bool PermiteUnidades(int cantidadSolicitada)
     {
-        return false;
+        return maxUnidadesPorPrestamo is null || cantidadSolicitada <= maxUnidadesPorPrestamo;
     }
-    private TipoUsuario(string nombre, int? maxPrestamosConcurrentes,HashSet<Permiso> permisos)
+    private TipoUsuario(string nombre, int? maxPrestamosConcurrentes, int? maxUnidadesPorPrestamo, HashSet<Permiso> permisos)
     {
         this.Nombre = nombre;
         this.MaxPrestamosConcurrentes = maxPrestamosConcurrentes;
+        this.maxUnidadesPorPrestamo = maxUnidadesPorPrestamo;
         this.permisos = permisos;
     }
 
