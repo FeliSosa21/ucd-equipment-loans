@@ -37,5 +37,9 @@ public class Catalogo
             throw new DominioException($"El nombre del catalogo debe tener como maximo {LargoMaximoNombre} caracteres");
         }
     }
-    
+
+    public void AgregarTipo(TipoEquipamiento tipo)
+    {
+        Tipos.Add(tipo);
+    }
 }
