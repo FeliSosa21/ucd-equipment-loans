@@ -68,50 +68,22 @@ public sealed class CatalogoTests
         Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(null!));
         
     }
-
-    [TestMethod]
-    public void AgregarTipo_TipoConNombreRepetido_LanzaDominioException()
-    {
-        var catalogo = CrearCatalogo();
-        string nombreRepetido = "Proyector Epson EB-770Fi";
-        var tipoEquipamiento = CrearTipo(nombre: nombreRepetido);
-        var tipoEquipamientoNombreRepetido = CrearTipo(nombre: nombreRepetido, descripcion: "proyector para sala recreativa");
-        catalogo.AgregarTipo(tipoEquipamiento);
-        
-        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamientoNombreRepetido));
-    }
-
-    [TestMethod]
-    public void AgregarTipo_NombreRepetidoConDistintasMayusculas_LanzaDominioException()
-    {
-        var catalogo = CrearCatalogo();
-        var tipoEquipamiento = CrearTipo(nombre: "Proyector Epson EB-770FI");
-        var tipoEquipamientoNombreEnMayusculas = CrearTipo(nombre: "PROYECTOR EPSON EB-770Fi");
-        catalogo.AgregarTipo(tipoEquipamiento);
-        
-        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamientoNombreEnMayusculas));
-    }
     
     [TestMethod]
-    public void AgregarTipo_NombreRepetidoConEspaciosEnLosExtremos_LanzaDominioException()
+    [DataRow("Proyector Epson EB-770Fi", "Proyector Epson EB-770Fi")]
+    [DataRow("Proyector Epson EB-770Fi", "PROYECTOR EPSON EB-770FI")]
+    [DataRow("Proyector Epson EB-770Fi", " Proyector Epson EB-770Fi ")]
+    [DataRow(" Proyector Epson EB-770Fi ", "Proyector Epson EB-770Fi")]
+    public void AgregarTipo_NombreEquivalenteAUnoExistente_LanzaDominioException(string nombreExistente,
+        string nombreNuevo)
     {
         var catalogo = CrearCatalogo();
-        var tipoEquipamiento = CrearTipo(nombre: "Proyector Epson EB-770Fi");
-        var tipoEquipamientoEspacioAlPrincipoYAlFinal =CrearTipo(nombre: " Proyector Epson EB-770Fi ");
-        catalogo.AgregarTipo(tipoEquipamiento);
+        var tipoEquipamientoExistente = CrearTipo(nombre:nombreExistente);
+        var tipoEquipamientoRepetido = CrearTipo(nombre:nombreNuevo);
         
-        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamientoEspacioAlPrincipoYAlFinal));
-    }
-    
-    [TestMethod]
-    public void AgregarTipo_NombreExistenteConEspaciosEnLosExtremos_LanzaDominioException()
-    {
-        var catalogo = CrearCatalogo();
-        var tipoEquipamientoExistenteConEspacios = CrearTipo(nombre: " Proyector Epson EB-770Fi ");
-        var tipoEquipamientoNuevoSinEspacios =CrearTipo(nombre: "Proyector Epson EB-770Fi");
-        catalogo.AgregarTipo(tipoEquipamientoExistenteConEspacios);
+        catalogo.AgregarTipo(tipoEquipamientoExistente);
         
-        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamientoNuevoSinEspacios));
+        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamientoRepetido));       
     }
     
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
