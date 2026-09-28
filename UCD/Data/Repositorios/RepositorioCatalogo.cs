@@ -2,11 +2,11 @@
 
 namespace Data.Repositorios;
 
-public class CatalogoRepositorio
+public class RepositorioCatalogo
 {
 
-    private readonly BaseDeDatosEnMemoria _baseDeDatos;
-    public CatalogoRepositorio(BaseDeDatosEnMemoria baseDeDatos)
+    private readonly Memoria _baseDeDatos;
+    public RepositorioCatalogo(Memoria baseDeDatos)
     {
         _baseDeDatos = baseDeDatos;
     }
