@@ -16,6 +16,7 @@ public sealed class TipoUsuarioTests
             Assert.IsFalse(resultado, $"SinPermisos no deberia tener el permiso: {permiso}");
         }
     }
+
     [TestMethod]
     public void Estudiante_AccesosRepetidos_DevuelveLaMismaInstancia()
     {
@@ -32,12 +33,13 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.ConsultarMisSolicitudes)]
     public void TienePermiso_EstudianteYPermisosPropios_DevuelveTrue(Permiso permiso)
     {
-        var tipo = TipoUsuario.Estudiante;  
-        
+        var tipo = TipoUsuario.Estudiante;
+
         var resultado = tipo.TienePermiso(permiso);
-        
+
         Assert.IsTrue(resultado);
     }
+
     [TestMethod]
     [DataRow(Permiso.ConsultarCatalogo)]
     [DataRow(Permiso.ConsultarDisponibilidad)]
@@ -49,7 +51,7 @@ public sealed class TipoUsuarioTests
         var tipo = TipoUsuario.Docente;
 
         var resultado = tipo.TienePermiso(permiso);
-        
+
         Assert.IsTrue(resultado);
     }
 
@@ -63,7 +65,7 @@ public sealed class TipoUsuarioTests
         var tipo = TipoUsuario.FuncionarioCE;
 
         var resultado = tipo.TienePermiso(permiso);
-        
+
         Assert.IsTrue(resultado);
     }
 
@@ -114,9 +116,9 @@ public sealed class TipoUsuarioTests
     public void TienePermiso_DocenteYPermisosAjenos_DevuelveFalse(Permiso permiso)
     {
         var tipo = TipoUsuario.Docente;
-        
+
         var resultado = tipo.TienePermiso(permiso);
-        
+
         Assert.IsFalse(resultado);
     }
 
@@ -128,30 +130,30 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.EvaluarSolicitud)]
     [DataRow(Permiso.RegistrarDevolucion)]
     [DataRow(Permiso.ConsultarPrestamos)]
-    
+
     public void TienePermiso_SupervisorYPermisosPropios_DevuelveTrue(Permiso permiso)
     {
         var tipo = TipoUsuario.Supervisor;
-        
+
         var resultado = tipo.TienePermiso(permiso);
-        
+
         Assert.IsTrue(resultado);
     }
 
     [TestMethod]
     [DataRow(Permiso.ConsultarDisponibilidad)]
     [DataRow(Permiso.SolicitarPrestamo)]
-    [DataRow(Permiso.ConsultarMisSolicitudes)] 
+    [DataRow(Permiso.ConsultarMisSolicitudes)]
     [DataRow(Permiso.RealizarPrestamo)]
     [DataRow(Permiso.GestionarUsuarios)]
     public void TienePermiso_SupervisorYPermisosAjenos_DevuelveFalse(Permiso permiso)
     {
         var tipo = TipoUsuario.Supervisor;
-        
+
         var resultado = tipo.TienePermiso(permiso);
-        
+
         Assert.IsFalse(resultado);
-        
+
     }
 
     [TestMethod]
@@ -173,52 +175,57 @@ public sealed class TipoUsuarioTests
         var tipo = TipoUsuario.Administrador;
 
         var nombre = tipo.Nombre;
-        
+
         Assert.AreEqual("Administrador", nombre);
     }
+
     [TestMethod]
     public void Nombre_Docente_DevuelveDocente()
     {
         var tipo = TipoUsuario.Docente;
 
         var nombre = tipo.Nombre;
-    
+
         Assert.AreEqual("Docente", nombre);
     }
+
     [TestMethod]
     public void Nombre_Estudiante_DevuelveEstudiante()
     {
         var tipo = TipoUsuario.Estudiante;
 
         var nombre = tipo.Nombre;
-    
+
         Assert.AreEqual("Estudiante", nombre);
     }
+
     [TestMethod]
     public void Nombre_FuncionarioCE_DevuelveFuncionarioDelCentroDeEquipamiento()
     {
         var tipo = TipoUsuario.FuncionarioCE;
 
         var nombre = tipo.Nombre;
-    
+
         Assert.AreEqual("Funcionario del centro de equipamiento", nombre);
     }
+
     [TestMethod]
     public void Nombre_Supervisor_DevuelveSupervisor()
     {
         var tipo = TipoUsuario.Supervisor;
 
         var nombre = tipo.Nombre;
-    
+
         Assert.AreEqual("Supervisor", nombre);
     }
+
     [TestMethod]
     public void Nombre_SinPermisos_DevuelveSinPermisos()
     {
         var tipo = TipoUsuario.SinPermisos;
 
         var nombre = tipo.Nombre;
-    
+
         Assert.AreEqual("Sin permisos", nombre);
     }
 
@@ -234,10 +241,32 @@ public sealed class TipoUsuarioTests
             TipoUsuario.Supervisor,
             TipoUsuario.Administrador
         };
-        
+
         var todos = TipoUsuario.Todos().ToList();
-        
+
         CollectionAssert.AreEquivalent(esperados, todos);
     }
 
+    [TestMethod]
+    [DataRow(0)]
+    [DataRow(1)]
+    public void PuedeAgregarPrestamo_EstudianteDebajoDelMaximo_DevuelveTrue(int prestamosVigentes)
+    {
+        var tipo = TipoUsuario.Estudiante;
+
+        var resultado = tipo.PuedeAgregarPrestamo(prestamosVigentes);
+
+        Assert.IsTrue(resultado);
+    }
+
+    [TestMethod]
+    [DataRow(2)]
+    [DataRow(3)]
+    public void PuedeAgregarPrestamo_EstudianteEnElMaximoOMas_DevuelveFalse(int prestamosVigentes)
+    {
+        var tipo = TipoUsuario.Estudiante;
+
+        var resultado = tipo.PuedeAgregarPrestamo(prestamosVigentes);
+    }
 }
+    

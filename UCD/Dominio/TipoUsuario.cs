@@ -69,6 +69,11 @@ public class TipoUsuario
             Administrador
         };
     }
+
+    public bool PuedeAgregarPrestamo(int prestamosVigentes)
+    {
+        return false;
+    }
     private TipoUsuario(string nombre, HashSet<Permiso> permisos)
     {
         this.Nombre = nombre;
