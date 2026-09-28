@@ -40,6 +40,11 @@ public class Catalogo
 
     public void AgregarTipo(TipoEquipamiento tipo)
     {
+        if (tipo is null)
+        {
+            throw new DominioException("El tipo no puede ser vacio");
+        }
+        
         Tipos.Add(tipo);
     }
 }
