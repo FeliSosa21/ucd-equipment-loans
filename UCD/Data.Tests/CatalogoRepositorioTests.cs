@@ -29,6 +29,19 @@ public sealed class CatalogoRepositorioTests
         
         Assert.AreSame(catalogo, resultado);
     }
+
+    [TestMethod]
+    public void Obtener_OtroRepositorioConLaMismaBase_DevuelveElCatalogoGuardado()
+    {
+        var memoria = new BaseDeDatosEnMemoria();
+        var primerRepositorio = new CatalogoRepositorio(memoria);
+        var segundoRepositorio = new CatalogoRepositorio(memoria);
+        var catalogo = CrearCatalogo();
+        
+        primerRepositorio.Guardar(catalogo);
+        var resultado = segundoRepositorio.Obtener();
+        Assert.AreSame(catalogo, resultado);
+    }
     
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
