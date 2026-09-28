@@ -20,4 +20,9 @@ public class RepositorioUsuario
     {
         return _memoria.Usuarios.FirstOrDefault(usuario => usuario.Dni == dni);
     }
+
+    public Usuario? ObtenerUsuarioPorCorreo(string correo)
+    {
+        return _memoria.Usuarios.FirstOrDefault(usuario => string.Equals(usuario.Correo, correo, StringComparison.OrdinalIgnoreCase));
+    }
 }
