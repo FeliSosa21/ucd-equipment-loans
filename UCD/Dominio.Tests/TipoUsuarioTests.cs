@@ -267,6 +267,10 @@ public sealed class TipoUsuarioTests
         var tipo = TipoUsuario.Estudiante;
 
         var resultado = tipo.PuedeAgregarPrestamo(prestamosVigentes);
+        
+        Assert.IsFalse(resultado);
     }
+    
+    
 }
     
