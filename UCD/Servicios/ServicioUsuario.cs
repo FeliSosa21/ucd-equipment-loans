@@ -15,7 +15,13 @@ public class ServicioUsuario
 
     public void Registrar(UsuarioDto dto)
     {
-        Usuario usuario = new Usuario(dni: dto.Dni, nombre: dto.Nombre, apellido: dto.Apellido, correo: dto.Correo, contrasena: dto.Contrasena);
+        if (_repositorio.ObtenerUsuarioPorDni(dto.Dni) != null)
+        {
+            throw new DominioException("El dni ya existe");
+        }
+
+        Usuario usuario = new Usuario(dni: dto.Dni, nombre: dto.Nombre, apellido: dto.Apellido, correo: dto.Correo,
+            contrasena: dto.Contrasena);
         _repositorio.AgregarUsuario(usuario);
     }
 }
