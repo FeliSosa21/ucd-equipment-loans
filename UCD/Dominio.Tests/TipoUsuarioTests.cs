@@ -1,7 +1,6 @@
 ﻿namespace Dominio.Tests;
 
 [TestClass]
-
 public sealed class TipoUsuarioTests
 {
     [TestMethod]
@@ -130,7 +129,6 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.EvaluarSolicitud)]
     [DataRow(Permiso.RegistrarDevolucion)]
     [DataRow(Permiso.ConsultarPrestamos)]
-
     public void TienePermiso_SupervisorYPermisosPropios_DevuelveTrue(Permiso permiso)
     {
         var tipo = TipoUsuario.Supervisor;
@@ -153,7 +151,6 @@ public sealed class TipoUsuarioTests
         var resultado = tipo.TienePermiso(permiso);
 
         Assert.IsFalse(resultado);
-
     }
 
     [TestMethod]
@@ -270,6 +267,7 @@ public sealed class TipoUsuarioTests
         
         Assert.IsFalse(resultado);
     }
+    
     [TestMethod]
     [DataRow(0)]
     [DataRow(1)]
@@ -306,6 +304,7 @@ public sealed class TipoUsuarioTests
         
         Assert.IsTrue(resultado);
     }
+    
     [TestMethod]
     public void PuedeAgregarPrestamo_FuncionarioCESinPrestamos_DevuelveFalse()
     {
