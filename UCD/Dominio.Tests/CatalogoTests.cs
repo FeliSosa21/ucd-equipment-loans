@@ -103,6 +103,17 @@ public sealed class CatalogoTests
         Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamientoEspacioAlPrincipoYAlFinal));
     }
     
+    [TestMethod]
+    public void AgregarTipo_NombreExistenteConEspaciosEnLosExtremos_LanzaDominioException()
+    {
+        var catalogo = CrearCatalogo();
+        var tipoEquipamientoExistenteConEspacios = CrearTipo(nombre: " Proyector Epson EB-770Fi ");
+        var tipoEquipamientoNuevoSinEspacios =CrearTipo(nombre: "Proyector Epson EB-770Fi");
+        catalogo.AgregarTipo(tipoEquipamientoExistenteConEspacios);
+        
+        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamientoNuevoSinEspacios));
+    }
+    
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
