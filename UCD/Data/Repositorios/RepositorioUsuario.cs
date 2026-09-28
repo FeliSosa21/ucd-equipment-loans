@@ -15,4 +15,9 @@ public class RepositorioUsuario
     {
         _memoria.Usuarios.Add(usuario);
     }
+
+    public Usuario? ObtenerUsuarioPorDni(string dni)
+    {
+        return _memoria.Usuarios.FirstOrDefault(usuario => usuario.Dni == dni);
+    }
 }
