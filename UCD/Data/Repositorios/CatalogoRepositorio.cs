@@ -4,6 +4,8 @@ namespace Data.Repositorios;
 
 public class CatalogoRepositorio
 {
+    private Catalogo? _catalogo;
+    
     public CatalogoRepositorio(BaseDeDatosEnMemoria baseDeDatosEnMemoria)
     {
         
@@ -11,6 +13,11 @@ public class CatalogoRepositorio
 
     public Catalogo? Obtener()
     {
-        return null;
+        return _catalogo;
+    }
+
+    public void Guardar(Catalogo catalogo)
+    {
+        _catalogo = catalogo;
     }
 }
