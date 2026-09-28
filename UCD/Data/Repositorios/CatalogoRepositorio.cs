@@ -4,30 +4,35 @@ namespace Data.Repositorios;
 
 public class CatalogoRepositorio
 {
-    private readonly BaseDeDatosEnMemoria _BaseDeDatos;
+    private readonly BaseDeDatosEnMemoria _baseDeDatos;
     
     public CatalogoRepositorio(BaseDeDatosEnMemoria baseDeDatosEnMemoria)
     {
-        _BaseDeDatos = baseDeDatosEnMemoria;
+        _baseDeDatos = baseDeDatosEnMemoria;
     }
 
     public Catalogo? Obtener()
     {
-        return _BaseDeDatos.Catalogo;
+        return _baseDeDatos.Catalogo;
     }
 
     public void Guardar(Catalogo catalogo)
     {
-        if (catalogo == null)
+        ValidarQueSePuedaGuardar(catalogo);
+        
+        _baseDeDatos.Catalogo = catalogo;
+    }
+
+    private void ValidarQueSePuedaGuardar(Catalogo catalogo)
+    {
+        if (catalogo is null)
         {
             throw new DominioException("El catalogo no puede ser nulo");
         }
 
-        if (_BaseDeDatos.Catalogo is not null)
+        if (_baseDeDatos.Catalogo is not null)
         {
-            throw new DominioException("Ya existe un catálogo, el sistemas admite uno solo");
+            throw new DominioException("Ya existe un catálogo, el sistema admite uno solo");
         }
-        
-        _BaseDeDatos.Catalogo = catalogo;
     }
 }
