@@ -81,6 +81,11 @@ public class TipoUsuario
     {
         return MaxPrestamosConcurrentes is null || prestamosVigentes < MaxPrestamosConcurrentes;
     }
+
+    public bool PermiteUnidades(int cantidadSolicitada)
+    {
+        return false;
+    }
     private TipoUsuario(string nombre, int? maxPrestamosConcurrentes,HashSet<Permiso> permisos)
     {
         this.Nombre = nombre;

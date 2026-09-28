@@ -335,5 +335,95 @@ public sealed class TipoUsuarioTests
 
         Assert.IsFalse(resultado);
     }
+
+    [TestMethod]
+    [DataRow(1)]
+    [DataRow(2)]
+    public void PermiteUnidades_EstudianteHastaElMaximo_DevuelveTrue(int cantidadSolicitada)
+    {
+        var tipo = TipoUsuario.Estudiante;
+        
+        var resultado = tipo.PermiteUnidades(cantidadSolicitada);
+        
+        Assert.IsTrue(resultado);
+    }
+    
+    [TestMethod]
+    [DataRow(3)]
+    [DataRow(4)]
+    public void PermiteUnidades_EstudianteSobreElMaximo_DevuelveFalse(int cantidadSolicitada)
+    {
+        var tipo = TipoUsuario.Estudiante;
+        
+        var resultado = tipo.PermiteUnidades(cantidadSolicitada);
+        
+        Assert.IsFalse(resultado);
+    }
+    
+    [TestMethod]
+    [DataRow(1)]
+    [DataRow(40)]
+    public void PermiteUnidades_DocenteHastaElMaximo_DevuelveTrue(int cantidadSolicitada)
+    {
+        var tipo = TipoUsuario.Docente;
+    
+        var resultado = tipo.PermiteUnidades(cantidadSolicitada);
+    
+        Assert.IsTrue(resultado);
+    }
+
+    [TestMethod]
+    [DataRow(41)]
+    [DataRow(42)]
+    public void PermiteUnidades_DocenteSobreElMaximo_DevuelveFalse(int cantidadSolicitada)
+    {
+        var tipo = TipoUsuario.Docente;
+    
+        var resultado = tipo.PermiteUnidades(cantidadSolicitada);
+    
+        Assert.IsFalse(resultado);
+    }
+
+    [TestMethod]
+    [DataRow(1)]
+    [DataRow(1000)]
+    public void PermiteUnidades_AdministradorConCualquierCantidad_DevuelveTrue(int cantidadSolicitada)
+    {
+        var tipo = TipoUsuario.Administrador;
+    
+        var resultado = tipo.PermiteUnidades(cantidadSolicitada);
+    
+        Assert.IsTrue(resultado);
+    }
+
+    [TestMethod]
+    public void PermiteUnidades_FuncionarioCEConUnaUnidad_DevuelveFalse()
+    {
+        var tipo = TipoUsuario.FuncionarioCE;
+    
+        var resultado = tipo.PermiteUnidades(1);
+    
+        Assert.IsFalse(resultado);
+    }
+
+    [TestMethod]
+    public void PermiteUnidades_SupervisorConUnaUnidad_DevuelveFalse()
+    {
+        var tipo = TipoUsuario.Supervisor;
+    
+        var resultado = tipo.PermiteUnidades(1);
+    
+        Assert.IsFalse(resultado);
+    }
+
+    [TestMethod]
+    public void PermiteUnidades_SinPermisosConUnaUnidad_DevuelveFalse()
+    {
+        var tipo = TipoUsuario.SinPermisos;
+    
+        var resultado = tipo.PermiteUnidades(1);
+    
+        Assert.IsFalse(resultado);
+    }
 }
     
