@@ -6,6 +6,10 @@ public class TipoUsuario
 {
     public string Nombre { get; }
     private readonly HashSet<Permiso> permisos;
+    public static IReadOnlyList<TipoUsuario> Todos()
+    {
+        return Array.Empty<TipoUsuario>();
+    }
 
     public static TipoUsuario SinPermisos { get; } = new TipoUsuario(
         "Sin permisos",

@@ -222,4 +222,22 @@ public sealed class TipoUsuarioTests
         Assert.AreEqual("Sin permisos", nombre);
     }
 
+    [TestMethod]
+    public void Todos_SinArgumentos_DevuelveLosSeisTiposDeUsuario()
+    {
+        var esperados = new[]
+        {
+            TipoUsuario.SinPermisos,
+            TipoUsuario.Estudiante,
+            TipoUsuario.Docente,
+            TipoUsuario.FuncionarioCE,
+            TipoUsuario.Supervisor,
+            TipoUsuario.Administrador
+        };
+        
+        var todos = TipoUsuario.Todos().ToList();
+        
+        CollectionAssert.AreEquivalent(esperados, todos);
+    }
+
 }
