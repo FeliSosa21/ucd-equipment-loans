@@ -47,4 +47,17 @@ public class RepositorioUsuarioTests
 
         Assert.IsNull(resultado);
     }
+
+    [TestMethod]
+    public void ObtenerUsuarioPorCorreo_CorreoConMayusculas_DevuelveElUsuario()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        Usuario usuario = new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa", correo: "felipe@hotmail.com",
+            contrasena: "VivaLaOrt2026");
+        repositorio.AgregarUsuario(usuario);
+
+        Usuario? resultado = repositorio.ObtenerUsuarioPorCorreo(correo: "FelIpE@hotmail.COM");
+        Assert.AreEqual(usuario, resultado);
+    }
 }
