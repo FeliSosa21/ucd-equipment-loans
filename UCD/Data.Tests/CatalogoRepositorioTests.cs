@@ -51,6 +51,20 @@ public sealed class CatalogoRepositorioTests
 
         Assert.ThrowsException<DominioException>(() => repositorio.Guardar(null!));
     }
+
+    [TestMethod]
+    public void Guardar_YaExisteUnCatalogo_LanzaDominioException()
+    {
+        var memoria = new BaseDeDatosEnMemoria();
+        var repositorio = new CatalogoRepositorio(memoria);
+        
+        var catalogo = CrearCatalogo();
+        repositorio.Guardar(catalogo);
+        
+        var catalogoNuevo = CrearCatalogo(nombre: "catalogo nuevo");
+        
+        Assert.ThrowsException<DominioException>(() => repositorio.Guardar(catalogoNuevo));
+    }
     
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
