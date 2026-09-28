@@ -57,7 +57,7 @@ public class Catalogo
     {
         foreach (var tipoExistente in Tipos)
         {
-            if (string.Equals(tipoExistente.Nombre, nombre, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(tipoExistente.Nombre, nombre.Trim(), StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
