@@ -10,4 +10,5 @@ public sealed class DominioExceptionTests
 
         Assert.AreEqual("El nombre es inválido.", excepcion.Message);
     }
+    
 }
