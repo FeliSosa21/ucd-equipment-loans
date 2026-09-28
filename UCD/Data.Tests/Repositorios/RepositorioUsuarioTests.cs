@@ -27,7 +27,7 @@ public class RepositorioUsuarioTests
         Usuario usuario = new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa", correo: "felipe@hotmail.com", contrasena: "VivaLaOrt2026");
         repositorio.AgregarUsuario(usuario);
 
-        Usuario resultado = repositorio.ObtenerUsuarioPorDni(dni: "12345672");
+        Usuario? resultado = repositorio.ObtenerUsuarioPorDni(dni: "12345672");
 
         Assert.AreEqual(usuario, resultado);
     }
