@@ -306,6 +306,34 @@ public sealed class TipoUsuarioTests
         
         Assert.IsTrue(resultado);
     }
-    
+    [TestMethod]
+    public void PuedeAgregarPrestamo_FuncionarioCESinPrestamos_DevuelveFalse()
+    {
+        var tipo = TipoUsuario.FuncionarioCE;
+
+        var resultado = tipo.PuedeAgregarPrestamo(0);
+
+        Assert.IsFalse(resultado);
+    }
+
+    [TestMethod]
+    public void PuedeAgregarPrestamo_SupervisorSinPrestamos_DevuelveFalse()
+    {
+        var tipo = TipoUsuario.Supervisor;
+
+        var resultado = tipo.PuedeAgregarPrestamo(0);
+
+        Assert.IsFalse(resultado);
+    }
+
+    [TestMethod]
+    public void PuedeAgregarPrestamo_SinPermisosSinPrestamos_DevuelveFalse()
+    {
+        var tipo = TipoUsuario.SinPermisos;
+
+        var resultado = tipo.PuedeAgregarPrestamo(0);
+
+        Assert.IsFalse(resultado);
+    }
 }
     
