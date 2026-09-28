@@ -22,6 +22,11 @@ public class CatalogoRepositorio
         {
             throw new DominioException("El catalogo no puede ser nulo");
         }
+
+        if (_BaseDeDatos.Catalogo is not null)
+        {
+            throw new DominioException("Ya existe un catálogo, el sistemas admite uno solo");
+        }
         
         _BaseDeDatos.Catalogo = catalogo;
     }
