@@ -88,14 +88,25 @@ public sealed class CatalogoTests
         var tipoEquipamiento = CrearTipo(nombre: "Proyector Epson EB-770FI");
         var tipoEquipamientoNombreEnMayusculas = CrearTipo(nombre: "PROYECTOR EPSON EB-770Fi");
         catalogo.AgregarTipo(tipoEquipamiento);
+        
         Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamientoNombreEnMayusculas));
+    }
+    
+    [TestMethod]
+    public void AgregarTipo_NombreRepetidoConEspaciosEnLosExtremos_LanzaDominioException()
+    {
+        var catalogo = CrearCatalogo();
+        var tipoEquipamiento = CrearTipo(nombre: "Proyector Epson EB-770Fi");
+        var tipoEquipamientoEspacioAlPrincipoYAlFinal =CrearTipo(nombre: " Proyector Epson EB-770Fi ");
+        catalogo.AgregarTipo(tipoEquipamiento);
+        
+        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamientoEspacioAlPrincipoYAlFinal));
     }
     
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
     }
-    
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson EB-770Fi",
         string descripcion = "Proyector para aulas",
