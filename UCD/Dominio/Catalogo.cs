@@ -44,6 +44,14 @@ public class Catalogo
         {
             throw new DominioException("El tipo no puede ser vacio");
         }
+
+        foreach (var tipoExistente in Tipos)
+        {
+            if (tipoExistente.Nombre == tipo.Nombre)
+            {
+                throw new DominioException("Ya existe un tipo de equipamiento con ese nombre");
+            }
+        }
         
         Tipos.Add(tipo);
     }
