@@ -58,7 +58,7 @@ public class Catalogo
         string nombreSinEspacios = nombre.Trim();
         foreach (var tipoExistente in Tipos)
         {
-            if (string.Equals(tipoExistente.Nombre, nombreSinEspacios, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(tipoExistente.Nombre.Trim(), nombreSinEspacios, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
