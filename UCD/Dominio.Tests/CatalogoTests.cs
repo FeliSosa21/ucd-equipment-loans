@@ -59,6 +59,15 @@ public sealed class CatalogoTests
 
         CollectionAssert.Contains(catalogo.Tipos, tipoEquipamiento);
     }
+
+    [TestMethod]
+    public void AgregarTipo_TipoNull_LanzaDominioException()
+    {
+        var catalogo = CrearCatalogo();
+        
+        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(null));
+        
+    }
     
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
