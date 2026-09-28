@@ -12,8 +12,7 @@ public class RepositorioUsuarioTests
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        Usuario usuario = new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa", correo: "felipe@hotmail.com",
-            contrasena: "VivaLaOrt2026");
+        Usuario usuario = CrearUsuario();
 
         repositorio.AgregarUsuario(usuario);
 
@@ -25,8 +24,7 @@ public class RepositorioUsuarioTests
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        Usuario usuario = new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa", correo: "felipe@hotmail.com",
-            contrasena: "VivaLaOrt2026");
+        Usuario usuario = CrearUsuario();
         repositorio.AgregarUsuario(usuario);
 
         Usuario? resultado = repositorio.ObtenerUsuarioPorDni(dni: "12345672");
@@ -39,8 +37,7 @@ public class RepositorioUsuarioTests
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        Usuario usuario = new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa", correo: "felipe@hotmail.com",
-            contrasena: "VivaLaOrt2026");
+        Usuario usuario = CrearUsuario();
         repositorio.AgregarUsuario(usuario);
 
         Usuario? resultado = repositorio.ObtenerUsuarioPorDni(dni: "45678905");
@@ -48,13 +45,18 @@ public class RepositorioUsuarioTests
         Assert.IsNull(resultado);
     }
 
+    private static Usuario CrearUsuario()
+    {
+        return new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa", correo: "felipe@hotmail.com",
+            contrasena: "VivaLaOrt2026");
+    }
+
     [TestMethod]
     public void ObtenerUsuarioPorCorreo_CorreoConMayusculas_DevuelveElUsuario()
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        Usuario usuario = new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa", correo: "felipe@hotmail.com",
-            contrasena: "VivaLaOrt2026");
+        Usuario usuario = CrearUsuario();
         repositorio.AgregarUsuario(usuario);
 
         Usuario? resultado = repositorio.ObtenerUsuarioPorCorreo(correo: "FelIpE@hotmail.COM");
