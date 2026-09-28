@@ -65,7 +65,7 @@ public sealed class CatalogoTests
     {
         var catalogo = CrearCatalogo();
         
-        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(null));
+        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(null!));
         
     }
     
