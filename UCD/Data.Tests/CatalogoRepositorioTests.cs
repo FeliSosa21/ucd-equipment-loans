@@ -42,6 +42,15 @@ public sealed class CatalogoRepositorioTests
         var resultado = segundoRepositorio.Obtener();
         Assert.AreSame(catalogo, resultado);
     }
+
+    [TestMethod]
+    public void Guardar_CatalogoNull_LanzaDominioException()
+    {
+        var memoria = new BaseDeDatosEnMemoria();
+        var repositorio = new CatalogoRepositorio(memoria);
+
+        Assert.ThrowsException<DominioException>(() => repositorio.Guardar(null!));
+    }
     
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
