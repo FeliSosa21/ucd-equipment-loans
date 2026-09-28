@@ -166,6 +166,60 @@ public sealed class TipoUsuarioTests
             Assert.IsTrue(resultado, $"El administrador deberia tener {permiso}");
         }
     }
+
+    [TestMethod]
+    public void Nombre_Administrador_DevuelveAdministrador()
+    {
+        var tipo = TipoUsuario.Administrador;
+
+        var nombre = tipo.Nombre;
+        
+        Assert.AreEqual("Administrador", nombre);
+    }
+    [TestMethod]
+    public void Nombre_Docente_DevuelveDocente()
+    {
+        var tipo = TipoUsuario.Docente;
+
+        var nombre = tipo.Nombre;
     
+        Assert.AreEqual("Docente", nombre);
+    }
+    [TestMethod]
+    public void Nombre_Estudiante_DevuelveEstudiante()
+    {
+        var tipo = TipoUsuario.Estudiante;
+
+        var nombre = tipo.Nombre;
+    
+        Assert.AreEqual("Estudiante", nombre);
+    }
+    [TestMethod]
+    public void Nombre_FuncionarioCE_DevuelveFuncionarioDelCentroDeEquipamiento()
+    {
+        var tipo = TipoUsuario.FuncionarioCE;
+
+        var nombre = tipo.Nombre;
+    
+        Assert.AreEqual("Funcionario del centro de equipamiento", nombre);
+    }
+    [TestMethod]
+    public void Nombre_Supervisor_DevuelveSupervisor()
+    {
+        var tipo = TipoUsuario.Supervisor;
+
+        var nombre = tipo.Nombre;
+    
+        Assert.AreEqual("Supervisor", nombre);
+    }
+    [TestMethod]
+    public void Nombre_SinPermisos_DevuelveSinPermisos()
+    {
+        var tipo = TipoUsuario.SinPermisos;
+
+        var nombre = tipo.Nombre;
+    
+        Assert.AreEqual("Sin permisos", nombre);
+    }
 
 }

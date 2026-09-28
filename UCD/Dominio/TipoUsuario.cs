@@ -1,7 +1,10 @@
-﻿namespace Dominio;
+﻿using System.Reflection;
+
+namespace Dominio;
 
 public class TipoUsuario
 {
+    public string Nombre { get; set; }
     private readonly HashSet<Permiso> permisos;
 
     public static TipoUsuario SinPermisos { get; } = new TipoUsuario(new HashSet<Permiso>());
