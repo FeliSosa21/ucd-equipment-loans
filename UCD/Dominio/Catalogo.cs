@@ -55,9 +55,10 @@ public class Catalogo
     
     private bool ChequearNombreExistente(string nombre)
     {
+        string nombreSinEspacios = nombre.Trim();
         foreach (var tipoExistente in Tipos)
         {
-            if (string.Equals(tipoExistente.Nombre, nombre.Trim(), StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(tipoExistente.Nombre, nombreSinEspacios, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
