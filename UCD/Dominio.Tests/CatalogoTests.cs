@@ -40,18 +40,39 @@ public sealed class CatalogoTests
     {
         Assert.ThrowsException<DominioException>(() => CrearCatalogo(nombre: "     "));
     }
-
-    private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
-    {
-        return new Catalogo(nombre);
-    }
-
+    
     [TestMethod]
     public void Constructor_CatalogoNuevo_NoTieneTipos()
     {
         var catalogo = CrearCatalogo();
         
         Assert.AreEqual(0, catalogo.Tipos.Count);
+    }
+
+    [TestMethod]
+    public void AgregarTipo_TipoValido_SeAgregaTipo()
+    {
+        var catalogo = CrearCatalogo();
+        var tipoEquipamiento = CrearTipo();
+        
+        catalogo.AgregarTipo(tipoEquipamiento);
+
+        CollectionAssert.Contains(catalogo.Tipos, tipoEquipamiento);
+    }
+    
+    private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
+    {
+        return new Catalogo(nombre);
+    }
+    
+    private static TipoEquipamiento CrearTipo(
+        string nombre = "Proyector Epson EB-770Fi",
+        string descripcion = "Proyector para aulas",
+        int duracionMaxPrestamo = 8,
+        bool requiereAprobacion = true,
+        Categoria categoria = Categoria.Audiovisual)
+    {
+        return new TipoEquipamiento(nombre, descripcion, duracionMaxPrestamo, requiereAprobacion, categoria);
     }
 }
 
