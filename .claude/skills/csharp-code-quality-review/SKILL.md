@@ -7,7 +7,13 @@ description: Revisa clases C#, tests MSTest y componentes Razor contra los linea
 
 Cubre los capítulos de Clean Code que pide la letra: 1 al 10 y 12.
 
-## Restricción importante — leer primero
+## Restricciones importantes — leer primero
+
+**Solo lectura.** Esta skill revisa y reporta: no edites, crees ni borres archivos,
+no ejecutes comandos que cambien el repositorio y no hagas commits. Los cambios los
+decide y aplica el equipo después de leer el reporte.
+
+### Funcionalidades manuales
 
 Este proyecto tiene 3 funcionalidades de desarrollo manual sin asistencia de IA:
 **Registro en el sistema, Consultas al catálogo, y Préstamos**.
@@ -18,6 +24,11 @@ código concreto — solo podés señalar en términos generales qué principio 
 Code podría estar en juego (ej. "este método parece tener más de una responsabilidad"),
 sin mostrar cómo arreglarlo. Para el resto del proyecto (dominio de otras funcionalidades,
 capa de datos, UI, etc.) no hay restricción y podés sugerir cambios concretos.
+
+Si no podés preguntar (por ejemplo, en una revisión automática de un PR), deducilo
+por la rama y los archivos: `feature/registro`, `Usuario`, `ServicioUsuario` o
+`Registro.razor` son de Registro; lo mismo con catálogo y préstamos. Ante la duda,
+tratalo como funcionalidad manual.
 
 ## Cómo revisar
 
@@ -76,13 +87,16 @@ Fuente principal: diapositivas del curso "04.10e Clean Code 1" (G. Mousqués).
 
 ### 5. Objetos y estructuras de datos (Clean Code cap. 6)
 - Encapsulamiento: propiedades con `private set` cuando no deberían modificarse desde afuera
-  (revisar contra el diagrama de dominio — ¿esa propiedad tiene un método propio para modificarse,
-  tipo `ModificarNombre`, o se está exponiendo un `set` público que rompe esa regla?)
+  (¿esa propiedad tiene un método propio para modificarse, tipo `ModificarNombre`, o se
+  está exponiendo un `set` público que rompe esa regla? El diagrama de dominio no está en
+  el repositorio en un formato legible: basate en el código y, si hay dudas, preguntá)
 - Evitar exponer estructura interna innecesariamente
 
 ### 6. Manejo de errores (Clean Code cap. 7)
 - Excepciones en vez de códigos de error o valores mágicos de retorno
 - Mensajes de excepción descriptivos (no genéricos tipo "Error")
+- Las reglas del dominio lanzan `DominioException`, no `Exception` ni `ArgumentException`
+- Mensajes de excepción sin tildes ni ñ (convención del equipo, ej. "El correo no puede estar vacio")
 - No tragarse excepciones con catch vacíos
 
 ### 7. Límites (Clean Code cap. 8)
@@ -97,14 +111,21 @@ Fuente principal: diapositivas del curso "04.10e Clean Code 1" (G. Mousqués).
 Aplicar a los archivos de `*.Tests`:
 - Un concepto por test: si un test verifica dos comportamientos distintos, dividirlo
 - Nombre descriptivo con el patrón que ya usa el proyecto:
-  `Metodo_Escenario_ResultadoEsperado` (ej. `Constructor_FechaValida_GuardaLaFecha`)
+  `Accion_Escenario_ResultadoEsperado` (ej. `Constructor_FechaValida_GuardaLaFecha`),
+  con el mismo vocabulario en los tests de un mismo tema
 - Estructura Arrange / Act / Assert clara, separada por líneas en blanco
 - F.I.R.S.T.: rápidos, independientes entre sí (sin estado compartido que dependa
   del orden), repetibles (sin `DateTime.Now` ni datos aleatorios sin controlar),
   autovalidados (un Assert que decide, sin revisar la consola) y escritos antes
   del código (TDD)
 - Tests limpios como código de producción: sin duplicación, usar métodos de ayuda
-  para crear objetos (ej. `CrearDevolucion(...)`) en vez de repetir constructores
+  para crear objetos (ej. `CrearDevolucion(...)`) en vez de repetir constructores.
+  Esos helpers se llaman con argumentos con nombre (`CrearUsuario(correo: "...")`):
+  un argumento posicional puede cargar el valor en el parámetro equivocado
+- Casos de una misma clase de equivalencia agrupados con `[DataRow]` en un solo
+  `[TestMethod]`, en vez de un test copiado por cada valor
+- Además de los tests que esperan excepción, al menos un test de control con datos
+  válidos por cada regla
 - Para excepciones, verificar el tipo concreto (`DominioException`) y, si aporta,
   el mensaje
 - Bordes cubiertos: valores límite (ej. 2 y 50 caracteres, y también 1 y 51),
@@ -133,7 +154,9 @@ Las cuatro reglas del diseño simple, en orden de prioridad:
   proyecto mezcla los dos estilos. El proyecto prefiere propiedades autoimplementadas
 - `namespace` file-scoped (`namespace Dominio;`) — es el estilo que ya usa este proyecto,
   mantenerlo consistente en archivos nuevos
-- Usar `var` cuando el tipo es obvio por el contexto (lado derecho de la asignación)
+- Tipos de variables: Microsoft permite `var` cuando el tipo es obvio por el lado derecho,
+  pero el proyecto usa tipos explícitos. No marcar los tipos explícitos como error; sí
+  señalar un `var` cuando el tipo no se deduce de la línea, o si un archivo mezcla estilos
 
 ### 12. Componentes Razor (UI de Blazor)
 Aplicar a los archivos `.razor` y `.razor.css`:
@@ -155,8 +178,16 @@ Organizá los hallazgos por archivo. Para cada uno:
 ```
 ### NombreDelArchivo.cs
 
-- **Línea X** — [categoría, ej: Nombres / Funciones / Manejo de errores]
+- **Línea X** — [categoría, ej: Nombres / Funciones / Manejo de errores] — severidad
   Qué está mal y por qué importa.
 ```
+
+Severidad:
+- **Alta**: puede causar un bug, rompe una regla del dominio o deja un caso sin test.
+- **Media**: dificulta leer o mantener el código (nombres engañosos, métodos largos,
+  duplicación, números mágicos).
+- **Baja**: formato o estilo.
+
+Ordená los hallazgos de cada archivo de mayor a menor severidad.
 
 Al final, un resumen de 1-2 líneas con la impresión general (no una lista repetida).
