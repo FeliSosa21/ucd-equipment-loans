@@ -270,7 +270,30 @@ public sealed class TipoUsuarioTests
         
         Assert.IsFalse(resultado);
     }
-    
+    [TestMethod]
+    [DataRow(0)]
+    [DataRow(1)]
+    [DataRow(2)]
+    public void PuedeAgregarPrestamo_DocenteDebajoDelMaximo_DevuelveTrue(int prestamosVigentes)
+    {
+        var tipo = TipoUsuario.Docente;
+
+        var resultado = tipo.PuedeAgregarPrestamo(prestamosVigentes);
+
+        Assert.IsTrue(resultado);
+    }
+
+    [TestMethod]
+    [DataRow(3)]
+    [DataRow(4)]
+    public void PuedeAgregarPrestamo_DocenteEnElMaximoOMas_DevuelveFalse(int prestamosVigentes)
+    {
+        var tipo = TipoUsuario.Docente;
+
+        var resultado = tipo.PuedeAgregarPrestamo(prestamosVigentes);
+
+        Assert.IsFalse(resultado);
+    }
     
 }
     
