@@ -1,13 +1,12 @@
-﻿using System.Reflection;
-
-namespace Dominio;
+﻿namespace Dominio;
 
 public class TipoUsuario
 {
-    public string Nombre { get; }
-    private readonly int? MaxPrestamosConcurrentes;
+    private readonly int? maxPrestamosConcurrentes;
     private readonly int? maxUnidadesPorPrestamo;
     private readonly HashSet<Permiso> permisos;
+
+    public string Nombre { get; }
 
     public static TipoUsuario SinPermisos { get; } = new TipoUsuario(
         "Sin permisos",
@@ -66,14 +65,16 @@ public class TipoUsuario
             Permiso.RegistrarDevolucion,
             Permiso.ConsultarPrestamos
         });
+
     public static TipoUsuario Administrador { get; } = new TipoUsuario(
         "Administrador",
         maxPrestamosConcurrentes: null,
         maxUnidadesPorPrestamo: null,
         new HashSet<Permiso>(Enum.GetValues<Permiso>()));
+
     public static IReadOnlyList<TipoUsuario> Todos()
     {
-        return new []
+        return new[]
         {
             SinPermisos,
             Estudiante,
@@ -84,19 +85,10 @@ public class TipoUsuario
         };
     }
 
-    public bool PuedeAgregarPrestamo(int prestamosVigentes)
-    {
-        return MaxPrestamosConcurrentes is null || prestamosVigentes < MaxPrestamosConcurrentes;
-    }
-
-    public bool PermiteUnidades(int cantidadSolicitada)
-    {
-        return maxUnidadesPorPrestamo is null || cantidadSolicitada <= maxUnidadesPorPrestamo;
-    }
     private TipoUsuario(string nombre, int? maxPrestamosConcurrentes, int? maxUnidadesPorPrestamo, HashSet<Permiso> permisos)
     {
-        this.Nombre = nombre;
-        this.MaxPrestamosConcurrentes = maxPrestamosConcurrentes;
+        Nombre = nombre;
+        this.maxPrestamosConcurrentes = maxPrestamosConcurrentes;
         this.maxUnidadesPorPrestamo = maxUnidadesPorPrestamo;
         this.permisos = permisos;
     }
@@ -104,5 +96,15 @@ public class TipoUsuario
     public bool TienePermiso(Permiso permiso)
     {
         return permisos.Contains(permiso);
+    }
+
+    public bool PuedeAgregarPrestamo(int prestamosVigentes)
+    {
+        return maxPrestamosConcurrentes is null || prestamosVigentes < maxPrestamosConcurrentes;
+    }
+
+    public bool PermiteUnidades(int cantidadSolicitada)
+    {
+        return maxUnidadesPorPrestamo is null || cantidadSolicitada <= maxUnidadesPorPrestamo;
     }
 }
