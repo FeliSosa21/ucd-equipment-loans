@@ -19,7 +19,7 @@ public class ServicioSesion
 
         if (usuario is null || !usuario.ContrasenaEsCorrecta(contrasena))
         {
-            throw new DominioException("Correo o contrasena incorrectos");
+            throw new ServicioException("Correo o contrasena incorrectos");
         }
 
         return new UsuarioSesionDto { Correo = usuario.Correo, Nombre = usuario.Nombre };
