@@ -32,3 +32,7 @@
     padding: .6rem 1.25rem .7rem; box-shadow: 0 -1px 2px rgba(0, 0, 0, .2);
 }
 #blazor-error-ui .dismiss { cursor: pointer; position: absolute; right: .75rem; top: .5rem; }
+.sesion { align-items: center; }
+.usuario { display: flex; flex-direction: column; line-height: 1.2; text-align: right; }
+.usuario strong { font-size: .85rem; }
+.usuario small { font-size: .7rem; color: var(--ink-faint); }

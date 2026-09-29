@@ -1,10 +1,10 @@
 @page "/ingresar"
 @layout UI.Components.Layout.AuthLayout
-@rendermode InteractiveServer
 @using DTOs
 @using Servicios
 @inject NavigationManager Navigation
 @inject ServicioSesion ServicioSesion
+@inject SesionActual SesionActual
 
 <PageTitle>UCD · Ingresar</PageTitle>
 
@@ -61,6 +61,7 @@
         try
         {
             UsuarioSesionDto sesion = ServicioSesion.IniciarSesion(_correo.Trim(), _contrasena);
+            SesionActual.Iniciar(sesion);
             Navigation.NavigateTo(PaginaDeInicio(sesion));
         }
         catch (ServicioException ex)

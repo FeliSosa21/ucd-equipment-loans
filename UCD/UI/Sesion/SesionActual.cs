@@ -1,0 +1,25 @@
+using DTOs;
+
+namespace UI.Sesion;
+
+// Guarda quien esta logueado mientras dure la conexion del navegador (circuito de Blazor).
+public class SesionActual
+{
+    public UsuarioSesionDto? Usuario { get; private set; }
+
+    public bool EstaIniciada => Usuario is not null;
+
+    public event Action? Cambio;
+
+    public void Iniciar(UsuarioSesionDto usuario)
+    {
+        Usuario = usuario;
+        Cambio?.Invoke();
+    }
+
+    public void Cerrar()
+    {
+        Usuario = null;
+        Cambio?.Invoke();
+    }
+}

@@ -2,6 +2,7 @@ using Data;
 using Data.Repositorios;
 using Servicios;
 using UI.Components;
+using UI.Sesion;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,9 @@ builder.Services.AddSingleton<Memoria>();
 builder.Services.AddScoped<RepositorioUsuario>();
 builder.Services.AddScoped<ServicioUsuario>();
 builder.Services.AddScoped<ServicioSesion>();
+
+// Quien esta logueado: uno por conexion del navegador.
+builder.Services.AddScoped<SesionActual>();
 
 var app = builder.Build();
 
