@@ -69,9 +69,10 @@ public class Catalogo
 
     public TipoEquipamiento? BuscarTipoPorNombre(string nombre)
     {
+        string nombreSinEspacios = nombre.Trim();
         foreach (var tipo in Tipos)
         {
-            if (tipo.Nombre == nombre)
+            if (String.Equals(tipo.Nombre.Trim(), nombreSinEspacios, StringComparison.OrdinalIgnoreCase))
             {
                 return tipo;
             }
