@@ -1,6 +1,5 @@
 using Data;
 using Data.Repositorios;
-using Dominio;
 using DTOs;
 
 namespace Servicios.Tests;
@@ -33,7 +32,7 @@ public class ServicioSesionTests
         new ServicioUsuario(repositorio).Registrar(CrearDto());
         ServicioSesion servicio = new ServicioSesion(repositorio);
 
-        Assert.ThrowsException<DominioException>(() => servicio.IniciarSesion(CorreoValido, "OtraClave2026"));
+        Assert.ThrowsException<ServicioException>(() => servicio.IniciarSesion(CorreoValido, "OtraClave2026"));
     }
 
     [TestMethod]
@@ -44,7 +43,7 @@ public class ServicioSesionTests
         new ServicioUsuario(repositorio).Registrar(CrearDto());
         ServicioSesion servicio = new ServicioSesion(repositorio);
 
-        Assert.ThrowsException<DominioException>(() => servicio.IniciarSesion("otro@hotmail.com", ContrasenaValida));
+        Assert.ThrowsException<ServicioException>(() => servicio.IniciarSesion("otro@hotmail.com", ContrasenaValida));
     }
 
     private static UsuarioDto CrearDto()
