@@ -414,6 +414,16 @@ public sealed class UsuarioTests
         Assert.AreEqual(TipoUsuario.SinPermisos, usuario.Tipo);
     }
 
+    [TestMethod]
+    public void ContrasenaEsCorrecta_MismaContrasena_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+
+        bool resultado = usuario.ContrasenaEsCorrecta(ContrasenaValida);
+
+        Assert.IsTrue(resultado);
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
