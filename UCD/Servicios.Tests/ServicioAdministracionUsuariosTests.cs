@@ -9,6 +9,7 @@ namespace Servicios.Tests;
 public class ServicioAdministracionUsuariosTests
 {
     private const string DniValido = "12345672";
+    private const string CorreoNuevo = "ana@hotmail.com";
 
     [TestMethod]
     public void ListarUsuarios_ConUnRegistrado_LoDevuelveConSuTipoYEstado()
@@ -71,15 +72,57 @@ public class ServicioAdministracionUsuariosTests
         Assert.AreEqual(EstadoUsuario.Activo, repositorio.ObtenerUsuarioPorDni(DniValido)!.Estado);
     }
 
+    [TestMethod]
+    public void CrearUsuario_DatosValidos_QuedaConElTipoYLaContrasenaPredeterminada()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+
+        servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Estudiante.Nombre);
+
+        Usuario? creado = repositorio.ObtenerUsuarioPorCorreo(CorreoNuevo);
+        Assert.IsNotNull(creado);
+        Assert.AreEqual(TipoUsuario.Estudiante, creado.Tipo);
+        Assert.IsTrue(creado.ContrasenaEsCorrecta(ServicioAdministracionUsuarios.ContrasenaPredeterminada));
+        Assert.IsTrue(creado.DebeCambiarContrasena);
+    }
+
+    [TestMethod]
+    public void CrearUsuario_DniDuplicado_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+        UsuarioDto dto = CrearDtoNuevo();
+        dto.Dni = DniValido;
+
+        Assert.ThrowsException<ServicioException>(() => servicio.CrearUsuario(dto, TipoUsuario.Estudiante.Nombre));
+    }
+
+    [TestMethod]
+    public void CrearUsuario_TipoInexistente_NoLoGuarda()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.CrearUsuario(CrearDtoNuevo(), "Rector"));
+        Assert.IsNull(repositorio.ObtenerUsuarioPorCorreo(CorreoNuevo));
+    }
+
+    private static UsuarioDto CrearDtoNuevo()
+    {
+        return new UsuarioDto
+        {
+            Dni = "45678905", Nombre = "Ana", Apellido = "Perez", Correo = CorreoNuevo
+        };
+    }
+
     private static ServicioAdministracionUsuarios CrearServicioConUnUsuario(out RepositorioUsuario repositorio)
     {
         Memoria memoria = new Memoria();
         repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio).Registrar(new UsuarioDto
+        ServicioUsuario servicioUsuario = new ServicioUsuario(repositorio);
+        servicioUsuario.Registrar(new UsuarioDto
         {
             Dni = DniValido, Nombre = "Felipe", Apellido = "Sosa", Correo = "felipe@hotmail.com",
             Contrasena = "VivaLaOrt2026"
         });
-        return new ServicioAdministracionUsuarios(repositorio);
+        return new ServicioAdministracionUsuarios(repositorio, servicioUsuario);
     }
 }
