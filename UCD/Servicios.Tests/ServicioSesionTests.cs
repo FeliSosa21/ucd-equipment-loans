@@ -1,0 +1,34 @@
+using Data;
+using Data.Repositorios;
+using DTOs;
+
+namespace Servicios.Tests;
+
+[TestClass]
+public class ServicioSesionTests
+{
+    private const string CorreoValido = "felipe@hotmail.com";
+    private const string ContrasenaValida = "VivaLaOrt2026";
+
+    [TestMethod]
+    public void IniciarSesion_CredencialesCorrectas_DevuelveLaSesion()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        ServicioSesion servicio = new ServicioSesion(repositorio);
+
+        UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, ContrasenaValida);
+
+        Assert.AreEqual(CorreoValido, sesion.Correo);
+        Assert.AreEqual("Felipe", sesion.Nombre);
+    }
+
+    private static UsuarioDto CrearDto()
+    {
+        return new UsuarioDto
+        {
+            Dni = "12345672", Nombre = "Felipe", Apellido = "Sosa", Correo = CorreoValido, Contrasena = ContrasenaValida
+        };
+    }
+}
