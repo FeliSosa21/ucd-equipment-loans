@@ -14,11 +14,7 @@ public class ServicioUsuarioTests
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
         ServicioUsuario servicio = new ServicioUsuario(repositorio);
-        UsuarioDto dto = new UsuarioDto
-        {
-            Dni = "12345672", Nombre = "Felipe", Apellido = "Sosa", Correo = "felipe@hotmail.com",
-            Contrasena = "VivaLaOrt2026"
-        };
+        UsuarioDto dto = CrearDto();
 
         servicio.Registrar(dto);
 
@@ -31,17 +27,10 @@ public class ServicioUsuarioTests
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
         ServicioUsuario servicio = new ServicioUsuario(repositorio);
-        UsuarioDto dto1 = new UsuarioDto
-        {
-            Dni = "12345672", Nombre = "Felipe", Apellido = "Sosa", Correo = "felipe@hotmail.com",
-            Contrasena = "VivaLaOrt2026"
-        };
-        UsuarioDto repetido = new UsuarioDto
-        {
-            Dni = "12345672", Nombre = "Felipe", Apellido = "Sosa", Correo = "felipe@hotmail.com",
-            Contrasena = "VivaLaOrt2026"
-        };
-        servicio.Registrar(dto1);
+        UsuarioDto primero = CrearDto();
+        UsuarioDto repetido = CrearDto(correo: "otro@hotmail.com");
+        servicio.Registrar(primero);
+
         Assert.ThrowsException<DominioException>(() => servicio.Registrar(repetido));
     }
 
@@ -51,18 +40,18 @@ public class ServicioUsuarioTests
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
         ServicioUsuario servicio = new ServicioUsuario(repositorio);
-        UsuarioDto dto1 = new UsuarioDto
-        {
-            Dni = "12345672", Nombre = "Felipe", Apellido = "Sosa", Correo = "felipe@hotmail.com",
-            Contrasena = "VivaLaOrt2026"
-        };
-        UsuarioDto repetido = new UsuarioDto
-        {
-            Dni = "54670643", Nombre = "Felipe", Apellido = "Sosa", Correo = "Felipe@hotmail.COM",
-            Contrasena = "VivaLaOrt2026"
-        };
-        servicio.Registrar(dto1);
+        UsuarioDto primero = CrearDto();
+        UsuarioDto repetido = CrearDto(dni: "45678905", correo: "Felipe@Hotmail.COM");
+        servicio.Registrar(primero);
+
         Assert.ThrowsException<DominioException>(() => servicio.Registrar(repetido));
-        
+    }
+
+    private static UsuarioDto CrearDto(string dni = "12345672", string correo = "felipe@hotmail.com")
+    {
+        return new UsuarioDto
+        {
+            Dni = dni, Nombre = "Felipe", Apellido = "Sosa", Correo = correo, Contrasena = "VivaLaOrt2026"
+        };
     }
 }
