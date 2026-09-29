@@ -109,7 +109,20 @@ public sealed class CatalogoTests
         catalogo.AgregarTipo(segundoTipo);
 
         var resultado = catalogo.BuscarTipoPorNombre(nombre: "Notebook");
+
         Assert.AreSame(segundoTipo, resultado);
+    }
+
+    [TestMethod]
+    public void BuscarTipoPorNombre_NombreInexistente_DevuelveNull()
+    {
+        var catalogo = CrearCatalogo();
+        var tipo = CrearTipo(nombre: "Proyector");
+        catalogo.AgregarTipo(tipo);
+
+        var resultado = catalogo.BuscarTipoPorNombre("Notebook");
+
+        Assert.IsNull(resultado);
     }
 
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
