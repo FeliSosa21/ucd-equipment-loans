@@ -29,6 +29,7 @@ public class ServicioSesion
 
         return new UsuarioSesionDto
         {
+            Dni = usuario.Dni,
             Correo = usuario.Correo,
             Nombre = usuario.Nombre,
             Tipo = usuario.Tipo.Nombre,

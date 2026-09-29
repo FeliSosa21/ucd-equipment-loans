@@ -23,6 +23,7 @@ public class ServicioSesionTests
 
         Assert.AreEqual(CorreoValido, sesion.Correo);
         Assert.AreEqual("Felipe", sesion.Nombre);
+        Assert.AreEqual("12345672", sesion.Dni);
     }
 
     [TestMethod]

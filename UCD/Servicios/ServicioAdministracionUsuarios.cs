@@ -4,7 +4,8 @@ using DTOs;
 
 namespace Servicios;
 
-// Lo que hace el administrador con las cuentas: crear, listar, asignar tipo, desactivar y reactivar.
+// Gestion de cuentas: el administrador crea, lista, asigna tipo, modifica, desactiva y reactiva;
+// cualquier usuario puede modificar sus propios datos (la UI controla quien edita a quien).
 public class ServicioAdministracionUsuarios
 {
     public const string ContrasenaPredeterminada = "Ucd12345";
@@ -50,6 +51,31 @@ public class ServicioAdministracionUsuarios
     {
         Usuario usuario = ObtenerUsuario(dni);
         usuario.AsignarTipo(ObtenerTipo(nombreTipo));
+    }
+
+    public UsuarioResumenDto ObtenerResumen(string dni)
+    {
+        return CrearResumen(ObtenerUsuario(dni));
+    }
+
+    public void ModificarDatos(string dni, string nombre, string apellido, string correo)
+    {
+        Usuario usuario = ObtenerUsuario(dni);
+        Usuario? duenoDelCorreo = _repositorio.ObtenerUsuarioPorCorreo(correo);
+
+        if (duenoDelCorreo != null && duenoDelCorreo != usuario)
+        {
+            throw new ServicioException("El correo ya existe");
+        }
+
+        try
+        {
+            usuario.ModificarDatos(nombre, apellido, correo);
+        }
+        catch (DominioException ex)
+        {
+            throw new ServicioException(ex.Message);
+        }
     }
 
     public void Desactivar(string dni)

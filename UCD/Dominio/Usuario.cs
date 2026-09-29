@@ -48,6 +48,17 @@ public class Usuario
         Estado = EstadoUsuario.Desactivado;
     }
 
+    public void ModificarDatos(string nombre, string apellido, string correo)
+    {
+        ValidarNombreOApellido(nombre, "nombre");
+        ValidarNombreOApellido(apellido, "apellido");
+        ValidarCorreo(correo);
+
+        Nombre = nombre;
+        Apellido = apellido;
+        Correo = correo;
+    }
+
     public void Reactivar()
     {
         Estado = EstadoUsuario.Activo;

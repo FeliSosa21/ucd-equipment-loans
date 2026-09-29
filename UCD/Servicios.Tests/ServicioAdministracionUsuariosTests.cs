@@ -105,6 +105,57 @@ public class ServicioAdministracionUsuariosTests
         Assert.IsNull(repositorio.ObtenerUsuarioPorCorreo(CorreoNuevo));
     }
 
+    [TestMethod]
+    public void ObtenerResumen_UsuarioExistente_DevuelveSusDatos()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        UsuarioResumenDto resumen = servicio.ObtenerResumen(DniValido);
+
+        Assert.AreEqual("Felipe", resumen.Nombre);
+    }
+
+    [TestMethod]
+    public void ModificarDatos_DatosValidos_LosActualiza()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+
+        servicio.ModificarDatos(DniValido, "Pedro", "Suarez", "pedro@hotmail.com");
+
+        Usuario usuario = repositorio.ObtenerUsuarioPorDni(DniValido)!;
+        Assert.AreEqual("Pedro", usuario.Nombre);
+        Assert.AreEqual("pedro@hotmail.com", usuario.Correo);
+    }
+
+    [TestMethod]
+    public void ModificarDatos_MismoCorreoConOtrasMayusculas_LoPermite()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+
+        servicio.ModificarDatos(DniValido, "Felipe", "Sosa", "FELIPE@hotmail.com");
+
+        Assert.AreEqual("FELIPE@hotmail.com", repositorio.ObtenerUsuarioPorDni(DniValido)!.Correo);
+    }
+
+    [TestMethod]
+    public void ModificarDatos_CorreoDeOtroUsuario_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+        servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Estudiante.Nombre);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ModificarDatos(DniValido, "Felipe", "Sosa", CorreoNuevo));
+    }
+
+    [TestMethod]
+    public void ModificarDatos_NombreInvalido_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ModificarDatos(DniValido, "F", "Sosa", "felipe@hotmail.com"));
+    }
+
     private static UsuarioDto CrearDtoNuevo()
     {
         return new UsuarioDto

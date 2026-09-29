@@ -456,6 +456,28 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void ModificarDatos_DatosValidos_LosActualiza()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.ModificarDatos("Pedro", "Suarez", "pedro@hotmail.com");
+
+        Assert.AreEqual("Pedro", usuario.Nombre);
+        Assert.AreEqual("Suarez", usuario.Apellido);
+        Assert.AreEqual("pedro@hotmail.com", usuario.Correo);
+    }
+
+    [TestMethod]
+    public void ModificarDatos_CorreoInvalido_NoCambiaNingunDato()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.ThrowsException<DominioException>(() => usuario.ModificarDatos("Pedro", "Suarez", "pedro@hotmail"));
+        Assert.AreEqual(NombreValido, usuario.Nombre);
+        Assert.AreEqual(CorreoValido, usuario.Correo);
+    }
+
+    [TestMethod]
     public void Reactivar_UsuarioDesactivado_QuedaActivo()
     {
         Usuario usuario = CrearUsuario();
