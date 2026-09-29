@@ -367,7 +367,6 @@ public sealed class UsuarioTests
 
     [TestMethod]
     [DataRow("123456")]
-    [DataRow("1234560")]
     [DataRow("123456789")]
     public void CrearUsuario_DniConLargoInvalido_LanzaExcepcion(string dni)
     {
@@ -412,6 +411,48 @@ public sealed class UsuarioTests
         Usuario usuario = CrearUsuario();
 
         Assert.AreEqual(TipoUsuario.SinPermisos, usuario.Tipo);
+    }
+
+    [TestMethod]
+    public void CrearUsuario_DniCon7Digitos_AgregarCeroAdelante()
+    {
+        Usuario usuario = CrearUsuario(dni: "1234561");
+
+        Assert.AreEqual("01234561", usuario.Dni);
+    }
+
+    [TestMethod]
+    public void ContrasenaEsCorrecta_MismaContrasena_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+
+        bool resultado = usuario.ContrasenaEsCorrecta(ContrasenaValida);
+
+        Assert.IsTrue(resultado);
+    }
+
+    [TestMethod]
+    [DataRow("vivalaort2026")]
+    [DataRow("VIVALAORT2026")]
+    [DataRow("VivalaOrt2027")]
+    [DataRow("")]
+    public void ContrasenaEsCorrecta_ContrasenaDistinta_DevuelveFalse(string contrasena)
+    {
+        Usuario usuario = CrearUsuario();
+
+        bool resultado = usuario.ContrasenaEsCorrecta(contrasena);
+
+        Assert.IsFalse(resultado);
+    }
+
+    [TestMethod]
+    public void Desactivar_UsuarioActivo_QuedaDesactivado()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.Desactivar();
+
+        Assert.AreEqual(EstadoUsuario.Desactivado, usuario.Estado);
     }
 
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,

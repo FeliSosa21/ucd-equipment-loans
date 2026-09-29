@@ -21,6 +21,7 @@ public class Usuario
 
     public Usuario(string dni, string nombre, string apellido, string correo, string contrasena)
     {
+        dni = NormalizarDni(dni);
         ValidarDni(dni);
         ValidarNombreOApellido(nombre, "nombre");
         ValidarNombreOApellido(apellido, "apellido");
@@ -35,6 +36,16 @@ public class Usuario
         Estado = EstadoUsuario.Activo;
         DebeCambiarContrasena = false;
         Tipo = TipoUsuario.SinPermisos;
+    }
+
+    public bool ContrasenaEsCorrecta(string contrasena)
+    {
+        return Contrasena == contrasena;
+    }
+
+    public void Desactivar()
+    {
+        Estado = EstadoUsuario.Desactivado;
     }
 
     private static void ValidarNombreOApellido(string valor, string campo)
@@ -264,6 +275,16 @@ public class Usuario
         int verificadorRecibido = ValorDigito(dni[^1]);
 
         return verificadorCalculado == verificadorRecibido;
+    }
+
+    private static string NormalizarDni(string dni)
+    {
+        if (!string.IsNullOrEmpty(dni) && dni.Length == LargoDni - 1)
+        {
+            return "0" + dni;
+        }
+
+        return dni;
     }
 
     private static int ValorDigito(char c)

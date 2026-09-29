@@ -31,7 +31,21 @@ public class ServicioUsuarioTests
         UsuarioDto repetido = CrearDto(correo: "otro@hotmail.com");
         servicio.Registrar(primero);
 
-        Assert.ThrowsException<DominioException>(() => servicio.Registrar(repetido));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(repetido));
+        Assert.IsNull(repositorio.ObtenerUsuarioPorCorreo(repetido.Correo));
+    }
+
+    [TestMethod]
+    public void Registrar_DniDuplicadoSinCeroAdelante_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        ServicioUsuario servicio = new ServicioUsuario(repositorio);
+        UsuarioDto primero = CrearDto(dni: "01234561");
+        UsuarioDto repetido = CrearDto(dni: "1234561", correo: "otro@hotmail.com");
+        servicio.Registrar(primero);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(repetido));
         Assert.IsNull(repositorio.ObtenerUsuarioPorCorreo(repetido.Correo));
     }
 
@@ -45,7 +59,7 @@ public class ServicioUsuarioTests
         UsuarioDto repetido = CrearDto(dni: "45678905", correo: "Felipe@Hotmail.COM");
         servicio.Registrar(primero);
 
-        Assert.ThrowsException<DominioException>(() => servicio.Registrar(repetido));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(repetido));
         Assert.IsNull(repositorio.ObtenerUsuarioPorDni(repetido.Dni));
     }
 
@@ -57,7 +71,7 @@ public class ServicioUsuarioTests
         ServicioUsuario servicio = new ServicioUsuario(repositorio);
         UsuarioDto dto = CrearDto(dni: "12345678");
 
-        Assert.ThrowsException<DominioException>(() => servicio.Registrar(dto));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(dto));
     }
 
     [TestMethod]
