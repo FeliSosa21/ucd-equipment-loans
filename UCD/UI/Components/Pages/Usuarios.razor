@@ -13,10 +13,60 @@
 </div>
 
 <div class="toolbar">
+    <button class="btn btn-primary btn-sm" @onclick="() => _mostrarAlta = !_mostrarAlta">
+        @(_mostrarAlta ? "Cancelar" : "Nuevo usuario")
+    </button>
     <input class="field" type="search" placeholder="Buscar por nombre, CI o correo"
            aria-label="Buscar usuario" style="min-width: 320px"
            @bind="_busqueda" @bind:event="oninput" />
 </div>
+
+@if (_mostrarAlta)
+{
+    <div class="card alta">
+        <form class="form-grid" @onsubmit="CrearUsuario" novalidate>
+            <div class="form-row">
+                <div>
+                    <label class="lbl" for="alta-ci">Cédula de identidad</label>
+                    <input id="alta-ci" class="field mono" inputmode="numeric" @bind="_nuevo.Dni" />
+                </div>
+                <div>
+                    <label class="lbl" for="alta-tipo">Tipo de usuario</label>
+                    <select id="alta-tipo" class="field" @bind="_tipoNuevo">
+                        @foreach (string tipo in _tipos)
+                        {
+                            <option value="@tipo">@tipo</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label class="lbl" for="alta-nombre">Nombre</label>
+                    <input id="alta-nombre" class="field" @bind="_nuevo.Nombre" />
+                </div>
+                <div>
+                    <label class="lbl" for="alta-apellido">Apellido</label>
+                    <input id="alta-apellido" class="field" @bind="_nuevo.Apellido" />
+                </div>
+            </div>
+            <div>
+                <label class="lbl" for="alta-correo">Correo electrónico</label>
+                <input id="alta-correo" type="email" class="field" @bind="_nuevo.Correo" />
+            </div>
+            <div class="hint">
+                La cuenta se crea con la contraseña <strong class="mono">@ServicioAdministracionUsuarios.ContrasenaPredeterminada</strong>
+                y el usuario debe cambiarla en su primer ingreso.
+            </div>
+            <button type="submit" class="btn btn-primary">Crear usuario</button>
+        </form>
+    </div>
+}
+
+@if (_exito is not null)
+{
+    <div class="alert alert-success mensaje" role="status">@_exito</div>
+}
 
 @if (_error is not null)
 {
@@ -77,6 +127,10 @@
     private List<string> _tipos = new List<string>();
     private string _busqueda = string.Empty;
     private string? _error;
+    private string? _exito;
+    private bool _mostrarAlta;
+    private UsuarioDto _nuevo = new UsuarioDto();
+    private string _tipoNuevo = string.Empty;
 
     private IEnumerable<UsuarioResumenDto> UsuariosFiltrados =>
         _usuarios.Where(usuario => string.IsNullOrWhiteSpace(_busqueda) ||
@@ -92,7 +146,20 @@
         }
 
         _tipos = ServicioAdministracion.NombresDeTipos();
+        _tipoNuevo = _tipos.First();
         Recargar();
+    }
+
+    private void CrearUsuario()
+    {
+        Ejecutar(() => ServicioAdministracion.CrearUsuario(_nuevo, _tipoNuevo));
+
+        if (_error is null)
+        {
+            _exito = $"Se creó la cuenta de {_nuevo.Nombre} {_nuevo.Apellido}.";
+            _nuevo = new UsuarioDto();
+            _mostrarAlta = false;
+        }
     }
 
     private bool EsElMismo(UsuarioResumenDto usuario) =>
@@ -117,6 +184,7 @@
     private void Ejecutar(Action accion)
     {
         _error = null;
+        _exito = null;
         try
         {
             accion();
