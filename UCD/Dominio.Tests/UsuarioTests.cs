@@ -406,6 +406,13 @@ public sealed class UsuarioTests
         Assert.AreEqual(dni, usuario.Dni);
     }
 
+    [TestMethod]
+    public void Constructor_DatosValidos_TieneSinPermisos()
+    {
+        Usuario usuario = CrearUsuario();
+        Assert.AreEqual(TipoUsuario.SinPermisos, usuario.Tipo);
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
