@@ -37,6 +37,11 @@ public class Usuario
         Tipo = TipoUsuario.SinPermisos;
     }
 
+    public bool ContrasenaEsCorrecta(string contrasena)
+    {
+        return Contrasena == contrasena;
+    }
+
     private static void ValidarNombreOApellido(string valor, string campo)
     {
         if (string.IsNullOrWhiteSpace(valor))
