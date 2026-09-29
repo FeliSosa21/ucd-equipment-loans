@@ -17,6 +17,17 @@ public class SesionActual
         Cambio?.Invoke();
     }
 
+    public void MarcarContrasenaCambiada()
+    {
+        if (Usuario is null)
+        {
+            return;
+        }
+
+        Usuario.DebeCambiarContrasena = false;
+        Cambio?.Invoke();
+    }
+
     public void Cerrar()
     {
         Usuario = null;

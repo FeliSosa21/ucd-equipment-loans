@@ -50,6 +50,21 @@
         SesionActual.Cambio += StateHasChanged;
     }
 
+    protected override void OnParametersSet()
+    {
+        ExigirCambioDeContrasena();
+    }
+
+    // Si el usuario debe cambiar la contrasena, no puede ir a otra pantalla hasta hacerlo.
+    private void ExigirCambioDeContrasena()
+    {
+        if (SesionActual.EstaIniciada && SesionActual.Usuario!.DebeCambiarContrasena &&
+            !Navigation.Uri.EndsWith("/cambiar-contrasena", StringComparison.OrdinalIgnoreCase))
+        {
+            Navigation.NavigateTo("/cambiar-contrasena");
+        }
+    }
+
     private void CerrarSesion()
     {
         SesionActual.Cerrar();

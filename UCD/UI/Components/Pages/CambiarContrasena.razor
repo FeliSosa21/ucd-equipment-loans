@@ -92,7 +92,7 @@
         try
         {
             ServicioSesion.CambiarContrasena(SesionActual.Usuario!.Correo, _actual, _nueva);
-            SesionActual.Usuario.DebeCambiarContrasena = false;
+            SesionActual.MarcarContrasenaCambiada();
             ContinuarOAvisar();
         }
         catch (ServicioException ex)

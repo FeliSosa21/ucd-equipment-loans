@@ -61,8 +61,10 @@
         SesionActual.Cambio += StateHasChanged;
     }
 
+    // Mientras deba cambiar la contrasena, solo se muestra "Cambiar contraseña".
     private bool Puede(string permiso) =>
-        SesionActual.EstaIniciada && SesionActual.Usuario!.Permisos.Contains(permiso);
+        SesionActual.EstaIniciada && !SesionActual.Usuario!.DebeCambiarContrasena &&
+        SesionActual.Usuario.Permisos.Contains(permiso);
 
     public void Dispose()
     {
