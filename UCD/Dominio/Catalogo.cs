@@ -4,7 +4,7 @@ public class Catalogo
 {
     private const int LargoMinimoNombre = 3;
     private const int LargoMaximoNombre = 80;
-        
+
     public string Nombre { get; private set; }
     public List<TipoEquipamiento> Tipos { get; private set; } = new();
 
@@ -13,7 +13,7 @@ public class Catalogo
         ValidarNombre(nombre);
         Nombre = nombre;
     }
-    
+
     public void ModificarNombre(string nombre)
     {
         ValidarNombre(nombre);
@@ -37,7 +37,7 @@ public class Catalogo
             throw new DominioException($"El nombre del catalogo debe tener como maximo {LargoMaximoNombre} caracteres");
         }
     }
-    
+
     public void AgregarTipo(TipoEquipamiento tipo)
     {
         if (tipo is null)
@@ -49,10 +49,10 @@ public class Catalogo
         {
             throw new DominioException("Ya existe un tipo de equipamiento con ese nombre");
         }
-        
+
         Tipos.Add(tipo);
     }
-    
+
     private bool ChequearNombreExistente(string nombre)
     {
         string nombreSinEspacios = nombre.Trim();
@@ -63,7 +63,20 @@ public class Catalogo
                 return true;
             }
         }
-        
+
         return false;
+    }
+
+    public TipoEquipamiento? BuscarTipoPorNombre(string nombre)
+    {
+        foreach (var tipo in Tipos)
+        {
+            if (tipo.Nombre == nombre)
+            {
+                return tipo;
+            }
+        }
+
+        return null;
     }
 }
