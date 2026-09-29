@@ -36,6 +36,20 @@ public class ServicioUsuarioTests
     }
 
     [TestMethod]
+    public void Registrar_DniDuplicadoSinCeroAdelante_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        ServicioUsuario servicio = new ServicioUsuario(repositorio);
+        UsuarioDto primero = CrearDto(dni: "01234561");
+        UsuarioDto repetido = CrearDto(dni: "1234561", correo: "otro@hotmail.com");
+        servicio.Registrar(primero);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(repetido));
+        Assert.IsNull(repositorio.ObtenerUsuarioPorCorreo(repetido.Correo));
+    }
+
+    [TestMethod]
     public void Registrar_CorreoDuplicadoConOtrasMayusculas_LanzaExcepcion()
     {
         Memoria memoria = new Memoria();
