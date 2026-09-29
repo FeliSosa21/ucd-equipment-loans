@@ -455,6 +455,26 @@ public sealed class UsuarioTests
         Assert.AreEqual(EstadoUsuario.Desactivado, usuario.Estado);
     }
 
+    [TestMethod]
+    public void AsignarTipo_Administrador_TieneTipoAdministrador()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.AsignarTipo(TipoUsuario.Administrador);
+
+        Assert.AreEqual(TipoUsuario.Administrador, usuario.Tipo);
+    }
+
+    [TestMethod]
+    public void ExigirCambioDeContrasena_UsuarioNuevo_DebeCambiarContrasena()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.ExigirCambioDeContrasena();
+
+        Assert.IsTrue(usuario.DebeCambiarContrasena);
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {

@@ -48,6 +48,16 @@ public class Usuario
         Estado = EstadoUsuario.Desactivado;
     }
 
+    public void AsignarTipo(TipoUsuario tipo)
+    {
+        Tipo = tipo;
+    }
+
+    public void ExigirCambioDeContrasena()
+    {
+        DebeCambiarContrasena = true;
+    }
+
     private static void ValidarNombreOApellido(string valor, string campo)
     {
         if (string.IsNullOrWhiteSpace(valor))
