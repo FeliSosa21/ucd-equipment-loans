@@ -58,6 +58,20 @@ public class ServicioSesionTests
         Assert.ThrowsException<ServicioException>(() => servicio.IniciarSesion(CorreoValido, ContrasenaValida));
     }
 
+    [TestMethod]
+    public void IniciarSesion_UsuarioRecienRegistrado_DevuelveTipoYCambioDeContrasena()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        ServicioSesion servicio = new ServicioSesion(repositorio);
+
+        UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, ContrasenaValida);
+
+        Assert.AreEqual("Sin permisos", sesion.Tipo);
+        Assert.IsFalse(sesion.DebeCambiarContrasena);
+    }
+
     private static UsuarioDto CrearDto()
     {
         return new UsuarioDto
