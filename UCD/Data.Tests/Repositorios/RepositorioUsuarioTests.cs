@@ -55,6 +55,7 @@ public class RepositorioUsuarioTests
         repositorio.AgregarUsuario(usuario);
 
         Usuario? resultado = repositorio.ObtenerUsuarioPorCorreo(correo: "FelIpE@hotmail.COM");
+
         Assert.AreEqual(usuario, resultado);
     }
 
@@ -73,7 +74,11 @@ public class RepositorioUsuarioTests
 
     private static Usuario CrearUsuario()
     {
-        return new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa", correo: "felipe@hotmail.com",
+        return new Usuario(
+            dni: "12345672",
+            nombre: "Felipe",
+            apellido: "Sosa",
+            correo: "felipe@hotmail.com",
             contrasena: "VivaLaOrt2026");
     }
 }

@@ -17,7 +17,7 @@ public class ServicioUsuario
     {
         if (_repositorio.ObtenerUsuarioPorDni(dto.Dni) != null)
         {
-            throw new DominioException("El dni ya existe");
+            throw new DominioException("El DNI ya existe");
         }
 
         if (_repositorio.ObtenerUsuarioPorCorreo(dto.Correo) != null)
@@ -25,7 +25,11 @@ public class ServicioUsuario
             throw new DominioException("El correo ya existe");
         }
 
-        Usuario usuario = new Usuario(dni: dto.Dni, nombre: dto.Nombre, apellido: dto.Apellido, correo: dto.Correo,
+        Usuario usuario = new Usuario(
+            dni: dto.Dni,
+            nombre: dto.Nombre,
+            apellido: dto.Apellido,
+            correo: dto.Correo,
             contrasena: dto.Contrasena);
         _repositorio.AgregarUsuario(usuario);
     }
