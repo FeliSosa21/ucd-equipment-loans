@@ -15,9 +15,9 @@ public class ServicioSesion
 
     public UsuarioSesionDto IniciarSesion(string correo, string contrasena)
     {
-        Usuario usuario = _repositorio.ObtenerUsuarioPorCorreo(correo)!;
+        Usuario? usuario = _repositorio.ObtenerUsuarioPorCorreo(correo);
 
-        if (!usuario.ContrasenaEsCorrecta(contrasena))
+        if (usuario is null || !usuario.ContrasenaEsCorrecta(contrasena))
         {
             throw new DominioException("Correo o contrasena incorrectos");
         }
