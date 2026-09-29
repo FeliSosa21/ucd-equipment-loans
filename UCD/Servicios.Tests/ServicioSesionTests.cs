@@ -46,6 +46,18 @@ public class ServicioSesionTests
         Assert.ThrowsException<ServicioException>(() => servicio.IniciarSesion("otro@hotmail.com", ContrasenaValida));
     }
 
+    [TestMethod]
+    public void IniciarSesion_UsuarioDesactivado_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        repositorio.ObtenerUsuarioPorCorreo(CorreoValido)!.Desactivar();
+        ServicioSesion servicio = new ServicioSesion(repositorio);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.IniciarSesion(CorreoValido, ContrasenaValida));
+    }
+
     private static UsuarioDto CrearDto()
     {
         return new UsuarioDto
