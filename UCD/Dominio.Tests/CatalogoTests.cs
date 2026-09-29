@@ -40,12 +40,12 @@ public sealed class CatalogoTests
     {
         Assert.ThrowsException<DominioException>(() => CrearCatalogo(nombre: "     "));
     }
-    
+
     [TestMethod]
     public void Constructor_CatalogoNuevo_NoTieneTipos()
     {
         var catalogo = CrearCatalogo();
-        
+
         Assert.AreEqual(0, catalogo.Tipos.Count);
     }
 
@@ -54,7 +54,7 @@ public sealed class CatalogoTests
     {
         var catalogo = CrearCatalogo();
         var tipoEquipamiento = CrearTipo();
-        
+
         catalogo.AgregarTipo(tipoEquipamiento);
 
         CollectionAssert.Contains(catalogo.Tipos, tipoEquipamiento);
@@ -64,11 +64,11 @@ public sealed class CatalogoTests
     public void AgregarTipo_TipoNull_LanzaDominioException()
     {
         var catalogo = CrearCatalogo();
-        
+
         Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(null!));
-        
+
     }
-    
+
     [TestMethod]
     [DataRow("Proyector Epson EB-770Fi", "Proyector Epson EB-770Fi")]
     [DataRow("Proyector Epson EB-770Fi", "PROYECTOR EPSON EB-770FI")]
@@ -80,12 +80,25 @@ public sealed class CatalogoTests
         var catalogo = CrearCatalogo();
         var tipoEquipamientoExistente = CrearTipo(nombre:nombreExistente);
         var tipoEquipamientoRepetido = CrearTipo(nombre:nombreNuevo);
-        
+
         catalogo.AgregarTipo(tipoEquipamientoExistente);
-        
-        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamientoRepetido));       
+
+        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamientoRepetido));
     }
-    
+
+    [TestMethod]
+    public void AgregarTipo_DosTiposConNombresDistintos_AmbosQuedanEnElCatalogo()
+    {
+        var catalogo = CrearCatalogo();
+        var primerTipo = CrearTipo(nombre: "Proyector");
+        var segundoTipo = CrearTipo(nombre: "Notebook");
+
+        catalogo.AgregarTipo(primerTipo);
+        catalogo.AgregarTipo(segundoTipo);
+
+        Assert.AreEqual(2, catalogo.Tipos.Count);
+    }
+
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
@@ -99,6 +112,7 @@ public sealed class CatalogoTests
     {
         return new TipoEquipamiento(nombre, descripcion, duracionMaxPrestamo, requiereAprobacion, categoria);
     }
+
 }
 
 
