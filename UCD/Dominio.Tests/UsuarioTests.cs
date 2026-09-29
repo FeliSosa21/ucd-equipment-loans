@@ -414,9 +414,10 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
-    public void CrearUsuario_DniCon7Digitos_Agregar0Adelante()
+    public void CrearUsuario_DniCon7Digitos_AgregarCeroAdelante()
     {
-        Usuario usuario = CrearUsuario(dni:"1234561");
+        Usuario usuario = CrearUsuario(dni: "1234561");
+
         Assert.AreEqual("01234561", usuario.Dni);
     }
 
