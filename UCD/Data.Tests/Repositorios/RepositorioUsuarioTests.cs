@@ -27,7 +27,7 @@ public class RepositorioUsuarioTests
         Usuario usuario = CrearUsuario();
         repositorio.AgregarUsuario(usuario);
 
-        Usuario? resultado = repositorio.ObtenerUsuarioPorDni(dni: "12345672");
+        Usuario? resultado = repositorio.ObtenerUsuarioPorDni(dni: usuario.Dni);
 
         Assert.AreEqual(usuario, resultado);
     }
@@ -45,7 +45,6 @@ public class RepositorioUsuarioTests
         Assert.IsNull(resultado);
     }
 
-
     [TestMethod]
     public void ObtenerUsuarioPorCorreo_CorreoConMayusculas_DevuelveElUsuario()
     {
@@ -54,7 +53,7 @@ public class RepositorioUsuarioTests
         Usuario usuario = CrearUsuario();
         repositorio.AgregarUsuario(usuario);
 
-        Usuario? resultado = repositorio.ObtenerUsuarioPorCorreo(correo: "FelIpE@hotmail.COM");
+        Usuario? resultado = repositorio.ObtenerUsuarioPorCorreo(correo: usuario.Correo.ToUpperInvariant());
 
         Assert.AreEqual(usuario, resultado);
     }

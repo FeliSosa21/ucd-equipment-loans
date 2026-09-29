@@ -41,7 +41,7 @@ public class Usuario
     {
         if (string.IsNullOrWhiteSpace(valor))
         {
-            throw new DominioException($"El {campo} no puede ser vacio");
+            throw new DominioException($"El {campo} no puede estar vacio");
         }
 
         if (valor.Length < LargoMinimoNombreOApellido)
@@ -195,7 +195,7 @@ public class Usuario
     {
         if (string.IsNullOrWhiteSpace(contrasena))
         {
-            throw new DominioException("La contrasena no puede ser vacia");
+            throw new DominioException("La contrasena no puede estar vacia");
         }
 
         if (contrasena.Length < LargoMinimoContrasena)
@@ -223,7 +223,7 @@ public class Usuario
     {
         if (string.IsNullOrWhiteSpace(dni))
         {
-            throw new DominioException("El DNI no puede ser vacio");
+            throw new DominioException("El DNI no puede estar vacio");
         }
 
         foreach (char c in dni)

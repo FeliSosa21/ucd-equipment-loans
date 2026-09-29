@@ -338,7 +338,7 @@ public sealed class UsuarioTests
     [DataRow("Abcdefg1")]
     [DataRow("Abc123!@")]
     [DataRow("VivalaOrt2026")]
-    public void CrearUsuario_ContrasenaValida_NoLanzaExcepcion(string contrasena)
+    public void CrearUsuario_ContrasenaValida_SeCrea(string contrasena)
     {
         Usuario usuario = CrearUsuario(contrasena: contrasena);
 

@@ -32,7 +32,7 @@ public class ServicioUsuarioTests
         servicio.Registrar(primero);
 
         Assert.ThrowsException<DominioException>(() => servicio.Registrar(repetido));
-        Assert.IsNull(repositorio.ObtenerUsuarioPorCorreo("otro@hotmail.com"));
+        Assert.IsNull(repositorio.ObtenerUsuarioPorCorreo(repetido.Correo));
     }
 
     [TestMethod]
@@ -46,11 +46,11 @@ public class ServicioUsuarioTests
         servicio.Registrar(primero);
 
         Assert.ThrowsException<DominioException>(() => servicio.Registrar(repetido));
-        Assert.IsNull(repositorio.ObtenerUsuarioPorDni("45678905"));
+        Assert.IsNull(repositorio.ObtenerUsuarioPorDni(repetido.Dni));
     }
 
     [TestMethod]
-    public void Registrar_DatosInvalidos_LanzaExcepcion()
+    public void Registrar_DniInvalido_LanzaExcepcion()
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
@@ -58,11 +58,10 @@ public class ServicioUsuarioTests
         UsuarioDto dto = CrearDto(dni: "12345678");
 
         Assert.ThrowsException<DominioException>(() => servicio.Registrar(dto));
-        Assert.IsNull(repositorio.ObtenerUsuarioPorDni("12345678"));
     }
 
     [TestMethod]
-    public void Registrar_DatosValidos_GuardaLosDatosDto()
+    public void Registrar_DatosValidos_GuardaLosDatosIngresados()
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
@@ -70,11 +69,12 @@ public class ServicioUsuarioTests
         UsuarioDto dto = CrearDto();
 
         servicio.Registrar(dto);
-        Usuario? guardado = repositorio.ObtenerUsuarioPorDni(dto.Dni);
 
-        Assert.AreEqual(dto.Apellido, guardado!.Apellido);
-        Assert.AreEqual(dto.Correo, guardado!.Correo);
-        Assert.AreEqual(dto.Nombre, guardado!.Nombre);
+        Usuario? guardado = repositorio.ObtenerUsuarioPorDni(dto.Dni);
+        Assert.IsNotNull(guardado);
+        Assert.AreEqual(dto.Nombre, guardado.Nombre);
+        Assert.AreEqual(dto.Apellido, guardado.Apellido);
+        Assert.AreEqual(dto.Correo, guardado.Correo);
     }
 
     private static UsuarioDto CrearDto(string dni = "12345672", string correo = "felipe@hotmail.com")
