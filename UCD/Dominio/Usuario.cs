@@ -17,6 +17,7 @@ public class Usuario
     private string Contrasena { get; set; }
     public EstadoUsuario Estado { get; private set; }
     public bool DebeCambiarContrasena { get; private set; }
+    public TipoUsuario Tipo { get; private set; }
 
     public Usuario(string dni, string nombre, string apellido, string correo, string contrasena)
     {
@@ -33,6 +34,7 @@ public class Usuario
         Contrasena = contrasena;
         Estado = EstadoUsuario.Activo;
         DebeCambiarContrasena = false;
+        Tipo = TipoUsuario.SinPermisos;
     }
 
     private static void ValidarNombreOApellido(string valor, string campo)
