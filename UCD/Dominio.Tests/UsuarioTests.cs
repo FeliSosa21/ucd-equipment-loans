@@ -169,7 +169,7 @@ public sealed class UsuarioTests
     [DataRow("feli-.pe@hotmail.com")]
     [DataRow("feli-_pe@hotmail.com")]
     [DataRow("feli--pe@hotmail.com")]
-    public void CrearUsuario_CorreoConCaracteresConsecutivos_LanzaExcepcion(string correo)
+    public void CrearUsuario_CorreoConCaracteresEspecialesConsecutivos_LanzaExcepcion(string correo)
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correo));
     }
@@ -338,7 +338,7 @@ public sealed class UsuarioTests
     [DataRow("Abcdefg1")]
     [DataRow("Abc123!@")]
     [DataRow("VivalaOrt2026")]
-    public void CrearUsuario_ContrasenaValida_NoLanzaExcepcion(string contrasena)
+    public void CrearUsuario_ContrasenaValida_SeCrea(string contrasena)
     {
         Usuario usuario = CrearUsuario(contrasena: contrasena);
 
@@ -404,6 +404,14 @@ public sealed class UsuarioTests
         Usuario usuario = CrearUsuario(dni: dni);
 
         Assert.AreEqual(dni, usuario.Dni);
+    }
+
+    [TestMethod]
+    public void CrearUsuario_DatosValidos_TieneSinPermisos()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.AreEqual(TipoUsuario.SinPermisos, usuario.Tipo);
     }
 
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
