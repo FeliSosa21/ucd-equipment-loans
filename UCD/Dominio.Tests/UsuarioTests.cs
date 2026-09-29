@@ -367,7 +367,6 @@ public sealed class UsuarioTests
 
     [TestMethod]
     [DataRow("123456")]
-    [DataRow("1234560")]
     [DataRow("123456789")]
     public void CrearUsuario_DniConLargoInvalido_LanzaExcepcion(string dni)
     {
@@ -412,6 +411,13 @@ public sealed class UsuarioTests
         Usuario usuario = CrearUsuario();
 
         Assert.AreEqual(TipoUsuario.SinPermisos, usuario.Tipo);
+    }
+
+    [TestMethod]
+    public void CrearUsuario_DniCon7Digitos_Agregar0Adelante()
+    {
+        Usuario usuario = CrearUsuario(dni:"1234561");
+        Assert.AreEqual("01234561", usuario.Dni);
     }
 
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
