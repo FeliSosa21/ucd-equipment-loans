@@ -18,6 +18,7 @@ builder.Services.AddScoped<RepositorioUsuario>();
 builder.Services.AddScoped<ServicioUsuario>();
 builder.Services.AddScoped<ServicioSesion>();
 builder.Services.AddScoped<CargaInicial>();
+builder.Services.AddScoped<ServicioAdministracionUsuarios>();
 
 // Quien esta logueado: uno por conexion del navegador.
 builder.Services.AddScoped<SesionActual>();

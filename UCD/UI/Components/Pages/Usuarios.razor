@@ -1,4 +1,9 @@
 @page "/usuarios"
+@using DTOs
+@using Servicios
+@inject ServicioAdministracionUsuarios ServicioAdministracion
+@inject SesionActual SesionActual
+@inject NavigationManager Navigation
 
 <PageTitle>UCD · Usuarios</PageTitle>
 
@@ -9,8 +14,14 @@
 
 <div class="toolbar">
     <input class="field" type="search" placeholder="Buscar por nombre, CI o correo"
-           aria-label="Buscar usuario" style="min-width: 320px" />
+           aria-label="Buscar usuario" style="min-width: 320px"
+           @bind="_busqueda" @bind:event="oninput" />
 </div>
+
+@if (_error is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_error</div>
+}
 
 <div class="card table-card">
     <table>
@@ -21,8 +32,105 @@
                 <th>Correo</th>
                 <th>Tipo de usuario</th>
                 <th>Estado</th>
+                <th></th>
             </tr>
         </thead>
+        <tbody>
+            @foreach (UsuarioResumenDto usuario in UsuariosFiltrados)
+            {
+                <tr>
+                    <td>@usuario.Nombre @usuario.Apellido</td>
+                    <td class="mono">@usuario.Dni</td>
+                    <td>@usuario.Correo</td>
+                    <td>
+                        <select class="field" aria-label="Tipo de @usuario.Nombre" disabled="@EsElMismo(usuario)"
+                                value="@usuario.Tipo" @onchange="e => AsignarTipo(usuario, e.Value?.ToString())">
+                            @foreach (string tipo in _tipos)
+                            {
+                                <option value="@tipo">@tipo</option>
+                            }
+                        </select>
+                    </td>
+                    <td>@(usuario.Activo ? "Activo" : "Desactivado")</td>
+                    <td>
+                        @if (!EsElMismo(usuario))
+                        {
+                            <button class="btn btn-ghost btn-sm" @onclick="() => CambiarEstado(usuario)">
+                                @(usuario.Activo ? "Desactivar" : "Reactivar")
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
     </table>
-    <EstadoVacio Titulo="No hay usuarios registrados" />
+    @if (!UsuariosFiltrados.Any())
+    {
+        <EstadoVacio Titulo="No hay usuarios que coincidan" />
+    }
 </div>
+
+@code {
+    private const string PermisoGestionarUsuarios = "GestionarUsuarios";
+
+    private List<UsuarioResumenDto> _usuarios = new List<UsuarioResumenDto>();
+    private List<string> _tipos = new List<string>();
+    private string _busqueda = string.Empty;
+    private string? _error;
+
+    private IEnumerable<UsuarioResumenDto> UsuariosFiltrados =>
+        _usuarios.Where(usuario => string.IsNullOrWhiteSpace(_busqueda) ||
+                                   $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
+                                       .Contains(_busqueda.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    protected override void OnInitialized()
+    {
+        if (!SesionActual.EstaIniciada || !SesionActual.Usuario!.Permisos.Contains(PermisoGestionarUsuarios))
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        _tipos = ServicioAdministracion.NombresDeTipos();
+        Recargar();
+    }
+
+    private bool EsElMismo(UsuarioResumenDto usuario) =>
+        string.Equals(usuario.Correo, SesionActual.Usuario?.Correo, StringComparison.OrdinalIgnoreCase);
+
+    private void AsignarTipo(UsuarioResumenDto usuario, string? tipo)
+    {
+        Ejecutar(() => ServicioAdministracion.AsignarTipo(usuario.Dni, tipo ?? string.Empty));
+    }
+
+    private void CambiarEstado(UsuarioResumenDto usuario)
+    {
+        if (usuario.Activo)
+        {
+            Ejecutar(() => ServicioAdministracion.Desactivar(usuario.Dni));
+            return;
+        }
+
+        Ejecutar(() => ServicioAdministracion.Reactivar(usuario.Dni));
+    }
+
+    private void Ejecutar(Action accion)
+    {
+        _error = null;
+        try
+        {
+            accion();
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+        }
+
+        Recargar();
+    }
+
+    private void Recargar()
+    {
+        _usuarios = ServicioAdministracion.ListarUsuarios();
+    }
+}
