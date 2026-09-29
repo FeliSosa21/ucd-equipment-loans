@@ -424,6 +424,20 @@ public sealed class UsuarioTests
         Assert.IsTrue(resultado);
     }
 
+    [TestMethod]
+    [DataRow("vivalaort2026")]
+    [DataRow("VIVALAORT2026")]
+    [DataRow("VivalaOrt2027")]
+    [DataRow("")]
+    public void ContrasenaEsCorrecta_ContrasenaDistinta_DevuelveFalse(string contrasena)
+    {
+        Usuario usuario = CrearUsuario();
+
+        bool resultado = usuario.ContrasenaEsCorrecta(contrasena);
+
+        Assert.IsFalse(resultado);
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
