@@ -1,0 +1,43 @@
+@page "/inventario"
+
+<PageTitle>UCD · Inventario</PageTitle>
+
+<div class="page-header">
+    <h1>Inventario</h1>
+    <p>Un tipo de equipamiento es el modelo general; cada unidad física es el ejemplar concreto que se presta.</p>
+</div>
+
+<div class="toolbar">
+    <select class="field" aria-label="Categoría">
+                <option value="">Todas las categorías</option>
+                <option>Computación</option>
+                <option>Audiovisual</option>
+                <option>Laboratorio</option>
+                <option>Electrónica</option>
+                <option>Accesorios</option>
+    </select>
+    <select class="field" aria-label="Estado de la unidad">
+        <option value="">Todos los estados</option>
+        <option>Disponible</option>
+        <option>Prestada</option>
+        <option>En mantenimiento</option>
+        <option>Dada de baja</option>
+    </select>
+    <span class="espacio"></span>
+    <button class="btn btn-primary" disabled title="Disponible cuando esté el servicio">Nueva unidad</button>
+</div>
+
+<div class="card table-card">
+    <table>
+        <thead>
+            <tr>
+                <th>ID institucional</th>
+                <th>N° de serie</th>
+                <th>Tipo</th>
+                <th>Ubicación</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+    </table>
+    <EstadoVacio Titulo="No hay unidades físicas registradas" />
+</div>

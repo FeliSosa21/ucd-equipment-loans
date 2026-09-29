@@ -1,30 +1,77 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">UI</a>
-    </div>
-</div>
+@implements IDisposable
+@inject SesionActual SesionActual
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+@* Cada item se muestra solo si el tipo del usuario logueado tiene el permiso (letra, req. 1) *@
+<nav class="nav">
+    @if (Puede("ConsultarMisSolicitudes") || Puede("ConsultarCatalogo"))
+    {
+        <div class="nav-section">General</div>
+        @if (Puede("ConsultarMisSolicitudes"))
+        {
+            <NavLink class="nav-item" href="" Match="NavLinkMatch.All">Mis solicitudes</NavLink>
+        }
+        @if (Puede("ConsultarCatalogo"))
+        {
+            <NavLink class="nav-item" href="catalogo">Catálogo</NavLink>
+        }
+    }
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+    @if (Puede("GestionarCatalogo") || Puede("GestionarUnidades") || Puede("EvaluarSolicitud") ||
+         Puede("RegistrarDevolucion") || Puede("ConsultarHistorico"))
+    {
+        <div class="nav-section">Gestión</div>
+        @if (Puede("GestionarCatalogo"))
+        {
+            <NavLink class="nav-item" href="tipos-equipamiento">Tipos de equipamiento</NavLink>
+        }
+        @if (Puede("GestionarUnidades"))
+        {
+            <NavLink class="nav-item" href="inventario">Inventario</NavLink>
+        }
+        @if (Puede("EvaluarSolicitud"))
+        {
+            <NavLink class="nav-item" href="aprobaciones">Aprobaciones</NavLink>
+        }
+        @if (Puede("RegistrarDevolucion"))
+        {
+            <NavLink class="nav-item" href="devoluciones">Devoluciones</NavLink>
+        }
+        @if (Puede("ConsultarHistorico"))
+        {
+            <NavLink class="nav-item" href="auditoria">Registro histórico</NavLink>
+        }
+    }
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
+    @if (Puede("GestionarUsuarios"))
+    {
+        <div class="nav-section">Administración</div>
+        <NavLink class="nav-item" href="usuarios">Usuarios</NavLink>
+    }
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
+    @if (SesionActual.EstaIniciada)
+    {
+        <div class="nav-section">Mi cuenta</div>
+        @if (!SesionActual.Usuario!.DebeCambiarContrasena)
+        {
+            <NavLink class="nav-item" href="mis-datos">Mis datos</NavLink>
+        }
+        <NavLink class="nav-item" href="cambiar-contrasena">Cambiar contraseña</NavLink>
+    }
+</nav>
 
+@code {
+    protected override void OnInitialized()
+    {
+        SesionActual.Cambio += StateHasChanged;
+    }
+
+    // Mientras deba cambiar la contrasena, solo se muestra "Cambiar contraseña".
+    private bool Puede(string permiso) =>
+        SesionActual.EstaIniciada && !SesionActual.Usuario!.DebeCambiarContrasena &&
+        SesionActual.Usuario.Permisos.Contains(permiso);
+
+    public void Dispose()
+    {
+        SesionActual.Cambio -= StateHasChanged;
+    }
+}

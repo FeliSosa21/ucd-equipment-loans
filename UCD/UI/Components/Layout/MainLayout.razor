@@ -1,23 +1,78 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject SesionActual SesionActual
+@inject NavigationManager Navigation
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+<header class="topbar">
+    <a class="brand" href="">
+        <span class="brand-logo mono">UCD</span>
+        <span class="brand-text">
+            <strong>UCD</strong>
+            <small>Úsalo, cuídalo, devuélvelo entero</small>
+        </span>
+    </a>
+
+    <div class="sesion">
+        @if (SesionActual.EstaIniciada)
+        {
+            <span class="usuario">
+                <strong>@SesionActual.Usuario!.Nombre</strong>
+                <small>@SesionActual.Usuario.Tipo</small>
+            </span>
+            <button class="btn btn-ghost btn-sm" @onclick="CerrarSesion">Salir</button>
+        }
+        else
+        {
+            <a class="btn btn-ghost btn-sm" href="ingresar">Ingresar</a>
+            <a class="btn btn-primary btn-sm" href="registro">Crear cuenta</a>
+        }
     </div>
+</header>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
+<div class="shell">
+    <aside class="sidebar">
+        <NavMenu />
+    </aside>
+    <main class="content">
+        @Body
     </main>
 </div>
 
 <div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
+    Ocurrió un error inesperado.
+    <a href="." class="reload">Recargar</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        SesionActual.Cambio += StateHasChanged;
+    }
+
+    protected override void OnParametersSet()
+    {
+        ExigirCambioDeContrasena();
+    }
+
+    // Si el usuario debe cambiar la contrasena, no puede ir a otra pantalla hasta hacerlo.
+    private void ExigirCambioDeContrasena()
+    {
+        if (SesionActual.EstaIniciada && SesionActual.Usuario!.DebeCambiarContrasena &&
+            !Navigation.Uri.EndsWith("/cambiar-contrasena", StringComparison.OrdinalIgnoreCase))
+        {
+            Navigation.NavigateTo("/cambiar-contrasena");
+        }
+    }
+
+    private void CerrarSesion()
+    {
+        SesionActual.Cerrar();
+        Navigation.NavigateTo("/");
+    }
+
+    public void Dispose()
+    {
+        SesionActual.Cambio -= StateHasChanged;
+    }
+}

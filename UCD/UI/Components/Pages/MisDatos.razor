@@ -1,0 +1,88 @@
+@page "/mis-datos"
+@using DTOs
+@using Servicios
+@inject ServicioAdministracionUsuarios ServicioAdministracion
+@inject SesionActual SesionActual
+@inject NavigationManager Navigation
+
+<PageTitle>UCD · Mis datos</PageTitle>
+
+<div class="page-header">
+    <h1>Mis datos</h1>
+    <p>Modificá tu nombre, apellido o correo.</p>
+</div>
+
+<div class="card formulario">
+    <form class="form-grid" @onsubmit="Guardar" novalidate>
+        <div>
+            <label class="lbl" for="ci">Cédula de identidad</label>
+            <input id="ci" class="field mono" value="@_dni" disabled />
+        </div>
+        <div class="form-row">
+            <div>
+                <label class="lbl" for="nombre">Nombre</label>
+                <input id="nombre" class="field" @bind="_nombre" @bind:event="oninput" />
+            </div>
+            <div>
+                <label class="lbl" for="apellido">Apellido</label>
+                <input id="apellido" class="field" @bind="_apellido" @bind:event="oninput" />
+            </div>
+        </div>
+        <div>
+            <label class="lbl" for="correo">Correo electrónico</label>
+            <input id="correo" type="email" class="field" @bind="_correo" @bind:event="oninput" />
+        </div>
+
+        @if (_error is not null)
+        {
+            <div class="alert alert-error" role="alert">@_error</div>
+        }
+        @if (_exito)
+        {
+            <div class="alert alert-success" role="status">Tus datos se guardaron correctamente.</div>
+        }
+
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+    </form>
+</div>
+
+@code {
+    private string _dni = string.Empty;
+    private string _nombre = string.Empty;
+    private string _apellido = string.Empty;
+    private string _correo = string.Empty;
+    private string? _error;
+    private bool _exito;
+
+    protected override void OnInitialized()
+    {
+        if (!SesionActual.EstaIniciada)
+        {
+            Navigation.NavigateTo("/ingresar");
+            return;
+        }
+
+        UsuarioResumenDto datos = ServicioAdministracion.ObtenerResumen(SesionActual.Usuario!.Dni);
+        _dni = datos.Dni;
+        _nombre = datos.Nombre;
+        _apellido = datos.Apellido;
+        _correo = datos.Correo;
+    }
+
+    private void Guardar()
+    {
+        _error = null;
+        _exito = false;
+
+        try
+        {
+            ServicioAdministracion.ModificarDatos(_dni, _nombre, _apellido, _correo.Trim());
+            SesionActual.ActualizarDatos(_nombre, _correo.Trim());
+            _exito = true;
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}
