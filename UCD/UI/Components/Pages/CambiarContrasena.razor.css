@@ -1,1 +1,2 @@
 .formulario { padding: 1.75rem; max-width: 480px; }
+.mostrar { display: flex; align-items: center; gap: .4rem; font-size: .8rem; color: var(--ink-soft); cursor: pointer; }

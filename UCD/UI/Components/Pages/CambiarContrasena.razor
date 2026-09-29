@@ -1,29 +1,42 @@
 @page "/cambiar-contrasena"
+@using Servicios
+@inject ServicioSesion ServicioSesion
+@inject SesionActual SesionActual
+@inject NavigationManager Navigation
 
 <PageTitle>UCD · Cambiar contraseña</PageTitle>
 
 <div class="page-header">
     <h1>Cambiar contraseña</h1>
     <p>Ingresá tu contraseña actual y elegí una nueva.</p>
+    @if (_obligatorio)
+    {
+        <div class="alert alert-info">Es tu primer ingreso: tenés que cambiar la contraseña antes de seguir.</div>
+    }
 </div>
 
 <div class="card formulario">
     <form class="form-grid" @onsubmit="Cambiar" novalidate>
         <div>
             <label class="lbl" for="actual">Contraseña actual</label>
-            <input id="actual" type="password" class="field" autocomplete="current-password"
+            <input id="actual" type="@TipoContrasena" class="field" autocomplete="current-password"
                    @bind="_actual" @bind:event="oninput" />
         </div>
         <div>
             <label class="lbl" for="nueva">Nueva contraseña</label>
-            <input id="nueva" type="password" class="field" autocomplete="new-password"
+            <input id="nueva" type="@TipoContrasena" class="field" autocomplete="new-password"
                    @bind="_nueva" @bind:event="oninput" />
         </div>
         <div>
             <label class="lbl" for="repetir">Repetir nueva contraseña</label>
-            <input id="repetir" type="password" class="field" autocomplete="new-password"
+            <input id="repetir" type="@TipoContrasena" class="field" autocomplete="new-password"
                    @bind="_repetir" @bind:event="oninput" />
         </div>
+
+        <label class="mostrar">
+            <input type="checkbox" @bind="_mostrarContrasena" />
+            Mostrar contraseñas
+        </label>
 
         @if (_error is not null)
         {
@@ -46,9 +59,24 @@
     private string _repetir = string.Empty;
     private string? _error;
     private bool _exito;
+    private bool _obligatorio;
+    private bool _mostrarContrasena;
+
+    private string TipoContrasena => _mostrarContrasena ? "text" : "password";
 
     private bool FormularioCompleto =>
         !string.IsNullOrEmpty(_actual) && !string.IsNullOrEmpty(_nueva) && !string.IsNullOrEmpty(_repetir);
+
+    protected override void OnInitialized()
+    {
+        if (!SesionActual.EstaIniciada)
+        {
+            Navigation.NavigateTo("/ingresar");
+            return;
+        }
+
+        _obligatorio = SesionActual.Usuario!.DebeCambiarContrasena;
+    }
 
     private void Cambiar()
     {
@@ -63,12 +91,30 @@
 
         try
         {
-            // TODO: llamar al servicio de cambio de contraseña.
-            _exito = true;
+            ServicioSesion.CambiarContrasena(SesionActual.Usuario!.Correo, _actual, _nueva);
+            SesionActual.Usuario.DebeCambiarContrasena = false;
+            ContinuarOAvisar();
         }
-        catch (Exception ex) // TODO: cambiar por la excepción que tire el servicio
+        catch (ServicioException ex)
         {
             _error = ex.Message;
         }
+    }
+
+    private void ContinuarOAvisar()
+    {
+        if (!_obligatorio)
+        {
+            _exito = true;
+            return;
+        }
+
+        if (SesionActual.Usuario!.PendienteDeActivacion)
+        {
+            Navigation.NavigateTo("/pendiente-activacion");
+            return;
+        }
+
+        Navigation.NavigateTo("/");
     }
 }
