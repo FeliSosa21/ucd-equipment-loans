@@ -42,6 +42,11 @@ public class Usuario
         return Contrasena == contrasena;
     }
 
+    public void Desactivar()
+    {
+        Estado = EstadoUsuario.Desactivado;
+    }
+
     private static void ValidarNombreOApellido(string valor, string campo)
     {
         if (string.IsNullOrWhiteSpace(valor))
