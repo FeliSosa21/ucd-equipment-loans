@@ -22,6 +22,11 @@ public class ServicioSesion
             throw new ServicioException("Correo o contrasena incorrectos");
         }
 
+        if (usuario.Estado == EstadoUsuario.Desactivado)
+        {
+            throw new ServicioException("El usuario esta desactivado");
+        }
+
         return new UsuarioSesionDto { Correo = usuario.Correo, Nombre = usuario.Nombre };
     }
 }
