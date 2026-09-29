@@ -1,5 +1,6 @@
 using Data;
 using Data.Repositorios;
+using Dominio;
 using DTOs;
 
 namespace Servicios.Tests;
@@ -22,6 +23,17 @@ public class ServicioSesionTests
 
         Assert.AreEqual(CorreoValido, sesion.Correo);
         Assert.AreEqual("Felipe", sesion.Nombre);
+    }
+
+    [TestMethod]
+    public void IniciarSesion_ContrasenaIncorrecta_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        ServicioSesion servicio = new ServicioSesion(repositorio);
+
+        Assert.ThrowsException<DominioException>(() => servicio.IniciarSesion(CorreoValido, "OtraClave2026"));
     }
 
     private static UsuarioDto CrearDto()
