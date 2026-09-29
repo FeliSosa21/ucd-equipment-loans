@@ -59,6 +59,22 @@ public class ServicioUsuarioTests
         Assert.ThrowsException<DominioException>(() => servicio.Registrar(dto));
     }
 
+    [TestMethod]
+    public void Registrar_DatosValidos_GuardaLosDatosDto()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        ServicioUsuario servicio = new ServicioUsuario(repositorio);
+        UsuarioDto dto = CrearDto();
+        
+        servicio.Registrar(dto);
+        Usuario? guardado = repositorio.ObtenerUsuarioPorDni(dto.Dni);
+        
+        Assert.AreEqual(dto.Apellido, guardado!.Apellido);
+        Assert.AreEqual(dto.Correo, guardado!.Correo);
+        Assert.AreEqual(dto.Nombre, guardado!.Nombre);
+    }
+
     private static UsuarioDto CrearDto(string dni = "12345672", string correo = "felipe@hotmail.com")
     {
         return new UsuarioDto
