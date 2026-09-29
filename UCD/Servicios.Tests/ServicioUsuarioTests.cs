@@ -32,6 +32,7 @@ public class ServicioUsuarioTests
         servicio.Registrar(primero);
 
         Assert.ThrowsException<DominioException>(() => servicio.Registrar(repetido));
+        Assert.IsNull(repositorio.ObtenerUsuarioPorCorreo("otro@hotmail.com"));
     }
 
     [TestMethod]
@@ -45,6 +46,7 @@ public class ServicioUsuarioTests
         servicio.Registrar(primero);
 
         Assert.ThrowsException<DominioException>(() => servicio.Registrar(repetido));
+        Assert.IsNull(repositorio.ObtenerUsuarioPorDni("45678905"));
     }
 
     [TestMethod]
@@ -55,8 +57,8 @@ public class ServicioUsuarioTests
         ServicioUsuario servicio = new ServicioUsuario(repositorio);
         UsuarioDto dto = CrearDto(dni: "12345678");
 
-
         Assert.ThrowsException<DominioException>(() => servicio.Registrar(dto));
+        Assert.IsNull(repositorio.ObtenerUsuarioPorDni("12345678"));
     }
 
     [TestMethod]
@@ -66,10 +68,10 @@ public class ServicioUsuarioTests
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
         ServicioUsuario servicio = new ServicioUsuario(repositorio);
         UsuarioDto dto = CrearDto();
-        
+
         servicio.Registrar(dto);
         Usuario? guardado = repositorio.ObtenerUsuarioPorDni(dto.Dni);
-        
+
         Assert.AreEqual(dto.Apellido, guardado!.Apellido);
         Assert.AreEqual(dto.Correo, guardado!.Correo);
         Assert.AreEqual(dto.Nombre, guardado!.Nombre);
