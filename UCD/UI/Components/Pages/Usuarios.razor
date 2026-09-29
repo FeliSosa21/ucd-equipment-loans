@@ -13,7 +13,7 @@
 </div>
 
 <div class="toolbar">
-    <button class="btn btn-primary btn-sm" @onclick="() => _mostrarAlta = !_mostrarAlta">
+    <button class="btn btn-primary btn-sm" @onclick="() => { _mostrarAlta = !_mostrarAlta; _editando = null; }">
         @(_mostrarAlta ? "Cancelar" : "Nuevo usuario")
     </button>
     <input class="field" type="search" placeholder="Buscar por nombre, CI o correo"
@@ -63,6 +63,33 @@
     </div>
 }
 
+@if (_editando is not null)
+{
+    <div class="card alta">
+        <form class="form-grid" @onsubmit="GuardarEdicion" novalidate>
+            <div class="lbl">Editar datos de la cédula <span class="mono">@_editando.Dni</span></div>
+            <div class="form-row">
+                <div>
+                    <label class="lbl" for="edicion-nombre">Nombre</label>
+                    <input id="edicion-nombre" class="field" @bind="_editando.Nombre" />
+                </div>
+                <div>
+                    <label class="lbl" for="edicion-apellido">Apellido</label>
+                    <input id="edicion-apellido" class="field" @bind="_editando.Apellido" />
+                </div>
+            </div>
+            <div>
+                <label class="lbl" for="edicion-correo">Correo electrónico</label>
+                <input id="edicion-correo" type="email" class="field" @bind="_editando.Correo" />
+            </div>
+            <div class="acciones">
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                <button type="button" class="btn btn-ghost" @onclick="() => _editando = null">Cancelar</button>
+            </div>
+        </form>
+    </div>
+}
+
 @if (_exito is not null)
 {
     <div class="alert alert-success mensaje" role="status">@_exito</div>
@@ -103,6 +130,7 @@
                     </td>
                     <td>@(usuario.Activo ? "Activo" : "Desactivado")</td>
                     <td>
+                        <button class="btn btn-ghost btn-sm" @onclick="() => AbrirEdicion(usuario)">Editar</button>
                         @if (!EsElMismo(usuario))
                         {
                             <button class="btn btn-ghost btn-sm" @onclick="() => CambiarEstado(usuario)">
@@ -131,6 +159,7 @@
     private bool _mostrarAlta;
     private UsuarioDto _nuevo = new UsuarioDto();
     private string _tipoNuevo = string.Empty;
+    private UsuarioResumenDto? _editando;
 
     private IEnumerable<UsuarioResumenDto> UsuariosFiltrados =>
         _usuarios.Where(usuario => string.IsNullOrWhiteSpace(_busqueda) ||
@@ -162,8 +191,36 @@
         }
     }
 
-    private bool EsElMismo(UsuarioResumenDto usuario) =>
-        string.Equals(usuario.Correo, SesionActual.Usuario?.Correo, StringComparison.OrdinalIgnoreCase);
+    private void AbrirEdicion(UsuarioResumenDto usuario)
+    {
+        _mostrarAlta = false;
+        _editando = new UsuarioResumenDto
+        {
+            Dni = usuario.Dni, Nombre = usuario.Nombre, Apellido = usuario.Apellido, Correo = usuario.Correo
+        };
+    }
+
+    private void GuardarEdicion()
+    {
+        UsuarioResumenDto editado = _editando!;
+        Ejecutar(() => ServicioAdministracion.ModificarDatos(editado.Dni, editado.Nombre, editado.Apellido,
+            editado.Correo.Trim()));
+
+        if (_error is null)
+        {
+            if (EsElMismoDni(editado.Dni))
+            {
+                SesionActual.ActualizarDatos(editado.Nombre, editado.Correo.Trim());
+            }
+
+            _exito = $"Se guardaron los datos de {editado.Nombre} {editado.Apellido}.";
+            _editando = null;
+        }
+    }
+
+    private bool EsElMismoDni(string dni) => dni == SesionActual.Usuario?.Dni;
+
+    private bool EsElMismo(UsuarioResumenDto usuario) => EsElMismoDni(usuario.Dni);
 
     private void AsignarTipo(UsuarioResumenDto usuario, string? tipo)
     {

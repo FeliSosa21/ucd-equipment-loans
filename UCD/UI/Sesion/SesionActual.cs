@@ -28,6 +28,18 @@ public class SesionActual
         Cambio?.Invoke();
     }
 
+    public void ActualizarDatos(string nombre, string correo)
+    {
+        if (Usuario is null)
+        {
+            return;
+        }
+
+        Usuario.Nombre = nombre;
+        Usuario.Correo = correo;
+        Cambio?.Invoke();
+    }
+
     public void Cerrar()
     {
         Usuario = null;
