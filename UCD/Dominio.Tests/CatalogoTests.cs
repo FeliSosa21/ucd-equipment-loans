@@ -125,6 +125,21 @@ public sealed class CatalogoTests
         Assert.IsNull(resultado);
     }
 
+    [TestMethod]
+    [DataRow("Proyector Epson EB-770Fi", "PROYECTOR EPSON EB-770FI")]
+    [DataRow("Proyector Epson EB-770Fi", " Proyector Epson EB-770Fi ")]
+    [DataRow(" Proyector Epson EB-770Fi ", "Proyector Epson EB-770Fi")]
+    public void BuscarTipoPorNombreEquivalente_NombreEquivalente_DevuelveElTipo(string nombreExistente, string nombreNuevo)
+    {
+        var catalogo = CrearCatalogo();
+        var tipoEquipamientoExistente = CrearTipo(nombre:nombreExistente);
+
+        catalogo.AgregarTipo(tipoEquipamientoExistente);
+        var resultado =  catalogo.BuscarTipoPorNombre(nombreNuevo);
+
+        Assert.AreSame(tipoEquipamientoExistente, resultado);
+    }
+
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
