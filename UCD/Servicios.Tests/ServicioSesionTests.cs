@@ -85,6 +85,44 @@ public class ServicioSesionTests
         Assert.IsTrue(sesion.PendienteDeActivacion);
     }
 
+    [TestMethod]
+    public void CambiarContrasena_DatosCorrectos_PermiteIngresarConLaNueva()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        ServicioSesion servicio = new ServicioSesion(repositorio);
+
+        servicio.CambiarContrasena(CorreoValido, ContrasenaValida, "NuevaClave2026");
+
+        UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, "NuevaClave2026");
+        Assert.IsFalse(sesion.DebeCambiarContrasena);
+    }
+
+    [TestMethod]
+    public void CambiarContrasena_ActualIncorrecta_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        ServicioSesion servicio = new ServicioSesion(repositorio);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.CambiarContrasena(CorreoValido, "OtraClave2026", "NuevaClave2026"));
+    }
+
+    [TestMethod]
+    public void CambiarContrasena_NuevaInvalida_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        ServicioSesion servicio = new ServicioSesion(repositorio);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.CambiarContrasena(CorreoValido, ContrasenaValida, "corta1A"));
+    }
+
     private static UsuarioDto CrearDto()
     {
         return new UsuarioDto

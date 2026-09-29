@@ -58,6 +58,14 @@ public class Usuario
         DebeCambiarContrasena = true;
     }
 
+    public void CambiarContrasena(string nueva)
+    {
+        ValidarFormatoContrasena(nueva);
+
+        Contrasena = nueva;
+        DebeCambiarContrasena = false;
+    }
+
     private static void ValidarNombreOApellido(string valor, string campo)
     {
         if (string.IsNullOrWhiteSpace(valor))

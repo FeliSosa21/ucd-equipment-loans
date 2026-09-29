@@ -475,6 +475,26 @@ public sealed class UsuarioTests
         Assert.IsTrue(usuario.DebeCambiarContrasena);
     }
 
+    [TestMethod]
+    public void CambiarContrasena_NuevaValida_LaReemplazaYYaNoDebeCambiarla()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.ExigirCambioDeContrasena();
+
+        usuario.CambiarContrasena("NuevaClave2026");
+
+        Assert.IsTrue(usuario.ContrasenaEsCorrecta("NuevaClave2026"));
+        Assert.IsFalse(usuario.DebeCambiarContrasena);
+    }
+
+    [TestMethod]
+    public void CambiarContrasena_NuevaInvalida_LanzaExcepcion()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.ThrowsException<DominioException>(() => usuario.CambiarContrasena("corta1A"));
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {

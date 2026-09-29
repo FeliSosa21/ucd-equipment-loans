@@ -36,4 +36,23 @@ public class ServicioSesion
             PendienteDeActivacion = usuario.Tipo == TipoUsuario.SinPermisos
         };
     }
+
+    public void CambiarContrasena(string correo, string actual, string nueva)
+    {
+        Usuario? usuario = _repositorio.ObtenerUsuarioPorCorreo(correo);
+
+        if (usuario is null || !usuario.ContrasenaEsCorrecta(actual))
+        {
+            throw new ServicioException("La contrasena actual es incorrecta");
+        }
+
+        try
+        {
+            usuario.CambiarContrasena(nueva);
+        }
+        catch (DominioException ex)
+        {
+            throw new ServicioException(ex.Message);
+        }
+    }
 }
