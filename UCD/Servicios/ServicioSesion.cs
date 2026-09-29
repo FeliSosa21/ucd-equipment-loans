@@ -33,7 +33,8 @@ public class ServicioSesion
             Nombre = usuario.Nombre,
             Tipo = usuario.Tipo.Nombre,
             DebeCambiarContrasena = usuario.DebeCambiarContrasena,
-            PendienteDeActivacion = usuario.Tipo == TipoUsuario.SinPermisos
+            PendienteDeActivacion = usuario.Tipo == TipoUsuario.SinPermisos,
+            Permisos = PermisosDe(usuario.Tipo)
         };
     }
 
@@ -54,5 +55,13 @@ public class ServicioSesion
         {
             throw new ServicioException(ex.Message);
         }
+    }
+
+    private static List<string> PermisosDe(TipoUsuario tipo)
+    {
+        return Enum.GetValues<Permiso>()
+            .Where(tipo.TienePermiso)
+            .Select(permiso => permiso.ToString())
+            .ToList();
     }
 }

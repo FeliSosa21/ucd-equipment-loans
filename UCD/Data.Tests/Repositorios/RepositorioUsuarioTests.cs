@@ -71,6 +71,19 @@ public class RepositorioUsuarioTests
         Assert.IsNull(resultado);
     }
 
+    [TestMethod]
+    public void ObtenerTodos_ConUnUsuario_LoDevuelve()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        Usuario usuario = CrearUsuario();
+        repositorio.AgregarUsuario(usuario);
+
+        IReadOnlyList<Usuario> resultado = repositorio.ObtenerTodos();
+
+        CollectionAssert.Contains(resultado.ToList(), usuario);
+    }
+
     private static Usuario CrearUsuario()
     {
         return new Usuario(

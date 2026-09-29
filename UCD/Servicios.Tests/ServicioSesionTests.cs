@@ -1,5 +1,6 @@
 using Data;
 using Data.Repositorios;
+using Dominio;
 using DTOs;
 
 namespace Servicios.Tests;
@@ -83,6 +84,20 @@ public class ServicioSesionTests
         UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, ContrasenaValida);
 
         Assert.IsTrue(sesion.PendienteDeActivacion);
+    }
+
+    [TestMethod]
+    public void IniciarSesion_Administrador_DevuelveElPermisoDeGestionarUsuarios()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        repositorio.ObtenerUsuarioPorCorreo(CorreoValido)!.AsignarTipo(TipoUsuario.Administrador);
+        ServicioSesion servicio = new ServicioSesion(repositorio);
+
+        UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, ContrasenaValida);
+
+        CollectionAssert.Contains(sesion.Permisos, nameof(Permiso.GestionarUsuarios));
     }
 
     [TestMethod]

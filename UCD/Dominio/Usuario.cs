@@ -48,6 +48,11 @@ public class Usuario
         Estado = EstadoUsuario.Desactivado;
     }
 
+    public void Reactivar()
+    {
+        Estado = EstadoUsuario.Activo;
+    }
+
     public void AsignarTipo(TipoUsuario tipo)
     {
         Tipo = tipo;

@@ -7,4 +7,5 @@ public class UsuarioSesionDto
     public string Tipo { get; set; } = string.Empty;
     public bool DebeCambiarContrasena { get; set; }
     public bool PendienteDeActivacion { get; set; }
+    public List<string> Permisos { get; set; } = new List<string>();
 }

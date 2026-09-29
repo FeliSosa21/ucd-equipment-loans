@@ -26,4 +26,9 @@ public class RepositorioUsuario
         return _memoria.Usuarios.FirstOrDefault(usuario =>
             string.Equals(usuario.Correo, correo, StringComparison.OrdinalIgnoreCase));
     }
+
+    public IReadOnlyList<Usuario> ObtenerTodos()
+    {
+        return _memoria.Usuarios.AsReadOnly();
+    }
 }

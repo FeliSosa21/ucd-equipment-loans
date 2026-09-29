@@ -456,6 +456,17 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void Reactivar_UsuarioDesactivado_QuedaActivo()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.Desactivar();
+
+        usuario.Reactivar();
+
+        Assert.AreEqual(EstadoUsuario.Activo, usuario.Estado);
+    }
+
+    [TestMethod]
     public void AsignarTipo_Administrador_TieneTipoAdministrador()
     {
         Usuario usuario = CrearUsuario();
