@@ -438,6 +438,16 @@ public sealed class UsuarioTests
         Assert.IsFalse(resultado);
     }
 
+    [TestMethod]
+    public void Desactivar_UsuarioActivo_QuedaDesactivado()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.Desactivar();
+
+        Assert.AreEqual(EstadoUsuario.Desactivado, usuario.Estado);
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
