@@ -36,6 +36,17 @@ public class ServicioSesionTests
         Assert.ThrowsException<DominioException>(() => servicio.IniciarSesion(CorreoValido, "OtraClave2026"));
     }
 
+    [TestMethod]
+    public void IniciarSesion_CorreoInexistente_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        ServicioSesion servicio = new ServicioSesion(repositorio);
+
+        Assert.ThrowsException<DominioException>(() => servicio.IniciarSesion("otro@hotmail.com", ContrasenaValida));
+    }
+
     private static UsuarioDto CrearDto()
     {
         return new UsuarioDto
