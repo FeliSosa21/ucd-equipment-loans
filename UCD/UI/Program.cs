@@ -1,3 +1,6 @@
+using Data;
+using Data.Repositorios;
+using Servicios;
 using UI.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -5,6 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Una sola Memoria para toda la aplicacion: guarda los datos mientras corre el sistema.
+builder.Services.AddSingleton<Memoria>();
+
+// Repositorios y servicios: uno por conexion; no guardan estado propio.
+builder.Services.AddScoped<RepositorioUsuario>();
+builder.Services.AddScoped<ServicioUsuario>();
 
 var app = builder.Build();
 
