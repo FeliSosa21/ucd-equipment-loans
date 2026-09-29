@@ -72,6 +72,19 @@ public class ServicioSesionTests
         Assert.IsFalse(sesion.DebeCambiarContrasena);
     }
 
+    [TestMethod]
+    public void IniciarSesion_UsuarioRecienRegistrado_EstaPendienteDeActivacion()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        ServicioSesion servicio = new ServicioSesion(repositorio);
+
+        UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, ContrasenaValida);
+
+        Assert.IsTrue(sesion.PendienteDeActivacion);
+    }
+
     private static UsuarioDto CrearDto()
     {
         return new UsuarioDto

@@ -15,6 +15,7 @@ builder.Services.AddSingleton<Memoria>();
 // Repositorios y servicios: uno por conexion; no guardan estado propio.
 builder.Services.AddScoped<RepositorioUsuario>();
 builder.Services.AddScoped<ServicioUsuario>();
+builder.Services.AddScoped<ServicioSesion>();
 
 var app = builder.Build();
 

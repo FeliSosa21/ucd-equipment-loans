@@ -6,4 +6,5 @@ public class UsuarioSesionDto
     public string Nombre { get; set; } = string.Empty;
     public string Tipo { get; set; } = string.Empty;
     public bool DebeCambiarContrasena { get; set; }
+    public bool PendienteDeActivacion { get; set; }
 }

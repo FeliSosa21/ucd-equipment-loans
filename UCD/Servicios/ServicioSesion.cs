@@ -32,7 +32,8 @@ public class ServicioSesion
             Correo = usuario.Correo,
             Nombre = usuario.Nombre,
             Tipo = usuario.Tipo.Nombre,
-            DebeCambiarContrasena = usuario.DebeCambiarContrasena
+            DebeCambiarContrasena = usuario.DebeCambiarContrasena,
+            PendienteDeActivacion = usuario.Tipo == TipoUsuario.SinPermisos
         };
     }
 }
