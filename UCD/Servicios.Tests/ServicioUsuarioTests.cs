@@ -47,6 +47,18 @@ public class ServicioUsuarioTests
         Assert.ThrowsException<DominioException>(() => servicio.Registrar(repetido));
     }
 
+    [TestMethod]
+    public void Registrar_DatosInvalidos_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        ServicioUsuario servicio = new ServicioUsuario(repositorio);
+        UsuarioDto dto = CrearDto(dni: "12345678");
+
+
+        Assert.ThrowsException<DominioException>(() => servicio.Registrar(dto));
+    }
+
     private static UsuarioDto CrearDto(string dni = "12345672", string correo = "felipe@hotmail.com")
     {
         return new UsuarioDto
