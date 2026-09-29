@@ -45,7 +45,7 @@ public class Catalogo
             throw new DominioException("El tipo no puede ser nulo");
         }
 
-        if (ChequearNombreExistente(tipo.Nombre))
+        if (ExisteTipoConNombre(tipo.Nombre))
         {
             throw new DominioException("Ya existe un tipo de equipamiento con ese nombre");
         }
@@ -53,15 +53,11 @@ public class Catalogo
         Tipos.Add(tipo);
     }
 
-    private bool ChequearNombreExistente(string nombre)
+    private bool ExisteTipoConNombre(string nombre)
     {
-        string nombreSinEspacios = nombre.Trim();
-        foreach (var tipoExistente in Tipos)
+        if (BuscarTipoPorNombre(nombre) is not null)
         {
-            if (string.Equals(tipoExistente.Nombre.Trim(), nombreSinEspacios, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
+            return true;
         }
 
         return false;
@@ -72,7 +68,7 @@ public class Catalogo
         string nombreSinEspacios = nombre.Trim();
         foreach (var tipo in Tipos)
         {
-            if (String.Equals(tipo.Nombre.Trim(), nombreSinEspacios, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(tipo.Nombre.Trim(), nombreSinEspacios, StringComparison.OrdinalIgnoreCase))
             {
                 return tipo;
             }
