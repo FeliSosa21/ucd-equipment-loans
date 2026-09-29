@@ -27,6 +27,12 @@ public class ServicioSesion
             throw new ServicioException("El usuario esta desactivado");
         }
 
-        return new UsuarioSesionDto { Correo = usuario.Correo, Nombre = usuario.Nombre };
+        return new UsuarioSesionDto
+        {
+            Correo = usuario.Correo,
+            Nombre = usuario.Nombre,
+            Tipo = usuario.Tipo.Nombre,
+            DebeCambiarContrasena = usuario.DebeCambiarContrasena
+        };
     }
 }
