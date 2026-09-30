@@ -17,9 +17,11 @@ public class Usuario
     private string Contrasena { get; set; }
     public EstadoUsuario Estado { get; private set; }
     public bool DebeCambiarContrasena { get; private set; }
+    public TipoUsuario Tipo { get; private set; }
 
     public Usuario(string dni, string nombre, string apellido, string correo, string contrasena)
     {
+        dni = NormalizarDni(dni);
         ValidarDni(dni);
         ValidarNombreOApellido(nombre, "nombre");
         ValidarNombreOApellido(apellido, "apellido");
@@ -33,13 +35,58 @@ public class Usuario
         Contrasena = contrasena;
         Estado = EstadoUsuario.Activo;
         DebeCambiarContrasena = false;
+        Tipo = TipoUsuario.SinPermisos;
+    }
+
+    public bool ContrasenaEsCorrecta(string contrasena)
+    {
+        return Contrasena == contrasena;
+    }
+
+    public void Desactivar()
+    {
+        Estado = EstadoUsuario.Desactivado;
+    }
+
+    public void ModificarDatos(string nombre, string apellido, string correo)
+    {
+        ValidarNombreOApellido(nombre, "nombre");
+        ValidarNombreOApellido(apellido, "apellido");
+        ValidarCorreo(correo);
+
+        Nombre = nombre;
+        Apellido = apellido;
+        Correo = correo;
+    }
+
+    public void Reactivar()
+    {
+        Estado = EstadoUsuario.Activo;
+    }
+
+    public void AsignarTipo(TipoUsuario tipo)
+    {
+        Tipo = tipo;
+    }
+
+    public void ExigirCambioDeContrasena()
+    {
+        DebeCambiarContrasena = true;
+    }
+
+    public void CambiarContrasena(string nueva)
+    {
+        ValidarFormatoContrasena(nueva);
+
+        Contrasena = nueva;
+        DebeCambiarContrasena = false;
     }
 
     private static void ValidarNombreOApellido(string valor, string campo)
     {
         if (string.IsNullOrWhiteSpace(valor))
         {
-            throw new DominioException($"El {campo} no puede ser vacio");
+            throw new DominioException($"El {campo} no puede estar vacio");
         }
 
         if (valor.Length < LargoMinimoNombreOApellido)
@@ -193,7 +240,7 @@ public class Usuario
     {
         if (string.IsNullOrWhiteSpace(contrasena))
         {
-            throw new DominioException("La contrasena no puede ser vacia");
+            throw new DominioException("La contrasena no puede estar vacia");
         }
 
         if (contrasena.Length < LargoMinimoContrasena)
@@ -221,7 +268,7 @@ public class Usuario
     {
         if (string.IsNullOrWhiteSpace(dni))
         {
-            throw new DominioException("El DNI no puede ser vacio");
+            throw new DominioException("El DNI no puede estar vacio");
         }
 
         foreach (char c in dni)
@@ -262,6 +309,16 @@ public class Usuario
         int verificadorRecibido = ValorDigito(dni[^1]);
 
         return verificadorCalculado == verificadorRecibido;
+    }
+
+    private static string NormalizarDni(string dni)
+    {
+        if (!string.IsNullOrEmpty(dni) && dni.Length == LargoDni - 1)
+        {
+            return "0" + dni;
+        }
+
+        return dni;
     }
 
     private static int ValorDigito(char c)

@@ -15,4 +15,20 @@ public class RepositorioUsuario
     {
         _memoria.Usuarios.Add(usuario);
     }
+
+    public Usuario? ObtenerUsuarioPorDni(string dni)
+    {
+        return _memoria.Usuarios.FirstOrDefault(usuario => usuario.Dni == dni);
+    }
+
+    public Usuario? ObtenerUsuarioPorCorreo(string correo)
+    {
+        return _memoria.Usuarios.FirstOrDefault(usuario =>
+            string.Equals(usuario.Correo, correo, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public IReadOnlyList<Usuario> ObtenerTodos()
+    {
+        return _memoria.Usuarios.AsReadOnly();
+    }
 }

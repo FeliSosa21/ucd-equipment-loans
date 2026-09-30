@@ -1,4 +1,7 @@
 @inherits LayoutComponentBase
+@implements IDisposable
+@inject SesionActual SesionActual
+@inject NavigationManager Navigation
 
 <header class="topbar">
     <a class="brand" href="">
@@ -9,10 +12,20 @@
         </span>
     </a>
 
-    @* Cuando exista el login, esto se reemplaza por el avatar con nombre y tipo de usuario *@
     <div class="sesion">
-        <a class="btn btn-ghost btn-sm" href="ingresar">Ingresar</a>
-        <a class="btn btn-primary btn-sm" href="registro">Crear cuenta</a>
+        @if (SesionActual.EstaIniciada)
+        {
+            <span class="usuario">
+                <strong>@SesionActual.Usuario!.Nombre</strong>
+                <small>@SesionActual.Usuario.Tipo</small>
+            </span>
+            <button class="btn btn-ghost btn-sm" @onclick="CerrarSesion">Salir</button>
+        }
+        else
+        {
+            <a class="btn btn-ghost btn-sm" href="ingresar">Ingresar</a>
+            <a class="btn btn-primary btn-sm" href="registro">Crear cuenta</a>
+        }
     </div>
 </header>
 
@@ -30,3 +43,36 @@
     <a href="." class="reload">Recargar</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        SesionActual.Cambio += StateHasChanged;
+    }
+
+    protected override void OnParametersSet()
+    {
+        ExigirCambioDeContrasena();
+    }
+
+    // Si el usuario debe cambiar la contrasena, no puede ir a otra pantalla hasta hacerlo.
+    private void ExigirCambioDeContrasena()
+    {
+        if (SesionActual.EstaIniciada && SesionActual.Usuario!.DebeCambiarContrasena &&
+            !Navigation.Uri.EndsWith("/cambiar-contrasena", StringComparison.OrdinalIgnoreCase))
+        {
+            Navigation.NavigateTo("/cambiar-contrasena");
+        }
+    }
+
+    private void CerrarSesion()
+    {
+        SesionActual.Cerrar();
+        Navigation.NavigateTo("/");
+    }
+
+    public void Dispose()
+    {
+        SesionActual.Cambio -= StateHasChanged;
+    }
+}

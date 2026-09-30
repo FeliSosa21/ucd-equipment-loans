@@ -1,4 +1,9 @@
 @page "/usuarios"
+@using DTOs
+@using Servicios
+@inject ServicioAdministracionUsuarios ServicioAdministracion
+@inject SesionActual SesionActual
+@inject NavigationManager Navigation
 
 <PageTitle>UCD · Usuarios</PageTitle>
 
@@ -8,9 +13,92 @@
 </div>
 
 <div class="toolbar">
+    <button class="btn btn-primary btn-sm" @onclick="() => { _mostrarAlta = !_mostrarAlta; _editando = null; }">
+        @(_mostrarAlta ? "Cancelar" : "Nuevo usuario")
+    </button>
     <input class="field" type="search" placeholder="Buscar por nombre, CI o correo"
-           aria-label="Buscar usuario" style="min-width: 320px" />
+           aria-label="Buscar usuario" style="min-width: 320px"
+           @bind="_busqueda" @bind:event="oninput" />
 </div>
+
+@if (_mostrarAlta)
+{
+    <div class="card alta">
+        <form class="form-grid" @onsubmit="CrearUsuario" novalidate>
+            <div class="form-row">
+                <div>
+                    <label class="lbl" for="alta-ci">Cédula de identidad</label>
+                    <input id="alta-ci" class="field mono" inputmode="numeric" @bind="_nuevo.Dni" />
+                </div>
+                <div>
+                    <label class="lbl" for="alta-tipo">Tipo de usuario</label>
+                    <select id="alta-tipo" class="field" @bind="_tipoNuevo">
+                        @foreach (string tipo in _tipos)
+                        {
+                            <option value="@tipo">@tipo</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label class="lbl" for="alta-nombre">Nombre</label>
+                    <input id="alta-nombre" class="field" @bind="_nuevo.Nombre" />
+                </div>
+                <div>
+                    <label class="lbl" for="alta-apellido">Apellido</label>
+                    <input id="alta-apellido" class="field" @bind="_nuevo.Apellido" />
+                </div>
+            </div>
+            <div>
+                <label class="lbl" for="alta-correo">Correo electrónico</label>
+                <input id="alta-correo" type="email" class="field" @bind="_nuevo.Correo" />
+            </div>
+            <div class="hint">
+                La cuenta se crea con la contraseña <strong class="mono">@ServicioAdministracionUsuarios.ContrasenaPredeterminada</strong>
+                y el usuario debe cambiarla en su primer ingreso.
+            </div>
+            <button type="submit" class="btn btn-primary">Crear usuario</button>
+        </form>
+    </div>
+}
+
+@if (_editando is not null)
+{
+    <div class="card alta">
+        <form class="form-grid" @onsubmit="GuardarEdicion" novalidate>
+            <div class="lbl">Editar datos de la cédula <span class="mono">@_editando.Dni</span></div>
+            <div class="form-row">
+                <div>
+                    <label class="lbl" for="edicion-nombre">Nombre</label>
+                    <input id="edicion-nombre" class="field" @bind="_editando.Nombre" />
+                </div>
+                <div>
+                    <label class="lbl" for="edicion-apellido">Apellido</label>
+                    <input id="edicion-apellido" class="field" @bind="_editando.Apellido" />
+                </div>
+            </div>
+            <div>
+                <label class="lbl" for="edicion-correo">Correo electrónico</label>
+                <input id="edicion-correo" type="email" class="field" @bind="_editando.Correo" />
+            </div>
+            <div class="acciones">
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                <button type="button" class="btn btn-ghost" @onclick="() => _editando = null">Cancelar</button>
+            </div>
+        </form>
+    </div>
+}
+
+@if (_exito is not null)
+{
+    <div class="alert alert-success mensaje" role="status">@_exito</div>
+}
+
+@if (_error is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_error</div>
+}
 
 <div class="card table-card">
     <table>
@@ -21,8 +109,153 @@
                 <th>Correo</th>
                 <th>Tipo de usuario</th>
                 <th>Estado</th>
+                <th></th>
             </tr>
         </thead>
+        <tbody>
+            @foreach (UsuarioResumenDto usuario in UsuariosFiltrados)
+            {
+                <tr>
+                    <td>@usuario.Nombre @usuario.Apellido</td>
+                    <td class="mono">@usuario.Dni</td>
+                    <td>@usuario.Correo</td>
+                    <td>
+                        <select class="field" aria-label="Tipo de @usuario.Nombre" disabled="@EsElMismo(usuario)"
+                                value="@usuario.Tipo" @onchange="e => AsignarTipo(usuario, e.Value?.ToString())">
+                            @foreach (string tipo in _tipos)
+                            {
+                                <option value="@tipo">@tipo</option>
+                            }
+                        </select>
+                    </td>
+                    <td>@(usuario.Activo ? "Activo" : "Desactivado")</td>
+                    <td>
+                        <button class="btn btn-ghost btn-sm" @onclick="() => AbrirEdicion(usuario)">Editar</button>
+                        @if (!EsElMismo(usuario))
+                        {
+                            <button class="btn btn-ghost btn-sm" @onclick="() => CambiarEstado(usuario)">
+                                @(usuario.Activo ? "Desactivar" : "Reactivar")
+                            </button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
     </table>
-    <EstadoVacio Titulo="No hay usuarios registrados" />
+    @if (!UsuariosFiltrados.Any())
+    {
+        <EstadoVacio Titulo="No hay usuarios que coincidan" />
+    }
 </div>
+
+@code {
+    private const string PermisoGestionarUsuarios = "GestionarUsuarios";
+
+    private List<UsuarioResumenDto> _usuarios = new List<UsuarioResumenDto>();
+    private List<string> _tipos = new List<string>();
+    private string _busqueda = string.Empty;
+    private string? _error;
+    private string? _exito;
+    private bool _mostrarAlta;
+    private UsuarioDto _nuevo = new UsuarioDto();
+    private string _tipoNuevo = string.Empty;
+    private UsuarioResumenDto? _editando;
+
+    private IEnumerable<UsuarioResumenDto> UsuariosFiltrados =>
+        _usuarios.Where(usuario => string.IsNullOrWhiteSpace(_busqueda) ||
+                                   $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
+                                       .Contains(_busqueda.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    protected override void OnInitialized()
+    {
+        if (!SesionActual.EstaIniciada || !SesionActual.Usuario!.Permisos.Contains(PermisoGestionarUsuarios))
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        _tipos = ServicioAdministracion.NombresDeTipos();
+        _tipoNuevo = _tipos.First();
+        Recargar();
+    }
+
+    private void CrearUsuario()
+    {
+        Ejecutar(() => ServicioAdministracion.CrearUsuario(_nuevo, _tipoNuevo));
+
+        if (_error is null)
+        {
+            _exito = $"Se creó la cuenta de {_nuevo.Nombre} {_nuevo.Apellido}.";
+            _nuevo = new UsuarioDto();
+            _mostrarAlta = false;
+        }
+    }
+
+    private void AbrirEdicion(UsuarioResumenDto usuario)
+    {
+        _mostrarAlta = false;
+        _editando = new UsuarioResumenDto
+        {
+            Dni = usuario.Dni, Nombre = usuario.Nombre, Apellido = usuario.Apellido, Correo = usuario.Correo
+        };
+    }
+
+    private void GuardarEdicion()
+    {
+        UsuarioResumenDto editado = _editando!;
+        Ejecutar(() => ServicioAdministracion.ModificarDatos(editado.Dni, editado.Nombre, editado.Apellido,
+            editado.Correo.Trim()));
+
+        if (_error is null)
+        {
+            if (EsElMismoDni(editado.Dni))
+            {
+                SesionActual.ActualizarDatos(editado.Nombre, editado.Correo.Trim());
+            }
+
+            _exito = $"Se guardaron los datos de {editado.Nombre} {editado.Apellido}.";
+            _editando = null;
+        }
+    }
+
+    private bool EsElMismoDni(string dni) => dni == SesionActual.Usuario?.Dni;
+
+    private bool EsElMismo(UsuarioResumenDto usuario) => EsElMismoDni(usuario.Dni);
+
+    private void AsignarTipo(UsuarioResumenDto usuario, string? tipo)
+    {
+        Ejecutar(() => ServicioAdministracion.AsignarTipo(usuario.Dni, tipo ?? string.Empty));
+    }
+
+    private void CambiarEstado(UsuarioResumenDto usuario)
+    {
+        if (usuario.Activo)
+        {
+            Ejecutar(() => ServicioAdministracion.Desactivar(usuario.Dni));
+            return;
+        }
+
+        Ejecutar(() => ServicioAdministracion.Reactivar(usuario.Dni));
+    }
+
+    private void Ejecutar(Action accion)
+    {
+        _error = null;
+        _exito = null;
+        try
+        {
+            accion();
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+        }
+
+        Recargar();
+    }
+
+    private void Recargar()
+    {
+        _usuarios = ServicioAdministracion.ListarUsuarios();
+    }
+}

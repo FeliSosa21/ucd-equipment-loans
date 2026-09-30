@@ -169,7 +169,7 @@ public sealed class UsuarioTests
     [DataRow("feli-.pe@hotmail.com")]
     [DataRow("feli-_pe@hotmail.com")]
     [DataRow("feli--pe@hotmail.com")]
-    public void CrearUsuario_CorreoConCaracteresConsecutivos_LanzaExcepcion(string correo)
+    public void CrearUsuario_CorreoConCaracteresEspecialesConsecutivos_LanzaExcepcion(string correo)
     {
         Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: correo));
     }
@@ -338,7 +338,7 @@ public sealed class UsuarioTests
     [DataRow("Abcdefg1")]
     [DataRow("Abc123!@")]
     [DataRow("VivalaOrt2026")]
-    public void CrearUsuario_ContrasenaValida_NoLanzaExcepcion(string contrasena)
+    public void CrearUsuario_ContrasenaValida_SeCrea(string contrasena)
     {
         Usuario usuario = CrearUsuario(contrasena: contrasena);
 
@@ -367,7 +367,6 @@ public sealed class UsuarioTests
 
     [TestMethod]
     [DataRow("123456")]
-    [DataRow("1234560")]
     [DataRow("123456789")]
     public void CrearUsuario_DniConLargoInvalido_LanzaExcepcion(string dni)
     {
@@ -404,6 +403,129 @@ public sealed class UsuarioTests
         Usuario usuario = CrearUsuario(dni: dni);
 
         Assert.AreEqual(dni, usuario.Dni);
+    }
+
+    [TestMethod]
+    public void CrearUsuario_DatosValidos_TieneSinPermisos()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.AreEqual(TipoUsuario.SinPermisos, usuario.Tipo);
+    }
+
+    [TestMethod]
+    public void CrearUsuario_DniCon7Digitos_AgregarCeroAdelante()
+    {
+        Usuario usuario = CrearUsuario(dni: "1234561");
+
+        Assert.AreEqual("01234561", usuario.Dni);
+    }
+
+    [TestMethod]
+    public void ContrasenaEsCorrecta_MismaContrasena_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+
+        bool resultado = usuario.ContrasenaEsCorrecta(ContrasenaValida);
+
+        Assert.IsTrue(resultado);
+    }
+
+    [TestMethod]
+    [DataRow("vivalaort2026")]
+    [DataRow("VIVALAORT2026")]
+    [DataRow("VivalaOrt2027")]
+    [DataRow("")]
+    public void ContrasenaEsCorrecta_ContrasenaDistinta_DevuelveFalse(string contrasena)
+    {
+        Usuario usuario = CrearUsuario();
+
+        bool resultado = usuario.ContrasenaEsCorrecta(contrasena);
+
+        Assert.IsFalse(resultado);
+    }
+
+    [TestMethod]
+    public void Desactivar_UsuarioActivo_QuedaDesactivado()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.Desactivar();
+
+        Assert.AreEqual(EstadoUsuario.Desactivado, usuario.Estado);
+    }
+
+    [TestMethod]
+    public void ModificarDatos_DatosValidos_LosActualiza()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.ModificarDatos("Pedro", "Suarez", "pedro@hotmail.com");
+
+        Assert.AreEqual("Pedro", usuario.Nombre);
+        Assert.AreEqual("Suarez", usuario.Apellido);
+        Assert.AreEqual("pedro@hotmail.com", usuario.Correo);
+    }
+
+    [TestMethod]
+    public void ModificarDatos_CorreoInvalido_NoCambiaNingunDato()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.ThrowsException<DominioException>(() => usuario.ModificarDatos("Pedro", "Suarez", "pedro@hotmail"));
+        Assert.AreEqual(NombreValido, usuario.Nombre);
+        Assert.AreEqual(CorreoValido, usuario.Correo);
+    }
+
+    [TestMethod]
+    public void Reactivar_UsuarioDesactivado_QuedaActivo()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.Desactivar();
+
+        usuario.Reactivar();
+
+        Assert.AreEqual(EstadoUsuario.Activo, usuario.Estado);
+    }
+
+    [TestMethod]
+    public void AsignarTipo_Administrador_TieneTipoAdministrador()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.AsignarTipo(TipoUsuario.Administrador);
+
+        Assert.AreEqual(TipoUsuario.Administrador, usuario.Tipo);
+    }
+
+    [TestMethod]
+    public void ExigirCambioDeContrasena_UsuarioNuevo_DebeCambiarContrasena()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.ExigirCambioDeContrasena();
+
+        Assert.IsTrue(usuario.DebeCambiarContrasena);
+    }
+
+    [TestMethod]
+    public void CambiarContrasena_NuevaValida_LaReemplazaYYaNoDebeCambiarla()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.ExigirCambioDeContrasena();
+
+        usuario.CambiarContrasena("NuevaClave2026");
+
+        Assert.IsTrue(usuario.ContrasenaEsCorrecta("NuevaClave2026"));
+        Assert.IsFalse(usuario.DebeCambiarContrasena);
+    }
+
+    [TestMethod]
+    public void CambiarContrasena_NuevaInvalida_LanzaExcepcion()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.ThrowsException<DominioException>(() => usuario.CambiarContrasena("corta1A"));
     }
 
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,

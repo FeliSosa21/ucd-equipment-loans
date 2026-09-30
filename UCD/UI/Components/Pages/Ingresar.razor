@@ -1,7 +1,10 @@
 @page "/ingresar"
 @layout UI.Components.Layout.AuthLayout
-@rendermode InteractiveServer
+@using DTOs
+@using Servicios
 @inject NavigationManager Navigation
+@inject ServicioSesion ServicioSesion
+@inject SesionActual SesionActual
 
 <PageTitle>UCD · Ingresar</PageTitle>
 
@@ -19,9 +22,14 @@
         </div>
         <div>
             <label class="lbl" for="contrasena">Contraseña</label>
-            <input id="contrasena" type="password" class="field" autocomplete="current-password"
+            <input id="contrasena" type="@TipoContrasena" class="field" autocomplete="current-password"
                    @bind="_contrasena" @bind:event="oninput" />
         </div>
+
+        <label class="mostrar">
+            <input type="checkbox" @bind="_mostrarContrasena" />
+            Mostrar contraseña
+        </label>
 
         @if (_error is not null)
         {
@@ -40,6 +48,9 @@
     private string _correo = string.Empty;
     private string _contrasena = string.Empty;
     private string? _error;
+    private bool _mostrarContrasena;
+
+    private string TipoContrasena => _mostrarContrasena ? "text" : "password";
 
     private bool FormularioCompleto =>
         !string.IsNullOrWhiteSpace(_correo) && !string.IsNullOrEmpty(_contrasena);
@@ -49,13 +60,28 @@
         _error = null;
         try
         {
-            // TODO: llamar al servicio de ingreso. Si es el primer ingreso, ir a /cambiar-contrasena;
-            // si el usuario no tiene tipo asignado, ir a /pendiente-activacion.
-            Navigation.NavigateTo("/");
+            UsuarioSesionDto sesion = ServicioSesion.IniciarSesion(_correo.Trim(), _contrasena);
+            SesionActual.Iniciar(sesion);
+            Navigation.NavigateTo(PaginaDeInicio(sesion));
         }
-        catch (Exception ex) // TODO: cambiar por la excepción que tire el servicio
+        catch (ServicioException ex)
         {
             _error = ex.Message;
         }
+    }
+
+    private static string PaginaDeInicio(UsuarioSesionDto sesion)
+    {
+        if (sesion.DebeCambiarContrasena)
+        {
+            return "/cambiar-contrasena";
+        }
+
+        if (sesion.PendienteDeActivacion)
+        {
+            return "/pendiente-activacion";
+        }
+
+        return "/";
     }
 }
