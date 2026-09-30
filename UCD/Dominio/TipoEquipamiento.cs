@@ -81,6 +81,10 @@ public class TipoEquipamiento
 
     public void AgregarUnidad(UnidadFisica unidad)
     {
+        if (unidad is null)
+        {
+            throw new DominioException("La unidad no puede ser nula");
+        }
         Unidades.Add(unidad);
     }
 }
