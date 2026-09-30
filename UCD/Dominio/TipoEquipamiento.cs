@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Dominio;
 
@@ -53,11 +52,37 @@ public class TipoEquipamiento
 
     public bool EstaActivo => Estado == EstadoTipoEquipamiento.Activo;
 
+    public void AgregarUnidad(UnidadFisica unidad)
+    {
+        ValidarQueSePuedaAgregar(unidad);
+
+        _unidades.Add(unidad);
+    }
+
+    public int CantidadDisponibles()
+    {
+        return UnidadesDisponibles().Count;
+    }
+
+    public IReadOnlyCollection<UnidadFisica> UnidadesDisponibles()
+    {
+        var disponibles = new List<UnidadFisica>();
+        foreach (var unidad in _unidades)
+        {
+            if (unidad.EstaDisponible())
+            {
+                disponibles.Add(unidad);
+            }
+        }
+
+        return disponibles;
+    }
+
     private static void ValidarNombre(string nombre)
     {
         if (string.IsNullOrWhiteSpace(nombre))
         {
-            throw new DominioException("El nombre del tipo de equipamiento no puede ser vacío");
+            throw new DominioException("El nombre del tipo de equipamiento no puede ser vacio");
         }
 
         if (nombre.Length < LargoMinimoNombre)
@@ -78,7 +103,7 @@ public class TipoEquipamiento
         if (descripcion.Length > LargoMaximoDescripcion)
         {
             throw new DominioException(
-                $"La descripción del tipo de equipamiento no puede superar los {LargoMaximoDescripcion} caracteres");
+                $"La descripcion del tipo de equipamiento no puede superar los {LargoMaximoDescripcion} caracteres");
         }
     }
 
@@ -86,15 +111,8 @@ public class TipoEquipamiento
     {
         if (duracionMaxPrestamo <= 0)
         {
-            throw new DominioException("La duración máxima de préstamo debe ser mayor que cero");
+            throw new DominioException("La duracion maxima de prestamo debe ser mayor que cero");
         }
-    }
-
-    public void AgregarUnidad(UnidadFisica unidad)
-    {
-        ValidarQueSePuedaAgregar(unidad);
-
-        _unidades.Add(unidad);
     }
 
     private void ValidarQueSePuedaAgregar(UnidadFisica unidad)
@@ -117,24 +135,4 @@ public class TipoEquipamiento
             }
         }
     }
-
-    public int CantidadDisponibles()
-    {
-        return UnidadesDisponibles().Count;
-    }
-
-    public List<UnidadFisica> UnidadesDisponibles()
-    {
-        var listaDisponibles = new List<UnidadFisica>();
-        foreach (var unidad in _unidades)
-        {
-            if (unidad.EstaDisponible())
-            {
-                listaDisponibles.Add(unidad);
-            }
-        }
-
-        return listaDisponibles;
-    }
-
 }

@@ -239,7 +239,8 @@ public sealed class TipoEquipamientoTests
     {
         var tipo = CrearTipo();
         var unidad = CrearUnidad(idInstitucional: "EQP-0001");
-        var unidadIdRepetido = CrearUnidad(idInstitucional: "EQP-0001");
+        var unidadIdRepetido = CrearUnidad(idInstitucional: "EQP-0001", ubiFisica: "Laboratorio Fisica");
+
         tipo.AgregarUnidad(unidad);
 
         Assert.ThrowsException<DominioException>(() => tipo.AgregarUnidad(unidadIdRepetido));
@@ -251,6 +252,7 @@ public sealed class TipoEquipamientoTests
         var tipo = CrearTipo();
         var primeraUnidad = CrearUnidad(idInstitucional: "EQP-0001");
         var segundaUnidad = CrearUnidad(idInstitucional: "EQP-0002");
+
         tipo.AgregarUnidad(primeraUnidad);
         tipo.AgregarUnidad(segundaUnidad);
 
@@ -262,7 +264,8 @@ public sealed class TipoEquipamientoTests
     public void CantidadDisponibles_SinUnidades_DevuelveCero()
     {
         var tipo = CrearTipo();
-        Assert.AreEqual(0,tipo.CantidadDisponibles());
+
+        Assert.AreEqual(0, tipo.CantidadDisponibles());
     }
 
     [TestMethod]
@@ -275,7 +278,6 @@ public sealed class TipoEquipamientoTests
         unidadPrestada.Prestada();
         unidadEnMantenimiento.Prestada();
         unidadEnMantenimiento.AMantenimiento();
-
         tipo.AgregarUnidad(unidadDisponible);
         tipo.AgregarUnidad(unidadPrestada);
         tipo.AgregarUnidad(unidadEnMantenimiento);
@@ -292,9 +294,9 @@ public sealed class TipoEquipamientoTests
         var unidadDisponible = CrearUnidad(idInstitucional: "EQP-0001");
         var unidadPrestada = CrearUnidad(idInstitucional: "EQP-0002");
         unidadPrestada.Prestada();
-
         tipo.AgregarUnidad(unidadDisponible);
         tipo.AgregarUnidad(unidadPrestada);
+
         var disponibles = tipo.UnidadesDisponibles();
 
         Assert.IsTrue(disponibles.Contains(unidadDisponible));
