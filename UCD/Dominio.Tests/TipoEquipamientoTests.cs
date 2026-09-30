@@ -224,6 +224,16 @@ public sealed class TipoEquipamientoTests
         Assert.ThrowsException<DominioException>(() => tipo.AgregarUnidad(null!));
     }
 
+    [TestMethod]
+    public void AgregarUnidad_TipoDiscontinuado_LanzaDominioException()
+    {
+        var tipo = CrearTipo();
+        tipo.Discontinuar();
+        var unidad = CrearUnidad();
+
+        Assert.ThrowsException<DominioException>(() => tipo.AgregarUnidad(unidad));
+    }
+
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
         string descripcion = "Proyector para aulas",
