@@ -156,6 +156,50 @@ public class ServicioAdministracionUsuariosTests
             servicio.ModificarDatos(DniValido, "F", "Sosa", "felipe@hotmail.com"));
     }
 
+    [TestMethod]
+    public void Desactivar_UnicoAdministradorActivo_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+        servicio.AsignarTipo(DniValido, TipoUsuario.Administrador.Nombre);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Desactivar(DniValido));
+        Assert.AreEqual(EstadoUsuario.Activo, repositorio.ObtenerUsuarioPorDni(DniValido)!.Estado);
+    }
+
+    [TestMethod]
+    public void Desactivar_AdministradorConOtroAdministradorActivo_QuedaDesactivado()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+        servicio.AsignarTipo(DniValido, TipoUsuario.Administrador.Nombre);
+        servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Administrador.Nombre);
+
+        servicio.Desactivar(DniValido);
+
+        Assert.AreEqual(EstadoUsuario.Desactivado, repositorio.ObtenerUsuarioPorDni(DniValido)!.Estado);
+    }
+
+    [TestMethod]
+    public void AsignarTipo_UnicoAdministradorActivoAOtroTipo_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+        servicio.AsignarTipo(DniValido, TipoUsuario.Administrador.Nombre);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.AsignarTipo(DniValido, TipoUsuario.Docente.Nombre));
+        Assert.AreEqual(TipoUsuario.Administrador, repositorio.ObtenerUsuarioPorDni(DniValido)!.Tipo);
+    }
+
+    [TestMethod]
+    public void AsignarTipo_UnicoAdministradorActivoAAdministrador_LoMantiene()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+        servicio.AsignarTipo(DniValido, TipoUsuario.Administrador.Nombre);
+
+        servicio.AsignarTipo(DniValido, TipoUsuario.Administrador.Nombre);
+
+        Assert.AreEqual(TipoUsuario.Administrador, repositorio.ObtenerUsuarioPorDni(DniValido)!.Tipo);
+    }
+
     private static UsuarioDto CrearDtoNuevo()
     {
         return new UsuarioDto

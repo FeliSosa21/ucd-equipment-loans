@@ -50,7 +50,14 @@ public class ServicioAdministracionUsuarios
     public void AsignarTipo(string dni, string nombreTipo)
     {
         Usuario usuario = ObtenerUsuario(dni);
-        usuario.AsignarTipo(ObtenerTipo(nombreTipo));
+        TipoUsuario tipo = ObtenerTipo(nombreTipo);
+
+        if (tipo != TipoUsuario.Administrador)
+        {
+            ValidarQueQuedeOtroAdministradorActivo(usuario);
+        }
+
+        usuario.AsignarTipo(tipo);
     }
 
     public UsuarioResumenDto ObtenerResumen(string dni)
@@ -80,12 +87,34 @@ public class ServicioAdministracionUsuarios
 
     public void Desactivar(string dni)
     {
-        ObtenerUsuario(dni).Desactivar();
+        Usuario usuario = ObtenerUsuario(dni);
+        ValidarQueQuedeOtroAdministradorActivo(usuario);
+        usuario.Desactivar();
     }
 
     public void Reactivar(string dni)
     {
         ObtenerUsuario(dni).Reactivar();
+    }
+
+    private void ValidarQueQuedeOtroAdministradorActivo(Usuario usuario)
+    {
+        if (!EsAdministradorActivo(usuario))
+        {
+            return;
+        }
+
+        bool hayOtro = _repositorio.ObtenerTodos().Any(otro => otro != usuario && EsAdministradorActivo(otro));
+
+        if (!hayOtro)
+        {
+            throw new ServicioException("Debe quedar al menos un administrador activo");
+        }
+    }
+
+    private static bool EsAdministradorActivo(Usuario usuario)
+    {
+        return usuario.Tipo == TipoUsuario.Administrador && usuario.Estado == EstadoUsuario.Activo;
     }
 
     private static TipoUsuario ObtenerTipo(string nombreTipo)
