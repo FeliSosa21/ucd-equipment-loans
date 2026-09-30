@@ -17,12 +17,15 @@ public class TipoEquipamiento
 
     public List<UnidadFisica> Unidades { get; private set; } = new();
 
-    public TipoEquipamiento(string nombre, string descripcion, int duracionMaxPrestamo, bool requiereAprobacion, Categoria categoria)
+    public TipoEquipamiento(string nombre, string descripcion, int duracionMaxPrestamo, bool requiereAprobacion,
+        Categoria categoria)
     {
         Modificar(nombre, descripcion, duracionMaxPrestamo, requiereAprobacion, categoria);
     }
+
     [MemberNotNull(nameof(Nombre), nameof(Descripcion))]
-    public void Modificar(string nombre, string descripcion, int duracionMaxPrestamo, bool requiereAprobacion, Categoria categoria)
+    public void Modificar(string nombre, string descripcion, int duracionMaxPrestamo, bool requiereAprobacion,
+        Categoria categoria)
     {
         ValidarNombre(nombre);
         ValidarDescripcion(descripcion);
@@ -34,6 +37,7 @@ public class TipoEquipamiento
         RequiereAprobacion = requiereAprobacion;
         Categoria = categoria;
     }
+
     public void Discontinuar()
     {
         if (Estado == EstadoTipoEquipamiento.Discontinuado)
@@ -43,18 +47,22 @@ public class TipoEquipamiento
 
         Estado = EstadoTipoEquipamiento.Discontinuado;
     }
+
     public bool EstaActivo => Estado == EstadoTipoEquipamiento.Activo;
+
     private static void ValidarNombre(string nombre)
     {
         if (string.IsNullOrWhiteSpace(nombre))
         {
             throw new DominioException("El nombre del tipo de equipamiento no puede ser vacío");
         }
+
         if (nombre.Length < LargoMinimoNombre)
         {
             throw new DominioException(
                 $"El nombre del tipo de equipamiento debe tener al menos {LargoMinimoNombre} caracteres");
         }
+
         if (nombre.Length > LargoMaximoNombre)
         {
             throw new DominioException(
@@ -81,6 +89,12 @@ public class TipoEquipamiento
 
     public void AgregarUnidad(UnidadFisica unidad)
     {
+        ValidadQueSePuedeAgregar(unidad);
+        Unidades.Add(unidad);
+    }
+
+    private void ValidadQueSePuedeAgregar(UnidadFisica unidad)
+    {
         if (unidad is null)
         {
             throw new DominioException("La unidad no puede ser nula");
@@ -88,9 +102,7 @@ public class TipoEquipamiento
 
         if (!EstaActivo)
         {
-            throw new DominioException("La unidad no esta disponible");
+            throw new DominioException("No se pueden agregar unidades a un tipo discontinuo");
         }
-
-        Unidades.Add(unidad);
     }
 }
