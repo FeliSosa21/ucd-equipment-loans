@@ -4,9 +4,8 @@ using Servicios;
 using UI.Components;
 using UI.Sesion;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -23,7 +22,7 @@ builder.Services.AddScoped<ServicioAdministracionUsuarios>();
 // Quien esta logueado: uno por conexion del navegador.
 builder.Services.AddScoped<SesionActual>();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Precarga el usuario root al arrancar (la Memoria empieza vacia).
 using (IServiceScope scope = app.Services.CreateScope())
@@ -31,11 +30,9 @@ using (IServiceScope scope = app.Services.CreateScope())
     scope.ServiceProvider.GetRequiredService<CargaInicial>().CargarRoot();
 }
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 app.UseHttpsRedirection();

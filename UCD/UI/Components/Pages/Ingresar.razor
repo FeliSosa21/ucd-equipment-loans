@@ -26,10 +26,7 @@
                    @bind="_contrasena" @bind:event="oninput" />
         </div>
 
-        <label class="mostrar">
-            <input type="checkbox" @bind="_mostrarContrasena" />
-            Mostrar contraseña
-        </label>
+        <MostrarContrasena @bind-Visible="_mostrarContrasena" />
 
         @if (_error is not null)
         {
@@ -50,7 +47,7 @@
     private string? _error;
     private bool _mostrarContrasena;
 
-    private string TipoContrasena => _mostrarContrasena ? "text" : "password";
+    private string TipoContrasena => MostrarContrasena.TipoDeCampo(_mostrarContrasena);
 
     private bool FormularioCompleto =>
         !string.IsNullOrWhiteSpace(_correo) && !string.IsNullOrEmpty(_contrasena);

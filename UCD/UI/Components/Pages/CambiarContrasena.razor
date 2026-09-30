@@ -1,8 +1,7 @@
 @page "/cambiar-contrasena"
 @using Servicios
+@inherits PaginaConSesion
 @inject ServicioSesion ServicioSesion
-@inject SesionActual SesionActual
-@inject NavigationManager Navigation
 
 <PageTitle>UCD · Cambiar contraseña</PageTitle>
 
@@ -33,10 +32,7 @@
                    @bind="_repetir" @bind:event="oninput" />
         </div>
 
-        <label class="mostrar">
-            <input type="checkbox" @bind="_mostrarContrasena" />
-            Mostrar contraseñas
-        </label>
+        <MostrarContrasena @bind-Visible="_mostrarContrasena" Texto="Mostrar contraseñas" />
 
         @if (_error is not null)
         {
@@ -62,16 +58,15 @@
     private bool _obligatorio;
     private bool _mostrarContrasena;
 
-    private string TipoContrasena => _mostrarContrasena ? "text" : "password";
+    private string TipoContrasena => MostrarContrasena.TipoDeCampo(_mostrarContrasena);
 
     private bool FormularioCompleto =>
         !string.IsNullOrEmpty(_actual) && !string.IsNullOrEmpty(_nueva) && !string.IsNullOrEmpty(_repetir);
 
     protected override void OnInitialized()
     {
-        if (!SesionActual.EstaIniciada)
+        if (RedirigirSiNoHaySesion())
         {
-            Navigation.NavigateTo("/ingresar");
             return;
         }
 

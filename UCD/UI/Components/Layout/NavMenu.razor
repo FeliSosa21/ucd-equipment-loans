@@ -3,46 +3,46 @@
 
 @* Cada item se muestra solo si el tipo del usuario logueado tiene el permiso (letra, req. 1) *@
 <nav class="nav">
-    @if (Puede("ConsultarMisSolicitudes") || Puede("ConsultarCatalogo"))
+    @if (Puede(Permisos.ConsultarMisSolicitudes) || Puede(Permisos.ConsultarCatalogo))
     {
         <div class="nav-section">General</div>
-        @if (Puede("ConsultarMisSolicitudes"))
+        @if (Puede(Permisos.ConsultarMisSolicitudes))
         {
             <NavLink class="nav-item" href="" Match="NavLinkMatch.All">Mis solicitudes</NavLink>
         }
-        @if (Puede("ConsultarCatalogo"))
+        @if (Puede(Permisos.ConsultarCatalogo))
         {
             <NavLink class="nav-item" href="catalogo">Catálogo</NavLink>
         }
     }
 
-    @if (Puede("GestionarCatalogo") || Puede("GestionarUnidades") || Puede("EvaluarSolicitud") ||
-         Puede("RegistrarDevolucion") || Puede("ConsultarHistorico"))
+    @if (Puede(Permisos.GestionarCatalogo) || Puede(Permisos.GestionarUnidades) || Puede(Permisos.EvaluarSolicitud) ||
+         Puede(Permisos.RegistrarDevolucion) || Puede(Permisos.ConsultarHistorico))
     {
         <div class="nav-section">Gestión</div>
-        @if (Puede("GestionarCatalogo"))
+        @if (Puede(Permisos.GestionarCatalogo))
         {
             <NavLink class="nav-item" href="tipos-equipamiento">Tipos de equipamiento</NavLink>
         }
-        @if (Puede("GestionarUnidades"))
+        @if (Puede(Permisos.GestionarUnidades))
         {
             <NavLink class="nav-item" href="inventario">Inventario</NavLink>
         }
-        @if (Puede("EvaluarSolicitud"))
+        @if (Puede(Permisos.EvaluarSolicitud))
         {
             <NavLink class="nav-item" href="aprobaciones">Aprobaciones</NavLink>
         }
-        @if (Puede("RegistrarDevolucion"))
+        @if (Puede(Permisos.RegistrarDevolucion))
         {
             <NavLink class="nav-item" href="devoluciones">Devoluciones</NavLink>
         }
-        @if (Puede("ConsultarHistorico"))
+        @if (Puede(Permisos.ConsultarHistorico))
         {
             <NavLink class="nav-item" href="auditoria">Registro histórico</NavLink>
         }
     }
 
-    @if (Puede("GestionarUsuarios"))
+    @if (Puede(Permisos.GestionarUsuarios))
     {
         <div class="nav-section">Administración</div>
         <NavLink class="nav-item" href="usuarios">Usuarios</NavLink>

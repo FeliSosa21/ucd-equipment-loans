@@ -2,21 +2,11 @@
 
 @* Layout para las pantallas sin sesión (registro, ingreso, cuenta pendiente): sin menú lateral *@
 <div class="auth">
-    <a class="brand" href="">
-        <span class="brand-logo mono">UCD</span>
-        <span class="brand-text">
-            <strong>UCD</strong>
-            <small>Úsalo, cuídalo, devuélvelo entero</small>
-        </span>
-    </a>
+    <Marca Grande="true" />
 
     <main class="auth-body">
         @Body
     </main>
 </div>
 
-<div id="blazor-error-ui" data-nosnippet>
-    Ocurrió un error inesperado.
-    <a href="." class="reload">Recargar</a>
-    <span class="dismiss">🗙</span>
-</div>
+<ErrorInesperado />

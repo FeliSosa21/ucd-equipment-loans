@@ -1,9 +1,8 @@
 @page "/mis-datos"
 @using DTOs
 @using Servicios
+@inherits PaginaConSesion
 @inject ServicioAdministracionUsuarios ServicioAdministracion
-@inject SesionActual SesionActual
-@inject NavigationManager Navigation
 
 <PageTitle>UCD · Mis datos</PageTitle>
 
@@ -56,9 +55,8 @@
 
     protected override void OnInitialized()
     {
-        if (!SesionActual.EstaIniciada)
+        if (RedirigirSiNoHaySesion())
         {
-            Navigation.NavigateTo("/ingresar");
             return;
         }
 
@@ -76,8 +74,12 @@
 
         try
         {
-            ServicioAdministracion.ModificarDatos(_dni, _nombre, _apellido, _correo.Trim());
-            SesionActual.ActualizarDatos(_nombre, _correo.Trim());
+            UsuarioResumenDto datos = new UsuarioResumenDto
+            {
+                Dni = _dni, Nombre = _nombre, Apellido = _apellido, Correo = _correo.Trim()
+            };
+            ServicioAdministracion.ModificarDatos(datos, SesionActual.Usuario!.Dni);
+            SesionActual.ActualizarDatos(datos.Nombre, datos.Correo);
             _exito = true;
         }
         catch (ServicioException ex)

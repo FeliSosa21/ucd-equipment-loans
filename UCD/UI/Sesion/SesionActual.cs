@@ -17,6 +17,13 @@ public class SesionActual
         Cambio?.Invoke();
     }
 
+    // Reemplaza los datos guardados por los actuales (tipo, permisos, etc.).
+    public void Renovar(UsuarioSesionDto usuario)
+    {
+        Usuario = usuario;
+        Cambio?.Invoke();
+    }
+
     public void MarcarContrasenaCambiada()
     {
         if (Usuario is null)

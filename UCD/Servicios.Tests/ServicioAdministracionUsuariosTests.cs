@@ -10,6 +10,7 @@ public class ServicioAdministracionUsuariosTests
 {
     private const string DniValido = "12345672";
     private const string CorreoNuevo = "ana@hotmail.com";
+    private const string DniResponsable = "11111111";
 
     [TestMethod]
     public void ListarUsuarios_ConUnRegistrado_LoDevuelveConSuTipoYEstado()
@@ -25,11 +26,25 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void NombresDeTipos_DevuelveLosSeisTipos()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        List<string> nombres = servicio.NombresDeTipos();
+
+        CollectionAssert.AreEqual(new List<string>
+        {
+            "Sin permisos", "Estudiante", "Docente", "Funcionario del centro de equipamiento", "Supervisor",
+            "Administrador"
+        }, nombres);
+    }
+
+    [TestMethod]
     public void AsignarTipo_TipoExistente_LoAsigna()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
 
-        servicio.AsignarTipo(DniValido, TipoUsuario.Docente.Nombre);
+        servicio.AsignarTipo(DniValido, TipoUsuario.Docente.Nombre, DniResponsable);
 
         Assert.AreEqual(TipoUsuario.Docente, repositorio.ObtenerUsuarioPorDni(DniValido)!.Tipo);
     }
@@ -39,7 +54,7 @@ public class ServicioAdministracionUsuariosTests
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.AsignarTipo(DniValido, "Rector"));
+        Assert.ThrowsException<ServicioException>(() => servicio.AsignarTipo(DniValido, "Rector", DniResponsable));
     }
 
     [TestMethod]
@@ -48,7 +63,7 @@ public class ServicioAdministracionUsuariosTests
         ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.AsignarTipo("45678905", TipoUsuario.Docente.Nombre));
+            servicio.AsignarTipo("45678905", TipoUsuario.Docente.Nombre, DniResponsable));
     }
 
     [TestMethod]
@@ -56,7 +71,7 @@ public class ServicioAdministracionUsuariosTests
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
 
-        servicio.Desactivar(DniValido);
+        servicio.Desactivar(DniValido, DniResponsable);
 
         Assert.AreEqual(EstadoUsuario.Desactivado, repositorio.ObtenerUsuarioPorDni(DniValido)!.Estado);
     }
@@ -65,7 +80,7 @@ public class ServicioAdministracionUsuariosTests
     public void Reactivar_UsuarioDesactivado_QuedaActivo()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
-        servicio.Desactivar(DniValido);
+        servicio.Desactivar(DniValido, DniResponsable);
 
         servicio.Reactivar(DniValido);
 
@@ -120,7 +135,8 @@ public class ServicioAdministracionUsuariosTests
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
 
-        servicio.ModificarDatos(DniValido, "Pedro", "Suarez", "pedro@hotmail.com");
+        servicio.ModificarDatos(
+            CrearDatos(dni: DniValido, nombre: "Pedro", apellido: "Suarez", correo: "pedro@hotmail.com"), DniValido);
 
         Usuario usuario = repositorio.ObtenerUsuarioPorDni(DniValido)!;
         Assert.AreEqual("Pedro", usuario.Nombre);
@@ -132,7 +148,8 @@ public class ServicioAdministracionUsuariosTests
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
 
-        servicio.ModificarDatos(DniValido, "Felipe", "Sosa", "FELIPE@hotmail.com");
+        servicio.ModificarDatos(
+            CrearDatos(dni: DniValido, nombre: "Felipe", apellido: "Sosa", correo: "FELIPE@hotmail.com"), DniValido);
 
         Assert.AreEqual("FELIPE@hotmail.com", repositorio.ObtenerUsuarioPorDni(DniValido)!.Correo);
     }
@@ -144,7 +161,8 @@ public class ServicioAdministracionUsuariosTests
         servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Estudiante.Nombre);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.ModificarDatos(DniValido, "Felipe", "Sosa", CorreoNuevo));
+            servicio.ModificarDatos(
+                CrearDatos(dni: DniValido, nombre: "Felipe", apellido: "Sosa", correo: CorreoNuevo), DniValido));
     }
 
     [TestMethod]
@@ -153,7 +171,132 @@ public class ServicioAdministracionUsuariosTests
         ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.ModificarDatos(DniValido, "F", "Sosa", "felipe@hotmail.com"));
+            servicio.ModificarDatos(
+                CrearDatos(dni: DniValido, nombre: "F", apellido: "Sosa", correo: "felipe@hotmail.com"), DniValido));
+    }
+
+    [TestMethod]
+    public void Desactivar_UnicoAdministradorActivo_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+        servicio.AsignarTipo(DniValido, TipoUsuario.Administrador.Nombre, DniResponsable);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Desactivar(DniValido, DniResponsable));
+        Assert.AreEqual(EstadoUsuario.Activo, repositorio.ObtenerUsuarioPorDni(DniValido)!.Estado);
+    }
+
+    [TestMethod]
+    public void Desactivar_AdministradorConOtroAdministradorActivo_QuedaDesactivado()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+        servicio.AsignarTipo(DniValido, TipoUsuario.Administrador.Nombre, DniResponsable);
+        servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Administrador.Nombre);
+
+        servicio.Desactivar(DniValido, DniResponsable);
+
+        Assert.AreEqual(EstadoUsuario.Desactivado, repositorio.ObtenerUsuarioPorDni(DniValido)!.Estado);
+    }
+
+    [TestMethod]
+    public void AsignarTipo_UnicoAdministradorActivoAOtroTipo_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+        servicio.AsignarTipo(DniValido, TipoUsuario.Administrador.Nombre, DniResponsable);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.AsignarTipo(DniValido, TipoUsuario.Docente.Nombre, DniResponsable));
+        Assert.AreEqual(TipoUsuario.Administrador, repositorio.ObtenerUsuarioPorDni(DniValido)!.Tipo);
+    }
+
+    [TestMethod]
+    public void AsignarTipo_UnicoAdministradorActivoAAdministrador_LoMantiene()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+        servicio.AsignarTipo(DniValido, TipoUsuario.Administrador.Nombre, DniResponsable);
+
+        servicio.AsignarTipo(DniValido, TipoUsuario.Administrador.Nombre, DniResponsable);
+
+        Assert.AreEqual(TipoUsuario.Administrador, repositorio.ObtenerUsuarioPorDni(DniValido)!.Tipo);
+    }
+
+    [TestMethod]
+    public void Desactivar_UsuarioInexistente_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Desactivar("45678905", DniResponsable));
+    }
+
+    [TestMethod]
+    public void Reactivar_UsuarioInexistente_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Reactivar("45678905"));
+    }
+
+    [TestMethod]
+    public void ObtenerResumen_UsuarioInexistente_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ObtenerResumen("45678905"));
+    }
+
+    [TestMethod]
+    public void ModificarDatos_UsuarioInexistente_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ModificarDatos(
+                CrearDatos(dni: "45678905", nombre: "Pedro", apellido: "Suarez", correo: "pedro@hotmail.com"),
+                "45678905"));
+    }
+
+    [TestMethod]
+    public void Desactivar_ElMismoResponsable_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Desactivar(DniValido, DniValido));
+    }
+
+    [TestMethod]
+    public void AsignarTipo_ElMismoResponsable_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.AsignarTipo(DniValido, TipoUsuario.Docente.Nombre, DniValido));
+    }
+
+    [TestMethod]
+    public void ModificarDatos_AdministradorModificaAOtro_LosActualiza()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+        servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Administrador.Nombre);
+
+        servicio.ModificarDatos(CrearDatos(dni: DniValido, nombre: "Pedro", apellido: "Suarez",
+            correo: "pedro@hotmail.com"), "45678905");
+
+        Assert.AreEqual("Pedro", repositorio.ObtenerUsuarioPorDni(DniValido)!.Nombre);
+    }
+
+    [TestMethod]
+    public void ModificarDatos_NoAdministradorModificaAOtro_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+        servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Estudiante.Nombre);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ModificarDatos(CrearDatos(dni: DniValido,
+            nombre: "Pedro", apellido: "Suarez", correo: "pedro@hotmail.com"), "45678905"));
+        Assert.AreEqual("Felipe", repositorio.ObtenerUsuarioPorDni(DniValido)!.Nombre);
+    }
+
+    private static UsuarioResumenDto CrearDatos(string dni, string nombre, string apellido, string correo)
+    {
+        return new UsuarioResumenDto { Dni = dni, Nombre = nombre, Apellido = apellido, Correo = correo };
     }
 
     private static UsuarioDto CrearDtoNuevo()

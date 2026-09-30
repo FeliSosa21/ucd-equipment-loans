@@ -47,10 +47,18 @@ public class ServicioAdministracionUsuarios
         return TipoUsuario.Todos().Select(tipo => tipo.Nombre).ToList();
     }
 
-    public void AsignarTipo(string dni, string nombreTipo)
+    public void AsignarTipo(string dni, string nombreTipo, string dniResponsable)
     {
+        ValidarQueNoSeaElMismo(dni, dniResponsable, "Un administrador no puede cambiar su propio tipo");
         Usuario usuario = ObtenerUsuario(dni);
-        usuario.AsignarTipo(ObtenerTipo(nombreTipo));
+        TipoUsuario tipo = ObtenerTipo(nombreTipo);
+
+        if (tipo != TipoUsuario.Administrador)
+        {
+            ValidarQueQuedeOtroAdministradorActivo(usuario);
+        }
+
+        usuario.AsignarTipo(tipo);
     }
 
     public UsuarioResumenDto ObtenerResumen(string dni)
@@ -58,10 +66,11 @@ public class ServicioAdministracionUsuarios
         return CrearResumen(ObtenerUsuario(dni));
     }
 
-    public void ModificarDatos(string dni, string nombre, string apellido, string correo)
+    public void ModificarDatos(UsuarioResumenDto datos, string dniResponsable)
     {
-        Usuario usuario = ObtenerUsuario(dni);
-        Usuario? duenoDelCorreo = _repositorio.ObtenerUsuarioPorCorreo(correo);
+        ValidarQuePuedeModificar(datos.Dni, dniResponsable);
+        Usuario usuario = ObtenerUsuario(datos.Dni);
+        Usuario? duenoDelCorreo = _repositorio.ObtenerUsuarioPorCorreo(datos.Correo);
 
         if (duenoDelCorreo != null && duenoDelCorreo != usuario)
         {
@@ -70,7 +79,7 @@ public class ServicioAdministracionUsuarios
 
         try
         {
-            usuario.ModificarDatos(nombre, apellido, correo);
+            usuario.ModificarDatos(datos.Nombre, datos.Apellido, datos.Correo);
         }
         catch (DominioException ex)
         {
@@ -78,14 +87,60 @@ public class ServicioAdministracionUsuarios
         }
     }
 
-    public void Desactivar(string dni)
+    public void Desactivar(string dni, string dniResponsable)
     {
-        ObtenerUsuario(dni).Desactivar();
+        ValidarQueNoSeaElMismo(dni, dniResponsable, "Un administrador no puede desactivarse a si mismo");
+        Usuario usuario = ObtenerUsuario(dni);
+        ValidarQueQuedeOtroAdministradorActivo(usuario);
+        usuario.Desactivar();
     }
 
     public void Reactivar(string dni)
     {
         ObtenerUsuario(dni).Reactivar();
+    }
+
+    private void ValidarQuePuedeModificar(string dni, string dniResponsable)
+    {
+        if (dni == dniResponsable)
+        {
+            return;
+        }
+
+        Usuario? responsable = _repositorio.ObtenerUsuarioPorDni(dniResponsable);
+
+        if (responsable is null || !EsAdministradorActivo(responsable))
+        {
+            throw new ServicioException("Solo un administrador puede modificar los datos de otro usuario");
+        }
+    }
+
+    private static void ValidarQueNoSeaElMismo(string dni, string dniResponsable, string mensaje)
+    {
+        if (dni == dniResponsable)
+        {
+            throw new ServicioException(mensaje);
+        }
+    }
+
+    private void ValidarQueQuedeOtroAdministradorActivo(Usuario usuario)
+    {
+        if (!EsAdministradorActivo(usuario))
+        {
+            return;
+        }
+
+        bool hayOtro = _repositorio.ObtenerTodos().Any(otro => otro != usuario && EsAdministradorActivo(otro));
+
+        if (!hayOtro)
+        {
+            throw new ServicioException("Debe quedar al menos un administrador activo");
+        }
+    }
+
+    private static bool EsAdministradorActivo(Usuario usuario)
+    {
+        return usuario.Tipo == TipoUsuario.Administrador && usuario.Estado == EstadoUsuario.Activo;
     }
 
     private static TipoUsuario ObtenerTipo(string nombreTipo)
