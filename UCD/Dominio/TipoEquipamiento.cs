@@ -15,6 +15,8 @@ public class TipoEquipamiento
     public Categoria Categoria { get; private set; }
     public EstadoTipoEquipamiento Estado { get; private set; } = EstadoTipoEquipamiento.Activo;
 
+    public List<UnidadFisica> Unidades { get; private set; } = new();
+
     public TipoEquipamiento(string nombre, string descripcion, int duracionMaxPrestamo, bool requiereAprobacion, Categoria categoria)
     {
         Modificar(nombre, descripcion, duracionMaxPrestamo, requiereAprobacion, categoria);
