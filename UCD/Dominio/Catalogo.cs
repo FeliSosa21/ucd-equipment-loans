@@ -5,8 +5,8 @@ public class Catalogo
     private const int LargoMinimoNombre = 3;
     private const int LargoMaximoNombre = 80;
 
-    public string Nombre { get; private set; }
     private readonly List<TipoEquipamiento> _tipos = new();
+    public string Nombre { get; private set; }
 
     public IReadOnlyCollection<TipoEquipamiento> Tipos => _tipos.AsReadOnly();
 
@@ -22,7 +22,7 @@ public class Catalogo
         Nombre = nombre;
     }
 
-    static void ValidarNombre(string nombre)
+    private static void ValidarNombre(string nombre)
     {
         if (string.IsNullOrWhiteSpace(nombre))
         {
@@ -57,20 +57,16 @@ public class Catalogo
 
     private bool ExisteTipoConNombre(string nombre)
     {
-        if (BuscarTipoPorNombre(nombre) is not null)
-        {
-            return true;
-        }
-
-        return false;
+        return BuscarTipoPorNombre(nombre) is not null;
     }
 
     public TipoEquipamiento? BuscarTipoPorNombre(string nombre)
     {
-        string nombreSinEspacios = nombre.Trim();
+        var nombreBuscado = nombre.Trim();
+
         foreach (var tipo in _tipos)
         {
-            if (string.Equals(tipo.Nombre.Trim(), nombreSinEspacios, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(tipo.Nombre.Trim(), nombreBuscado, StringComparison.OrdinalIgnoreCase))
             {
                 return tipo;
             }

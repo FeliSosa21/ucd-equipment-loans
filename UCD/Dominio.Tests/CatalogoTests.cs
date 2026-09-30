@@ -66,7 +66,6 @@ public sealed class CatalogoTests
         var catalogo = CrearCatalogo();
 
         Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(null!));
-
     }
 
     [TestMethod]
@@ -74,12 +73,12 @@ public sealed class CatalogoTests
     [DataRow("Proyector Epson EB-770Fi", "PROYECTOR EPSON EB-770FI")]
     [DataRow("Proyector Epson EB-770Fi", " Proyector Epson EB-770Fi ")]
     [DataRow(" Proyector Epson EB-770Fi ", "Proyector Epson EB-770Fi")]
-    public void AgregarTipo_NombreEquivalenteAUnoExistente_LanzaDominioException(string nombreExistente,
-        string nombreNuevo)
+    public void AgregarTipo_NombreEquivalenteAUnoExistente_LanzaDominioException(string nombreGuardado,
+        string nombreBuscado)
     {
         var catalogo = CrearCatalogo();
-        var tipoEquipamientoExistente = CrearTipo(nombre:nombreExistente);
-        var tipoEquipamientoRepetido = CrearTipo(nombre:nombreNuevo);
+        var tipoEquipamientoExistente = CrearTipo(nombre: nombreGuardado);
+        var tipoEquipamientoRepetido = CrearTipo(nombre: nombreBuscado);
 
         catalogo.AgregarTipo(tipoEquipamientoExistente);
 
@@ -100,7 +99,7 @@ public sealed class CatalogoTests
     }
 
     [TestMethod]
-    public void BuscarTipoPorNombre_NombreExistente_DevuelveElTipo()
+    public void BuscarTipoPorNombre_nombreGuardado_DevuelveElTipo()
     {
         var catalogo = CrearCatalogo();
         var primerTipo = CrearTipo(nombre: "Proyector");
@@ -108,7 +107,7 @@ public sealed class CatalogoTests
         catalogo.AgregarTipo(primerTipo);
         catalogo.AgregarTipo(segundoTipo);
 
-        var resultado = catalogo.BuscarTipoPorNombre(nombre: "Notebook");
+        var resultado = catalogo.BuscarTipoPorNombre("Notebook");
 
         Assert.AreSame(segundoTipo, resultado);
     }
@@ -129,13 +128,13 @@ public sealed class CatalogoTests
     [DataRow("Proyector Epson EB-770Fi", "PROYECTOR EPSON EB-770FI")]
     [DataRow("Proyector Epson EB-770Fi", " Proyector Epson EB-770Fi ")]
     [DataRow(" Proyector Epson EB-770Fi ", "Proyector Epson EB-770Fi")]
-    public void BuscarTipoPorNombreEquivalente_NombreEquivalente_DevuelveElTipo(string nombreExistente, string nombreNuevo)
+    public void BuscarTipoPorNombreEquivalente_NombreEquivalente_DevuelveElTipo(string nombreGuardado, string nombreBuscado)
     {
         var catalogo = CrearCatalogo();
-        var tipoEquipamientoExistente = CrearTipo(nombre:nombreExistente);
-
+        var tipoEquipamientoExistente = CrearTipo(nombre: nombreGuardado);
         catalogo.AgregarTipo(tipoEquipamientoExistente);
-        var resultado =  catalogo.BuscarTipoPorNombre(nombreNuevo);
+
+        var resultado = catalogo.BuscarTipoPorNombre(nombreBuscado);
 
         Assert.AreSame(tipoEquipamientoExistente, resultado);
     }
@@ -144,6 +143,7 @@ public sealed class CatalogoTests
     {
         return new Catalogo(nombre);
     }
+
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson EB-770Fi",
         string descripcion = "Proyector para aulas",
@@ -153,7 +153,4 @@ public sealed class CatalogoTests
     {
         return new TipoEquipamiento(nombre, descripcion, duracionMaxPrestamo, requiereAprobacion, categoria);
     }
-
 }
-
-
