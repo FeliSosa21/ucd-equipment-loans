@@ -200,6 +200,39 @@ public class ServicioAdministracionUsuariosTests
         Assert.AreEqual(TipoUsuario.Administrador, repositorio.ObtenerUsuarioPorDni(DniValido)!.Tipo);
     }
 
+    [TestMethod]
+    public void Desactivar_UsuarioInexistente_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Desactivar("45678905"));
+    }
+
+    [TestMethod]
+    public void Reactivar_UsuarioInexistente_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Reactivar("45678905"));
+    }
+
+    [TestMethod]
+    public void ObtenerResumen_UsuarioInexistente_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ObtenerResumen("45678905"));
+    }
+
+    [TestMethod]
+    public void ModificarDatos_UsuarioInexistente_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ModificarDatos("45678905", "Pedro", "Suarez", "pedro@hotmail.com"));
+    }
+
     private static UsuarioDto CrearDtoNuevo()
     {
         return new UsuarioDto

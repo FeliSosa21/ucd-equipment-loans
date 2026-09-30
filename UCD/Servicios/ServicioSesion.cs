@@ -27,16 +27,7 @@ public class ServicioSesion
             throw new ServicioException("El usuario esta desactivado");
         }
 
-        return new UsuarioSesionDto
-        {
-            Dni = usuario.Dni,
-            Correo = usuario.Correo,
-            Nombre = usuario.Nombre,
-            Tipo = usuario.Tipo.Nombre,
-            DebeCambiarContrasena = usuario.DebeCambiarContrasena,
-            PendienteDeActivacion = usuario.Tipo == TipoUsuario.SinPermisos,
-            Permisos = PermisosDe(usuario.Tipo)
-        };
+        return CrearSesion(usuario);
     }
 
     public void CambiarContrasena(string correo, string actual, string nueva)
@@ -56,6 +47,20 @@ public class ServicioSesion
         {
             throw new ServicioException(ex.Message);
         }
+    }
+
+    private static UsuarioSesionDto CrearSesion(Usuario usuario)
+    {
+        return new UsuarioSesionDto
+        {
+            Dni = usuario.Dni,
+            Correo = usuario.Correo,
+            Nombre = usuario.Nombre,
+            Tipo = usuario.Tipo.Nombre,
+            DebeCambiarContrasena = usuario.DebeCambiarContrasena,
+            PendienteDeActivacion = usuario.Tipo == TipoUsuario.SinPermisos,
+            Permisos = PermisosDe(usuario.Tipo)
+        };
     }
 
     private static List<string> PermisosDe(TipoUsuario tipo)

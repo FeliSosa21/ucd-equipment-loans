@@ -139,6 +139,18 @@ public class ServicioSesionTests
             servicio.CambiarContrasena(CorreoValido, ContrasenaValida, "corta1A"));
     }
 
+    [TestMethod]
+    public void CambiarContrasena_CorreoInexistente_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        ServicioSesion servicio = new ServicioSesion(repositorio);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.CambiarContrasena("ana@hotmail.com", ContrasenaValida, "NuevaClave2026"));
+    }
+
     private static UsuarioDto CrearDto()
     {
         return new UsuarioDto
