@@ -66,6 +66,11 @@ public class Usuario
 
     public void AsignarTipo(TipoUsuario tipo)
     {
+        if (tipo is null)
+        {
+            throw new DominioException("El tipo de usuario no puede ser nulo");
+        }
+
         Tipo = tipo;
     }
 

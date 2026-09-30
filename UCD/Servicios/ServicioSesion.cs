@@ -30,6 +30,18 @@ public class ServicioSesion
         return CrearSesion(usuario);
     }
 
+    public UsuarioSesionDto RenovarSesion(string dni)
+    {
+        Usuario? usuario = _repositorio.ObtenerUsuarioPorDni(dni);
+
+        if (usuario is null || usuario.Estado == EstadoUsuario.Desactivado)
+        {
+            throw new ServicioException("La sesion ya no es valida");
+        }
+
+        return CrearSesion(usuario);
+    }
+
     public void CambiarContrasena(string correo, string actual, string nueva)
     {
         Usuario? usuario = _repositorio.ObtenerUsuarioPorCorreo(correo);

@@ -1,7 +1,9 @@
 @inherits LayoutComponentBase
+@using Servicios
 @implements IDisposable
 @inject SesionActual SesionActual
 @inject NavigationManager Navigation
+@inject ServicioSesion ServicioSesion
 
 <header class="topbar">
     <Marca />
@@ -42,7 +44,28 @@
 
     protected override void OnParametersSet()
     {
+        RenovarSesion();
         ExigirCambioDeContrasena();
+    }
+
+    // En cada navegacion se traen los datos actuales: si el usuario fue desactivado, se cierra la sesion,
+    // y si le cambiaron el tipo, el menu refleja los permisos nuevos.
+    private void RenovarSesion()
+    {
+        if (!SesionActual.EstaIniciada)
+        {
+            return;
+        }
+
+        try
+        {
+            SesionActual.Renovar(ServicioSesion.RenovarSesion(SesionActual.Usuario!.Dni));
+        }
+        catch (ServicioException)
+        {
+            SesionActual.Cerrar();
+            Navigation.NavigateTo("/ingresar");
+        }
     }
 
     // Si el usuario debe cambiar la contrasena, no puede ir a otra pantalla hasta hacerlo.

@@ -8,6 +8,7 @@ namespace Servicios.Tests;
 [TestClass]
 public class ServicioSesionTests
 {
+    private const string DniValido = "12345672";
     private const string CorreoValido = "felipe@hotmail.com";
     private const string ContrasenaValida = "VivaLaOrt2026";
 
@@ -151,11 +152,46 @@ public class ServicioSesionTests
             servicio.CambiarContrasena("ana@hotmail.com", ContrasenaValida, "NuevaClave2026"));
     }
 
+    [TestMethod]
+    public void RenovarSesion_UsuarioActivo_DevuelveLosDatosActuales()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        repositorio.ObtenerUsuarioPorDni(DniValido)!.AsignarTipo(TipoUsuario.Docente);
+        ServicioSesion servicio = new ServicioSesion(repositorio);
+
+        UsuarioSesionDto sesion = servicio.RenovarSesion(DniValido);
+
+        Assert.AreEqual(TipoUsuario.Docente.Nombre, sesion.Tipo);
+        Assert.IsFalse(sesion.PendienteDeActivacion);
+    }
+
+    [TestMethod]
+    public void RenovarSesion_UsuarioDesactivado_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        repositorio.ObtenerUsuarioPorDni(DniValido)!.Desactivar();
+        ServicioSesion servicio = new ServicioSesion(repositorio);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.RenovarSesion(DniValido));
+    }
+
+    [TestMethod]
+    public void RenovarSesion_UsuarioInexistente_LanzaExcepcion()
+    {
+        ServicioSesion servicio = new ServicioSesion(new RepositorioUsuario(new Memoria()));
+
+        Assert.ThrowsException<ServicioException>(() => servicio.RenovarSesion(DniValido));
+    }
+
     private static UsuarioDto CrearDto()
     {
         return new UsuarioDto
         {
-            Dni = "12345672", Nombre = "Felipe", Apellido = "Sosa", Correo = CorreoValido, Contrasena = ContrasenaValida
+            Dni = DniValido, Nombre = "Felipe", Apellido = "Sosa", Correo = CorreoValido, Contrasena = ContrasenaValida
         };
     }
 }

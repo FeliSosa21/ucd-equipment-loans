@@ -499,6 +499,15 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void AsignarTipo_Nulo_LanzaExcepcion()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.ThrowsException<DominioException>(() => usuario.AsignarTipo(null!));
+        Assert.AreEqual(TipoUsuario.SinPermisos, usuario.Tipo);
+    }
+
+    [TestMethod]
     public void ExigirCambioDeContrasena_UsuarioNuevo_DebeCambiarContrasena()
     {
         Usuario usuario = CrearUsuario();
