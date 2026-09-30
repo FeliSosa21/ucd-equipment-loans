@@ -224,14 +224,15 @@
 
     private void AsignarTipo(UsuarioResumenDto usuario, string? tipo)
     {
-        Ejecutar(() => ServicioAdministracion.AsignarTipo(usuario.Dni, tipo ?? string.Empty));
+        Ejecutar(() => ServicioAdministracion.AsignarTipo(usuario.Dni, tipo ?? string.Empty,
+            SesionActual.Usuario!.Dni));
     }
 
     private void CambiarEstado(UsuarioResumenDto usuario)
     {
         if (usuario.Activo)
         {
-            Ejecutar(() => ServicioAdministracion.Desactivar(usuario.Dni));
+            Ejecutar(() => ServicioAdministracion.Desactivar(usuario.Dni, SesionActual.Usuario!.Dni));
             return;
         }
 

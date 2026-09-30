@@ -47,8 +47,9 @@ public class ServicioAdministracionUsuarios
         return TipoUsuario.Todos().Select(tipo => tipo.Nombre).ToList();
     }
 
-    public void AsignarTipo(string dni, string nombreTipo)
+    public void AsignarTipo(string dni, string nombreTipo, string dniResponsable)
     {
+        ValidarQueNoSeaElMismo(dni, dniResponsable, "Un administrador no puede cambiar su propio tipo");
         Usuario usuario = ObtenerUsuario(dni);
         TipoUsuario tipo = ObtenerTipo(nombreTipo);
 
@@ -85,8 +86,9 @@ public class ServicioAdministracionUsuarios
         }
     }
 
-    public void Desactivar(string dni)
+    public void Desactivar(string dni, string dniResponsable)
     {
+        ValidarQueNoSeaElMismo(dni, dniResponsable, "Un administrador no puede desactivarse a si mismo");
         Usuario usuario = ObtenerUsuario(dni);
         ValidarQueQuedeOtroAdministradorActivo(usuario);
         usuario.Desactivar();
@@ -95,6 +97,14 @@ public class ServicioAdministracionUsuarios
     public void Reactivar(string dni)
     {
         ObtenerUsuario(dni).Reactivar();
+    }
+
+    private static void ValidarQueNoSeaElMismo(string dni, string dniResponsable, string mensaje)
+    {
+        if (dni == dniResponsable)
+        {
+            throw new ServicioException(mensaje);
+        }
     }
 
     private void ValidarQueQuedeOtroAdministradorActivo(Usuario usuario)
