@@ -26,6 +26,20 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void NombresDeTipos_DevuelveLosSeisTipos()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        List<string> nombres = servicio.NombresDeTipos();
+
+        CollectionAssert.AreEqual(new List<string>
+        {
+            "Sin permisos", "Estudiante", "Docente", "Funcionario del centro de equipamiento", "Supervisor",
+            "Administrador"
+        }, nombres);
+    }
+
+    [TestMethod]
     public void AsignarTipo_TipoExistente_LoAsigna()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
