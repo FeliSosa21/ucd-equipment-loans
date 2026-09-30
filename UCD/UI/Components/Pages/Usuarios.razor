@@ -12,11 +12,11 @@
 </div>
 
 <div class="toolbar">
-    <button class="btn btn-primary btn-sm" @onclick="() => { _mostrarAlta = !_mostrarAlta; _editando = null; }">
+    <button class="btn btn-primary btn-sm" @onclick="AlternarAlta">
         @(_mostrarAlta ? "Cancelar" : "Nuevo usuario")
     </button>
-    <input class="field" type="search" placeholder="Buscar por nombre, CI o correo"
-           aria-label="Buscar usuario" style="min-width: 320px"
+    <input class="field busqueda" type="search" placeholder="Buscar por nombre, CI o correo"
+           aria-label="Buscar usuario"
            @bind="_busqueda" @bind:event="oninput" />
 </div>
 

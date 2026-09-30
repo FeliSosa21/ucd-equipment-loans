@@ -1,13 +1,12 @@
 using DTOs;
 using Servicios;
+using UI.Sesion;
 
 namespace UI.Components.Pages;
 
 public partial class Usuarios
 {
-    private const string PermisoGestionarUsuarios = "GestionarUsuarios";
-
-    private List<UsuarioResumenDto> _usuarios = new List<UsuarioResumenDto>();
+        private List<UsuarioResumenDto> _usuarios = new List<UsuarioResumenDto>();
     private List<string> _tipos = new List<string>();
     private string _busqueda = string.Empty;
     private string? _error;
@@ -24,7 +23,7 @@ public partial class Usuarios
 
     protected override void OnInitialized()
     {
-        if (RedirigirSiNoTienePermiso(PermisoGestionarUsuarios))
+        if (RedirigirSiNoTienePermiso(Permisos.GestionarUsuarios))
         {
             return;
         }
@@ -32,6 +31,12 @@ public partial class Usuarios
         _tipos = ServicioAdministracion.NombresDeTipos();
         _tipoNuevo = _tipos.First();
         Recargar();
+    }
+
+    private void AlternarAlta()
+    {
+        _mostrarAlta = !_mostrarAlta;
+        _editando = null;
     }
 
     private void CrearUsuario()
