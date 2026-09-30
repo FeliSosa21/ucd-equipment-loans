@@ -273,13 +273,14 @@ public sealed class TipoEquipamientoTests
         var unidadPrestada = CrearUnidad(idInstitucional: "EQP-0002");
         var unidadEnMantenimiento = CrearUnidad(idInstitucional: "EQP-0003");
         unidadPrestada.Prestada();
+        unidadEnMantenimiento.Prestada();
         unidadEnMantenimiento.AMantenimiento();
 
         tipo.AgregarUnidad(unidadDisponible);
         tipo.AgregarUnidad(unidadPrestada);
         tipo.AgregarUnidad(unidadEnMantenimiento);
 
-        var cantidad =  tipo.CantidadDisponibles();
+        var cantidad = tipo.CantidadDisponibles();
 
         Assert.AreEqual(1, cantidad);
     }
