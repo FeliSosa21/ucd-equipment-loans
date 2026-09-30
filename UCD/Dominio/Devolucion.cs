@@ -2,7 +2,7 @@ namespace Dominio;
 
 public class Devolucion
 {
-    private const int LargoMaxObservaciones = 300;
+    private const int LargoMaximoObservaciones = 300;
 
     public DateTime FechaHoraDevolucion { get; private set; }
     public CondicionDevolucion Condicion { get; private set; }
@@ -43,9 +43,9 @@ public class Devolucion
 
     private static void ValidarObservaciones(string? observaciones)
     {
-        if (observaciones != null && observaciones.Length > LargoMaxObservaciones)
+        if (observaciones != null && observaciones.Length > LargoMaximoObservaciones)
         {
-            throw new DominioException("Las observaciones no pueden tener mas de 300 caracteres");
+            throw new DominioException($"Las observaciones no pueden tener mas de {LargoMaximoObservaciones} caracteres");
         }
     }
 
