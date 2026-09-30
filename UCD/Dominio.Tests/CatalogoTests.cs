@@ -73,12 +73,12 @@ public sealed class CatalogoTests
     [DataRow("Proyector Epson EB-770Fi", "PROYECTOR EPSON EB-770FI")]
     [DataRow("Proyector Epson EB-770Fi", " Proyector Epson EB-770Fi ")]
     [DataRow(" Proyector Epson EB-770Fi ", "Proyector Epson EB-770Fi")]
-    public void AgregarTipo_NombreEquivalenteAUnoExistente_LanzaDominioException(string nombreGuardado,
-        string nombreBuscado)
+    public void AgregarTipo_NombreEquivalenteAUnoExistente_LanzaDominioException(string nombreExistente,
+        string nombreNuevo)
     {
         var catalogo = CrearCatalogo();
-        var tipoEquipamientoExistente = CrearTipo(nombre: nombreGuardado);
-        var tipoEquipamientoRepetido = CrearTipo(nombre: nombreBuscado);
+        var tipoEquipamientoExistente = CrearTipo(nombre: nombreExistente);
+        var tipoEquipamientoRepetido = CrearTipo(nombre: nombreNuevo);
 
         catalogo.AgregarTipo(tipoEquipamientoExistente);
 
@@ -99,7 +99,7 @@ public sealed class CatalogoTests
     }
 
     [TestMethod]
-    public void BuscarTipoPorNombre_nombreGuardado_DevuelveElTipo()
+    public void BuscarTipoPorNombre_NombreExistente_DevuelveElTipo()
     {
         var catalogo = CrearCatalogo();
         var primerTipo = CrearTipo(nombre: "Proyector");
@@ -128,7 +128,7 @@ public sealed class CatalogoTests
     [DataRow("Proyector Epson EB-770Fi", "PROYECTOR EPSON EB-770FI")]
     [DataRow("Proyector Epson EB-770Fi", " Proyector Epson EB-770Fi ")]
     [DataRow(" Proyector Epson EB-770Fi ", "Proyector Epson EB-770Fi")]
-    public void BuscarTipoPorNombreEquivalente_NombreEquivalente_DevuelveElTipo(string nombreGuardado, string nombreBuscado)
+    public void BuscarTipoPorNombre_NombreEquivalente_DevuelveElTipo(string nombreGuardado, string nombreBuscado)
     {
         var catalogo = CrearCatalogo();
         var tipoEquipamientoExistente = CrearTipo(nombre: nombreGuardado);
