@@ -41,10 +41,116 @@ public sealed class CatalogoTests
         Assert.ThrowsException<DominioException>(() => CrearCatalogo(nombre: "     "));
     }
 
+    [TestMethod]
+    public void Constructor_CatalogoNuevo_NoTieneTipos()
+    {
+        var catalogo = CrearCatalogo();
+
+        Assert.AreEqual(0, catalogo.Tipos.Count);
+    }
+
+    [TestMethod]
+    public void AgregarTipo_TipoValido_SeAgregaTipo()
+    {
+        var catalogo = CrearCatalogo();
+        var tipoEquipamiento = CrearTipo();
+
+        catalogo.AgregarTipo(tipoEquipamiento);
+
+        Assert.IsTrue(catalogo.Tipos.Contains(tipoEquipamiento));
+    }
+
+    [TestMethod]
+    public void AgregarTipo_TipoNull_LanzaDominioException()
+    {
+        var catalogo = CrearCatalogo();
+
+        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(null!));
+    }
+
+    [TestMethod]
+    [DataRow("Proyector Epson EB-770Fi", "Proyector Epson EB-770Fi")]
+    [DataRow("Proyector Epson EB-770Fi", "PROYECTOR EPSON EB-770FI")]
+    [DataRow("Proyector Epson EB-770Fi", " Proyector Epson EB-770Fi ")]
+    [DataRow(" Proyector Epson EB-770Fi ", "Proyector Epson EB-770Fi")]
+    public void AgregarTipo_NombreEquivalenteAUnoExistente_LanzaDominioException(string nombreExistente,
+        string nombreNuevo)
+    {
+        var catalogo = CrearCatalogo();
+        var tipoEquipamientoExistente = CrearTipo(nombre: nombreExistente);
+        var tipoEquipamientoRepetido = CrearTipo(nombre: nombreNuevo);
+
+        catalogo.AgregarTipo(tipoEquipamientoExistente);
+
+        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamientoRepetido));
+    }
+
+    [TestMethod]
+    public void AgregarTipo_DosTiposConNombresDistintos_AmbosQuedanEnElCatalogo()
+    {
+        var catalogo = CrearCatalogo();
+        var primerTipo = CrearTipo(nombre: "Proyector");
+        var segundoTipo = CrearTipo(nombre: "Notebook");
+
+        catalogo.AgregarTipo(primerTipo);
+        catalogo.AgregarTipo(segundoTipo);
+
+        Assert.AreEqual(2, catalogo.Tipos.Count);
+    }
+
+    [TestMethod]
+    public void BuscarTipoPorNombre_NombreExistente_DevuelveElTipo()
+    {
+        var catalogo = CrearCatalogo();
+        var primerTipo = CrearTipo(nombre: "Proyector");
+        var segundoTipo = CrearTipo(nombre: "Notebook");
+        catalogo.AgregarTipo(primerTipo);
+        catalogo.AgregarTipo(segundoTipo);
+
+        var resultado = catalogo.BuscarTipoPorNombre("Notebook");
+
+        Assert.AreSame(segundoTipo, resultado);
+    }
+
+    [TestMethod]
+    public void BuscarTipoPorNombre_NombreInexistente_DevuelveNull()
+    {
+        var catalogo = CrearCatalogo();
+        var tipo = CrearTipo(nombre: "Proyector");
+        catalogo.AgregarTipo(tipo);
+
+        var resultado = catalogo.BuscarTipoPorNombre("Notebook");
+
+        Assert.IsNull(resultado);
+    }
+
+    [TestMethod]
+    [DataRow("Proyector Epson EB-770Fi", "PROYECTOR EPSON EB-770FI")]
+    [DataRow("Proyector Epson EB-770Fi", " Proyector Epson EB-770Fi ")]
+    [DataRow(" Proyector Epson EB-770Fi ", "Proyector Epson EB-770Fi")]
+    public void BuscarTipoPorNombre_NombreEquivalente_DevuelveElTipo(string nombreGuardado, string nombreBuscado)
+    {
+        var catalogo = CrearCatalogo();
+        var tipoEquipamientoExistente = CrearTipo(nombre: nombreGuardado);
+        catalogo.AgregarTipo(tipoEquipamientoExistente);
+
+        var resultado = catalogo.BuscarTipoPorNombre(nombreBuscado);
+
+        Assert.AreSame(tipoEquipamientoExistente, resultado);
+    }
+
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
     }
+
+    private static TipoEquipamiento CrearTipo(
+        string nombre = "Proyector Epson EB-770Fi",
+        string descripcion = "Proyector para aulas",
+        int duracionMaxPrestamo = 8,
+        bool requiereAprobacion = true,
+        Categoria categoria = Categoria.Audiovisual)
+    {
+        return new TipoEquipamiento(nombre, descripcion, duracionMaxPrestamo, requiereAprobacion, categoria);
+    }
 }
-
-
