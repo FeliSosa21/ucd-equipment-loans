@@ -115,4 +115,10 @@ public class TipoEquipamiento
             }
         }
     }
+
+    public int CantidadDisponibles()
+    {
+        return 0;
+    }
+
 }
