@@ -10,6 +10,9 @@ public class Prestamo
     
     public Prestamo(Usuario solicitante, TipoEquipamiento tipoEquipamiento, int cantidadSolicitada, DateTime fechaHoraPrestamo)
     {
-        
+        Solicitante = solicitante;
+        TipoEquipamiento = tipoEquipamiento;
+        CantidadSolicitada = cantidadSolicitada;
+        FechaHoraPrestamo = fechaHoraPrestamo;
     }
 }
