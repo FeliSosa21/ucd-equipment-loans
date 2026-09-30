@@ -118,16 +118,7 @@ public class TipoEquipamiento
 
     public int CantidadDisponibles()
     {
-        var cantidad = 0;
-        foreach (var unidad in Unidades)
-        {
-            if (unidad.EstaDisponible())
-            {
-                cantidad++;
-            }
-        }
-
-        return cantidad;
+        return UnidadesDisponibles().Count;
     }
 
     public List<UnidadFisica> UnidadesDisponibles()
