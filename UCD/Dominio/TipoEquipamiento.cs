@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dominio;
 
@@ -90,6 +91,13 @@ public class TipoEquipamiento
     public void AgregarUnidad(UnidadFisica unidad)
     {
         ValidadQueSePuedeAgregar(unidad);
+        foreach (var unidadFisica in Unidades)
+        {
+            if (unidadFisica.IdInstitucional == unidad.IdInstitucional)
+            {
+                throw new DominioException("No se pueden agregar unidades ya existentes");
+            }
+        }
         Unidades.Add(unidad);
     }
 
