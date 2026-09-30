@@ -130,4 +130,18 @@ public class TipoEquipamiento
         return cantidad;
     }
 
+    public List<UnidadFisica> UnidadesDisponibles()
+    {
+        var listaDisponibles = new List<UnidadFisica>();
+        foreach (var unidad in Unidades)
+        {
+            if (unidad.EstaDisponible())
+            {
+                listaDisponibles.Add(unidad);
+            }
+        }
+
+        return listaDisponibles;
+    }
+
 }
