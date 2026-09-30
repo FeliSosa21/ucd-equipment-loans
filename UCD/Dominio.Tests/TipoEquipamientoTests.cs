@@ -285,6 +285,21 @@ public sealed class TipoEquipamientoTests
         Assert.AreEqual(1, cantidad);
     }
 
+    [TestMethod]
+    public void UnidadesDisponibles_UnidadesEnDistintosEstados_DevuelveSoloDisponibles()
+    {
+        var tipo = CrearTipo();
+        var unidadDisponible = CrearUnidad(idInstitucional: "EQP-0001");
+        var unidadPrestada = CrearUnidad(idInstitucional: "EQP-0002");
+        unidadPrestada.Prestada();
+
+        tipo.AgregarUnidad(unidadDisponible);
+        tipo.AgregarUnidad(unidadPrestada);
+        var disponibles = tipo.UnidadesDisponibles();
+
+        Assert.IsTrue(disponibles.Contains(unidadDisponible));
+    }
+
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
         string descripcion = "Proyector para aulas",
