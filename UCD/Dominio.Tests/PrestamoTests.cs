@@ -13,6 +13,21 @@ public sealed class PrestamoTests
         
         Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
     }
+
+    [TestMethod]
+    public void Constructor_DatosValidos_ConservaSolicitanteTipoCantidadYFecha()
+    {
+        var solicitante = CrearSolicitante();
+        var tipoEquipamiento = CrearTipoEquipamiento();
+        const int otraCantidadSolicitada = 1;
+        
+        var prestamo = CrearPrestamo(solicitante, tipoEquipamiento, otraCantidadSolicitada);
+        
+        Assert.AreSame(solicitante, prestamo.Solicitante);
+        Assert.AreSame(tipoEquipamiento, prestamo.TipoEquipamiento);
+        Assert.AreEqual(otraCantidadSolicitada, prestamo.CantidadSolicitada);
+        Assert.AreEqual(FechaFija, prestamo.FechaHoraPrestamo);
+    }
     
     private static Usuario CrearSolicitante()
     {
@@ -31,9 +46,9 @@ public sealed class PrestamoTests
         return tipo;
     }
 
-    private static Prestamo CrearPrestamo(int cantidadSolicitada = CantidadSolicitadaPorDefecto)
+    private static Prestamo CrearPrestamo(Usuario? solicitante = null, TipoEquipamiento? tipoEquipamiento = null, int cantidadSolicitada = CantidadSolicitadaPorDefecto)
     {
-        var prestamo = new Prestamo(CrearSolicitante(), CrearTipoEquipamiento(), cantidadSolicitada, FechaFija);
+        var prestamo = new Prestamo(solicitante ?? CrearSolicitante(), tipoEquipamiento ?? CrearTipoEquipamiento(), cantidadSolicitada, FechaFija);
         return prestamo;
     }
 }
