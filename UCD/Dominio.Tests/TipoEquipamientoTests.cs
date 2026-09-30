@@ -234,6 +234,17 @@ public sealed class TipoEquipamientoTests
         Assert.ThrowsException<DominioException>(() => tipo.AgregarUnidad(unidad));
     }
 
+    [TestMethod]
+    public void AgregarUnidad_IdInstitucionalRepetido_LanzaDominioException()
+    {
+        var tipo = CrearTipo();
+        var unidad = CrearUnidad(idInstitucional: "EQP-0001");
+        var unidadIdRepetido = CrearUnidad(idInstitucional: "EQP-0001");
+        tipo.AgregarUnidad(unidad);
+
+        Assert.ThrowsException<DominioException>(() => tipo.AgregarUnidad(unidadIdRepetido));
+    }
+
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
         string descripcion = "Proyector para aulas",
