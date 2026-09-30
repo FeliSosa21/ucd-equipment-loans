@@ -121,7 +121,8 @@ public class ServicioAdministracionUsuariosTests
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
 
-        servicio.ModificarDatos(DniValido, "Pedro", "Suarez", "pedro@hotmail.com");
+        servicio.ModificarDatos(
+            CrearDatos(dni: DniValido, nombre: "Pedro", apellido: "Suarez", correo: "pedro@hotmail.com"), DniValido);
 
         Usuario usuario = repositorio.ObtenerUsuarioPorDni(DniValido)!;
         Assert.AreEqual("Pedro", usuario.Nombre);
@@ -133,7 +134,8 @@ public class ServicioAdministracionUsuariosTests
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
 
-        servicio.ModificarDatos(DniValido, "Felipe", "Sosa", "FELIPE@hotmail.com");
+        servicio.ModificarDatos(
+            CrearDatos(dni: DniValido, nombre: "Felipe", apellido: "Sosa", correo: "FELIPE@hotmail.com"), DniValido);
 
         Assert.AreEqual("FELIPE@hotmail.com", repositorio.ObtenerUsuarioPorDni(DniValido)!.Correo);
     }
@@ -145,7 +147,8 @@ public class ServicioAdministracionUsuariosTests
         servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Estudiante.Nombre);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.ModificarDatos(DniValido, "Felipe", "Sosa", CorreoNuevo));
+            servicio.ModificarDatos(
+                CrearDatos(dni: DniValido, nombre: "Felipe", apellido: "Sosa", correo: CorreoNuevo), DniValido));
     }
 
     [TestMethod]
@@ -154,7 +157,8 @@ public class ServicioAdministracionUsuariosTests
         ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.ModificarDatos(DniValido, "F", "Sosa", "felipe@hotmail.com"));
+            servicio.ModificarDatos(
+                CrearDatos(dni: DniValido, nombre: "F", apellido: "Sosa", correo: "felipe@hotmail.com"), DniValido));
     }
 
     [TestMethod]
@@ -231,7 +235,9 @@ public class ServicioAdministracionUsuariosTests
         ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.ModificarDatos("45678905", "Pedro", "Suarez", "pedro@hotmail.com"));
+            servicio.ModificarDatos(
+                CrearDatos(dni: "45678905", nombre: "Pedro", apellido: "Suarez", correo: "pedro@hotmail.com"),
+                "45678905"));
     }
 
     [TestMethod]
@@ -249,6 +255,34 @@ public class ServicioAdministracionUsuariosTests
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.AsignarTipo(DniValido, TipoUsuario.Docente.Nombre, DniValido));
+    }
+
+    [TestMethod]
+    public void ModificarDatos_AdministradorModificaAOtro_LosActualiza()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+        servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Administrador.Nombre);
+
+        servicio.ModificarDatos(CrearDatos(dni: DniValido, nombre: "Pedro", apellido: "Suarez",
+            correo: "pedro@hotmail.com"), "45678905");
+
+        Assert.AreEqual("Pedro", repositorio.ObtenerUsuarioPorDni(DniValido)!.Nombre);
+    }
+
+    [TestMethod]
+    public void ModificarDatos_NoAdministradorModificaAOtro_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out RepositorioUsuario repositorio);
+        servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Estudiante.Nombre);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ModificarDatos(CrearDatos(dni: DniValido,
+            nombre: "Pedro", apellido: "Suarez", correo: "pedro@hotmail.com"), "45678905"));
+        Assert.AreEqual("Felipe", repositorio.ObtenerUsuarioPorDni(DniValido)!.Nombre);
+    }
+
+    private static UsuarioResumenDto CrearDatos(string dni, string nombre, string apellido, string correo)
+    {
+        return new UsuarioResumenDto { Dni = dni, Nombre = nombre, Apellido = apellido, Correo = correo };
     }
 
     private static UsuarioDto CrearDtoNuevo()

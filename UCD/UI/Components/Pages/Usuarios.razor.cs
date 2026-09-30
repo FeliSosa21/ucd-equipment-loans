@@ -58,14 +58,14 @@ public partial class Usuarios
     private void GuardarEdicion()
     {
         UsuarioResumenDto editado = _editando!;
-        Ejecutar(() => ServicioAdministracion.ModificarDatos(editado.Dni, editado.Nombre, editado.Apellido,
-            editado.Correo.Trim()));
+        editado.Correo = editado.Correo.Trim();
+        Ejecutar(() => ServicioAdministracion.ModificarDatos(editado, SesionActual.Usuario!.Dni));
 
         if (_error is null)
         {
             if (EsElMismoDni(editado.Dni))
             {
-                SesionActual.ActualizarDatos(editado.Nombre, editado.Correo.Trim());
+                SesionActual.ActualizarDatos(editado.Nombre, editado.Correo);
             }
 
             _exito = $"Se guardaron los datos de {editado.Nombre} {editado.Apellido}.";

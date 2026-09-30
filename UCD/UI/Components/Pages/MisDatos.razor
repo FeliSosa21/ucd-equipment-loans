@@ -74,8 +74,12 @@
 
         try
         {
-            ServicioAdministracion.ModificarDatos(_dni, _nombre, _apellido, _correo.Trim());
-            SesionActual.ActualizarDatos(_nombre, _correo.Trim());
+            UsuarioResumenDto datos = new UsuarioResumenDto
+            {
+                Dni = _dni, Nombre = _nombre, Apellido = _apellido, Correo = _correo.Trim()
+            };
+            ServicioAdministracion.ModificarDatos(datos, SesionActual.Usuario!.Dni);
+            SesionActual.ActualizarDatos(datos.Nombre, datos.Correo);
             _exito = true;
         }
         catch (ServicioException ex)
