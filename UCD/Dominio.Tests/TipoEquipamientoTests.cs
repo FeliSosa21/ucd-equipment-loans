@@ -265,6 +265,25 @@ public sealed class TipoEquipamientoTests
         Assert.AreEqual(0,tipo.CantidadDisponibles());
     }
 
+    [TestMethod]
+    public void CantidadDisponibles_UnidadesEnDistintosEstados_CuentaSoloDisponibles()
+    {
+        var tipo = CrearTipo();
+        var unidadDisponible = CrearUnidad(idInstitucional: "EQP-0001");
+        var unidadPrestada = CrearUnidad(idInstitucional: "EQP-0002");
+        var unidadEnMantenimiento = CrearUnidad(idInstitucional: "EQP-0003");
+        unidadPrestada.Prestada();
+        unidadEnMantenimiento.AMantenimiento();
+
+        tipo.AgregarUnidad(unidadDisponible);
+        tipo.AgregarUnidad(unidadPrestada);
+        tipo.AgregarUnidad(unidadEnMantenimiento);
+
+        var cantidad =  tipo.CantidadDisponibles();
+
+        Assert.AreEqual(1, cantidad);
+    }
+
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
         string descripcion = "Proyector para aulas",
