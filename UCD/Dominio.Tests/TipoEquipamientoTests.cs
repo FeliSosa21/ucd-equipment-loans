@@ -68,7 +68,7 @@ public sealed class TipoEquipamientoTests
     {
         Assert.ThrowsException<DominioException>(() => CrearTipo(nombre: "     "));
     }
-    
+
     [TestMethod]
     public void Constructor_NombreDe3Caracteres_GuardaElNombre()
     {
@@ -197,6 +197,112 @@ public sealed class TipoEquipamientoTests
         Assert.AreEqual("Proyector Epson PowerLite", tipo.Nombre);
     }
 
+    [TestMethod]
+    public void Constructor_TipoNuevo_NoTieneUnidades()
+    {
+        var tipo = CrearTipo();
+
+        Assert.AreEqual(0, tipo.Unidades.Count);
+    }
+
+    [TestMethod]
+    public void AgregarUnidad_TipoActivo_LaUnidadQuedaEnElTipo()
+    {
+        var tipo = CrearTipo();
+        var unidad = CrearUnidad();
+
+        tipo.AgregarUnidad(unidad);
+
+        Assert.IsTrue(tipo.Unidades.Contains(unidad));
+    }
+
+    [TestMethod]
+    public void AgregarUnidad_UnidadNull_LanzaDominioException()
+    {
+        var tipo = CrearTipo();
+
+        Assert.ThrowsException<DominioException>(() => tipo.AgregarUnidad(null!));
+    }
+
+    [TestMethod]
+    public void AgregarUnidad_TipoDiscontinuado_LanzaDominioException()
+    {
+        var tipo = CrearTipo();
+        tipo.Discontinuar();
+        var unidad = CrearUnidad();
+
+        Assert.ThrowsException<DominioException>(() => tipo.AgregarUnidad(unidad));
+    }
+
+    [TestMethod]
+    public void AgregarUnidad_IdInstitucionalRepetido_LanzaDominioException()
+    {
+        var tipo = CrearTipo();
+        var unidad = CrearUnidad(idInstitucional: "EQP-0001");
+        var unidadIdRepetido = CrearUnidad(idInstitucional: "EQP-0001", ubiFisica: "Laboratorio Fisica");
+
+        tipo.AgregarUnidad(unidad);
+
+        Assert.ThrowsException<DominioException>(() => tipo.AgregarUnidad(unidadIdRepetido));
+    }
+
+    [TestMethod]
+    public void AgregarUnidad_DosUnidadesDistintas_AmbasQuedan()
+    {
+        var tipo = CrearTipo();
+        var primeraUnidad = CrearUnidad(idInstitucional: "EQP-0001");
+        var segundaUnidad = CrearUnidad(idInstitucional: "EQP-0002");
+
+        tipo.AgregarUnidad(primeraUnidad);
+        tipo.AgregarUnidad(segundaUnidad);
+
+        Assert.IsTrue(tipo.Unidades.Contains(primeraUnidad));
+        Assert.IsTrue(tipo.Unidades.Contains(segundaUnidad));
+    }
+
+    [TestMethod]
+    public void CantidadDisponibles_SinUnidades_DevuelveCero()
+    {
+        var tipo = CrearTipo();
+
+        Assert.AreEqual(0, tipo.CantidadDisponibles());
+    }
+
+    [TestMethod]
+    public void CantidadDisponibles_UnidadesEnDistintosEstados_CuentaSoloDisponibles()
+    {
+        var tipo = CrearTipo();
+        var unidadDisponible = CrearUnidad(idInstitucional: "EQP-0001");
+        var unidadPrestada = CrearUnidad(idInstitucional: "EQP-0002");
+        var unidadEnMantenimiento = CrearUnidad(idInstitucional: "EQP-0003");
+        unidadPrestada.Prestada();
+        unidadEnMantenimiento.Prestada();
+        unidadEnMantenimiento.AMantenimiento();
+        tipo.AgregarUnidad(unidadDisponible);
+        tipo.AgregarUnidad(unidadPrestada);
+        tipo.AgregarUnidad(unidadEnMantenimiento);
+
+        var cantidad = tipo.CantidadDisponibles();
+
+        Assert.AreEqual(1, cantidad);
+    }
+
+    [TestMethod]
+    public void UnidadesDisponibles_UnidadesEnDistintosEstados_DevuelveSoloDisponibles()
+    {
+        var tipo = CrearTipo();
+        var unidadDisponible = CrearUnidad(idInstitucional: "EQP-0001");
+        var unidadPrestada = CrearUnidad(idInstitucional: "EQP-0002");
+        unidadPrestada.Prestada();
+        tipo.AgregarUnidad(unidadDisponible);
+        tipo.AgregarUnidad(unidadPrestada);
+
+        var disponibles = tipo.UnidadesDisponibles();
+
+        Assert.IsTrue(disponibles.Contains(unidadDisponible));
+        Assert.IsFalse(disponibles.Contains(unidadPrestada));
+    }
+
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
         string descripcion = "Proyector para aulas",
@@ -206,6 +312,7 @@ public sealed class TipoEquipamientoTests
     {
         return new TipoEquipamiento(nombre, descripcion, duracionMaxPrestamo, requiereAprobacion, categoria);
     }
+
     private static void ModificarTipo(
         TipoEquipamiento tipo,
         string nombre = "Proyector Epson PowerLite",
@@ -215,5 +322,13 @@ public sealed class TipoEquipamientoTests
         Categoria categoria = Categoria.Audiovisual)
     {
         tipo.Modificar(nombre, descripcion, duracionMaxPrestamo, requiereAprobacion, categoria);
+    }
+
+    private static UnidadFisica CrearUnidad(
+        string idInstitucional = "EQP-0001",
+        string ubiFisica = "Laboratorio Prueba",
+        string? numSerie = "PF3A7X21")
+    {
+        return new UnidadFisica(idInstitucional, ubiFisica, numSerie);
     }
 }
