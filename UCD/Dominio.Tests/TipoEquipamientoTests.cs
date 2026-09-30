@@ -245,6 +245,19 @@ public sealed class TipoEquipamientoTests
         Assert.ThrowsException<DominioException>(() => tipo.AgregarUnidad(unidadIdRepetido));
     }
 
+    [TestMethod]
+    public void AgregarUnidad_DosUnidadesDistintas_AmbasQuedan()
+    {
+        var tipo = CrearTipo();
+        var primeraUnidad = CrearUnidad(idInstitucional: "EQP-0001");
+        var segundaUnidad = CrearUnidad(idInstitucional: "EQP-0002");
+        tipo.AgregarUnidad(primeraUnidad);
+        tipo.AgregarUnidad(segundaUnidad);
+
+        Assert.IsTrue(tipo.Unidades.Contains(primeraUnidad));
+        Assert.IsTrue(tipo.Unidades.Contains(segundaUnidad));
+    }
+
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
         string descripcion = "Proyector para aulas",
