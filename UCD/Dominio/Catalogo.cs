@@ -6,7 +6,9 @@ public class Catalogo
     private const int LargoMaximoNombre = 80;
 
     public string Nombre { get; private set; }
-    public List<TipoEquipamiento> Tipos { get; private set; } = new();
+    private readonly List<TipoEquipamiento> _tipos = new();
+
+    public IReadOnlyCollection<TipoEquipamiento> Tipos => _tipos.AsReadOnly();
 
     public Catalogo(string nombre)
     {
@@ -50,7 +52,7 @@ public class Catalogo
             throw new DominioException("Ya existe un tipo de equipamiento con ese nombre");
         }
 
-        Tipos.Add(tipo);
+        _tipos.Add(tipo);
     }
 
     private bool ExisteTipoConNombre(string nombre)
@@ -66,7 +68,7 @@ public class Catalogo
     public TipoEquipamiento? BuscarTipoPorNombre(string nombre)
     {
         string nombreSinEspacios = nombre.Trim();
-        foreach (var tipo in Tipos)
+        foreach (var tipo in _tipos)
         {
             if (string.Equals(tipo.Nombre.Trim(), nombreSinEspacios, StringComparison.OrdinalIgnoreCase))
             {

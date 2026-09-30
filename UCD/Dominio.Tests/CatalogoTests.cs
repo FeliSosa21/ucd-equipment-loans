@@ -57,7 +57,7 @@ public sealed class CatalogoTests
 
         catalogo.AgregarTipo(tipoEquipamiento);
 
-        CollectionAssert.Contains(catalogo.Tipos, tipoEquipamiento);
+        Assert.IsTrue(catalogo.Tipos.Contains(tipoEquipamiento));
     }
 
     [TestMethod]
