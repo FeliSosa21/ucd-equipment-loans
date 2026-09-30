@@ -298,6 +298,7 @@ public sealed class TipoEquipamientoTests
         var disponibles = tipo.UnidadesDisponibles();
 
         Assert.IsTrue(disponibles.Contains(unidadDisponible));
+        Assert.IsFalse(disponibles.Contains(unidadPrestada));
     }
 
     private static TipoEquipamiento CrearTipo(
