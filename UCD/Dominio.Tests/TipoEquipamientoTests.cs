@@ -258,6 +258,13 @@ public sealed class TipoEquipamientoTests
         Assert.IsTrue(tipo.Unidades.Contains(segundaUnidad));
     }
 
+    [TestMethod]
+    public void CantidadDisponibles_SinUnidades_DevuelveCero()
+    {
+        var tipo = CrearTipo();
+        Assert.AreEqual(0,tipo.CantidadDisponibles());
+    }
+
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
         string descripcion = "Proyector para aulas",
