@@ -85,6 +85,12 @@ public class TipoEquipamiento
         {
             throw new DominioException("La unidad no puede ser nula");
         }
+
+        if (!EstaActivo)
+        {
+            throw new DominioException("La unidad no esta disponible");
+        }
+
         Unidades.Add(unidad);
     }
 }
