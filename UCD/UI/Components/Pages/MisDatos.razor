@@ -1,9 +1,8 @@
 @page "/mis-datos"
 @using DTOs
 @using Servicios
+@inherits PaginaConSesion
 @inject ServicioAdministracionUsuarios ServicioAdministracion
-@inject SesionActual SesionActual
-@inject NavigationManager Navigation
 
 <PageTitle>UCD · Mis datos</PageTitle>
 
@@ -56,9 +55,8 @@
 
     protected override void OnInitialized()
     {
-        if (!SesionActual.EstaIniciada)
+        if (RedirigirSiNoHaySesion())
         {
-            Navigation.NavigateTo("/ingresar");
             return;
         }
 

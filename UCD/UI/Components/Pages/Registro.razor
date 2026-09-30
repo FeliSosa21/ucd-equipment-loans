@@ -55,10 +55,7 @@
             </div>
         </div>
 
-        <label class="mostrar">
-            <input type="checkbox" @bind="_mostrarContrasena" />
-            Mostrar contraseña
-        </label>
+        <MostrarContrasena @bind-Visible="_mostrarContrasena" />
 
         <div class="alert alert-info">
             Al registrarte tu cuenta queda <strong>sin permisos</strong> hasta que un administrador
@@ -88,7 +85,7 @@
     private string? _error;
     private bool _mostrarContrasena;
 
-    private string TipoContrasena => _mostrarContrasena ? "text" : "password";
+    private string TipoContrasena => MostrarContrasena.TipoDeCampo(_mostrarContrasena);
 
     private bool FormularioCompleto =>
         !string.IsNullOrWhiteSpace(_ci) &&

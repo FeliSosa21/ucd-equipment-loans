@@ -1,0 +1,14 @@
+.brand { display: flex; align-items: center; gap: .75rem; width: fit-content; color: var(--ink); text-decoration: none; }
+.brand-logo {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: var(--navy); color: var(--on-navy);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .8rem;
+}
+.brand-text { display: flex; flex-direction: column; line-height: 1.2; }
+.brand-text strong { font-size: .95rem; }
+.brand-text small { font-size: .68rem; color: var(--ink-faint); }
+
+.grande .brand-logo { width: 40px; height: 40px; border-radius: 10px; font-size: .85rem; }
+.grande .brand-text strong { font-size: 1rem; }
+.grande .brand-text small { font-size: .7rem; }

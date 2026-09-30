@@ -1,9 +1,8 @@
 @page "/usuarios"
 @using DTOs
 @using Servicios
+@inherits PaginaConSesion
 @inject ServicioAdministracionUsuarios ServicioAdministracion
-@inject SesionActual SesionActual
-@inject NavigationManager Navigation
 
 <PageTitle>UCD · Usuarios</PageTitle>
 
@@ -147,116 +146,3 @@
         <EstadoVacio Titulo="No hay usuarios que coincidan" />
     }
 </div>
-
-@code {
-    private const string PermisoGestionarUsuarios = "GestionarUsuarios";
-
-    private List<UsuarioResumenDto> _usuarios = new List<UsuarioResumenDto>();
-    private List<string> _tipos = new List<string>();
-    private string _busqueda = string.Empty;
-    private string? _error;
-    private string? _exito;
-    private bool _mostrarAlta;
-    private UsuarioDto _nuevo = new UsuarioDto();
-    private string _tipoNuevo = string.Empty;
-    private UsuarioResumenDto? _editando;
-
-    private IEnumerable<UsuarioResumenDto> UsuariosFiltrados =>
-        _usuarios.Where(usuario => string.IsNullOrWhiteSpace(_busqueda) ||
-                                   $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
-                                       .Contains(_busqueda.Trim(), StringComparison.OrdinalIgnoreCase));
-
-    protected override void OnInitialized()
-    {
-        if (!SesionActual.EstaIniciada || !SesionActual.Usuario!.Permisos.Contains(PermisoGestionarUsuarios))
-        {
-            Navigation.NavigateTo("/");
-            return;
-        }
-
-        _tipos = ServicioAdministracion.NombresDeTipos();
-        _tipoNuevo = _tipos.First();
-        Recargar();
-    }
-
-    private void CrearUsuario()
-    {
-        Ejecutar(() => ServicioAdministracion.CrearUsuario(_nuevo, _tipoNuevo));
-
-        if (_error is null)
-        {
-            _exito = $"Se creó la cuenta de {_nuevo.Nombre} {_nuevo.Apellido}.";
-            _nuevo = new UsuarioDto();
-            _mostrarAlta = false;
-        }
-    }
-
-    private void AbrirEdicion(UsuarioResumenDto usuario)
-    {
-        _mostrarAlta = false;
-        _editando = new UsuarioResumenDto
-        {
-            Dni = usuario.Dni, Nombre = usuario.Nombre, Apellido = usuario.Apellido, Correo = usuario.Correo
-        };
-    }
-
-    private void GuardarEdicion()
-    {
-        UsuarioResumenDto editado = _editando!;
-        Ejecutar(() => ServicioAdministracion.ModificarDatos(editado.Dni, editado.Nombre, editado.Apellido,
-            editado.Correo.Trim()));
-
-        if (_error is null)
-        {
-            if (EsElMismoDni(editado.Dni))
-            {
-                SesionActual.ActualizarDatos(editado.Nombre, editado.Correo.Trim());
-            }
-
-            _exito = $"Se guardaron los datos de {editado.Nombre} {editado.Apellido}.";
-            _editando = null;
-        }
-    }
-
-    private bool EsElMismoDni(string dni) => dni == SesionActual.Usuario?.Dni;
-
-    private bool EsElMismo(UsuarioResumenDto usuario) => EsElMismoDni(usuario.Dni);
-
-    private void AsignarTipo(UsuarioResumenDto usuario, string? tipo)
-    {
-        Ejecutar(() => ServicioAdministracion.AsignarTipo(usuario.Dni, tipo ?? string.Empty,
-            SesionActual.Usuario!.Dni));
-    }
-
-    private void CambiarEstado(UsuarioResumenDto usuario)
-    {
-        if (usuario.Activo)
-        {
-            Ejecutar(() => ServicioAdministracion.Desactivar(usuario.Dni, SesionActual.Usuario!.Dni));
-            return;
-        }
-
-        Ejecutar(() => ServicioAdministracion.Reactivar(usuario.Dni));
-    }
-
-    private void Ejecutar(Action accion)
-    {
-        _error = null;
-        _exito = null;
-        try
-        {
-            accion();
-        }
-        catch (ServicioException ex)
-        {
-            _error = ex.Message;
-        }
-
-        Recargar();
-    }
-
-    private void Recargar()
-    {
-        _usuarios = ServicioAdministracion.ListarUsuarios();
-    }
-}

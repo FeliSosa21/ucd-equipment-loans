@@ -4,13 +4,7 @@
 @inject NavigationManager Navigation
 
 <header class="topbar">
-    <a class="brand" href="">
-        <span class="brand-logo mono">UCD</span>
-        <span class="brand-text">
-            <strong>UCD</strong>
-            <small>Úsalo, cuídalo, devuélvelo entero</small>
-        </span>
-    </a>
+    <Marca />
 
     <div class="sesion">
         @if (SesionActual.EstaIniciada)
@@ -38,11 +32,7 @@
     </main>
 </div>
 
-<div id="blazor-error-ui" data-nosnippet>
-    Ocurrió un error inesperado.
-    <a href="." class="reload">Recargar</a>
-    <span class="dismiss">🗙</span>
-</div>
+<ErrorInesperado />
 
 @code {
     protected override void OnInitialized()

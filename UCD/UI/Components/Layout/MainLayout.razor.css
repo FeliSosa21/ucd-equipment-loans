@@ -4,16 +4,6 @@
     border-bottom: 1px solid var(--border);
     padding: .75rem 1.5rem;
 }
-.brand { display: flex; align-items: center; gap: .75rem; width: fit-content; color: var(--ink); text-decoration: none; }
-.brand-logo {
-    width: 34px; height: 34px; border-radius: 8px;
-    background: var(--navy); color: var(--on-navy);
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: .8rem;
-}
-.brand-text { display: flex; flex-direction: column; line-height: 1.2; }
-.brand-text strong { font-size: .95rem; }
-.brand-text small { font-size: .68rem; color: var(--ink-faint); }
 .sesion { display: flex; gap: .5rem; }
 
 .shell { display: flex; min-height: calc(100vh - 59px); }
@@ -25,13 +15,6 @@
     .sidebar { width: auto; border-right: none; border-bottom: 1px solid var(--border); }
     .content { padding: 1.25rem 1rem; }
 }
-
-#blazor-error-ui {
-    display: none; position: fixed; bottom: 0; left: 0; width: 100%; z-index: 1000;
-    background: var(--amber-soft); color: var(--amber);
-    padding: .6rem 1.25rem .7rem; box-shadow: 0 -1px 2px rgba(0, 0, 0, .2);
-}
-#blazor-error-ui .dismiss { cursor: pointer; position: absolute; right: .75rem; top: .5rem; }
 .sesion { align-items: center; }
 .usuario { display: flex; flex-direction: column; line-height: 1.2; text-align: right; }
 .usuario strong { font-size: .85rem; }
