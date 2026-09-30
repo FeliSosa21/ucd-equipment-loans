@@ -16,7 +16,9 @@ public class TipoEquipamiento
     public Categoria Categoria { get; private set; }
     public EstadoTipoEquipamiento Estado { get; private set; } = EstadoTipoEquipamiento.Activo;
 
-    public List<UnidadFisica> Unidades { get; private set; } = new();
+    private readonly List<UnidadFisica> _unidades = new();
+
+    public IReadOnlyCollection<UnidadFisica> Unidades => _unidades.AsReadOnly();
 
     public TipoEquipamiento(string nombre, string descripcion, int duracionMaxPrestamo, bool requiereAprobacion,
         Categoria categoria)
@@ -92,7 +94,7 @@ public class TipoEquipamiento
     {
         ValidarQueSePuedaAgregar(unidad);
 
-        Unidades.Add(unidad);
+        _unidades.Add(unidad);
     }
 
     private void ValidarQueSePuedaAgregar(UnidadFisica unidad)
@@ -107,7 +109,7 @@ public class TipoEquipamiento
             throw new DominioException("No se pueden agregar unidades a un tipo discontinuado");
         }
 
-        foreach (var existente in Unidades)
+        foreach (var existente in _unidades)
         {
             if (existente.IdInstitucional == unidad.IdInstitucional)
             {
@@ -124,7 +126,7 @@ public class TipoEquipamiento
     public List<UnidadFisica> UnidadesDisponibles()
     {
         var listaDisponibles = new List<UnidadFisica>();
-        foreach (var unidad in Unidades)
+        foreach (var unidad in _unidades)
         {
             if (unidad.EstaDisponible())
             {
