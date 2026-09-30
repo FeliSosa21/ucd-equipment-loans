@@ -205,6 +205,17 @@ public sealed class TipoEquipamientoTests
         Assert.AreEqual(0, tipo.Unidades.Count);
     }
 
+    [TestMethod]
+    public void AgregarUnidad_TipoActivo_LaUnidadQuedaEnElTipo()
+    {
+        var tipo = CrearTipo();
+        var unidad = CrearUnidad();
+
+        tipo.AgregarUnidad(unidad);
+
+        Assert.IsTrue(tipo.Unidades.Contains(unidad));
+    }
+
     private static TipoEquipamiento CrearTipo(
         string nombre = "Proyector Epson PowerLite",
         string descripcion = "Proyector para aulas",
@@ -224,5 +235,13 @@ public sealed class TipoEquipamientoTests
         Categoria categoria = Categoria.Audiovisual)
     {
         tipo.Modificar(nombre, descripcion, duracionMaxPrestamo, requiereAprobacion, categoria);
+    }
+
+    private static UnidadFisica CrearUnidad(
+        string idInstitucional = "EQP-0001",
+        string ubiFisica = "Laboratorio Prueba",
+        string? numSerie = "PF3A7X21")
+    {
+        return new UnidadFisica(idInstitucional, ubiFisica, numSerie);
     }
 }
