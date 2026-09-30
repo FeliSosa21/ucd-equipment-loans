@@ -78,4 +78,9 @@ public class TipoEquipamiento
             throw new DominioException("La duración máxima de préstamo debe ser mayor que cero");
         }
     }
+
+    public void AgregarUnidad(UnidadFisica unidad)
+    {
+        Unidades.Add(unidad);
+    }
 }
