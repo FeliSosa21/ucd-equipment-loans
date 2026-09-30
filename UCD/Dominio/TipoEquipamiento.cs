@@ -90,18 +90,12 @@ public class TipoEquipamiento
 
     public void AgregarUnidad(UnidadFisica unidad)
     {
-        ValidadQueSePuedeAgregar(unidad);
-        foreach (var unidadFisica in Unidades)
-        {
-            if (unidadFisica.IdInstitucional == unidad.IdInstitucional)
-            {
-                throw new DominioException("No se pueden agregar unidades ya existentes");
-            }
-        }
+        ValidarQueSePuedaAgregar(unidad);
+
         Unidades.Add(unidad);
     }
 
-    private void ValidadQueSePuedeAgregar(UnidadFisica unidad)
+    private void ValidarQueSePuedaAgregar(UnidadFisica unidad)
     {
         if (unidad is null)
         {
@@ -110,7 +104,15 @@ public class TipoEquipamiento
 
         if (!EstaActivo)
         {
-            throw new DominioException("No se pueden agregar unidades a un tipo discontinuo");
+            throw new DominioException("No se pueden agregar unidades a un tipo discontinuado");
+        }
+
+        foreach (var existente in Unidades)
+        {
+            if (existente.IdInstitucional == unidad.IdInstitucional)
+            {
+                throw new DominioException("Ya existe una unidad con ese id institucional en el tipo");
+            }
         }
     }
 }
