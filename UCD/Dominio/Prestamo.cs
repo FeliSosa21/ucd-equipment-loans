@@ -14,7 +14,7 @@ public class Prestamo
 
     public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
-        return;
+        Estado = EstadoPrestamo.Activo;
     }
     
     public Prestamo(Usuario solicitante, TipoEquipamiento tipoEquipamiento, int cantidadSolicitada, DateTime fechaHoraPrestamo)
