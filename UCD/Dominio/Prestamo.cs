@@ -23,15 +23,21 @@ public class Prestamo
 
     public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
-        if (Estado == EstadoPrestamo.Activo)
-        {
-            throw new DominioException("Solo se puede confirmar una inscripcion pendiente");
-        }
+        ValidarQueEsteSolicitado();
         ValidarCantidad(unidadesFisicas);
         ValidarQueEstenDisponibles(unidadesFisicas);
         AsignarUnidades(unidadesFisicas);
         Estado = EstadoPrestamo.Activo;
     }
+
+    private void ValidarQueEsteSolicitado()
+    {
+        if (Estado == EstadoPrestamo.Activo)
+        {
+            throw new DominioException("Solo se puede confirmar una inscripcion pendiente");
+        }
+    }
+
     private void ValidarCantidad(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         if (unidadesFisicas.Count != CantidadSolicitada)
