@@ -32,7 +32,7 @@ public class Prestamo
 
     public void MarcarDevuelto()
     {
-        
+        Estado = EstadoPrestamo.Devuelto;
     }
 
     private void ValidarQueEsteSolicitado()
