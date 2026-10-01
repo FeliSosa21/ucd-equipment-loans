@@ -119,12 +119,15 @@ Fuente: diapositivas "04.20e Clean Code Parte 2".
 
 ### 6. Manejo de errores (Clean Code cap. 7)
 Fuente: diapositivas "04.20e Clean Code Parte 2" (Manejo de errores) y ejercicios "04.45".
-- **Esperable vs. excepcional.** Un resultado esperable y recuperable (contraseña
-  incorrecta, buscar algo y no encontrarlo) se informa devolviendo un valor o un mensaje
-  (por ejemplo, un DTO de resultado con `Exitoso` y `Mensaje`, o `null` al buscar). Las
-  excepciones son para lo imprevisto o para un contrato que no se puede cumplir (bugs,
-  argumento nulo, regla del dominio violada al construir una entidad). Señalar un
-  `throw` usado para el flujo normal y un `try/catch` en la UI para casos esperables
+- **Esperable vs. excepcional.** Las diapositivas distinguen el resultado esperable y
+  recuperable (contraseña incorrecta, buscar algo y no encontrarlo) de lo imprevisto (bugs,
+  argumento nulo). **Criterio de este proyecto (profesor, 01/10/2026):** los servicios
+  informan los casos esperables (credenciales incorrectas, datos inválidos, duplicados,
+  reglas de negocio) con `ServicioException` y la UI la captura para mostrar el mensaje;
+  no marcar eso como error. Buscar sin encontrar devuelve `null` en los repositorios. Sí
+  señalar excepciones usadas para controlar un loop o el flujo interno de un método, y
+  `try/catch` que capturen excepciones del lenguaje (`NullReferenceException`, etc.) para
+  ocultar un bug
 - Preferir excepciones sobre códigos de error para lo excepcional; específicas y con un
   nombre que diga la fuente del error
 - Usar primero las excepciones del lenguaje (`ArgumentNullException`,
