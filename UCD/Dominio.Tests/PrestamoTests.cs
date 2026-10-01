@@ -46,6 +46,17 @@ public sealed class PrestamoTests
         Assert.IsNotNull(prestamo.UnidadesFisicasAsignadas);
         Assert.AreEqual(0, prestamo.UnidadesFisicasAsignadas.Count);
     }
+
+    [TestMethod]
+    public void Activar_CantidadSolicitadaDeUnidadesDisponibles_QuedaActivo()
+    {
+        var prestamo = CrearPrestamo();
+        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
+        
+        prestamo.Activar(unidades);
+        
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+    }
      
     private static Usuario CrearSolicitante()
     {
@@ -68,5 +79,17 @@ public sealed class PrestamoTests
     {
         var prestamo = new Prestamo(solicitante ?? CrearSolicitante(), tipoEquipamiento ?? CrearTipoEquipamiento(), cantidadSolicitada, FechaFija);
         return prestamo;
+    }
+
+    private static List<UnidadFisica> CrearUnidadesFisicas(int cantidad)
+    {
+        var unidades = new List<UnidadFisica>();
+        for (int i = 1; i <= cantidad; i++)
+        {
+            unidades.Add(new UnidadFisica($"EQP-{i:D4}" ,
+                "Laboratorio Prueba",
+                "PF3A7X21"));
+        }
+        return unidades;
     }
 }

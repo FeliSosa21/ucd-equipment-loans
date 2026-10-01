@@ -11,6 +11,11 @@ public class Prestamo
     public int CantidadSolicitada { get; private set; }
     public DateTime FechaHoraPrestamo { get; private set; }
     public IReadOnlyList<UnidadFisica> UnidadesFisicasAsignadas => _unidadesFisicasAsignadas.AsReadOnly();
+
+    public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
+    {
+        return;
+    }
     
     public Prestamo(Usuario solicitante, TipoEquipamiento tipoEquipamiento, int cantidadSolicitada, DateTime fechaHoraPrestamo)
     {
