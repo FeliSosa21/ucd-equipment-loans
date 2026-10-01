@@ -50,10 +50,7 @@ public sealed class PrestamoTests
     [TestMethod]
     public void Activar_CantidadSolicitadaDeUnidadesDisponibles_QuedaActivo()
     {
-        var prestamo = CrearPrestamo();
-        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
-
-        prestamo.Activar(unidades);
+        var (prestamo, unidades) = CrearPrestamoActivo();
 
         Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
     }
@@ -61,10 +58,7 @@ public sealed class PrestamoTests
     [TestMethod]
     public void Activar_CantidadSolicitadaDeUnidadesDisponibles_AsignaEsasUnidades()
     {
-        var prestamo = CrearPrestamo();
-        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
-
-        prestamo.Activar(unidades);
+        var (prestamo, unidades) = CrearPrestamoActivo();
 
         CollectionAssert.AreEquivalent(unidades, prestamo.UnidadesAsignadas.ToList());
     }
@@ -72,10 +66,7 @@ public sealed class PrestamoTests
     [TestMethod]
     public void Activar_CantidadSolicitadaDeUnidadesDisponibles_UnidadesQuedanPrestadas()
     {
-        var prestamo = CrearPrestamo();
-        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
-
-        prestamo.Activar(unidades);
+        var (prestamo, unidades) = CrearPrestamoActivo();
 
         foreach (var unidad in unidades)
         {
@@ -114,9 +105,7 @@ public sealed class PrestamoTests
     [TestMethod]
     public void Activar_PrestamoYaActivo_LanzaExcepcion()
     {
-        var prestamo = CrearPrestamo();
-        var primerasUnidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
-        prestamo.Activar(primerasUnidades);
+        var (prestamo, primerasUnidades) = CrearPrestamoActivo();
         var nuevasUnidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
         
         Assert.ThrowsException<DominioException>(() => prestamo.Activar(nuevasUnidades));
@@ -132,9 +121,7 @@ public sealed class PrestamoTests
     [TestMethod]
     public void MarcarDevuelto_PrestamoActivoSinUnidadesPrestadas_QuedaDevuelto()
     {
-        var prestamo = CrearPrestamo();
-        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
-        prestamo.Activar(unidades);
+        var (prestamo, unidades) = CrearPrestamoActivo();
         unidades[0].Disponible();
         unidades[1].AMantenimiento();
         
@@ -155,9 +142,7 @@ public sealed class PrestamoTests
     [TestMethod]
     public void MarcarDevuelto_PrestamoYaDevuelto_LanzaExcepcion()
     {
-        var prestamo = CrearPrestamo();
-        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
-        prestamo.Activar(unidades);
+        var (prestamo, unidades) = CrearPrestamoActivo();
         foreach (var unidad in unidades)
         {
             unidad.Disponible();
@@ -171,9 +156,7 @@ public sealed class PrestamoTests
     [TestMethod]
     public void MarcarDevuelto_AlgunaUnidadTodaviaPrestada_LanzaExcepcion()
     {
-        var prestamo = CrearPrestamo();
-        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
-        prestamo.Activar(unidades);
+        var (prestamo, unidades) = CrearPrestamoActivo();
         var devuelta = unidades[0];
         devuelta.Disponible();
         
@@ -185,9 +168,7 @@ public sealed class PrestamoTests
     [TestMethod]
     public void Activar_PrestamoDevuelto_LanzaExcepcion()
     {
-        var prestamo = CrearPrestamo();
-        var primerasUnidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
-        prestamo.Activar(primerasUnidades);
+        var (prestamo, primerasUnidades) = CrearPrestamoActivo();
         foreach (var unidad in primerasUnidades)
         {
             unidad.Disponible();
@@ -259,6 +240,15 @@ public sealed class PrestamoTests
             ));
         }
         return unidades;
+    }
+    private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoActivo()
+    {
+        var prestamo = CrearPrestamo();
+        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
+
+        prestamo.Activar(unidades);
+
+        return (prestamo, unidades);
     }
 
     
