@@ -14,6 +14,11 @@ public class Prestamo
 
     public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
+        if (unidadesFisicas.Count != CantidadSolicitada)
+        {
+            throw new DominioException(
+                $"Se esperaban {CantidadSolicitada} cantidad de unidades y se recibieron {unidadesFisicas.Count}");
+        }
         foreach (var unidadFisica in unidadesFisicas)
         {
             unidadFisica.Prestada();
