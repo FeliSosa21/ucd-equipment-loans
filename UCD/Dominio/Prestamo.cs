@@ -58,7 +58,7 @@ public class Prestamo
 
     private void ValidarQueEsteSolicitado()
     {
-        if (Estado == EstadoPrestamo.Activo)
+        if (Estado != EstadoPrestamo.Solicitado)
         {
             throw new DominioException("Solo se puede activar un prestamo con estado: solicitado");
         }
