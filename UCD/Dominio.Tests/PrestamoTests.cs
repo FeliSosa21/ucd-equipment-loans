@@ -59,7 +59,7 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
-    public void Activar_CantidadSolicitadadDeUnidadesDisponibles_AsignaEsasUnidades()
+    public void Activar_CantidadSolicitadaDeUnidadesDisponibles_AsignaEsasUnidades()
     {
         var prestamo = CrearPrestamo();
         var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
@@ -87,10 +87,10 @@ public sealed class PrestamoTests
     [TestMethod]
     [DataRow(1)]
     [DataRow(3)]
-    public void Activar_CantidadDistintaALaSolicitada_LanzaExcepcion(int cantidadSolicitada)
+    public void Activar_CantidadDistintaALaSolicitada_LanzaExcepcion(int cantidadEntregada)
     {
         var prestamo = CrearPrestamo();
-        var unidades = CrearUnidadesFisicas(cantidadSolicitada);
+        var unidades = CrearUnidadesFisicas(cantidadEntregada);
 
         Assert.ThrowsException<DominioException>(() => prestamo.Activar(unidades));
         Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
@@ -152,14 +152,19 @@ public sealed class PrestamoTests
         return prestamo;
     }
 
-    private static List<UnidadFisica> CrearUnidadesFisicas(int cantidad)
+    private static List<UnidadFisica> CrearUnidadesFisicas(
+        int cantidad,
+        int primerNumero = 1)
     {
         var unidades = new List<UnidadFisica>();
-        for (int i = 1; i <= cantidad; i++)
+        for (int i = 0; i < cantidad; i++)
         {
-            unidades.Add(new UnidadFisica($"EQP-{i:D4}" ,
+            var numero = primerNumero + i;
+            unidades.Add(new UnidadFisica(
+                $"EQP-{numero:D4}",
                 "Laboratorio Prueba",
-                "PF3A7X21"));
+                null
+            ));
         }
         return unidades;
     }

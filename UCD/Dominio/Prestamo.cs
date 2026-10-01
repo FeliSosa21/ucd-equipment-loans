@@ -34,7 +34,7 @@ public class Prestamo
     {
         if (Estado == EstadoPrestamo.Activo)
         {
-            throw new DominioException("Solo se puede confirmar una inscripcion pendiente");
+            throw new DominioException("Solo se puede activar un prestamo con estado: solicitado");
         }
     }
 
@@ -52,7 +52,7 @@ public class Prestamo
         {
             if (!unidad.EstaDisponible())
             {
-                throw new DominioException($"la unidad {unidad.IdInstitucional} no esta libre");
+                throw new DominioException($"la unidad {unidad.IdInstitucional} no esta disponible");
             }
         }
     }
