@@ -24,6 +24,13 @@ public class Prestamo
     public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         ValidarCantidad(unidadesFisicas);
+        foreach (var unidad in unidadesFisicas)
+        {
+            if (!unidad.EstaDisponible())
+            {
+                throw new DominioException($"la unidad {unidad.IdInstitucional} no esta libre");
+            }
+        }
         foreach (var unidadFisica in unidadesFisicas)
         {
             unidadFisica.Prestada();
