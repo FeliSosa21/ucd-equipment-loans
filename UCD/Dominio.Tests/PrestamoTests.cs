@@ -151,7 +151,22 @@ public sealed class PrestamoTests
         Assert.ThrowsException<DominioException>(() => prestamo.MarcarDevuelto());
         Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
     }
-    
+
+    [TestMethod]
+    public void MarcarDevuelto_PrestamoYaDevuelto_LanzaExcepcion()
+    {
+        var prestamo = CrearPrestamo();
+        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
+        prestamo.Activar(unidades);
+        foreach (var unidad in unidades)
+        {
+            unidad.Disponible();
+        }
+        prestamo.MarcarDevuelto();
+        
+        Assert.ThrowsException<DominioException>(() => prestamo.MarcarDevuelto());
+        Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
+    }
     private static Usuario CrearSolicitante()
     {
         var usuario = new Usuario("12345672", "Renato", "Alves", "renato.alves@ejemplo.com", "VivalaOrt2026");
