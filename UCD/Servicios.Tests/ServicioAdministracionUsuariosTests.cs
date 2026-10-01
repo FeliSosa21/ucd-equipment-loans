@@ -294,6 +294,35 @@ public class ServicioAdministracionUsuariosTests
         Assert.AreEqual("Felipe", repositorio.ObtenerUsuarioPorDni(DniValido)!.Nombre);
     }
 
+    [TestMethod]
+    public void CrearUsuario_DtoNulo_LanzaArgumentNullException()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        Assert.ThrowsException<ArgumentNullException>(() =>
+            servicio.CrearUsuario(null!, TipoUsuario.Estudiante.Nombre));
+    }
+
+    [TestMethod]
+    public void ModificarDatos_DatosNulos_LanzaArgumentNullException()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        Assert.ThrowsException<ArgumentNullException>(() => servicio.ModificarDatos(null!, DniValido));
+    }
+
+    [TestMethod]
+    public void ModificarDatos_NombreInvalido_ConservaLaExcepcionDelDominio()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConUnUsuario(out _);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
+            servicio.ModificarDatos(
+                CrearDatos(dni: DniValido, nombre: "F", apellido: "Sosa", correo: "felipe@hotmail.com"), DniValido));
+
+        Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
+    }
+
     private static UsuarioResumenDto CrearDatos(string dni, string nombre, string apellido, string correo)
     {
         return new UsuarioResumenDto { Dni = dni, Nombre = nombre, Apellido = apellido, Correo = correo };

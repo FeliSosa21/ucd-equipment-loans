@@ -21,6 +21,7 @@ public class ServicioAdministracionUsuarios
 
     public void CrearUsuario(UsuarioDto dto, string nombreTipo)
     {
+        ArgumentNullException.ThrowIfNull(dto);
         TipoUsuario tipo = ObtenerTipo(nombreTipo);
 
         _servicioUsuario.Registrar(new UsuarioDto
@@ -68,6 +69,7 @@ public class ServicioAdministracionUsuarios
 
     public void ModificarDatos(UsuarioResumenDto datos, string dniResponsable)
     {
+        ArgumentNullException.ThrowIfNull(datos);
         ValidarQuePuedeModificar(datos.Dni, dniResponsable);
         Usuario usuario = ObtenerUsuario(datos.Dni);
         Usuario? duenoDelCorreo = _repositorio.ObtenerUsuarioPorCorreo(datos.Correo);
@@ -83,7 +85,7 @@ public class ServicioAdministracionUsuarios
         }
         catch (DominioException ex)
         {
-            throw new ServicioException(ex.Message);
+            throw new ServicioException(ex.Message, ex);
         }
     }
 
