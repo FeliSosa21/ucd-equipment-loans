@@ -2,7 +2,7 @@
 
 public class Prestamo
 {
-    public Guid Id { get; private set; }
+    public Guid Id { get; private set; } = Guid.NewGuid();
     public EstadoPrestamo Estado { get; private set; } = EstadoPrestamo.Solicitado;
     public Usuario Solicitante { get; private set; }
     public TipoEquipamiento TipoEquipamiento { get; private set; }
