@@ -94,6 +94,21 @@ public sealed class PrestamoTests
         Assert.ThrowsException<DominioException>(() => prestamo.Activar(unidades));
         Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
     }
+
+    [TestMethod]
+    public void Activar_AlgunaUnidadNoDisponible_LanzaExcepcionYNoPrestaNinguna()
+    {
+        var prestamo = CrearPrestamo();
+        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
+        var libre = unidades[0];
+        var prestada = unidades[1];
+        prestada.Prestada();
+        
+        Assert.ThrowsException<DominioException>(() => prestamo.Activar(unidades));
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, libre.Estado);
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+    }
     private static Usuario CrearSolicitante()
     {
         var usuario = new Usuario("12345672", "Renato", "Alves", "renato.alves@ejemplo.com", "VivalaOrt2026");
