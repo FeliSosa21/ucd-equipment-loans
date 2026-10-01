@@ -28,7 +28,16 @@ public sealed class PrestamoTests
         Assert.AreEqual(otraCantidadSolicitada, prestamo.CantidadSolicitada);
         Assert.AreEqual(FechaFija, prestamo.FechaHoraPrestamo);
     }
-    
+
+    [TestMethod]
+    public void Constructor_DosPrestamos_TienenIdDistinto()
+    {
+        var primerPrestamo = CrearPrestamo();
+        var segundoPrestamo = CrearPrestamo();
+        
+        Assert.AreNotEqual(primerPrestamo.Id, segundoPrestamo.Id);
+    }
+     
     private static Usuario CrearSolicitante()
     {
         var usuario = new Usuario("12345672", "Renato", "Alves", "renato.alves@ejemplo.com", "VivalaOrt2026");
