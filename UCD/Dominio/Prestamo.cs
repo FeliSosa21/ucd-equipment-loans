@@ -11,21 +11,7 @@ public class Prestamo
     public int CantidadSolicitada { get; private set; }
     public DateTime FechaHoraPrestamo { get; private set; }
     public IReadOnlyList<UnidadFisica> UnidadesAsignadas => _unidadesAsignadas.AsReadOnly();
-
-    public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
-    {
-        if (unidadesFisicas.Count != CantidadSolicitada)
-        {
-            throw new DominioException(
-                $"Se esperaban {CantidadSolicitada} cantidad de unidades y se recibieron {unidadesFisicas.Count}");
-        }
-        foreach (var unidadFisica in unidadesFisicas)
-        {
-            unidadFisica.Prestada();
-        }
-        _unidadesAsignadas.AddRange(unidadesFisicas);
-        Estado = EstadoPrestamo.Activo;
-    }
+    
     
     public Prestamo(Usuario solicitante, TipoEquipamiento tipoEquipamiento, int cantidadSolicitada, DateTime fechaHoraPrestamo)
     {
@@ -34,4 +20,25 @@ public class Prestamo
         CantidadSolicitada = cantidadSolicitada;
         FechaHoraPrestamo = fechaHoraPrestamo;
     }
+
+    public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
+    {
+        ValidarCantidad(unidadesFisicas);
+        foreach (var unidadFisica in unidadesFisicas)
+        {
+            unidadFisica.Prestada();
+        }
+        _unidadesAsignadas.AddRange(unidadesFisicas);
+        Estado = EstadoPrestamo.Activo;
+    }
+
+    private void ValidarCantidad(IReadOnlyList<UnidadFisica> unidadesFisicas)
+    {
+        if (unidadesFisicas.Count != CantidadSolicitada)
+        {
+            throw new DominioException(
+                $"Se esperaban {CantidadSolicitada} unidades y se recibieron {unidadesFisicas.Count}");
+        }
+    }
+
 }
