@@ -37,6 +37,15 @@ public sealed class PrestamoTests
         
         Assert.AreNotEqual(primerPrestamo.Id, segundoPrestamo.Id);
     }
+
+    [TestMethod]
+    public void Constructor_DatosValidos_NaceSinUnidadesAsignadas()
+    {
+        var prestamo = CrearPrestamo();
+        
+        Assert.IsNotNull(prestamo.UnidadesFisicasAsignadas);
+        Assert.AreEqual(0, prestamo.UnidadesFisicasAsignadas.Count);
+    }
      
     private static Usuario CrearSolicitante()
     {

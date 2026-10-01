@@ -8,6 +8,7 @@ public class Prestamo
     public TipoEquipamiento TipoEquipamiento { get; private set; }
     public int CantidadSolicitada { get; private set; }
     public DateTime FechaHoraPrestamo { get; private set; }
+    public IReadOnlyList<UnidadFisica> UnidadesFisicasAsignadas { get; }
     
     public Prestamo(Usuario solicitante, TipoEquipamiento tipoEquipamiento, int cantidadSolicitada, DateTime fechaHoraPrestamo)
     {
