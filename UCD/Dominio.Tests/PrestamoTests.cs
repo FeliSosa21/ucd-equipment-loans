@@ -43,8 +43,8 @@ public sealed class PrestamoTests
     {
         var prestamo = CrearPrestamo();
         
-        Assert.IsNotNull(prestamo.UnidadesFisicasAsignadas);
-        Assert.AreEqual(0, prestamo.UnidadesFisicasAsignadas.Count);
+        Assert.IsNotNull(prestamo.UnidadesAsignadas);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
     }
 
     [TestMethod]

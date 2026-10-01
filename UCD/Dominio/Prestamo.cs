@@ -2,7 +2,7 @@
 
 public class Prestamo
 {
-    private readonly List<UnidadFisica> _unidadesFisicasAsignadas = new List<UnidadFisica>();
+    private readonly List<UnidadFisica> _unidadesAsignadas = new List<UnidadFisica>();
     
     public Guid Id { get; private set; } = Guid.NewGuid();
     public EstadoPrestamo Estado { get; private set; } = EstadoPrestamo.Solicitado;
@@ -10,7 +10,7 @@ public class Prestamo
     public TipoEquipamiento TipoEquipamiento { get; private set; }
     public int CantidadSolicitada { get; private set; }
     public DateTime FechaHoraPrestamo { get; private set; }
-    public IReadOnlyList<UnidadFisica> UnidadesFisicasAsignadas => _unidadesFisicasAsignadas.AsReadOnly();
+    public IReadOnlyList<UnidadFisica> UnidadesAsignadas => _unidadesAsignadas.AsReadOnly();
 
     public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
