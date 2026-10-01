@@ -54,17 +54,17 @@
 
     private void IniciarSesion()
     {
-        ResultadoSesionDto resultado = ServicioSesion.IniciarSesion(_correo.Trim(), _contrasena);
-
-        if (!resultado.Exitoso)
-        {
-            _error = resultado.Mensaje;
-            return;
-        }
-
         _error = null;
-        SesionActual.Iniciar(resultado.Sesion!);
-        Navigation.NavigateTo(PaginaDeInicio(resultado.Sesion!));
+        try
+        {
+            UsuarioSesionDto sesion = ServicioSesion.IniciarSesion(_correo.Trim(), _contrasena);
+            SesionActual.Iniciar(sesion);
+            Navigation.NavigateTo(PaginaDeInicio(sesion));
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+        }
     }
 
     private static string PaginaDeInicio(UsuarioSesionDto sesion)

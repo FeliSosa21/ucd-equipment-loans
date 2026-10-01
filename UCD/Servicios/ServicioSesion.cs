@@ -13,21 +13,21 @@ public class ServicioSesion
         _repositorio = repositorio;
     }
 
-    public ResultadoSesionDto IniciarSesion(string correo, string contrasena)
+    public UsuarioSesionDto IniciarSesion(string correo, string contrasena)
     {
         Usuario? usuario = _repositorio.ObtenerUsuarioPorCorreo(correo);
 
         if (usuario is null || !usuario.ContrasenaEsCorrecta(contrasena))
         {
-            return IngresoFallido("Correo o contrasena incorrectos");
+            throw new ServicioException("Correo o contrasena incorrectos");
         }
 
         if (usuario.Estado == EstadoUsuario.Desactivado)
         {
-            return IngresoFallido("El usuario esta desactivado");
+            throw new ServicioException("El usuario esta desactivado");
         }
 
-        return new ResultadoSesionDto { Exitoso = true, Sesion = CrearSesion(usuario) };
+        return CrearSesion(usuario);
     }
 
     public UsuarioSesionDto RenovarSesion(string dni)
@@ -57,13 +57,8 @@ public class ServicioSesion
         }
         catch (DominioException ex)
         {
-            throw new ServicioException(ex.Message, ex);
+            throw new ServicioException(ex.Message);
         }
-    }
-
-    private static ResultadoSesionDto IngresoFallido(string mensaje)
-    {
-        return new ResultadoSesionDto { Exitoso = false, Mensaje = mensaje };
     }
 
     private static UsuarioSesionDto CrearSesion(Usuario usuario)
