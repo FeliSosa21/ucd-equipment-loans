@@ -57,7 +57,17 @@ public sealed class PrestamoTests
         
         Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
     }
-     
+
+    [TestMethod]
+    public void Activar_CantidadSolicitadadDeUnidadesDisponibles_AsignaEsasUnidades()
+    {
+        var prestamo = CrearPrestamo();
+        var unidades =  CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
+        
+        prestamo.Activar(unidades);
+        
+        CollectionAssert.AreEquivalent(unidades, prestamo.UnidadesAsignadas.ToList());
+    }
     private static Usuario CrearSolicitante()
     {
         var usuario = new Usuario("12345672", "Renato", "Alves", "renato.alves@ejemplo.com", "VivalaOrt2026");
