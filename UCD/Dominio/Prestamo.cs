@@ -30,6 +30,11 @@ public class Prestamo
         Estado = EstadoPrestamo.Activo;
     }
 
+    public void MarcarDevuelto()
+    {
+        
+    }
+
     private void ValidarQueEsteSolicitado()
     {
         if (Estado == EstadoPrestamo.Activo)
