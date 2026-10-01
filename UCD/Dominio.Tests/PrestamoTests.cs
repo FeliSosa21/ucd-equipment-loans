@@ -100,12 +100,12 @@ public sealed class PrestamoTests
     {
         var prestamo = CrearPrestamo();
         var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
-        var libre = unidades[0];
+        var disponible = unidades[0];
         var prestada = unidades[1];
         prestada.Prestada();
         
         Assert.ThrowsException<DominioException>(() => prestamo.Activar(unidades));
-        Assert.AreEqual(EstadoUnidadFisica.Disponible, libre.Estado);
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, disponible.Estado);
         Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
         Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
     }
