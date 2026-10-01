@@ -14,6 +14,7 @@ public class Prestamo
 
     public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
+        _unidadesAsignadas.AddRange(unidadesFisicas);
         Estado = EstadoPrestamo.Activo;
     }
     
