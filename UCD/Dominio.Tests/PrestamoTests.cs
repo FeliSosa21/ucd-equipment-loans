@@ -50,7 +50,10 @@ public sealed class PrestamoTests
     [TestMethod]
     public void Activar_CantidadSolicitadaDeUnidadesDisponibles_QuedaActivo()
     {
-        var (prestamo, unidades) = CrearPrestamoActivo();
+        var prestamo = CrearPrestamo();
+        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
+
+        prestamo.Activar(unidades);
 
         Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
     }
@@ -58,7 +61,10 @@ public sealed class PrestamoTests
     [TestMethod]
     public void Activar_CantidadSolicitadaDeUnidadesDisponibles_AsignaEsasUnidades()
     {
-        var (prestamo, unidades) = CrearPrestamoActivo();
+        var prestamo = CrearPrestamo();
+        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
+
+        prestamo.Activar(unidades);
 
         CollectionAssert.AreEquivalent(unidades, prestamo.UnidadesAsignadas.ToList());
     }
@@ -66,7 +72,10 @@ public sealed class PrestamoTests
     [TestMethod]
     public void Activar_CantidadSolicitadaDeUnidadesDisponibles_UnidadesQuedanPrestadas()
     {
-        var (prestamo, unidades) = CrearPrestamoActivo();
+        var prestamo = CrearPrestamo();
+        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
+
+        prestamo.Activar(unidades);
 
         foreach (var unidad in unidades)
         {
@@ -94,6 +103,7 @@ public sealed class PrestamoTests
         var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
         var disponible = unidades[0];
         var prestada = unidades[1];
+
         prestada.Prestada();
 
         Assert.ThrowsException<DominioException>(() => prestamo.Activar(unidades));
@@ -106,8 +116,11 @@ public sealed class PrestamoTests
     public void Activar_PrestamoYaActivo_LanzaExcepcion()
     {
         var (prestamo, primerasUnidades) = CrearPrestamoActivo();
-        var nuevasUnidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
-        
+
+        var nuevasUnidades = CrearUnidadesFisicas(
+            CantidadSolicitadaPorDefecto,
+            primerNumero: CantidadSolicitadaPorDefecto + 1);
+
         Assert.ThrowsException<DominioException>(() => prestamo.Activar(nuevasUnidades));
         foreach (var unidad in nuevasUnidades)
         {
@@ -122,11 +135,12 @@ public sealed class PrestamoTests
     public void MarcarDevuelto_PrestamoActivoSinUnidadesPrestadas_QuedaDevuelto()
     {
         var (prestamo, unidades) = CrearPrestamoActivo();
+
         unidades[0].Disponible();
         unidades[1].AMantenimiento();
-        
+
         prestamo.MarcarDevuelto();
-        
+
         Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
     }
 
@@ -134,7 +148,7 @@ public sealed class PrestamoTests
     public void MarcarDevuelto_PrestamoSolicitado_LanzaExcepcion()
     {
         var prestamo = CrearPrestamo();
-        
+
         Assert.ThrowsException<DominioException>(() => prestamo.MarcarDevuelto());
         Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
     }
@@ -142,13 +156,8 @@ public sealed class PrestamoTests
     [TestMethod]
     public void MarcarDevuelto_PrestamoYaDevuelto_LanzaExcepcion()
     {
-        var (prestamo, unidades) = CrearPrestamoActivo();
-        foreach (var unidad in unidades)
-        {
-            unidad.Disponible();
-        }
-        prestamo.MarcarDevuelto();
-        
+        var (prestamo, _) = CrearPrestamoDevuelto();
+
         Assert.ThrowsException<DominioException>(() => prestamo.MarcarDevuelto());
         Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
     }
@@ -157,9 +166,10 @@ public sealed class PrestamoTests
     public void MarcarDevuelto_AlgunaUnidadTodaviaPrestada_LanzaExcepcion()
     {
         var (prestamo, unidades) = CrearPrestamoActivo();
+
         var devuelta = unidades[0];
         devuelta.Disponible();
-        
+
         Assert.ThrowsException<DominioException>(() => prestamo.MarcarDevuelto());
         Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
         Assert.AreEqual(EstadoUnidadFisica.Disponible, devuelta.Estado);
@@ -168,18 +178,18 @@ public sealed class PrestamoTests
     [TestMethod]
     public void Activar_PrestamoDevuelto_LanzaExcepcion()
     {
-        var (prestamo, primerasUnidades) = CrearPrestamoActivo();
-        foreach (var unidad in primerasUnidades)
-        {
-            unidad.Disponible();
-        }
-        prestamo.MarcarDevuelto();
-        var nuevasUnidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto, primerNumero: CantidadSolicitadaPorDefecto + 1);
-        
+        var (prestamo, primerasUnidades) = CrearPrestamoDevuelto();
+
+        var nuevasUnidades = CrearUnidadesFisicas(
+            CantidadSolicitadaPorDefecto,
+            primerNumero: CantidadSolicitadaPorDefecto + 1);
+
         Assert.ThrowsException<DominioException>(() => prestamo.Activar(nuevasUnidades));
         foreach (var unidad in nuevasUnidades)
         {
-            Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado,
+            Assert.AreEqual(
+                EstadoUnidadFisica.Disponible,
+                unidad.Estado,
                 $"La unidad {unidad.IdInstitucional} deberia seguir disponible");
         }
         Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
@@ -189,58 +199,74 @@ public sealed class PrestamoTests
     [TestMethod]
     public void MarcarDevuelto_PrestamoActivoSinUnidadesPrestadas_NoCambiaLasUnidades()
     {
-        var prestamo = CrearPrestamo();
-        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
-        prestamo.Activar(unidades);
+        var (prestamo, unidades) = CrearPrestamoActivo();
+
         var disponible = unidades[0];
         var enMantenimiento = unidades[1];
+
         disponible.Disponible();
         enMantenimiento.AMantenimiento();
-        
+
         prestamo.MarcarDevuelto();
-        
+
         Assert.AreEqual(EstadoUnidadFisica.Disponible, disponible.Estado);
         Assert.AreEqual(EstadoUnidadFisica.EnMantenimiento, enMantenimiento.Estado);
     }
+
     private static Usuario CrearSolicitante()
     {
-        var usuario = new Usuario("12345672", "Renato", "Alves", "renato.alves@ejemplo.com", "VivalaOrt2026");
+        var usuario = new Usuario(
+            "12345672",
+            "Renato",
+            "Alves",
+            "renato.alves@ejemplo.com",
+            "VivalaOrt2026");
+
         usuario.AsignarTipo(TipoUsuario.Docente);
+
         return usuario;
     }
 
     private static TipoEquipamiento CrearTipoEquipamiento()
     {
-        var tipo = new TipoEquipamiento("Proyector Epson PowerLite",
+        var tipo = new TipoEquipamiento(
+            "Proyector Epson PowerLite",
             "Proyector para aulas",
             5,
             false,
             Categoria.Audiovisual);
+
         return tipo;
     }
 
     private static Prestamo CrearPrestamo(Usuario? solicitante = null, TipoEquipamiento? tipoEquipamiento = null, int cantidadSolicitada = CantidadSolicitadaPorDefecto)
     {
-        var prestamo = new Prestamo(solicitante ?? CrearSolicitante(), tipoEquipamiento ?? CrearTipoEquipamiento(), cantidadSolicitada, FechaFija);
+        var prestamo = new Prestamo(
+            solicitante ?? CrearSolicitante(),
+            tipoEquipamiento ?? CrearTipoEquipamiento(),
+            cantidadSolicitada,
+            FechaFija);
+
         return prestamo;
     }
 
-    private static List<UnidadFisica> CrearUnidadesFisicas(
-        int cantidad,
-        int primerNumero = 1)
+    private static List<UnidadFisica> CrearUnidadesFisicas(int cantidad, int primerNumero = 1)
     {
         var unidades = new List<UnidadFisica>();
+
         for (int i = 0; i < cantidad; i++)
         {
             var numero = primerNumero + i;
+
             unidades.Add(new UnidadFisica(
                 $"EQP-{numero:D4}",
                 "Laboratorio Prueba",
-                null
-            ));
+                null));
         }
+
         return unidades;
     }
+
     private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoActivo()
     {
         var prestamo = CrearPrestamo();
@@ -251,5 +277,17 @@ public sealed class PrestamoTests
         return (prestamo, unidades);
     }
 
-    
+    private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoDevuelto()
+    {
+        var (prestamo, unidades) = CrearPrestamoActivo();
+
+        foreach (var unidad in unidades)
+        {
+            unidad.Disponible();
+        }
+
+        prestamo.MarcarDevuelto();
+
+        return (prestamo, unidades);
+    }
 }
