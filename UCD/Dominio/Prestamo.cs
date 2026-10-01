@@ -36,6 +36,14 @@ public class Prestamo
         {
             throw new DominioException("Solo se puede devolver un prestamo activo");
         }
+
+        foreach (var unidadFisica in _unidadesAsignadas)
+        {
+            if (unidadFisica.Estado == EstadoUnidadFisica.Prestada)
+            {
+                throw new DominioException($"La unidad {unidadFisica.IdInstitucional} todavia esta prestada");
+            }
+        }
         Estado = EstadoPrestamo.Devuelto;
     }
 
