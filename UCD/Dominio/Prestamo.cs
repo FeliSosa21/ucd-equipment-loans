@@ -32,6 +32,10 @@ public class Prestamo
 
     public void MarcarDevuelto()
     {
+        if (Estado != EstadoPrestamo.Activo)
+        {
+            throw new DominioException("Solo se puede devolver un prestamo activo");
+        }
         Estado = EstadoPrestamo.Devuelto;
     }
 
