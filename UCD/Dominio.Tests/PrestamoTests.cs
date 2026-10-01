@@ -181,6 +181,29 @@ public sealed class PrestamoTests
         Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
         Assert.AreEqual(EstadoUnidadFisica.Disponible, devuelta.Estado);
     }
+
+    [TestMethod]
+    public void Activar_PrestamoDevuelto_LanzaExcepcion()
+    {
+        var prestamo = CrearPrestamo();
+        var primerasUnidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
+        prestamo.Activar(primerasUnidades);
+        foreach (var unidad in primerasUnidades)
+        {
+            unidad.Disponible();
+        }
+        prestamo.MarcarDevuelto();
+        var nuevasUnidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto, primerNumero: CantidadSolicitadaPorDefecto + 1);
+        
+        Assert.ThrowsException<DominioException>(() => prestamo.Activar(nuevasUnidades));
+        foreach (var unidad in nuevasUnidades)
+        {
+            Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado,
+                $"La unidad {unidad.IdInstitucional} deberia seguir disponible");
+        }
+        Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
+        CollectionAssert.AreEquivalent(primerasUnidades, prestamo.UnidadesAsignadas.ToList());
+    }
     private static Usuario CrearSolicitante()
     {
         var usuario = new Usuario("12345672", "Renato", "Alves", "renato.alves@ejemplo.com", "VivalaOrt2026");
