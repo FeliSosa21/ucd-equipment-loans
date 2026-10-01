@@ -32,11 +32,21 @@ public class Prestamo
 
     public void MarcarDevuelto()
     {
+        ValidarQueEsteActivo();
+        ValidarQueNingunaUnidadSigaPrestada();
+        
+        Estado = EstadoPrestamo.Devuelto;
+    }
+
+    private void ValidarQueEsteActivo()
+    {
         if (Estado != EstadoPrestamo.Activo)
         {
             throw new DominioException("Solo se puede devolver un prestamo activo");
         }
-
+    }
+    private void ValidarQueNingunaUnidadSigaPrestada()
+    {
         foreach (var unidadFisica in _unidadesAsignadas)
         {
             if (unidadFisica.Estado == EstadoUnidadFisica.Prestada)
@@ -44,7 +54,6 @@ public class Prestamo
                 throw new DominioException($"La unidad {unidadFisica.IdInstitucional} todavia esta prestada");
             }
         }
-        Estado = EstadoPrestamo.Devuelto;
     }
 
     private void ValidarQueEsteSolicitado()
