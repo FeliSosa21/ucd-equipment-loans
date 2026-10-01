@@ -5,7 +5,9 @@ description: Revisa clases C#, tests MSTest y componentes Razor contra los linea
 
 # Revisión de calidad de código C# (Clean Code + convenciones .NET)
 
-Cubre los capítulos de Clean Code que pide la letra: 1 al 10 y 12.
+Cubre los capítulos de Clean Code que pide la letra: 1 al 10 y 12. Fuentes del curso:
+diapositivas "04.10e Clean Code 1" y "04.20e Clean Code Parte 2" (G. Mousqués), que
+complementan el libro con *A Philosophy of Software Design* (J. Ousterhout).
 
 ## Restricciones importantes — leer primero
 
@@ -69,15 +71,34 @@ Fuente principal: diapositivas del curso "04.10e Clean Code 1" (G. Mousqués).
 - Sin espacios, sin tildes, sin ñ (compatibilidad con C#, convención del proyecto)
 
 ### 2. Funciones (Clean Code cap. 3)
-- Chicas — si un método no entra en una pantalla sin scrollear, sospechar
+Fuente: diapositivas "04.20e Clean Code Parte 2".
+- Chicas — si un método no entra en una pantalla sin scrollear, sospechar. Si se puede
+  extraer una función de ella, está haciendo demasiado
 - Hacen UNA sola cosa (si el nombre necesita un "y" para describirlo, probablemente hace dos)
-- Pocos argumentos (0-2 ideal, 3 aceptable, 4+ es señal de alerta — pensar en agrupar en un objeto)
-- Sin efectos secundarios ocultos (un método `EstaActivo()` no debería, de paso, cambiar el estado)
-- Un solo nivel de abstracción por función (no mezclar detalle de bajo nivel con lógica de alto nivel)
+- Pocos argumentos: 0, 1 o 2 es lo ideal; **3 o más puede ser un problema** → considerar
+  agrupar en un objeto (`MakeCircle(Point center, double radius)` en vez de `x, y, radius`)
+- Evitar parámetros `bool`: indican que la función hace más de una cosa
+- Con un solo parámetro, el nombre debe ser una pregunta (`bool ExisteArchivo(nombre)`)
+  o describir la transformación del parámetro en el resultado
+- Sin efectos secundarios ocultos (un método `EstaActivo()` no debería, de paso, cambiar el
+  estado; un `ChequearContrasena` no debería, de paso, iniciar la sesión)
+- **Separación comando/query**: una función o responde algo o hace algo, no ambas
+- Un solo nivel de abstracción por función, y **regla step-down**: el código se lee de arriba
+  hacia abajo y cada función va seguida de las del siguiente nivel (de lo general a lo
+  específico, como una noticia)
+- `switch` o cadenas de `if` por tipo: por definición hacen más de una cosa; evaluar si se
+  pueden reemplazar por polimorfismo
+- Favorecer clases y métodos **profundos** (Ousterhout): interfaz simple que esconde mucha
+  funcionalidad, frente a interfaces llanas con muchos parámetros y poca funcionalidad
 
 ### 3. Comentarios (Clean Code cap. 4)
-- Preferir código autoexplicativo antes que comentar código confuso
-- Marcar comentarios que solo repiten lo que el código ya dice (`// suma uno` sobre `i++`)
+- "Don't comment bad code — rewrite it": preferir código autoexplicativo
+  (`if (empleado.EsElegibleParaBeneficios())` en vez de comentar la condición). Comentar es
+  el último recurso
+- Buenos comentarios: legales, los que explican la **intención** o el porqué, los que
+  advierten consecuencias, clarificaciones de código de terceros, `TODO`
+- Malos comentarios: vagos, redundantes (repiten lo que el código ya dice, `// suma uno`
+  sobre `i++`), ambiguos
 - Comentarios de código muerto (código comentado en vez de borrado) → señalar para eliminar
 
 ### 4. Formato (Clean Code cap. 5)
@@ -90,14 +111,40 @@ Fuente principal: diapositivas del curso "04.10e Clean Code 1" (G. Mousqués).
   (¿esa propiedad tiene un método propio para modificarse, tipo `ModificarNombre`, o se
   está exponiendo un `set` público que rompe esa regla? El diagrama de dominio no está en
   el repositorio en un formato legible: basate en el código y, si hay dudas, preguntá)
-- Evitar exponer estructura interna innecesariamente
+- Evitar exponer estructura interna innecesariamente: cuanto más abstracta la interfaz,
+  más libertad para cambiar la implementación
+- **Ley de Demeter** ("hablá con amigos, no con extraños"): un método solo llama a métodos
+  de su clase, de objetos que crea, de sus parámetros o de sus atributos. Señalar los
+  *train wrecks* (`a.ObtenerB().ObtenerC().Hacer()`)
 
 ### 6. Manejo de errores (Clean Code cap. 7)
-- Excepciones en vez de códigos de error o valores mágicos de retorno
-- Mensajes de excepción descriptivos (no genéricos tipo "Error")
-- Las reglas del dominio lanzan `DominioException`, no `Exception` ni `ArgumentException`
-- Mensajes de excepción sin tildes ni ñ (convención del equipo, ej. "El correo no puede estar vacio")
-- No tragarse excepciones con catch vacíos
+Fuente: diapositivas "04.20e Clean Code Parte 2" (Manejo de errores) y ejercicios "04.45".
+- **Esperable vs. excepcional.** Un resultado esperable y recuperable (contraseña
+  incorrecta, buscar algo y no encontrarlo) se informa devolviendo un valor o un mensaje
+  (por ejemplo, un DTO de resultado con `Exitoso` y `Mensaje`, o `null` al buscar). Las
+  excepciones son para lo imprevisto o para un contrato que no se puede cumplir (bugs,
+  argumento nulo, regla del dominio violada al construir una entidad). Señalar un
+  `throw` usado para el flujo normal y un `try/catch` en la UI para casos esperables
+- Preferir excepciones sobre códigos de error para lo excepcional; específicas y con un
+  nombre que diga la fuente del error
+- Usar primero las excepciones del lenguaje (`ArgumentNullException`,
+  `ArgumentOutOfRangeException`, `InvalidOperationException`); las propias como último
+  recurso y no una por operación (`InsertClienteException`, `BorrarClienteException`...).
+  En este proyecto `DominioException` y `ServicioException` están justificadas (decisión
+  del equipo consultada con el profesor): no marcarlas como error
+- Una excepción propia define los tres constructores: vacío, `(mensaje)` y
+  `(mensaje, interna)`, y va en el namespace de quien la lanza
+- Al relanzar, pasar la excepción original como `InnerException`
+  (`throw new ServicioException(ex.Message, ex)`) para no perder el contexto
+- Al cruzar una frontera de capa, traducir la excepción (el servicio captura
+  `DominioException` y lanza `ServicioException`; la UI nunca captura excepciones del dominio)
+- `catch` solo donde se pueda hacer algo (recuperarse, liberar recursos, registrar);
+  si no, dejar que suba. `catch` específicos y del más específico al más general
+- Nunca `catch (Exception)` vacío (*exception swallowing*) ni lanzar `Exception`
+- Programación defensiva: chequear nulos en los parámetros de métodos públicos
+  (`ArgumentNullException.ThrowIfNull(dto)`) y no pasar `null` por parámetro
+- Mensajes de excepción descriptivos (no genéricos tipo "Error"), sin tildes ni ñ
+  (convención del equipo, ej. "El correo no puede estar vacio")
 
 ### 7. Límites (Clean Code cap. 8)
 - El código propio no depende directamente de detalles de terceros o de otras capas
@@ -139,7 +186,9 @@ Aplicar a los archivos de `*.Tests`:
 ### 10. Diseño emergente (Clean Code cap. 12)
 Las cuatro reglas del diseño simple, en orden de prioridad:
 1. Pasa todos los tests
-2. No tiene duplicación (misma validación o constante repetida en varias clases → señalar)
+2. No tiene duplicación (misma validación o constante repetida en varias clases → señalar;
+   loops casi iguales que solo cambian en lo que hacen con cada elemento → extraer la parte
+   común y pasar lo que cambia como `Func<>`)
 3. Expresa la intención del programador (nombres, constantes con nombre en vez de
    números mágicos como `80` o `300`)
 4. Minimiza la cantidad de clases y métodos (no crear abstracciones que todavía
