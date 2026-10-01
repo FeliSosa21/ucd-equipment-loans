@@ -82,6 +82,18 @@ public sealed class PrestamoTests
             Assert.AreEqual(EstadoUnidadFisica.Prestada, unidad.Estado, $"La unidad {unidad.IdInstitucional} deberia estar prestada");
         }
     }
+
+    [TestMethod]
+    [DataRow(1)]
+    [DataRow(3)]
+    public void Activar_CantidadDistintaALaSolicitada_LanzaExcepcion(int cantidadSolicitada)
+    {
+        var prestamo = CrearPrestamo();
+        var unidades = CrearUnidadesFisicas(cantidadSolicitada);
+        
+        Assert.ThrowsException<DominioException>(() => prestamo.Activar(unidades));
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+    }
     private static Usuario CrearSolicitante()
     {
         var usuario = new Usuario("12345672", "Renato", "Alves", "renato.alves@ejemplo.com", "VivalaOrt2026");
