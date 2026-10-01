@@ -14,6 +14,10 @@ public class Prestamo
 
     public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
+        foreach (var unidadFisica in unidadesFisicas)
+        {
+            unidadFisica.Prestada();
+        }
         _unidadesAsignadas.AddRange(unidadesFisicas);
         Estado = EstadoPrestamo.Activo;
     }
