@@ -6,6 +6,8 @@ namespace UI.Components.Pages;
 
 public partial class Devoluciones
 {
+    private const string FormatoFecha = "dd/MM/yyyy HH:mm";
+
     private List<PrestamoActivoDto> _prestamos = new List<PrestamoActivoDto>();
     private List<string> _condiciones = new List<string>();
     private List<UnidadDevueltaDto> _unidades = new List<UnidadDevueltaDto>();

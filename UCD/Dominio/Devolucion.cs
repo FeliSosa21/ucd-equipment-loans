@@ -73,12 +73,20 @@ public class Devolucion
         }
 
         List<UnidadFisica> devueltas = unidades.Select(unidadDevuelta => unidadDevuelta.Unidad).ToList();
+        ValidarQueNoHayaRepetidas(devueltas);
+        ValidarQueSeanLasDelPrestamo(devueltas, prestamo);
+    }
 
+    private static void ValidarQueNoHayaRepetidas(List<UnidadFisica> devueltas)
+    {
         if (devueltas.Distinct().Count() != devueltas.Count)
         {
             throw new DominioException("Una unidad no puede devolverse dos veces");
         }
+    }
 
+    private static void ValidarQueSeanLasDelPrestamo(List<UnidadFisica> devueltas, Prestamo prestamo)
+    {
         bool sonLasDelPrestamo = devueltas.Count == prestamo.UnidadesAsignadas.Count &&
                                  prestamo.UnidadesAsignadas.All(devueltas.Contains);
 

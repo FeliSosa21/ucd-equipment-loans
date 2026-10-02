@@ -95,3 +95,7 @@ tr:last-child td { border-bottom: none; }
 @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
 }
+
+/* Compartidos entre paginas: fila de botones de un formulario y mensaje sobre una tabla */
+.acciones { display: flex; gap: .5rem; }
+.mensaje { margin-bottom: 1rem; }

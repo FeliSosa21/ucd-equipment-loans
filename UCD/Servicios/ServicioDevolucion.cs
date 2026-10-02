@@ -42,10 +42,12 @@ public class ServicioDevolucion
         ArgumentNullException.ThrowIfNull(datos);
         Usuario responsable = ObtenerResponsable(dniResponsable);
         Prestamo prestamo = ObtenerPrestamo(datos.IdPrestamo);
-        List<UnidadDevuelta> unidades = datos.Unidades.Select(unidad => CrearUnidadDevuelta(unidad, prestamo)).ToList();
 
         try
         {
+            List<UnidadDevuelta> unidades = datos.Unidades
+                .Select(unidad => CrearUnidadDevuelta(unidad, prestamo))
+                .ToList();
             Devolucion devolucion = new Devolucion(prestamo, responsable, datos.FechaHoraDevolucion, unidades);
             devolucion.Aplicar();
             _devoluciones.AgregarDevolucion(devolucion);
@@ -96,14 +98,7 @@ public class ServicioDevolucion
             throw new ServicioException("La condicion de devolucion no existe");
         }
 
-        try
-        {
-            return new UnidadDevuelta(unidad, condicion, datos.Observaciones);
-        }
-        catch (DominioException ex)
-        {
-            throw new ServicioException(ex.Message, ex);
-        }
+        return new UnidadDevuelta(unidad, condicion, datos.Observaciones);
     }
 
     private static PrestamoActivoDto CrearPrestamoActivoDto(Prestamo prestamo)

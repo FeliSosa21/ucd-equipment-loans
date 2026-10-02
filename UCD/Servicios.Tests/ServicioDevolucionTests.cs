@@ -37,17 +37,26 @@ public class ServicioDevolucionTests
     }
 
     [TestMethod]
-    public void RegistrarDevolucion_DatosValidos_DevuelveElPrestamoYActualizaLasUnidades()
+    public void RegistrarDevolucion_DatosValidos_ElPrestamoDejaDeEstarActivo()
+    {
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+
+        servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
+
+        Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
+        Assert.AreEqual(0, servicio.ListarPrestamosActivos().Count);
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_CondicionPorUnidad_ActualizaCadaUnidad()
     {
         ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
         DevolucionDto datos = CrearDatos(prestamo.Id, condicionSegunda: "Dañada");
 
         servicio.RegistrarDevolucion(datos, DniFuncionario);
 
-        Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
         Assert.AreEqual(EstadoUnidadFisica.Disponible, prestamo.UnidadesAsignadas[0].Estado);
         Assert.AreEqual(EstadoUnidadFisica.EnMantenimiento, prestamo.UnidadesAsignadas[1].Estado);
-        Assert.AreEqual(0, servicio.ListarPrestamosActivos().Count);
     }
 
     [TestMethod]
@@ -81,14 +90,22 @@ public class ServicioDevolucionTests
     }
 
     [TestMethod]
-    [DataRow(DniSolicitante)]
-    [DataRow("30000004")]
-    public void RegistrarDevolucion_ResponsableSinPermisoOInexistente_LanzaExcepcion(string dniResponsable)
+    public void RegistrarDevolucion_ResponsableSinPermiso_LanzaExcepcion()
     {
         ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), dniResponsable));
+            servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniSolicitante));
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_ResponsableInexistente_LanzaExcepcion()
+    {
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), "30000004"));
         Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
     }
 

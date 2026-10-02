@@ -114,7 +114,7 @@ public sealed class DevolucionTests
     }
 
     [TestMethod]
-    public void Aplicar_CondicionPorUnidad_ActualizaCadaUnaYDevuelveElPrestamo()
+    public void Aplicar_CondicionPorUnidad_ActualizaCadaUnidadSegunSuCondicion()
     {
         Prestamo prestamo = CrearPrestamoActivo();
         UnidadFisica sana = prestamo.UnidadesAsignadas[0];
@@ -130,6 +130,17 @@ public sealed class DevolucionTests
 
         Assert.AreEqual(EstadoUnidadFisica.Disponible, sana.Estado);
         Assert.AreEqual(EstadoUnidadFisica.EnMantenimiento, rota.Estado);
+    }
+
+    [TestMethod]
+    public void Aplicar_DevolucionValida_DejaElPrestamoDevuelto()
+    {
+        Prestamo prestamo = CrearPrestamoActivo();
+        Devolucion devolucion = new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo.AddDays(1),
+            DevolverTodasSinObservaciones(prestamo));
+
+        devolucion.Aplicar();
+
         Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
     }
 
