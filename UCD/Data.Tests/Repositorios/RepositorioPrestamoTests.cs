@@ -22,7 +22,19 @@ public class RepositorioPrestamoTests
         
         Assert.AreSame(prestamo, resultado);
     }
-    
+
+    [TestMethod]
+    public void ObtenerUsuarioPorDni_DniInexistente_DevuelveNulo()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+        Prestamo prestamo = CrearPrestamo();
+        repositorio.AgregarPrestamo(prestamo);
+
+        Prestamo? resultado = repositorio.ObtenerPrestamoPorId(id: Guid.NewGuid());
+        
+        Assert.IsNull(resultado);
+    }
     
     private static Usuario CrearSolicitante()
     {
