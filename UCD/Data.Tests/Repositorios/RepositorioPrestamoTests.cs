@@ -24,7 +24,7 @@ public class RepositorioPrestamoTests
     }
 
     [TestMethod]
-    public void ObtenerUsuarioPorDni_DniInexistente_DevuelveNulo()
+    public void ObtenerPrestamoPorId_IdInexistente_DevuelveNulo()
     {
         Memoria memoria = new Memoria();
         RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
