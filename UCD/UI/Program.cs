@@ -15,10 +15,12 @@ builder.Services.AddSingleton<Memoria>();
 // Repositorios y servicios: uno por conexion; no guardan estado propio.
 builder.Services.AddScoped<RepositorioUsuario>();
 builder.Services.AddScoped<RepositorioPrestamo>();
+builder.Services.AddScoped<RepositorioDevolucion>();
 builder.Services.AddScoped<ServicioUsuario>();
 builder.Services.AddScoped<ServicioSesion>();
 builder.Services.AddScoped<CargaInicial>();
 builder.Services.AddScoped<ServicioAdministracionUsuarios>();
+builder.Services.AddScoped<ServicioDevolucion>();
 
 // Quien esta logueado: uno por conexion del navegador.
 builder.Services.AddScoped<SesionActual>();

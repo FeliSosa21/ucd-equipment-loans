@@ -1,4 +1,8 @@
 @page "/devoluciones"
+@using DTOs
+@using Servicios
+@inherits PaginaConSesion
+@inject ServicioDevolucion ServicioDevolucion
 
 <PageTitle>UCD · Devoluciones</PageTitle>
 
@@ -9,10 +13,90 @@
 
 <div class="toolbar">
     <input class="field busqueda" type="search" placeholder="Buscar por equipo o usuario"
-           aria-label="Buscar préstamo" />
+           aria-label="Buscar préstamo" @bind="_busqueda" @bind:event="oninput" />
 </div>
 
-<div class="card">
-    <EstadoVacio Titulo="No hay préstamos activos"
-                 Mensaje="Los préstamos que estén en curso van a aparecer acá para registrar su devolución." />
+@if (_seleccionado is not null)
+{
+    <div class="card devolucion">
+        <form class="form-grid" @onsubmit="Confirmar" novalidate>
+            <div class="lbl">
+                Devolución de <strong>@_seleccionado.TipoEquipamiento</strong> prestado a
+                <strong>@_seleccionado.Solicitante</strong>
+                (desde @_seleccionado.FechaHoraPrestamo.ToString("dd/MM/yyyy HH:mm"))
+            </div>
+
+            @foreach (UnidadDevueltaDto unidad in _unidades)
+            {
+                <div class="form-row">
+                    <div>
+                        <label class="lbl" for="condicion-@unidad.IdInstitucional">
+                            Condición de <span class="mono">@unidad.IdInstitucional</span>
+                        </label>
+                        <select id="condicion-@unidad.IdInstitucional" class="field" @bind="unidad.Condicion">
+                            @foreach (string condicion in _condiciones)
+                            {
+                                <option value="@condicion">@condicion</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label class="lbl" for="observaciones-@unidad.IdInstitucional">Observaciones (opcional)</label>
+                        <input id="observaciones-@unidad.IdInstitucional" class="field" maxlength="300"
+                               @bind="unidad.Observaciones" />
+                    </div>
+                </div>
+            }
+
+            @if (_error is not null)
+            {
+                <div class="alert alert-error" role="alert">@_error</div>
+            }
+
+            <div class="acciones">
+                <button type="submit" class="btn btn-primary">Confirmar devolución</button>
+                <button type="button" class="btn btn-ghost" @onclick="Cancelar">Cancelar</button>
+            </div>
+        </form>
+    </div>
+}
+
+@if (_exito is not null)
+{
+    <div class="alert alert-success mensaje" role="status">@_exito</div>
+}
+
+<div class="card table-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Solicitante</th>
+                <th>Equipo</th>
+                <th>Inicio</th>
+                <th>Unidades</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (PrestamoActivoDto prestamo in PrestamosFiltrados)
+            {
+                <tr>
+                    <td>@prestamo.Solicitante</td>
+                    <td>@prestamo.TipoEquipamiento</td>
+                    <td>@prestamo.FechaHoraPrestamo.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td class="mono">@string.Join(", ", prestamo.Unidades)</td>
+                    <td>
+                        <button class="btn btn-ghost btn-sm" @onclick="() => Seleccionar(prestamo)">
+                            Registrar devolución
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!PrestamosFiltrados.Any())
+    {
+        <EstadoVacio Titulo="No hay préstamos activos"
+                     Mensaje="Los préstamos que estén en curso van a aparecer acá para registrar su devolución." />
+    }
 </div>
