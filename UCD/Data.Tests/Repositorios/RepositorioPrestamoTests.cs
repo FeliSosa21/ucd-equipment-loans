@@ -35,6 +35,21 @@ public class RepositorioPrestamoTests
         
         Assert.IsNull(resultado);
     }
+
+    [TestMethod]
+    public void ObtenerPrestamosActivos_UnoActivoYUnoSolicitado_DevuelveSoloElActivo()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+        Prestamo solicitado = CrearPrestamo();
+        (Prestamo activo, _) = CrearPrestamoActivo();
+        repositorio.AgregarPrestamo(solicitado);
+        repositorio.AgregarPrestamo(activo);
+
+        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosActivos();
+        
+        CollectionAssert.AreEquivalent(new List<Prestamo> {activo}, resultado.ToList());
+    }
     
     private static Usuario CrearSolicitante()
     {
@@ -71,5 +86,32 @@ public class RepositorioPrestamoTests
             FechaFija);
 
         return prestamo;
+    }
+    
+    private static List<UnidadFisica> CrearUnidadesFisicas(int cantidad, int primerNumero = 1)
+    {
+        var unidades = new List<UnidadFisica>();
+
+        for (int i = 0; i < cantidad; i++)
+        {
+            var numero = primerNumero + i;
+
+            unidades.Add(new UnidadFisica(
+                $"EQP-{numero:D4}",
+                "Laboratorio Prueba",
+                null));
+        }
+
+        return unidades;
+    }
+
+    private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoActivo()
+    {
+        var prestamo = CrearPrestamo();
+        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
+
+        prestamo.Activar(unidades);
+
+        return (prestamo, unidades);
     }
 }

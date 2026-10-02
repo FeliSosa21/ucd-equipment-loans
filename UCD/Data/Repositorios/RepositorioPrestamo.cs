@@ -20,4 +20,9 @@ public class RepositorioPrestamo
     {
         return _memoria.Prestamos.FirstOrDefault(prestamo => prestamo.Id == id);
     }
+
+    public IReadOnlyList<Prestamo> ObtenerPrestamosActivos()
+    {
+        return new List<Prestamo>().AsReadOnly();
+    }
 }
