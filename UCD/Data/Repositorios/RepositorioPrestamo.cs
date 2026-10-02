@@ -18,6 +18,6 @@ public class RepositorioPrestamo
 
     public Prestamo? ObtenerPrestamoPorId(Guid id)
     {
-        return _memoria.Prestamos.FirstOrDefault();
+        return _memoria.Prestamos.FirstOrDefault(prestamo => prestamo.Id == id);
     }
 }
