@@ -23,6 +23,9 @@ public class RepositorioPrestamo
 
     public IReadOnlyList<Prestamo> ObtenerPrestamosActivos()
     {
-        return new List<Prestamo>().AsReadOnly();
+        return _memoria.Prestamos
+            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Activo)
+            .ToList()
+            .AsReadOnly();
     }
 }
