@@ -13,11 +13,11 @@ public class RepositorioPrestamo
 
     public void AgregarPrestamo(Prestamo prestamo)
     {
-        
+        _memoria.Prestamos.Add(prestamo);
     }
 
-    public Prestamo ObtenerPrestamoPorId(Guid id)
+    public Prestamo? ObtenerPrestamoPorId(Guid id)
     {
-        return null;
+        return _memoria.Prestamos.FirstOrDefault();
     }
 }
