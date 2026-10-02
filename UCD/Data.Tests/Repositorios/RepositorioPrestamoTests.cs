@@ -50,7 +50,25 @@ public class RepositorioPrestamoTests
         
         CollectionAssert.AreEquivalent(new List<Prestamo> {activo}, resultado.ToList());
     }
-    
+
+    [TestMethod]
+    public void ObtenerPrestamosActivos_PrestamoDevueltoDespuesDeAgregarlo_NoLoIncluye()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
+        repositorio.AgregarPrestamo(prestamo);
+        foreach (UnidadFisica unidad in unidades)
+        {
+            unidad.Disponible();
+        }
+        prestamo.MarcarDevuelto();
+
+        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosActivos();
+
+        Assert.AreEqual(0, resultado.Count);
+    }
+
     private static Usuario CrearSolicitante()
     {
         var usuario = new Usuario(
