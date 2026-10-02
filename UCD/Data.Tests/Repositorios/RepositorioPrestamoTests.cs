@@ -69,6 +69,20 @@ public class RepositorioPrestamoTests
         Assert.AreEqual(0, resultado.Count);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamoPorId_OtroRepositorioSobreLaMismaMemoria_LoEncuentra()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorioQueGuarda = new RepositorioPrestamo(memoria);
+        RepositorioPrestamo repositorioQueBusca = new RepositorioPrestamo(memoria);
+        Prestamo prestamo = CrearPrestamo();
+        repositorioQueGuarda.AgregarPrestamo(prestamo);
+
+        Prestamo? resultado = repositorioQueBusca.ObtenerPrestamoPorId(id: prestamo.Id);
+
+        Assert.AreSame(prestamo, resultado);
+    }
+
     private static Usuario CrearSolicitante()
     {
         var usuario = new Usuario(
