@@ -48,7 +48,7 @@ public class RepositorioPrestamoTests
 
         IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosActivos();
         
-        CollectionAssert.AreEquivalent(new List<Prestamo> {activo}, resultado.ToList());
+        CollectionAssert.AreEquivalent(new List<Prestamo> { activo }, resultado.ToList());
     }
 
     [TestMethod]
@@ -85,7 +85,7 @@ public class RepositorioPrestamoTests
 
     private static Usuario CrearSolicitante()
     {
-        var usuario = new Usuario(
+        Usuario usuario = new Usuario(
             "12345672",
             "Renato",
             "Alves",
@@ -99,7 +99,7 @@ public class RepositorioPrestamoTests
 
     private static TipoEquipamiento CrearTipoEquipamiento()
     {
-        var tipo = new TipoEquipamiento(
+        TipoEquipamiento tipo = new TipoEquipamiento(
             "Proyector Epson PowerLite",
             "Proyector para aulas",
             5,
@@ -109,9 +109,12 @@ public class RepositorioPrestamoTests
         return tipo;
     }
 
-    private static Prestamo CrearPrestamo(Usuario? solicitante = null, TipoEquipamiento? tipoEquipamiento = null, int cantidadSolicitada = CantidadSolicitadaPorDefecto)
+    private static Prestamo CrearPrestamo(
+        Usuario? solicitante = null,
+        TipoEquipamiento? tipoEquipamiento = null,
+        int cantidadSolicitada = CantidadSolicitadaPorDefecto)
     {
-        var prestamo = new Prestamo(
+        Prestamo prestamo = new Prestamo(
             solicitante ?? CrearSolicitante(),
             tipoEquipamiento ?? CrearTipoEquipamiento(),
             cantidadSolicitada,
@@ -119,14 +122,16 @@ public class RepositorioPrestamoTests
 
         return prestamo;
     }
-    
-    private static List<UnidadFisica> CrearUnidadesFisicas(int cantidad, int primerNumero = 1)
+
+    private static List<UnidadFisica> CrearUnidadesFisicas(
+        int cantidad,
+        int primerNumero = 1)
     {
-        var unidades = new List<UnidadFisica>();
+        List<UnidadFisica> unidades = new List<UnidadFisica>();
 
         for (int i = 0; i < cantidad; i++)
         {
-            var numero = primerNumero + i;
+            int numero = primerNumero + i;
 
             unidades.Add(new UnidadFisica(
                 $"EQP-{numero:D4}",
@@ -139,8 +144,8 @@ public class RepositorioPrestamoTests
 
     private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoActivo()
     {
-        var prestamo = CrearPrestamo();
-        var unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
+        Prestamo prestamo = CrearPrestamo();
+        List<UnidadFisica> unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
 
         prestamo.Activar(unidades);
 
