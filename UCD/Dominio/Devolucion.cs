@@ -1,36 +1,60 @@
 namespace Dominio;
 
+// Devolucion total de un prestamo activo: todas sus unidades en un mismo acto, cada una con su condicion.
 public class Devolucion
 {
-    private const int LargoMaximoObservaciones = 300;
+    private readonly List<UnidadDevuelta> _unidades;
 
-    public DateTime FechaHoraDevolucion { get; private set; }
-    public CondicionDevolucion Condicion { get; private set; }
-    public string? Observaciones { get; private set; }
-    public Usuario RegistradaPor { get; private set; }
+    public Prestamo Prestamo { get; }
+    public Usuario RegistradaPor { get; }
+    public DateTime FechaHoraDevolucion { get; }
+    public IReadOnlyList<UnidadDevuelta> Unidades => _unidades.AsReadOnly();
 
-    public Devolucion(DateTime fechaHoraDevolucion, DateTime inicioPrestamo, CondicionDevolucion condicion,
-        string? observaciones, Usuario registradaPor)
+    public Devolucion(Prestamo prestamo, Usuario registradaPor, DateTime fechaHoraDevolucion,
+        IReadOnlyList<UnidadDevuelta> unidades)
     {
-        ValidarFecha(fechaHoraDevolucion, inicioPrestamo);
-        ValidarObservaciones(observaciones);
+        ValidarPrestamo(prestamo);
         ValidarUsuario(registradaPor);
+        ValidarFecha(fechaHoraDevolucion, prestamo.FechaHoraPrestamo);
+        ValidarUnidades(unidades, prestamo);
 
-        FechaHoraDevolucion = fechaHoraDevolucion;
-        Condicion = condicion;
-        Observaciones = observaciones;
+        Prestamo = prestamo;
         RegistradaPor = registradaPor;
+        FechaHoraDevolucion = fechaHoraDevolucion;
+        _unidades = unidades.ToList();
     }
 
-    public void ActualizarUnidad(UnidadFisica unidad)
+    public void Aplicar()
     {
-        if (Condicion == CondicionDevolucion.SinObservaciones)
+        ValidarPrestamo(Prestamo);
+
+        foreach (UnidadDevuelta unidadDevuelta in _unidades)
         {
-            unidad.Disponible();
-            return;
+            unidadDevuelta.ActualizarEstadoDeLaUnidad();
         }
 
-        unidad.AMantenimiento();
+        Prestamo.MarcarDevuelto();
+    }
+
+    private static void ValidarPrestamo(Prestamo prestamo)
+    {
+        if (prestamo is null)
+        {
+            throw new DominioException("La devolucion debe tener el prestamo devuelto");
+        }
+
+        if (prestamo.Estado != EstadoPrestamo.Activo)
+        {
+            throw new DominioException("Solo se puede devolver un prestamo activo");
+        }
+    }
+
+    private static void ValidarUsuario(Usuario registradaPor)
+    {
+        if (registradaPor is null)
+        {
+            throw new DominioException("La devolucion debe tener el usuario que la registra");
+        }
     }
 
     private static void ValidarFecha(DateTime fechaHoraDevolucion, DateTime inicioPrestamo)
@@ -41,19 +65,26 @@ public class Devolucion
         }
     }
 
-    private static void ValidarObservaciones(string? observaciones)
+    private static void ValidarUnidades(IReadOnlyList<UnidadDevuelta> unidades, Prestamo prestamo)
     {
-        if (observaciones != null && observaciones.Length > LargoMaximoObservaciones)
+        if (unidades is null)
         {
-            throw new DominioException($"Las observaciones no pueden tener mas de {LargoMaximoObservaciones} caracteres");
+            throw new DominioException("La devolucion debe incluir las unidades del prestamo");
         }
-    }
 
-    private static void ValidarUsuario(Usuario registradaPor)
-    {
-        if (registradaPor is null)
+        List<UnidadFisica> devueltas = unidades.Select(unidadDevuelta => unidadDevuelta.Unidad).ToList();
+
+        if (devueltas.Distinct().Count() != devueltas.Count)
         {
-            throw new DominioException("La devolucion debe tener el usuario que la registra");
+            throw new DominioException("Una unidad no puede devolverse dos veces");
+        }
+
+        bool sonLasDelPrestamo = devueltas.Count == prestamo.UnidadesAsignadas.Count &&
+                                 prestamo.UnidadesAsignadas.All(devueltas.Contains);
+
+        if (!sonLasDelPrestamo)
+        {
+            throw new DominioException("La devolucion debe incluir todas las unidades del prestamo y solo esas");
         }
     }
 }

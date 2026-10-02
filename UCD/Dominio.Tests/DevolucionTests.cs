@@ -8,111 +8,186 @@ public sealed class DevolucionTests
     [TestMethod]
     public void Constructor_DatosValidos_GuardaLosDatos()
     {
-        DateTime fecha = new DateTime(2026, 9, 25, 15, 30, 0);
-        Usuario funcionario = CrearUsuario();
+        Prestamo prestamo = CrearPrestamoActivo();
+        Usuario funcionario = CrearFuncionario();
+        DateTime fecha = InicioPrestamo.AddDays(3);
+        List<UnidadDevuelta> unidades = DevolverTodasSinObservaciones(prestamo);
 
-        Devolucion devolucion = CrearDevolucion(fechaHoraDevolucion: fecha, condicion: CondicionDevolucion.ConFallas,
-            observaciones: "Pantalla rayada", registradaPor: funcionario);
+        Devolucion devolucion = new Devolucion(prestamo, funcionario, fecha, unidades);
 
+        Assert.AreSame(prestamo, devolucion.Prestamo);
+        Assert.AreSame(funcionario, devolucion.RegistradaPor);
         Assert.AreEqual(fecha, devolucion.FechaHoraDevolucion);
-        Assert.AreEqual(CondicionDevolucion.ConFallas, devolucion.Condicion);
-        Assert.AreEqual("Pantalla rayada", devolucion.Observaciones);
-        Assert.AreEqual(funcionario, devolucion.RegistradaPor);
+        CollectionAssert.AreEqual(unidades, devolucion.Unidades.ToList());
     }
 
     [TestMethod]
-    public void Constructor_SinObservaciones_LasDejaNulas()
-    {
-        Devolucion devolucion = CrearDevolucion(observaciones: null);
-
-        Assert.IsNull(devolucion.Observaciones);
-    }
-
-    [TestMethod]
-    public void Constructor_FechaAnteriorAlInicioDelPrestamo_LanzaExcepcion()
+    public void Constructor_PrestamoNulo_LanzaExcepcion()
     {
         Assert.ThrowsException<DominioException>(() =>
-            CrearDevolucion(fechaHoraDevolucion: InicioPrestamo.AddMinutes(-1)));
+            new Devolucion(null!, CrearFuncionario(), InicioPrestamo, new List<UnidadDevuelta>()));
     }
 
     [TestMethod]
-    public void Constructor_FechaIgualAlInicioDelPrestamo_SeCrea()
+    public void Constructor_PrestamoSolicitado_LanzaExcepcion()
     {
-        Devolucion devolucion = CrearDevolucion(fechaHoraDevolucion: InicioPrestamo);
+        Prestamo solicitado = CrearPrestamoSolicitado();
 
-        Assert.AreEqual(InicioPrestamo, devolucion.FechaHoraDevolucion);
-    }
-
-    [TestMethod]
-    [DataRow(301)]
-    [DataRow(400)]
-    public void Constructor_ObservacionesDeMasDe300Caracteres_LanzaExcepcion(int largo)
-    {
-        string observaciones = new string('a', largo);
-
-        Assert.ThrowsException<DominioException>(() => CrearDevolucion(observaciones: observaciones));
-    }
-
-    [TestMethod]
-    public void Constructor_ObservacionesDe300Caracteres_SeCrea()
-    {
-        string observaciones = new string('a', 300);
-
-        Devolucion devolucion = CrearDevolucion(observaciones: observaciones);
-
-        Assert.AreEqual(observaciones, devolucion.Observaciones);
+        Assert.ThrowsException<DominioException>(() =>
+            new Devolucion(solicitado, CrearFuncionario(), InicioPrestamo, new List<UnidadDevuelta>()));
     }
 
     [TestMethod]
     public void Constructor_SinUsuarioQueRegistra_LanzaExcepcion()
     {
+        Prestamo prestamo = CrearPrestamoActivo();
+
         Assert.ThrowsException<DominioException>(() =>
-            new Devolucion(InicioPrestamo.AddDays(1), InicioPrestamo, CondicionDevolucion.SinObservaciones, null,
-                null!));
+            new Devolucion(prestamo, null!, InicioPrestamo, DevolverTodasSinObservaciones(prestamo)));
     }
 
     [TestMethod]
-    public void ActualizarUnidad_SinObservaciones_QuedaDisponible()
+    public void Constructor_FechaAnteriorAlInicioDelPrestamo_LanzaExcepcion()
     {
-        UnidadFisica unidad = CrearUnidadPrestada();
-        Devolucion devolucion = CrearDevolucion(condicion: CondicionDevolucion.SinObservaciones);
+        Prestamo prestamo = CrearPrestamoActivo();
 
-        devolucion.ActualizarUnidad(unidad);
-
-        Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado);
+        Assert.ThrowsException<DominioException>(() => new Devolucion(prestamo, CrearFuncionario(),
+            InicioPrestamo.AddMinutes(-1), DevolverTodasSinObservaciones(prestamo)));
     }
 
     [TestMethod]
-    [DataRow(CondicionDevolucion.ConFallas)]
-    [DataRow(CondicionDevolucion.Daniada)]
-    public void ActualizarUnidad_ConFallasODaniada_PasaAMantenimiento(CondicionDevolucion condicion)
+    public void Constructor_FechaIgualAlInicioDelPrestamo_SeCrea()
     {
-        UnidadFisica unidad = CrearUnidadPrestada();
-        Devolucion devolucion = CrearDevolucion(condicion: condicion);
+        Prestamo prestamo = CrearPrestamoActivo();
 
-        devolucion.ActualizarUnidad(unidad);
+        Devolucion devolucion = new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo,
+            DevolverTodasSinObservaciones(prestamo));
 
-        Assert.AreEqual(EstadoUnidadFisica.EnMantenimiento, unidad.Estado);
+        Assert.AreEqual(InicioPrestamo, devolucion.FechaHoraDevolucion);
     }
 
-    private static Devolucion CrearDevolucion(DateTime? fechaHoraDevolucion = null,
-        CondicionDevolucion condicion = CondicionDevolucion.SinObservaciones, string? observaciones = null,
-        Usuario? registradaPor = null)
+    [TestMethod]
+    public void Constructor_UnidadesNulas_LanzaExcepcion()
     {
-        return new Devolucion(fechaHoraDevolucion ?? InicioPrestamo.AddDays(1), InicioPrestamo, condicion,
-            observaciones, registradaPor ?? CrearUsuario());
+        Prestamo prestamo = CrearPrestamoActivo();
+
+        Assert.ThrowsException<DominioException>(() =>
+            new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo, null!));
     }
 
-    private static Usuario CrearUsuario()
+    [TestMethod]
+    public void Constructor_FaltaUnaUnidadDelPrestamo_LanzaExcepcion()
+    {
+        Prestamo prestamo = CrearPrestamoActivo();
+        List<UnidadDevuelta> soloUna = DevolverTodasSinObservaciones(prestamo).Take(1).ToList();
+
+        Assert.ThrowsException<DominioException>(() =>
+            new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo, soloUna));
+    }
+
+    [TestMethod]
+    public void Constructor_UnidadQueNoEsDelPrestamo_LanzaExcepcion()
+    {
+        Prestamo prestamo = CrearPrestamoActivo();
+        List<UnidadDevuelta> unidades = DevolverTodasSinObservaciones(prestamo);
+        UnidadFisica ajena = CrearUnidad("EQP-0099");
+        ajena.Prestada();
+        unidades[1] = new UnidadDevuelta(ajena, CondicionDevolucion.SinObservaciones, null);
+
+        Assert.ThrowsException<DominioException>(() =>
+            new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo, unidades));
+    }
+
+    [TestMethod]
+    public void Constructor_UnidadRepetida_LanzaExcepcion()
+    {
+        Prestamo prestamo = CrearPrestamoActivo();
+        UnidadFisica primera = prestamo.UnidadesAsignadas[0];
+        List<UnidadDevuelta> repetidas = new List<UnidadDevuelta>
+        {
+            new UnidadDevuelta(primera, CondicionDevolucion.SinObservaciones, null),
+            new UnidadDevuelta(primera, CondicionDevolucion.ConFallas, null)
+        };
+
+        Assert.ThrowsException<DominioException>(() =>
+            new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo, repetidas));
+    }
+
+    [TestMethod]
+    public void Aplicar_CondicionPorUnidad_ActualizaCadaUnaYDevuelveElPrestamo()
+    {
+        Prestamo prestamo = CrearPrestamoActivo();
+        UnidadFisica sana = prestamo.UnidadesAsignadas[0];
+        UnidadFisica rota = prestamo.UnidadesAsignadas[1];
+        Devolucion devolucion = new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo.AddDays(1),
+            new List<UnidadDevuelta>
+            {
+                new UnidadDevuelta(sana, CondicionDevolucion.SinObservaciones, null),
+                new UnidadDevuelta(rota, CondicionDevolucion.Daniada, "No enciende")
+            });
+
+        devolucion.Aplicar();
+
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, sana.Estado);
+        Assert.AreEqual(EstadoUnidadFisica.EnMantenimiento, rota.Estado);
+        Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
+    }
+
+    [TestMethod]
+    public void Aplicar_DosVeces_LanzaExcepcion()
+    {
+        Prestamo prestamo = CrearPrestamoActivo();
+        Devolucion devolucion = new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo,
+            DevolverTodasSinObservaciones(prestamo));
+        devolucion.Aplicar();
+
+        Assert.ThrowsException<DominioException>(() => devolucion.Aplicar());
+        Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
+    }
+
+    [TestMethod]
+    public void Constructor_SolicitanteDesactivado_SeCrea()
+    {
+        Prestamo prestamo = CrearPrestamoActivo();
+        prestamo.Solicitante.Desactivar();
+
+        Devolucion devolucion = new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo,
+            DevolverTodasSinObservaciones(prestamo));
+
+        Assert.AreSame(prestamo, devolucion.Prestamo);
+    }
+
+    private static List<UnidadDevuelta> DevolverTodasSinObservaciones(Prestamo prestamo)
+    {
+        return prestamo.UnidadesAsignadas
+            .Select(unidad => new UnidadDevuelta(unidad, CondicionDevolucion.SinObservaciones, null))
+            .ToList();
+    }
+
+    private static Prestamo CrearPrestamoSolicitado()
+    {
+        Usuario solicitante = new Usuario(dni: "45678905", nombre: "Ana", apellido: "Perez",
+            correo: "ana@hotmail.com", contrasena: "VivaLaOrt2026");
+        TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",
+            duracionMaxPrestamo: 5, requiereAprobacion: false, categoria: Categoria.Audiovisual);
+        return new Prestamo(solicitante, tipo, cantidadSolicitada: 2, fechaHoraPrestamo: InicioPrestamo);
+    }
+
+    private static Prestamo CrearPrestamoActivo()
+    {
+        Prestamo prestamo = CrearPrestamoSolicitado();
+        prestamo.Activar(new List<UnidadFisica> { CrearUnidad("EQP-0001"), CrearUnidad("EQP-0002") });
+        return prestamo;
+    }
+
+    private static UnidadFisica CrearUnidad(string idInstitucional)
+    {
+        return new UnidadFisica(idInstitucional: idInstitucional, ubiFisica: "Deposito A", numSerie: null);
+    }
+
+    private static Usuario CrearFuncionario()
     {
         return new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa", correo: "felipe@hotmail.com",
             contrasena: "VivaLaOrt2026");
-    }
-
-    private static UnidadFisica CrearUnidadPrestada()
-    {
-        UnidadFisica unidad = new UnidadFisica("EQP-0042", "Deposito A", "PF3A7X21");
-        unidad.Prestada();
-        return unidad;
     }
 }
