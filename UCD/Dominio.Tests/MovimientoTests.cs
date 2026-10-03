@@ -41,6 +41,20 @@ public sealed class MovimientoTests
         Assert.IsNull(movimiento.Evaluador);
     }
 
+    [TestMethod]
+    public void Constructor_SolicitanteNulo_LanzaExcepcion()
+    {
+        Usuario evaluador = CrearEvaluador();
+        UnidadFisica unidad = CrearUnidad(idInstitucional: "EQP-0001");
+
+        Assert.ThrowsException<DominioException>(() => new Movimiento(
+            fechaHora: FechaFija,
+            tipo: TipoMovimiento.Prestamo,
+            solicitante: null!,
+            evaluador: evaluador,
+            unidad: unidad));
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
