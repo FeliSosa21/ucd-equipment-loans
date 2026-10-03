@@ -4,11 +4,11 @@ public class Prestamo
 {
     private readonly List<UnidadFisica> _unidadesAsignadas = new List<UnidadFisica>();
     
-    public Guid Id { get; private set; } = Guid.NewGuid();
+    public Guid Id { get; } = Guid.NewGuid();
     public EstadoPrestamo Estado { get; private set; } = EstadoPrestamo.Solicitado;
-    public Usuario Solicitante { get; private set; }
-    public TipoEquipamiento TipoEquipamiento { get; private set; }
-    public int CantidadSolicitada { get; private set; }
+    public Usuario Solicitante { get; }
+    public TipoEquipamiento TipoEquipamiento { get; }
+    public int CantidadSolicitada { get; }
     public DateTime FechaHoraPrestamo { get; private set; }
     public IReadOnlyList<UnidadFisica> UnidadesAsignadas => _unidadesAsignadas.AsReadOnly();
     
@@ -56,7 +56,7 @@ public class Prestamo
     
     private static void ValidarQueEstenDisponibles(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
-        foreach (var unidad in unidadesFisicas)
+        foreach (UnidadFisica unidad in unidadesFisicas)
         {
             if (!unidad.EstaDisponible())
             {
@@ -67,7 +67,7 @@ public class Prestamo
     
     private void AsignarUnidades(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
-        foreach (var unidadFisica in unidadesFisicas)
+        foreach (UnidadFisica unidadFisica in unidadesFisicas)
         {
             unidadFisica.Prestada();
         }
@@ -85,7 +85,7 @@ public class Prestamo
     
     private void ValidarQueNingunaUnidadSigaPrestada()
     {
-        foreach (var unidadFisica in _unidadesAsignadas)
+        foreach (UnidadFisica unidadFisica in _unidadesAsignadas)
         {
             if (unidadFisica.Estado == EstadoUnidadFisica.Prestada)
             {
