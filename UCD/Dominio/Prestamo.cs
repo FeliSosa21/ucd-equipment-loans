@@ -14,6 +14,10 @@ public class Prestamo
     
     public Prestamo(Usuario solicitante, TipoEquipamiento tipoEquipamiento, int cantidadSolicitada, DateTime fechaHoraPrestamo)
     {
+        if (solicitante == null)
+        {
+            throw new DominioException("El prestamo debe tener un solicitante");
+        }
         Solicitante = solicitante;
         TipoEquipamiento = tipoEquipamiento;
         CantidadSolicitada = cantidadSolicitada;
