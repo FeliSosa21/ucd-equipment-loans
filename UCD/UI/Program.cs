@@ -16,6 +16,7 @@ builder.Services.AddSingleton<Memoria>();
 builder.Services.AddScoped<RepositorioUsuario>();
 builder.Services.AddScoped<RepositorioPrestamo>();
 builder.Services.AddScoped<RepositorioDevolucion>();
+builder.Services.AddScoped<RepositorioMovimiento>();
 builder.Services.AddScoped<ServicioUsuario>();
 builder.Services.AddScoped<ServicioSesion>();
 builder.Services.AddScoped<CargaInicial>();
