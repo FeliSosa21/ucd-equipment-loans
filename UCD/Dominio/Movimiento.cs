@@ -13,6 +13,7 @@ public class Movimiento
         UnidadFisica unidad)
     {
         FechaHora = fechaHora;
+        Tipo = tipo;
         Solicitante = solicitante;
         Evaluador = evaluador;
         Unidad = unidad;
