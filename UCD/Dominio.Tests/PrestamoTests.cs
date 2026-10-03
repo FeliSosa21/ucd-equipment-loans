@@ -222,10 +222,22 @@ public sealed class PrestamoTests
         TipoEquipamiento tipo = CrearTipoEquipamiento();
 
         Assert.ThrowsException<DominioException>(() => new Prestamo(
-            solicitante: null,
+            solicitante: null!,
             tipoEquipamiento: tipo,
             cantidadSolicitada: CantidadSolicitadaPorDefecto,
             fechaHoraPrestamo:  FechaFija));
+    }
+
+    [TestMethod]
+    public void Constructor_TipoEquipamientoNulo_LanzaExcepcion()
+    {
+        Usuario solicitante = CrearSolicitante();
+
+        Assert.ThrowsException<DominioException>(() => new Prestamo(
+            solicitante: solicitante,
+            tipoEquipamiento: null!,
+            cantidadSolicitada: CantidadSolicitadaPorDefecto,
+            fechaHoraPrestamo: FechaFija));
     }
 
     private static Usuario CrearSolicitante()
