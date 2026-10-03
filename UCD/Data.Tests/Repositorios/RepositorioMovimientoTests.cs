@@ -50,6 +50,17 @@ public class RepositorioMovimientoTests
     }
 
     [TestMethod]
+    public void ObtenerTodos_ListaDevuelta_EsDeSoloLectura()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioMovimiento repositorio = new RepositorioMovimiento(memoria);
+
+        IReadOnlyList<Movimiento> resultado = repositorio.ObtenerTodos();
+
+        Assert.IsTrue(((ICollection<Movimiento>)resultado).IsReadOnly);
+    }
+
+    [TestMethod]
     public void AgregarMovimiento_MovimientoNulo_LanzaArgumentNullException()
     {
         Memoria memoria = new Memoria();
