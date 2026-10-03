@@ -256,6 +256,16 @@ public sealed class PrestamoTests
         
         Assert.IsNull(prestamo.Evaluador);
     }
+
+    [TestMethod]
+    public void Activar_ListaNula_LanzaExcepcion()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        Assert.ThrowsException<DominioException>(() => prestamo.Activar(null!));
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+    }
     
     private static Usuario CrearSolicitante()
     {
