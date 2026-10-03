@@ -23,6 +23,12 @@ public class Prestamo
         {
             throw new DominioException("El  prestamo debe tener un tipo equipamiento");
         }
+
+        if (cantidadSolicitada <= 0)
+        {
+            throw new DominioException("La cantidad solicitada debe ser mayor a cero");
+        }
+        
         Solicitante = solicitante;
         TipoEquipamiento = tipoEquipamiento;
         CantidadSolicitada = cantidadSolicitada;
