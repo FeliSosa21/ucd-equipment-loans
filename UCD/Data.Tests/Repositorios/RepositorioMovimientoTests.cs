@@ -61,6 +61,19 @@ public class RepositorioMovimientoTests
     }
 
     [TestMethod]
+    public void ObtenerTodos_AgregarDespuesDeObtener_NoCambiaLaListaYaDevuelta()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioMovimiento repositorio = new RepositorioMovimiento(memoria);
+        IReadOnlyList<Movimiento> resultado = repositorio.ObtenerTodos();
+        Movimiento movimiento = CrearMovimiento(tipo: TipoMovimiento.Prestamo, idInstitucional: "EQP-0001");
+
+        repositorio.AgregarMovimiento(movimiento);
+
+        Assert.AreEqual(0, resultado.Count);
+    }
+
+    [TestMethod]
     public void AgregarMovimiento_MovimientoNulo_LanzaArgumentNullException()
     {
         Memoria memoria = new Memoria();
