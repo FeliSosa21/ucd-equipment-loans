@@ -12,6 +12,7 @@ public class Movimiento
     public Movimiento(DateTime fechaHora, TipoMovimiento tipo, Usuario solicitante, Usuario? evaluador,
         UnidadFisica unidad)
     {
+        ValidarTipo(tipo);
         ValidarSolicitante(solicitante);
         ValidarUnidad(unidad);
 
@@ -20,6 +21,14 @@ public class Movimiento
         Solicitante = solicitante;
         Evaluador = evaluador;
         Unidad = unidad;
+    }
+
+    private static void ValidarTipo(TipoMovimiento tipo)
+    {
+        if (!Enum.IsDefined(tipo))
+        {
+            throw new DominioException("El movimiento debe tener un tipo valido");
+        }
     }
 
     private static void ValidarSolicitante(Usuario solicitante)
