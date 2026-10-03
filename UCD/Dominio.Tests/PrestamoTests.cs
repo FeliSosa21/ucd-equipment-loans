@@ -248,6 +248,15 @@ public sealed class PrestamoTests
         Assert.ThrowsException<DominioException>(
             () => CrearPrestamo(cantidadSolicitada: cantidad));
     }
+
+    [TestMethod]
+    public void Constructor_DatosValidos_NaceSinEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        
+        Assert.IsNull(prestamo.Evaluador);
+    }
+    
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
