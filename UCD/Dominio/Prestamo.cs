@@ -41,15 +41,13 @@ public class Prestamo
         ValidarQueEsteSolicitado();
         ValidarQueLaListaExista(unidadesFisicas);
         ValidarCantidad(unidadesFisicas);
-        if (unidadesFisicas.Distinct().Count() != unidadesFisicas.Count)
-        {
-            throw new DominioException("Una unidad no puede prestarse dos veces");
-        }
+        ValidarQueNoHayaUnidadesRepetidas(unidadesFisicas);
         ValidarQueEstenDisponibles(unidadesFisicas);
         AsignarUnidades(unidadesFisicas);
         Estado = EstadoPrestamo.Activo;
     }
-    
+
+
     public void MarcarDevuelto()
     {
         ValidarQueEsteActivo();
@@ -79,6 +77,14 @@ public class Prestamo
         {
             throw new DominioException(
                 $"Se esperaban {CantidadSolicitada} unidades y se recibieron {unidadesFisicas.Count}");
+        }
+    }
+    
+    private static void ValidarQueNoHayaUnidadesRepetidas(IReadOnlyList<UnidadFisica> unidadesFisicas)
+    {
+        if (unidadesFisicas.Distinct().Count() != unidadesFisicas.Count)
+        {
+            throw new DominioException("Una unidad no puede prestarse dos veces");
         }
     }
     
