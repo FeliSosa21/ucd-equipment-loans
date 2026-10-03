@@ -86,11 +86,11 @@ public class RepositorioPrestamoTests
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
-            "12345672",
-            "Renato",
-            "Alves",
-            "renato.alves@ejemplo.com",
-            "VivalaOrt2026");
+            dni: "12345672",
+            nombre: "Renato",
+            apellido: "Alves",
+            correo: "renato.alves@ejemplo.com",
+            contrasena: "VivalaOrt2026");
 
         usuario.AsignarTipo(TipoUsuario.Docente);
 
@@ -100,11 +100,11 @@ public class RepositorioPrestamoTests
     private static TipoEquipamiento CrearTipoEquipamiento()
     {
         TipoEquipamiento tipo = new TipoEquipamiento(
-            "Proyector Epson PowerLite",
-            "Proyector para aulas",
-            5,
-            false,
-            Categoria.Audiovisual);
+            nombre: "Proyector Epson PowerLite",
+            descripcion: "Proyector para aulas",
+            duracionMaxPrestamo: 5,
+            requiereAprobacion: false,
+            categoria: Categoria.Audiovisual);
 
         return tipo;
     }
@@ -115,10 +115,10 @@ public class RepositorioPrestamoTests
         int cantidadSolicitada = CantidadSolicitadaPorDefecto)
     {
         Prestamo prestamo = new Prestamo(
-            solicitante ?? CrearSolicitante(),
-            tipoEquipamiento ?? CrearTipoEquipamiento(),
-            cantidadSolicitada,
-            FechaFija);
+            solicitante: solicitante ?? CrearSolicitante(),
+            tipoEquipamiento: tipoEquipamiento ?? CrearTipoEquipamiento(),
+            cantidadSolicitada: cantidadSolicitada,
+            fechaHoraPrestamo: FechaFija);
 
         return prestamo;
     }
@@ -134,9 +134,9 @@ public class RepositorioPrestamoTests
             int numero = primerNumero + i;
 
             unidades.Add(new UnidadFisica(
-                $"EQP-{numero:D4}",
-                "Laboratorio Prueba",
-                null));
+                idInstitucional: $"EQP-{numero:D4}",
+                ubiFisica: "Laboratorio Prueba",
+                numSerie: null));
         }
 
         return unidades;
@@ -145,7 +145,7 @@ public class RepositorioPrestamoTests
     private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoActivo()
     {
         Prestamo prestamo = CrearPrestamo();
-        List<UnidadFisica> unidades = CrearUnidadesFisicas(CantidadSolicitadaPorDefecto);
+        List<UnidadFisica> unidades = CrearUnidadesFisicas(cantidad: CantidadSolicitadaPorDefecto);
 
         prestamo.Activar(unidades);
 
