@@ -240,6 +240,14 @@ public sealed class PrestamoTests
             fechaHoraPrestamo: FechaFija));
     }
 
+    [TestMethod]
+    [DataRow(0)]
+    [DataRow(-1)]
+    public void Constructor_CantidadNoPositiva_LanzaExcepcion(int cantidad)
+    {
+        Assert.ThrowsException<DominioException>(
+            () => CrearPrestamo(cantidadSolicitada: cantidad));
+    }
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
