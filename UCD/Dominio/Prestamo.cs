@@ -13,27 +13,41 @@ public class Prestamo
     public Usuario? Evaluador { get; private set; }
     public IReadOnlyList<UnidadFisica> UnidadesAsignadas => _unidadesAsignadas.AsReadOnly();
     
-    public Prestamo(Usuario solicitante, TipoEquipamiento tipoEquipamiento, int cantidadSolicitada, DateTime fechaHoraPrestamo)
+    public Prestamo(Usuario solicitante, TipoEquipamiento tipoEquipamiento, int cantidadSolicitada, 
+        DateTime fechaHoraPrestamo)
     {
-        if (solicitante == null)
-        {
-            throw new DominioException("El prestamo debe tener un solicitante");
-        }
-
-        if (tipoEquipamiento == null)
-        {
-            throw new DominioException("El  prestamo debe tener un tipo equipamiento");
-        }
-
-        if (cantidadSolicitada <= 0)
-        {
-            throw new DominioException("La cantidad solicitada debe ser mayor a cero");
-        }
+        ValidarSolicitante(solicitante);
+        ValidarTipoEquipamiento(tipoEquipamiento);
+        ValidarCantidadSolicitada(cantidadSolicitada);
         
         Solicitante = solicitante;
         TipoEquipamiento = tipoEquipamiento;
         CantidadSolicitada = cantidadSolicitada;
         FechaHoraPrestamo = fechaHoraPrestamo;
+    }
+
+    private static void ValidarSolicitante(Usuario solicitante)
+    {
+        if (solicitante == null)
+        {
+            throw new DominioException("El prestamo debe tener un solicitante");
+        }
+    }
+
+    private static void ValidarTipoEquipamiento(TipoEquipamiento tipoEquipamiento)
+    {
+        if (tipoEquipamiento == null)
+        {
+            throw new DominioException("El  prestamo debe tener un tipo equipamiento");
+        }
+    }
+
+    private static void ValidarCantidadSolicitada(int cantidadSolicitada)
+    {
+        if (cantidadSolicitada <= 0)
+        {
+            throw new DominioException("La cantidad solicitada debe ser mayor a cero");
+        }
     }
 
     public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
@@ -47,7 +61,6 @@ public class Prestamo
         Estado = EstadoPrestamo.Activo;
     }
 
-
     public void MarcarDevuelto()
     {
         ValidarQueEsteActivo();
@@ -55,7 +68,7 @@ public class Prestamo
         
         Estado = EstadoPrestamo.Devuelto;
     }
-    
+
     private void ValidarQueEsteSolicitado()
     {
         if (Estado != EstadoPrestamo.Solicitado)
@@ -68,9 +81,10 @@ public class Prestamo
     {
         if (unidadesFisicas is null)
         {
-            throw new DominioException("El prestamo debe tener un lista de unidades");
+            throw new DominioException("El prestamo debe tener una lista de unidades");
         }
     }
+    
     private void ValidarCantidad(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         if (unidadesFisicas.Count != CantidadSolicitada)
