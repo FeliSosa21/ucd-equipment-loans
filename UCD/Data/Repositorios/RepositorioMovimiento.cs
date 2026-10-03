@@ -13,6 +13,7 @@ public class RepositorioMovimiento
 
     public void AgregarMovimiento(Movimiento movimiento)
     {
+        ArgumentNullException.ThrowIfNull(movimiento);
         _memoria.Movimientos.Add(movimiento);
     }
 
