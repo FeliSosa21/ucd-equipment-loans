@@ -33,6 +33,14 @@ public sealed class MovimientoTests
         Assert.AreEqual(tipo, movimiento.Tipo);
     }
 
+    [TestMethod]
+    public void Constructor_SinEvaluador_QuedaSinEvaluador()
+    {
+        Movimiento movimiento = CrearMovimiento(evaluador: null);
+
+        Assert.IsNull(movimiento.Evaluador);
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
