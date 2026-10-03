@@ -216,6 +216,18 @@ public sealed class PrestamoTests
         Assert.AreEqual(EstadoUnidadFisica.EnMantenimiento, enMantenimiento.Estado);
     }
 
+    [TestMethod]
+    public void Constructor_SolicitanteNulo_LanzaExcepcion()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento();
+
+        Assert.ThrowsException<DominioException>(() => new Prestamo(
+            solicitante: null,
+            tipoEquipamiento: tipo,
+            cantidadSolicitada: CantidadSolicitadaPorDefecto,
+            fechaHoraPrestamo:  FechaFija));
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
