@@ -24,6 +24,17 @@ public class RepositorioMovimientoTests
         CollectionAssert.AreEqual(new List<Movimiento> { primero, segundo }, resultado.ToList());
     }
 
+    [TestMethod]
+    public void ObtenerTodos_SinMovimientos_DevuelveListaVacia()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioMovimiento repositorio = new RepositorioMovimiento(memoria);
+
+        IReadOnlyList<Movimiento> resultado = repositorio.ObtenerTodos();
+
+        Assert.AreEqual(0, resultado.Count);
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
