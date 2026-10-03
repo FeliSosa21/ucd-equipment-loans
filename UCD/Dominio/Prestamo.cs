@@ -18,6 +18,11 @@ public class Prestamo
         {
             throw new DominioException("El prestamo debe tener un solicitante");
         }
+
+        if (tipoEquipamiento == null)
+        {
+            throw new DominioException("El  prestamo debe tener un tipo equipamiento");
+        }
         Solicitante = solicitante;
         TipoEquipamiento = tipoEquipamiento;
         CantidadSolicitada = cantidadSolicitada;
