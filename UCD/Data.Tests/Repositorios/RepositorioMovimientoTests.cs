@@ -35,6 +35,20 @@ public class RepositorioMovimientoTests
         Assert.AreEqual(0, resultado.Count);
     }
 
+    [TestMethod]
+    public void ObtenerTodos_OtroRepositorioSobreLaMismaMemoria_LosEncuentra()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioMovimiento repositorioQueGuarda = new RepositorioMovimiento(memoria);
+        RepositorioMovimiento repositorioQueBusca = new RepositorioMovimiento(memoria);
+        Movimiento movimiento = CrearMovimiento(tipo: TipoMovimiento.Prestamo, idInstitucional: "EQP-0001");
+        repositorioQueGuarda.AgregarMovimiento(movimiento);
+
+        IReadOnlyList<Movimiento> resultado = repositorioQueBusca.ObtenerTodos();
+
+        CollectionAssert.AreEqual(new List<Movimiento> { movimiento }, resultado.ToList());
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
