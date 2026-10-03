@@ -19,6 +19,6 @@ public class RepositorioMovimiento
 
     public IReadOnlyList<Movimiento> ObtenerTodos()
     {
-        return _memoria.Movimientos;
+        return _memoria.Movimientos.ToList().AsReadOnly();
     }
 }
