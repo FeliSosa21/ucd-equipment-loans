@@ -9,7 +9,7 @@ public class Prestamo
     public Usuario Solicitante { get; }
     public TipoEquipamiento TipoEquipamiento { get; }
     public int CantidadSolicitada { get; }
-    public DateTime FechaHoraPrestamo { get; private set; }
+    public DateTime FechaHoraPrestamo { get; }
     public Usuario? Evaluador { get; private set; }
     public IReadOnlyList<UnidadFisica> UnidadesAsignadas => _unidadesAsignadas.AsReadOnly();
 
