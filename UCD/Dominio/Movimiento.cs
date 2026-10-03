@@ -13,6 +13,7 @@ public class Movimiento
         UnidadFisica unidad)
     {
         ValidarSolicitante(solicitante);
+        ValidarUnidad(unidad);
 
         FechaHora = fechaHora;
         Tipo = tipo;
@@ -26,6 +27,14 @@ public class Movimiento
         if (solicitante is null)
         {
             throw new DominioException("El movimiento debe tener un solicitante");
+        }
+    }
+
+    private static void ValidarUnidad(UnidadFisica unidad)
+    {
+        if (unidad is null)
+        {
+            throw new DominioException("El movimiento debe tener una unidad");
         }
     }
 }
