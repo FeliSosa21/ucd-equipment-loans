@@ -12,10 +12,20 @@ public class Movimiento
     public Movimiento(DateTime fechaHora, TipoMovimiento tipo, Usuario solicitante, Usuario? evaluador,
         UnidadFisica unidad)
     {
+        ValidarSolicitante(solicitante);
+
         FechaHora = fechaHora;
         Tipo = tipo;
         Solicitante = solicitante;
         Evaluador = evaluador;
         Unidad = unidad;
+    }
+
+    private static void ValidarSolicitante(Usuario solicitante)
+    {
+        if (solicitante is null)
+        {
+            throw new DominioException("El movimiento debe tener un solicitante");
+        }
     }
 }
