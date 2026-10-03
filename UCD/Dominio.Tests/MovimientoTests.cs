@@ -23,6 +23,16 @@ public sealed class MovimientoTests
         Assert.AreSame(unidad, movimiento.Unidad);
     }
 
+    [TestMethod]
+    [DataRow(TipoMovimiento.Prestamo)]
+    [DataRow(TipoMovimiento.Devolucion)]
+    public void Constructor_CadaTipo_ConservaElTipo(TipoMovimiento tipo)
+    {
+        Movimiento movimiento = CrearMovimiento(tipo: tipo);
+
+        Assert.AreEqual(tipo, movimiento.Tipo);
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
@@ -62,13 +72,14 @@ public sealed class MovimientoTests
     }
 
     private static Movimiento CrearMovimiento(
+        TipoMovimiento tipo = TipoMovimiento.Prestamo,
         Usuario? solicitante = null,
         Usuario? evaluador = null,
         UnidadFisica? unidad = null)
     {
         Movimiento movimiento = new Movimiento(
             fechaHora: FechaFija,
-            tipo: TipoMovimiento.Prestamo,
+            tipo: tipo,
             solicitante: solicitante ?? CrearSolicitante(),
             evaluador: evaluador,
             unidad: unidad ?? CrearUnidad(idInstitucional: "EQP-0001"));
