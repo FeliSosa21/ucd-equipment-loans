@@ -13,10 +13,11 @@ public class RepositorioMovimiento
 
     public void AgregarMovimiento(Movimiento movimiento)
     {
+        _memoria.Movimientos.Add(movimiento);
     }
 
     public IReadOnlyList<Movimiento> ObtenerTodos()
     {
-        return new List<Movimiento>();
+        return _memoria.Movimientos;
     }
 }
