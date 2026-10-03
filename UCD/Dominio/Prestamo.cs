@@ -3,7 +3,7 @@
 public class Prestamo
 {
     private readonly List<UnidadFisica> _unidadesAsignadas = new List<UnidadFisica>();
-    
+
     public Guid Id { get; } = Guid.NewGuid();
     public EstadoPrestamo Estado { get; private set; } = EstadoPrestamo.Solicitado;
     public Usuario Solicitante { get; }
@@ -12,42 +12,18 @@ public class Prestamo
     public DateTime FechaHoraPrestamo { get; private set; }
     public Usuario? Evaluador { get; private set; }
     public IReadOnlyList<UnidadFisica> UnidadesAsignadas => _unidadesAsignadas.AsReadOnly();
-    
-    public Prestamo(Usuario solicitante, TipoEquipamiento tipoEquipamiento, int cantidadSolicitada, 
+
+    public Prestamo(Usuario solicitante, TipoEquipamiento tipoEquipamiento, int cantidadSolicitada,
         DateTime fechaHoraPrestamo)
     {
         ValidarSolicitante(solicitante);
         ValidarTipoEquipamiento(tipoEquipamiento);
         ValidarCantidadSolicitada(cantidadSolicitada);
-        
+
         Solicitante = solicitante;
         TipoEquipamiento = tipoEquipamiento;
         CantidadSolicitada = cantidadSolicitada;
         FechaHoraPrestamo = fechaHoraPrestamo;
-    }
-
-    private static void ValidarSolicitante(Usuario solicitante)
-    {
-        if (solicitante == null)
-        {
-            throw new DominioException("El prestamo debe tener un solicitante");
-        }
-    }
-
-    private static void ValidarTipoEquipamiento(TipoEquipamiento tipoEquipamiento)
-    {
-        if (tipoEquipamiento == null)
-        {
-            throw new DominioException("El  prestamo debe tener un tipo equipamiento");
-        }
-    }
-
-    private static void ValidarCantidadSolicitada(int cantidadSolicitada)
-    {
-        if (cantidadSolicitada <= 0)
-        {
-            throw new DominioException("La cantidad solicitada debe ser mayor a cero");
-        }
     }
 
     public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
@@ -65,8 +41,32 @@ public class Prestamo
     {
         ValidarQueEsteActivo();
         ValidarQueNingunaUnidadSigaPrestada();
-        
+
         Estado = EstadoPrestamo.Devuelto;
+    }
+
+    private static void ValidarSolicitante(Usuario solicitante)
+    {
+        if (solicitante is null)
+        {
+            throw new DominioException("El prestamo debe tener un solicitante");
+        }
+    }
+
+    private static void ValidarTipoEquipamiento(TipoEquipamiento tipoEquipamiento)
+    {
+        if (tipoEquipamiento is null)
+        {
+            throw new DominioException("El prestamo debe tener un tipo de equipamiento");
+        }
+    }
+
+    private static void ValidarCantidadSolicitada(int cantidadSolicitada)
+    {
+        if (cantidadSolicitada <= 0)
+        {
+            throw new DominioException("La cantidad solicitada debe ser mayor a cero");
+        }
     }
 
     private void ValidarQueEsteSolicitado()
@@ -84,7 +84,7 @@ public class Prestamo
             throw new DominioException("El prestamo debe tener una lista de unidades");
         }
     }
-    
+
     private void ValidarCantidad(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         if (unidadesFisicas.Count != CantidadSolicitada)
@@ -93,7 +93,7 @@ public class Prestamo
                 $"Se esperaban {CantidadSolicitada} unidades y se recibieron {unidadesFisicas.Count}");
         }
     }
-    
+
     private static void ValidarQueNoHayaUnidadesRepetidas(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         if (unidadesFisicas.Distinct().Count() != unidadesFisicas.Count)
@@ -101,7 +101,7 @@ public class Prestamo
             throw new DominioException("Una unidad no puede prestarse dos veces");
         }
     }
-    
+
     private static void ValidarQueEstenDisponibles(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         foreach (UnidadFisica unidad in unidadesFisicas)
@@ -112,17 +112,17 @@ public class Prestamo
             }
         }
     }
-    
+
     private void AsignarUnidades(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         foreach (UnidadFisica unidadFisica in unidadesFisicas)
         {
             unidadFisica.Prestada();
         }
-        
+
         _unidadesAsignadas.AddRange(unidadesFisicas);
     }
-    
+
     private void ValidarQueEsteActivo()
     {
         if (Estado != EstadoPrestamo.Activo)
@@ -130,7 +130,7 @@ public class Prestamo
             throw new DominioException("Solo se puede devolver un prestamo activo");
         }
     }
-    
+
     private void ValidarQueNingunaUnidadSigaPrestada()
     {
         foreach (UnidadFisica unidadFisica in _unidadesAsignadas)
