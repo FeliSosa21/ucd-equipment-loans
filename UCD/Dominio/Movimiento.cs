@@ -12,5 +12,9 @@ public class Movimiento
     public Movimiento(DateTime fechaHora, TipoMovimiento tipo, Usuario solicitante, Usuario? evaluador,
         UnidadFisica unidad)
     {
+        FechaHora = fechaHora;
+        Solicitante = solicitante;
+        Evaluador = evaluador;
+        Unidad = unidad;
     }
 }
