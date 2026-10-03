@@ -69,6 +69,16 @@ public sealed class MovimientoTests
             unidad: null!));
     }
 
+    [TestMethod]
+    [DataRow(0)]
+    [DataRow(99)]
+    public void Constructor_TipoInexistente_LanzaExcepcion(int valorInvalido)
+    {
+        TipoMovimiento tipoInexistente = (TipoMovimiento)valorInvalido;
+
+        Assert.ThrowsException<DominioException>(() => CrearMovimiento(tipo: tipoInexistente));
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
