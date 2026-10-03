@@ -41,6 +41,10 @@ public class Prestamo
         ValidarQueEsteSolicitado();
         ValidarQueLaListaExista(unidadesFisicas);
         ValidarCantidad(unidadesFisicas);
+        if (unidadesFisicas.Distinct().Count() != unidadesFisicas.Count)
+        {
+            throw new DominioException("Una unidad no puede prestarse dos veces");
+        }
         ValidarQueEstenDisponibles(unidadesFisicas);
         AsignarUnidades(unidadesFisicas);
         Estado = EstadoPrestamo.Activo;
