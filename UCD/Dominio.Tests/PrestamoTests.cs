@@ -266,6 +266,19 @@ public sealed class PrestamoTests
         Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
         Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
     }
+
+    [TestMethod]
+    public void Activar_UnidadRepetida_LanzaExcepcionYNoPrestaNinguna()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        UnidadFisica unidad = CrearUnidadesFisicas(cantidad: 1)[0];
+        List<UnidadFisica> mismaUnidadDosVeces = new List<UnidadFisica> { unidad, unidad };
+        
+        Assert.ThrowsException<DominioException>(() => prestamo.Activar(mismaUnidadDosVeces));
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado);
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+    }
     
     private static Usuario CrearSolicitante()
     {
