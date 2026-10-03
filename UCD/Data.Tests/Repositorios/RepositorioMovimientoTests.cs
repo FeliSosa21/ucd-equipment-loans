@@ -49,6 +49,15 @@ public class RepositorioMovimientoTests
         CollectionAssert.AreEqual(new List<Movimiento> { movimiento }, resultado.ToList());
     }
 
+    [TestMethod]
+    public void AgregarMovimiento_MovimientoNulo_LanzaArgumentNullException()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioMovimiento repositorio = new RepositorioMovimiento(memoria);
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.AgregarMovimiento(null!));
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
