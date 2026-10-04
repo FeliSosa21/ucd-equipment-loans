@@ -23,6 +23,13 @@ public class RepositorioCatalogo
         _memoria.Catalogo = catalogo;
     }
 
+    public TipoEquipamiento? ObtenerTipoPorNombre(string nombre)
+    {
+        var catalogo = Obtener();
+
+        return catalogo.BuscarTipoPorNombre(nombre);
+    }
+
     private void ValidarQueSePuedaGuardar(Catalogo catalogo)
     {
         if (catalogo is null)
