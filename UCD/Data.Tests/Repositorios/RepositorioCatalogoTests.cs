@@ -68,14 +68,9 @@ public sealed class RepositorioCatalogoTests
     [TestMethod]
     public void ObtenerTipoPorNombre_TipoExistente_DevuelveElTipo()
     {
-        var memoria = new Memoria();
-        var repositorio = new RepositorioCatalogo(memoria);
-        var catalogo = CrearCatalogo(nombre: "Catalogo nuevo");
         var primerTipo = CrearTipo(nombre: "Proyector Epson PowerLite");
         var segundoTipo = CrearTipo(nombre: "Proyector Sony");
-        catalogo.AgregarTipo(primerTipo);
-        catalogo.AgregarTipo(segundoTipo);
-        repositorio.Guardar(catalogo);
+        var repositorio = CrearRepositorioCatalogo(primerTipo, segundoTipo);
 
         var encontrado = repositorio.ObtenerTipoPorNombre("Proyector Sony");
 
@@ -87,12 +82,8 @@ public sealed class RepositorioCatalogoTests
     [DataRow(" Proyector Epson EB-770Fi ")]
     public void ObtenerTipoPorNombre_NombreEquivalente_DevuelveElTipo(string nombreBuscado)
     {
-        var memoria = new Memoria();
-        var repositorio = new RepositorioCatalogo(memoria);
-        var catalogo = CrearCatalogo(nombre: "Catalogo nuevo");
         var tipo = CrearTipo(nombre: "Proyector Epson EB-770Fi");
-        catalogo.AgregarTipo(tipo);
-        repositorio.Guardar(catalogo);
+        var repositorio = CrearRepositorioCatalogo(tipo);
 
         var encontrado = repositorio.ObtenerTipoPorNombre(nombreBuscado);
 
@@ -102,12 +93,8 @@ public sealed class RepositorioCatalogoTests
     [TestMethod]
     public void ObtenerTipoPorNombre_NombreInexistente_DevuelveNull()
     {
-        var memoria = new Memoria();
-        var repositorio = new RepositorioCatalogo(memoria);
-        var catalogo = CrearCatalogo(nombre: "Catalogo nuevo");
         var tipo = CrearTipo(nombre: "Proyector Epson EB-770Fi");
-        catalogo.AgregarTipo(tipo);
-        repositorio.Guardar(catalogo);
+        var repositorio = CrearRepositorioCatalogo(tipo);
         var nombreInexistente = "Proyector Sony";
 
         var encontrado = repositorio.ObtenerTipoPorNombre(nombreInexistente);
@@ -129,12 +116,8 @@ public sealed class RepositorioCatalogoTests
     [TestMethod]
     public void ObtenerTipoPorNombre_NombreNull_LanzaArgumentNullException()
     {
-        var memoria = new Memoria();
-        var repositorio = new RepositorioCatalogo(memoria);
-        var catalogo = CrearCatalogo();
         var tipo = CrearTipo(nombre: "Proyector Sony");
-        catalogo.AgregarTipo(tipo);
-        repositorio.Guardar(catalogo);
+        var repositorio = CrearRepositorioCatalogo(tipo);
 
         Assert.ThrowsException<ArgumentNullException>(() => repositorio.ObtenerTipoPorNombre(null!));
     }
@@ -152,5 +135,19 @@ public sealed class RepositorioCatalogoTests
         Categoria categoria = Categoria.Audiovisual)
     {
         return new TipoEquipamiento(nombre, descripcion, duracionMaxPrestamo, requiereAprobacion, categoria);
+    }
+
+    private static RepositorioCatalogo CrearRepositorioCatalogo(params TipoEquipamiento[] tipos)
+    {
+        var memoria = new Memoria();
+        var repositorio = new RepositorioCatalogo(memoria);
+        var catalogo = CrearCatalogo();
+        foreach (var tipo in tipos)
+        {
+            catalogo.AgregarTipo(tipo);
+        }
+
+        repositorio.Guardar(catalogo);
+        return repositorio;
     }
 }
