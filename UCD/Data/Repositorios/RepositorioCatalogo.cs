@@ -27,7 +27,7 @@ public class RepositorioCatalogo
     {
         var catalogo = Obtener();
 
-        return catalogo.BuscarTipoPorNombre(nombre);
+        return catalogo?.BuscarTipoPorNombre(nombre);
     }
 
     private void ValidarQueSePuedaGuardar(Catalogo catalogo)
