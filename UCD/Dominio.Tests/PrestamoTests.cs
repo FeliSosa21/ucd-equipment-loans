@@ -329,6 +329,22 @@ public sealed class PrestamoTests
         Assert.IsNull(prestamo.MotivoRechazo);
     }
 
+    [TestMethod]
+    public void Activar_PrestamoRechazado_LanzaExcepcion()
+    {
+        Prestamo prestamo = CrearPrestamoRechazado();
+        List<UnidadFisica> unidades = CrearUnidadesFisicas(cantidad: CantidadSolicitadaPorDefecto);
+        
+        Assert.ThrowsException<DominioException>(() => prestamo.Activar(unidades));
+
+        foreach (UnidadFisica unidad in unidades)
+        {
+            Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado,
+                $"La unidad {unidad.IdInstitucional} deberia seguir disponible");
+        }
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+    }
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
@@ -408,5 +424,14 @@ public sealed class PrestamoTests
         prestamo.MarcarDevuelto();
 
         return (prestamo, unidades);
+    }
+
+    private static Prestamo CrearPrestamoRechazado()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        
+        prestamo.RechazarPorFaltaDeUnidades();
+        
+        return prestamo;
     }
 }
