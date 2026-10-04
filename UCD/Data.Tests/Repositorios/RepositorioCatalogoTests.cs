@@ -65,8 +65,35 @@ public sealed class RepositorioCatalogoTests
         Assert.ThrowsException<DominioException>(() => repositorio.Guardar(catalogoNuevo));
     }
 
+    [TestMethod]
+    public void ObtenerTipoPorNombre_TipoExistente_DevuelveElTipo()
+    {
+        var memoria = new Memoria();
+        var repositorio = new RepositorioCatalogo(memoria);
+        var catalogo = CrearCatalogo(nombre: "Catalogo nuevo");
+        var primerTipo = CrearTipo(nombre: "Proyector Epson PowerLite");
+        var segundoTipo = CrearTipo(nombre: "Proyector Sony");
+        catalogo.AgregarTipo(primerTipo);
+        catalogo.AgregarTipo(segundoTipo);
+        repositorio.Guardar(catalogo);
+
+        var encontrado = repositorio.ObtenerTipoPorNombre("Proyector Sony");
+
+        Assert.AreSame(segundoTipo, encontrado);
+    }
+
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
+    }
+
+    private static TipoEquipamiento CrearTipo(
+        string nombre = "Proyector Epson PowerLite",
+        string descripcion = "Proyector para aulas",
+        int duracionMaxPrestamo = 5,
+        bool requiereAprobacion = false,
+        Categoria categoria = Categoria.Audiovisual)
+    {
+        return new TipoEquipamiento(nombre, descripcion, duracionMaxPrestamo, requiereAprobacion, categoria);
     }
 }
