@@ -287,7 +287,16 @@ public sealed class PrestamoTests
         
         Assert.IsNull(prestamo.MotivoRechazo);
     }
-    
+
+    [TestMethod]
+    public void RechazarPorFaltaDeUnidades_PrestamoSolicitado_QuedaRechazado()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        prestamo.RechazarPorFaltaDeUnidades();
+        
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+    }
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(

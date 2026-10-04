@@ -38,6 +38,11 @@ public class Prestamo
         Estado = EstadoPrestamo.Activo;
     }
 
+    public void RechazarPorFaltaDeUnidades()
+    {
+        
+    }    
+
     public void MarcarDevuelto()
     {
         ValidarQueEsteActivo();
