@@ -56,7 +56,7 @@ public class Prestamo
 
     public bool EstaVigente()
     {
-        return false;
+        return Estado == EstadoPrestamo.Solicitado;
     }
 
     private static void ValidarSolicitante(Usuario solicitante)
