@@ -12,6 +12,7 @@ public class Prestamo
     public DateTime FechaHoraPrestamo { get; }
     public Usuario? Evaluador { get; private set; }
     public string? MotivoRechazo { get; private set; }
+    private const string MotivoFaltaDeUnidades = "No hay unidades suficientes para el tipo de equipamiento";
     public IReadOnlyList<UnidadFisica> UnidadesAsignadas => _unidadesAsignadas.AsReadOnly();
 
     public Prestamo(Usuario solicitante, TipoEquipamiento tipoEquipamiento, int cantidadSolicitada,
@@ -41,6 +42,7 @@ public class Prestamo
     public void RechazarPorFaltaDeUnidades()
     {
         Estado = EstadoPrestamo.Rechazado;
+        MotivoRechazo = MotivoFaltaDeUnidades;
     }    
 
     public void MarcarDevuelto()
