@@ -115,6 +115,17 @@ public sealed class RepositorioCatalogoTests
         Assert.IsNull(encontrado);
     }
 
+    [TestMethod]
+    public void ObtenerTipoPorNombre_SinCatalogo_DevuelveNull()
+    {
+        var memoria = new Memoria();
+        var repositorio = new RepositorioCatalogo(memoria);
+
+        var encontrado = repositorio.ObtenerTipoPorNombre("Proyector Sony");
+
+        Assert.IsNull(encontrado);
+    }
+
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
