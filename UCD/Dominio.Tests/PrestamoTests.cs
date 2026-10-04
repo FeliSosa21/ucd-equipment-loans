@@ -365,6 +365,16 @@ public sealed class PrestamoTests
         
         Assert.IsTrue(vigente);
     }
+
+    [TestMethod]
+    public void EstaVigente_PrestamoRechazado_DevuelveFalso()
+    {
+        Prestamo prestamo = CrearPrestamoRechazado();
+        
+        bool vigente = prestamo.EstaVigente();
+        
+        Assert.IsFalse(vigente);
+    }
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
