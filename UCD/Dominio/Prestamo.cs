@@ -41,6 +41,7 @@ public class Prestamo
 
     public void RechazarPorFaltaDeUnidades()
     {
+        ValidarQueEsteSolicitado();
         Estado = EstadoPrestamo.Rechazado;
         MotivoRechazo = MotivoFaltaDeUnidades;
     }    
