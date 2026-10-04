@@ -94,7 +94,7 @@ public sealed class RepositorioCatalogoTests
         catalogo.AgregarTipo(tipo);
         repositorio.Guardar(catalogo);
 
-        var encontrado =  repositorio.ObtenerTipoPorNombre(nombreBuscado);
+        var encontrado = repositorio.ObtenerTipoPorNombre(nombreBuscado);
 
         Assert.AreSame(tipo, encontrado);
     }
@@ -132,7 +132,7 @@ public sealed class RepositorioCatalogoTests
         var memoria = new Memoria();
         var repositorio = new RepositorioCatalogo(memoria);
         var catalogo = CrearCatalogo();
-        var  tipo = CrearTipo(nombre: "Proyector Sony");
+        var tipo = CrearTipo(nombre: "Proyector Sony");
         catalogo.AgregarTipo(tipo);
         repositorio.Guardar(catalogo);
 
