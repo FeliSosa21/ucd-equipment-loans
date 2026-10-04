@@ -28,4 +28,12 @@ public class RepositorioPrestamo
             .ToList()
             .AsReadOnly();
     }
+
+    public IReadOnlyList<Prestamo> ObtenerPrestamosDeSolicitante(string dni)
+    {
+        return _memoria.Prestamos
+            .Where(prestamo => prestamo.Solicitante.Dni == dni)
+            .ToList()
+            .AsReadOnly();
+    }
 }
