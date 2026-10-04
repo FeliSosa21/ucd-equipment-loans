@@ -25,6 +25,8 @@ public class RepositorioCatalogo
 
     public TipoEquipamiento? ObtenerTipoPorNombre(string nombre)
     {
+        ArgumentNullException.ThrowIfNull(nombre);
+
         var catalogo = Obtener();
 
         return catalogo?.BuscarTipoPorNombre(nombre);
