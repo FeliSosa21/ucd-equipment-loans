@@ -65,8 +65,89 @@ public sealed class RepositorioCatalogoTests
         Assert.ThrowsException<DominioException>(() => repositorio.Guardar(catalogoNuevo));
     }
 
+    [TestMethod]
+    public void ObtenerTipoPorNombre_TipoExistente_DevuelveElTipo()
+    {
+        var primerTipo = CrearTipo(nombre: "Proyector Epson PowerLite");
+        var segundoTipo = CrearTipo(nombre: "Proyector Sony");
+        var repositorio = CrearRepositorioCatalogo(primerTipo, segundoTipo);
+
+        var encontrado = repositorio.ObtenerTipoPorNombre("Proyector Sony");
+
+        Assert.AreSame(segundoTipo, encontrado);
+    }
+
+    [TestMethod]
+    [DataRow("PROYECTOR EPSON EB-770FI")]
+    [DataRow(" Proyector Epson EB-770Fi ")]
+    public void ObtenerTipoPorNombre_NombreEquivalente_DevuelveElTipo(string nombreBuscado)
+    {
+        var tipo = CrearTipo(nombre: "Proyector Epson EB-770Fi");
+        var repositorio = CrearRepositorioCatalogo(tipo);
+
+        var encontrado = repositorio.ObtenerTipoPorNombre(nombreBuscado);
+
+        Assert.AreSame(tipo, encontrado);
+    }
+
+    [TestMethod]
+    public void ObtenerTipoPorNombre_NombreInexistente_DevuelveNull()
+    {
+        var tipo = CrearTipo(nombre: "Proyector Epson EB-770Fi");
+        var repositorio = CrearRepositorioCatalogo(tipo);
+        var nombreInexistente = "Proyector Sony";
+
+        var encontrado = repositorio.ObtenerTipoPorNombre(nombreInexistente);
+
+        Assert.IsNull(encontrado);
+    }
+
+    [TestMethod]
+    public void ObtenerTipoPorNombre_SinCatalogo_DevuelveNull()
+    {
+        var memoria = new Memoria();
+        var repositorio = new RepositorioCatalogo(memoria);
+
+        var encontrado = repositorio.ObtenerTipoPorNombre("Proyector Sony");
+
+        Assert.IsNull(encontrado);
+    }
+
+    [TestMethod]
+    public void ObtenerTipoPorNombre_NombreNull_LanzaArgumentNullException()
+    {
+        var tipo = CrearTipo(nombre: "Proyector Sony");
+        var repositorio = CrearRepositorioCatalogo(tipo);
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.ObtenerTipoPorNombre(null!));
+    }
+
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
+    }
+
+    private static TipoEquipamiento CrearTipo(
+        string nombre = "Proyector Epson PowerLite",
+        string descripcion = "Proyector para aulas",
+        int duracionMaxPrestamo = 5,
+        bool requiereAprobacion = false,
+        Categoria categoria = Categoria.Audiovisual)
+    {
+        return new TipoEquipamiento(nombre, descripcion, duracionMaxPrestamo, requiereAprobacion, categoria);
+    }
+
+    private static RepositorioCatalogo CrearRepositorioCatalogo(params TipoEquipamiento[] tipos)
+    {
+        var memoria = new Memoria();
+        var repositorio = new RepositorioCatalogo(memoria);
+        var catalogo = CrearCatalogo();
+        foreach (var tipo in tipos)
+        {
+            catalogo.AgregarTipo(tipo);
+        }
+
+        repositorio.Guardar(catalogo);
+        return repositorio;
     }
 }
