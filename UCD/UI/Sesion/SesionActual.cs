@@ -9,11 +9,15 @@ public class SesionActual
 
     public bool EstaIniciada => Usuario is not null;
 
+    // Aviso para la pantalla de ingreso cuando la sesion se cerro sin que el usuario saliera.
+    public string? AvisoDeCierre { get; private set; }
+
     public event Action? Cambio;
 
     public void Iniciar(UsuarioSesionDto usuario)
     {
         Usuario = usuario;
+        AvisoDeCierre = null;
         Cambio?.Invoke();
     }
 
@@ -51,5 +55,12 @@ public class SesionActual
     {
         Usuario = null;
         Cambio?.Invoke();
+    }
+
+    // Cierra la sesion porque dejo de ser valida (por ejemplo, el usuario fue desactivado).
+    public void Expirar(string aviso)
+    {
+        AvisoDeCierre = aviso;
+        Cerrar();
     }
 }

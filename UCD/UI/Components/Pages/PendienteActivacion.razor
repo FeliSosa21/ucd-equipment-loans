@@ -1,5 +1,7 @@
 @page "/pendiente-activacion"
 @layout UI.Components.Layout.AuthLayout
+@inject SesionActual SesionActual
+@inject NavigationManager Navigation
 
 <PageTitle>UCD · Cuenta pendiente de activación</PageTitle>
 
@@ -14,5 +16,18 @@
         Tu cuenta todavía no tiene un tipo de usuario asignado. Un administrador debe habilitar
         tu acceso antes de que puedas ver solicitudes, el catálogo o cualquier otra sección.
     </p>
+    @* Con sesion, volver al inicio revisa de nuevo si un administrador ya le asigno un tipo. *@
     <a class="btn btn-ghost" href="">Volver al inicio</a>
+    @if (SesionActual.EstaIniciada)
+    {
+        <button class="btn btn-ghost" @onclick="Salir">Salir</button>
+    }
 </div>
+
+@code {
+    private void Salir()
+    {
+        SesionActual.Cerrar();
+        Navigation.NavigateTo("/");
+    }
+}

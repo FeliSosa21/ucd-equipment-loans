@@ -6,7 +6,7 @@ namespace UI.Components.Pages;
 
 public partial class Usuarios
 {
-        private List<UsuarioResumenDto> _usuarios = new List<UsuarioResumenDto>();
+    private List<UsuarioResumenDto> _usuarios = new List<UsuarioResumenDto>();
     private List<string> _tipos = new List<string>();
     private string _busqueda = string.Empty;
     private string? _error;
@@ -15,6 +15,7 @@ public partial class Usuarios
     private UsuarioDto _nuevo = new UsuarioDto();
     private string _tipoNuevo = string.Empty;
     private UsuarioResumenDto? _editando;
+    private int _recargas;
 
     private IEnumerable<UsuarioResumenDto> UsuariosFiltrados =>
         _usuarios.Where(usuario => string.IsNullOrWhiteSpace(_busqueda) ||
@@ -41,7 +42,12 @@ public partial class Usuarios
 
     private void CrearUsuario()
     {
-        Ejecutar(() => ServicioAdministracion.CrearUsuario(_nuevo, _tipoNuevo));
+        UsuarioDto datos = new UsuarioDto
+        {
+            Dni = _nuevo.Dni.Trim(), Nombre = _nuevo.Nombre.Trim(), Apellido = _nuevo.Apellido.Trim(),
+            Correo = _nuevo.Correo.Trim()
+        };
+        Ejecutar(() => ServicioAdministracion.CrearUsuario(datos, _tipoNuevo, SesionActual.Usuario!.Dni));
 
         if (_error is null)
         {
@@ -63,6 +69,8 @@ public partial class Usuarios
     private void GuardarEdicion()
     {
         UsuarioResumenDto editado = _editando!;
+        editado.Nombre = editado.Nombre.Trim();
+        editado.Apellido = editado.Apellido.Trim();
         editado.Correo = editado.Correo.Trim();
         Ejecutar(() => ServicioAdministracion.ModificarDatos(editado, SesionActual.Usuario!.Dni));
 
@@ -96,7 +104,7 @@ public partial class Usuarios
             return;
         }
 
-        Ejecutar(() => ServicioAdministracion.Reactivar(usuario.Dni));
+        Ejecutar(() => ServicioAdministracion.Reactivar(usuario.Dni, SesionActual.Usuario!.Dni));
     }
 
     private void Ejecutar(Action accion)
@@ -115,8 +123,11 @@ public partial class Usuarios
         Recargar();
     }
 
+    // Cambiar la clave de la tabla la vuelve a dibujar entera: si el servicio rechaza un cambio de tipo,
+    // el desplegable vuelve a mostrar el tipo real y no el que se habia elegido.
     private void Recargar()
     {
         _usuarios = ServicioAdministracion.ListarUsuarios();
+        _recargas++;
     }
 }

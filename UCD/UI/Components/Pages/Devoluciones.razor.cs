@@ -15,6 +15,7 @@ public partial class Devoluciones
     private string _busqueda = string.Empty;
     private string? _error;
     private string? _exito;
+    private string? _avisoLista;
 
     private IEnumerable<PrestamoActivoDto> PrestamosFiltrados =>
         _prestamos.Where(prestamo => string.IsNullOrWhiteSpace(_busqueda) ||
@@ -37,6 +38,7 @@ public partial class Devoluciones
         _seleccionado = prestamo;
         _error = null;
         _exito = null;
+        _avisoLista = null;
         _unidades = prestamo.Unidades
             .Select(id => new UnidadDevueltaDto { IdInstitucional = id, Condicion = _condiciones.First() })
             .ToList();
@@ -68,7 +70,23 @@ public partial class Devoluciones
         catch (ServicioException ex)
         {
             _error = ex.Message;
+            Recargar();
+            CerrarSiYaNoEstaActivo(prestamo);
         }
+    }
+
+    // Si otro usuario lo devolvio mientras tanto, se cierra el formulario y se avisa arriba de la lista.
+    private void CerrarSiYaNoEstaActivo(PrestamoActivoDto prestamo)
+    {
+        if (_prestamos.Any(activo => activo.Id == prestamo.Id))
+        {
+            return;
+        }
+
+        _seleccionado = null;
+        _error = null;
+        _avisoLista = $"El préstamo de {prestamo.TipoEquipamiento} de {prestamo.Solicitante} ya no está activo; " +
+                      "la lista se actualizó.";
     }
 
     private void Recargar()
