@@ -99,6 +99,22 @@ public sealed class RepositorioCatalogoTests
         Assert.AreSame(tipo, encontrado);
     }
 
+    [TestMethod]
+    public void ObtenerTipoPorNombre_NombreInexistente_DevuelveNull()
+    {
+        var memoria = new Memoria();
+        var repositorio = new RepositorioCatalogo(memoria);
+        var catalogo = CrearCatalogo(nombre: "Catalogo nuevo");
+        var tipo = CrearTipo(nombre: "Proyector Epson EB-770Fi");
+        catalogo.AgregarTipo(tipo);
+        repositorio.Guardar(catalogo);
+        var nombreInexistente = "Proyector Sony";
+
+        var encontrado = repositorio.ObtenerTipoPorNombre(nombreInexistente);
+
+        Assert.IsNull(encontrado);
+    }
+
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
