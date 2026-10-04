@@ -280,6 +280,14 @@ public sealed class PrestamoTests
         Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
     }
 
+    [TestMethod]
+    public void Constructor_DatosValidos_NaceSinMotivoDeRechazo()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+    
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
