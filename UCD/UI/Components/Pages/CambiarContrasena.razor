@@ -75,6 +75,12 @@
 
     private void Cambiar()
     {
+        // Un doble clic manda dos envios: el segundo llega con los campos ya vaciados.
+        if (!FormularioCompleto)
+        {
+            return;
+        }
+
         _error = null;
         _exito = false;
 
@@ -100,6 +106,9 @@
     {
         if (!_obligatorio)
         {
+            _actual = string.Empty;
+            _nueva = string.Empty;
+            _repetir = string.Empty;
             _exito = true;
             return;
         }

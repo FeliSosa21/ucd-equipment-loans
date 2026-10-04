@@ -38,10 +38,17 @@ public partial class Usuarios
     {
         _mostrarAlta = !_mostrarAlta;
         _editando = null;
+        LimpiarMensajes();
     }
 
     private void CrearUsuario()
     {
+        // Un doble clic manda dos envios: el segundo llega con el formulario ya cerrado.
+        if (!_mostrarAlta)
+        {
+            return;
+        }
+
         UsuarioDto datos = new UsuarioDto
         {
             Dni = _nuevo.Dni.Trim(), Nombre = _nuevo.Nombre.Trim(), Apellido = _nuevo.Apellido.Trim(),
@@ -51,7 +58,7 @@ public partial class Usuarios
 
         if (_error is null)
         {
-            _exito = $"Se creó la cuenta de {_nuevo.Nombre} {_nuevo.Apellido}.";
+            _exito = $"Se creó la cuenta de {datos.Nombre} {datos.Apellido}.";
             _nuevo = new UsuarioDto();
             _mostrarAlta = false;
         }
@@ -60,6 +67,7 @@ public partial class Usuarios
     private void AbrirEdicion(UsuarioResumenDto usuario)
     {
         _mostrarAlta = false;
+        LimpiarMensajes();
         _editando = new UsuarioResumenDto
         {
             Dni = usuario.Dni, Nombre = usuario.Nombre, Apellido = usuario.Apellido, Correo = usuario.Correo
@@ -68,7 +76,13 @@ public partial class Usuarios
 
     private void GuardarEdicion()
     {
-        UsuarioResumenDto editado = _editando!;
+        // Un doble clic manda dos envios: el segundo llega con el formulario ya cerrado.
+        if (_editando is null)
+        {
+            return;
+        }
+
+        UsuarioResumenDto editado = _editando;
         editado.Nombre = editado.Nombre.Trim();
         editado.Apellido = editado.Apellido.Trim();
         editado.Correo = editado.Correo.Trim();
@@ -107,10 +121,22 @@ public partial class Usuarios
         Ejecutar(() => ServicioAdministracion.Reactivar(usuario.Dni, SesionActual.Usuario!.Dni));
     }
 
-    private void Ejecutar(Action accion)
+    private void CancelarEdicion()
+    {
+        _editando = null;
+        LimpiarMensajes();
+    }
+
+    // Al abrir o cerrar un formulario se borran los mensajes de la accion anterior.
+    private void LimpiarMensajes()
     {
         _error = null;
         _exito = null;
+    }
+
+    private void Ejecutar(Action accion)
+    {
+        LimpiarMensajes();
         try
         {
             accion();

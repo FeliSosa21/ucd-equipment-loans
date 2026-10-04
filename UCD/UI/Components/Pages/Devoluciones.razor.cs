@@ -52,7 +52,13 @@ public partial class Devoluciones
 
     private void Confirmar()
     {
-        PrestamoActivoDto prestamo = _seleccionado!;
+        // Un doble clic manda dos envios: el segundo llega con el formulario ya cerrado.
+        if (_seleccionado is null)
+        {
+            return;
+        }
+
+        PrestamoActivoDto prestamo = _seleccionado;
         DevolucionDto datos = new DevolucionDto
         {
             IdPrestamo = prestamo.Id,
