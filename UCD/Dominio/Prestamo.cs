@@ -40,7 +40,7 @@ public class Prestamo
 
     public void RechazarPorFaltaDeUnidades()
     {
-        
+        Estado = EstadoPrestamo.Rechazado;
     }    
 
     public void MarcarDevuelto()
