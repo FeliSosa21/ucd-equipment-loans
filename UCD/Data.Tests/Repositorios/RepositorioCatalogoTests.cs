@@ -126,6 +126,19 @@ public sealed class RepositorioCatalogoTests
         Assert.IsNull(encontrado);
     }
 
+    [TestMethod]
+    public void ObtenerTipoPorNombre_NombreNull_LanzaArgumentNullException()
+    {
+        var memoria = new Memoria();
+        var repositorio = new RepositorioCatalogo(memoria);
+        var catalogo = CrearCatalogo();
+        var  tipo = CrearTipo(nombre: "Proyector Sony");
+        catalogo.AgregarTipo(tipo);
+        repositorio.Guardar(catalogo);
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.ObtenerTipoPorNombre(null!));
+    }
+
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
