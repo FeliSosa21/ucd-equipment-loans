@@ -18,13 +18,15 @@ public class ServicioDevolucion
     private readonly RepositorioPrestamo _prestamos;
     private readonly RepositorioUsuario _usuarios;
     private readonly RepositorioDevolucion _devoluciones;
+    private readonly RepositorioMovimiento _movimientos;
 
     public ServicioDevolucion(RepositorioPrestamo prestamos, RepositorioUsuario usuarios,
-        RepositorioDevolucion devoluciones)
+        RepositorioDevolucion devoluciones, RepositorioMovimiento movimientos)
     {
         _prestamos = prestamos;
         _usuarios = usuarios;
         _devoluciones = devoluciones;
+        _movimientos = movimientos;
     }
 
     public List<string> CondicionesPosibles()
@@ -51,10 +53,22 @@ public class ServicioDevolucion
             Devolucion devolucion = new Devolucion(prestamo, responsable, datos.FechaHoraDevolucion, unidades);
             devolucion.Aplicar();
             _devoluciones.AgregarDevolucion(devolucion);
+            RegistrarMovimientos(devolucion);
         }
         catch (DominioException ex)
         {
             throw new ServicioException(ex.Message, ex);
+        }
+    }
+
+    // Registro historico (req. 10): un movimiento por unidad, con la fecha efectiva de devolucion.
+    private void RegistrarMovimientos(Devolucion devolucion)
+    {
+        foreach (UnidadDevuelta unidadDevuelta in devolucion.Unidades)
+        {
+            _movimientos.AgregarMovimiento(new Movimiento(devolucion.FechaHoraDevolucion,
+                TipoMovimiento.Devolucion, devolucion.Prestamo.Solicitante, devolucion.Prestamo.Evaluador,
+                unidadDevuelta.Unidad));
         }
     }
 
