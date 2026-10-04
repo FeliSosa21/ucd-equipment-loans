@@ -82,6 +82,23 @@ public sealed class RepositorioCatalogoTests
         Assert.AreSame(segundoTipo, encontrado);
     }
 
+    [TestMethod]
+    [DataRow("PROYECTOR EPSON EB-770FI")]
+    [DataRow(" Proyector Epson EB-770Fi ")]
+    public void ObtenerTipoPorNombre_NombreEquivalente_DevuelveElTipo(string nombreBuscado)
+    {
+        var memoria = new Memoria();
+        var repositorio = new RepositorioCatalogo(memoria);
+        var catalogo = CrearCatalogo(nombre: "Catalogo nuevo");
+        var tipo = CrearTipo(nombre: "Proyector Epson EB-770Fi");
+        catalogo.AgregarTipo(tipo);
+        repositorio.Guardar(catalogo);
+
+        var encontrado =  repositorio.ObtenerTipoPorNombre(nombreBuscado);
+
+        Assert.AreSame(tipo, encontrado);
+    }
+
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
