@@ -51,6 +51,55 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Constructor_SolicitanteNulo_LanzaExcepcion()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento();
+
+        Assert.ThrowsException<DominioException>(() => new Prestamo(
+            solicitante: null!,
+            tipoEquipamiento: tipo,
+            cantidadSolicitada: CantidadSolicitadaPorDefecto,
+            fechaHoraPrestamo: FechaFija));
+    }
+
+    [TestMethod]
+    public void Constructor_TipoEquipamientoNulo_LanzaExcepcion()
+    {
+        Usuario solicitante = CrearSolicitante();
+
+        Assert.ThrowsException<DominioException>(() => new Prestamo(
+            solicitante: solicitante,
+            tipoEquipamiento: null!,
+            cantidadSolicitada: CantidadSolicitadaPorDefecto,
+            fechaHoraPrestamo: FechaFija));
+    }
+
+    [TestMethod]
+    [DataRow(0)]
+    [DataRow(-1)]
+    public void Constructor_CantidadNoPositiva_LanzaExcepcion(int cantidadInvalida)
+    {
+        Assert.ThrowsException<DominioException>(
+            () => CrearPrestamo(cantidadSolicitada: cantidadInvalida));
+    }
+
+    [TestMethod]
+    public void Constructor_DatosValidos_NaceSinEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        Assert.IsNull(prestamo.Evaluador);
+    }
+
+    [TestMethod]
+    public void Constructor_DatosValidos_NaceSinMotivoDeRechazo()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
     public void Activar_CantidadSolicitadaDeUnidadesDisponibles_QuedaActivo()
     {
         Prestamo prestamo = CrearPrestamo();
@@ -135,6 +184,66 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Activar_PrestamoDevuelto_LanzaExcepcion()
+    {
+        (Prestamo prestamo, List<UnidadFisica> primerasUnidades) = CrearPrestamoDevuelto();
+
+        List<UnidadFisica> nuevasUnidades = CrearUnidadesFisicas(
+            cantidad: CantidadSolicitadaPorDefecto,
+            primerNumero: CantidadSolicitadaPorDefecto + 1);
+
+        Assert.ThrowsException<DominioException>(() => prestamo.Activar(nuevasUnidades));
+        foreach (UnidadFisica unidad in nuevasUnidades)
+        {
+            Assert.AreEqual(
+                EstadoUnidadFisica.Disponible,
+                unidad.Estado,
+                $"La unidad {unidad.IdInstitucional} deberia seguir disponible");
+        }
+        Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
+        CollectionAssert.AreEquivalent(primerasUnidades, prestamo.UnidadesAsignadas.ToList());
+    }
+
+    [TestMethod]
+    public void Activar_ListaNula_LanzaExcepcion()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        Assert.ThrowsException<DominioException>(() => prestamo.Activar(null!));
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+    }
+
+    [TestMethod]
+    public void Activar_UnidadRepetida_LanzaExcepcionYNoPrestaNinguna()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        UnidadFisica unidad = CrearUnidadesFisicas(cantidad: 1)[0];
+        List<UnidadFisica> mismaUnidadDosVeces = new List<UnidadFisica> { unidad, unidad };
+
+        Assert.ThrowsException<DominioException>(() => prestamo.Activar(mismaUnidadDosVeces));
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado);
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+    }
+
+    [TestMethod]
+    public void Activar_PrestamoRechazado_LanzaExcepcion()
+    {
+        Prestamo prestamo = CrearPrestamoRechazado();
+        List<UnidadFisica> unidades = CrearUnidadesFisicas(cantidad: CantidadSolicitadaPorDefecto);
+
+        Assert.ThrowsException<DominioException>(() => prestamo.Activar(unidades));
+        foreach (UnidadFisica unidad in unidades)
+        {
+            Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado,
+                $"La unidad {unidad.IdInstitucional} deberia seguir disponible");
+        }
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+    }
+
+    [TestMethod]
     public void MarcarDevuelto_PrestamoActivoSinUnidadesPrestadas_QuedaDevuelto()
     {
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
@@ -179,27 +288,6 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
-    public void Activar_PrestamoDevuelto_LanzaExcepcion()
-    {
-        (Prestamo prestamo, List<UnidadFisica> primerasUnidades) = CrearPrestamoDevuelto();
-
-        List<UnidadFisica> nuevasUnidades = CrearUnidadesFisicas(
-            cantidad: CantidadSolicitadaPorDefecto,
-            primerNumero: CantidadSolicitadaPorDefecto + 1);
-
-        Assert.ThrowsException<DominioException>(() => prestamo.Activar(nuevasUnidades));
-        foreach (UnidadFisica unidad in nuevasUnidades)
-        {
-            Assert.AreEqual(
-                EstadoUnidadFisica.Disponible,
-                unidad.Estado,
-                $"La unidad {unidad.IdInstitucional} deberia seguir disponible");
-        }
-        Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
-        CollectionAssert.AreEquivalent(primerasUnidades, prestamo.UnidadesAsignadas.ToList());
-    }
-
-    [TestMethod]
     public void MarcarDevuelto_PrestamoActivoSinUnidadesPrestadas_NoCambiaLasUnidades()
     {
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
@@ -214,78 +302,6 @@ public sealed class PrestamoTests
 
         Assert.AreEqual(EstadoUnidadFisica.Disponible, disponible.Estado);
         Assert.AreEqual(EstadoUnidadFisica.EnMantenimiento, enMantenimiento.Estado);
-    }
-
-    [TestMethod]
-    public void Constructor_SolicitanteNulo_LanzaExcepcion()
-    {
-        TipoEquipamiento tipo = CrearTipoEquipamiento();
-
-        Assert.ThrowsException<DominioException>(() => new Prestamo(
-            solicitante: null!,
-            tipoEquipamiento: tipo,
-            cantidadSolicitada: CantidadSolicitadaPorDefecto,
-            fechaHoraPrestamo: FechaFija));
-    }
-
-    [TestMethod]
-    public void Constructor_TipoEquipamientoNulo_LanzaExcepcion()
-    {
-        Usuario solicitante = CrearSolicitante();
-
-        Assert.ThrowsException<DominioException>(() => new Prestamo(
-            solicitante: solicitante,
-            tipoEquipamiento: null!,
-            cantidadSolicitada: CantidadSolicitadaPorDefecto,
-            fechaHoraPrestamo: FechaFija));
-    }
-
-    [TestMethod]
-    [DataRow(0)]
-    [DataRow(-1)]
-    public void Constructor_CantidadNoPositiva_LanzaExcepcion(int cantidadInvalida)
-    {
-        Assert.ThrowsException<DominioException>(
-            () => CrearPrestamo(cantidadSolicitada: cantidadInvalida));
-    }
-
-    [TestMethod]
-    public void Constructor_DatosValidos_NaceSinEvaluador()
-    {
-        Prestamo prestamo = CrearPrestamo();
-
-        Assert.IsNull(prestamo.Evaluador);
-    }
-
-    [TestMethod]
-    public void Activar_ListaNula_LanzaExcepcion()
-    {
-        Prestamo prestamo = CrearPrestamo();
-
-        Assert.ThrowsException<DominioException>(() => prestamo.Activar(null!));
-        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
-        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
-    }
-
-    [TestMethod]
-    public void Activar_UnidadRepetida_LanzaExcepcionYNoPrestaNinguna()
-    {
-        Prestamo prestamo = CrearPrestamo();
-        UnidadFisica unidad = CrearUnidadesFisicas(cantidad: 1)[0];
-        List<UnidadFisica> mismaUnidadDosVeces = new List<UnidadFisica> { unidad, unidad };
-
-        Assert.ThrowsException<DominioException>(() => prestamo.Activar(mismaUnidadDosVeces));
-        Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado);
-        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
-        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
-    }
-
-    [TestMethod]
-    public void Constructor_DatosValidos_NaceSinMotivoDeRechazo()
-    {
-        Prestamo prestamo = CrearPrestamo();
-
-        Assert.IsNull(prestamo.MotivoRechazo);
     }
 
     [TestMethod]
@@ -327,22 +343,6 @@ public sealed class PrestamoTests
         Assert.ThrowsException<DominioException>(() => prestamo.RechazarPorFaltaDeUnidades());
         Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
         Assert.IsNull(prestamo.MotivoRechazo);
-    }
-
-    [TestMethod]
-    public void Activar_PrestamoRechazado_LanzaExcepcion()
-    {
-        Prestamo prestamo = CrearPrestamoRechazado();
-        List<UnidadFisica> unidades = CrearUnidadesFisicas(cantidad: CantidadSolicitadaPorDefecto);
-        
-        Assert.ThrowsException<DominioException>(() => prestamo.Activar(unidades));
-        foreach (UnidadFisica unidad in unidades)
-        {
-            Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado,
-                $"La unidad {unidad.IdInstitucional} deberia seguir disponible");
-        }
-        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
-        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
     }
 
     [TestMethod]
