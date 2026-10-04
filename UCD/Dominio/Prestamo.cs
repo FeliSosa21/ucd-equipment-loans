@@ -2,6 +2,7 @@
 
 public class Prestamo
 {
+    private const string MotivoFaltaDeUnidades = "No hay unidades suficientes para el tipo de equipamiento";
     private readonly List<UnidadFisica> _unidadesAsignadas = new List<UnidadFisica>();
 
     public Guid Id { get; } = Guid.NewGuid();
@@ -12,7 +13,6 @@ public class Prestamo
     public DateTime FechaHoraPrestamo { get; }
     public Usuario? Evaluador { get; private set; }
     public string? MotivoRechazo { get; private set; }
-    private const string MotivoFaltaDeUnidades = "No hay unidades suficientes para el tipo de equipamiento";
     public IReadOnlyList<UnidadFisica> UnidadesAsignadas => _unidadesAsignadas.AsReadOnly();
 
     public Prestamo(Usuario solicitante, TipoEquipamiento tipoEquipamiento, int cantidadSolicitada,
@@ -36,15 +36,17 @@ public class Prestamo
         ValidarQueNoHayaUnidadesRepetidas(unidadesFisicas);
         ValidarQueEstenDisponibles(unidadesFisicas);
         AsignarUnidades(unidadesFisicas);
+
         Estado = EstadoPrestamo.Activo;
     }
 
     public void RechazarPorFaltaDeUnidades()
     {
         ValidarQueEsteSolicitado();
+
         Estado = EstadoPrestamo.Rechazado;
         MotivoRechazo = MotivoFaltaDeUnidades;
-    }    
+    }
 
     public void MarcarDevuelto()
     {
@@ -87,7 +89,7 @@ public class Prestamo
     {
         if (Estado != EstadoPrestamo.Solicitado)
         {
-            throw new DominioException("Solo se puede activar un prestamo con estado: solicitado");
+            throw new DominioException("El prestamo debe estar solicitado");
         }
     }
 
@@ -118,11 +120,11 @@ public class Prestamo
 
     private static void ValidarQueEstenDisponibles(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
-        foreach (UnidadFisica unidad in unidadesFisicas)
+        foreach (UnidadFisica unidadFisica in unidadesFisicas)
         {
-            if (!unidad.EstaDisponible())
+            if (!unidadFisica.EstaDisponible())
             {
-                throw new DominioException($"La unidad {unidad.IdInstitucional} no esta disponible");
+                throw new DominioException($"La unidad {unidadFisica.IdInstitucional} no esta disponible");
             }
         }
     }
