@@ -28,4 +28,9 @@ public class RepositorioPrestamo
             .ToList()
             .AsReadOnly();
     }
+
+    public IReadOnlyList<Prestamo> ObtenerPrestamosDeSolicitante(string dni)
+    {
+        return new List<Prestamo>().AsReadOnly();
+    }
 }

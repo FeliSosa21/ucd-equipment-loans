@@ -83,10 +83,33 @@ public class RepositorioPrestamoTests
         Assert.AreSame(prestamo, resultado);
     }
 
-    private static Usuario CrearSolicitante()
+    [TestMethod]
+    public void ObtenerPrestamosDeSolicitante_DosSolicitantes_DevuelveSoloLosDelSolicitante()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+        Usuario solicitante = CrearSolicitante();
+        Usuario otroSolicitante = CrearSolicitante("45678905");
+        Prestamo primeroDelSolicitante = CrearPrestamo(solicitante: solicitante);
+        Prestamo segundoDelSolicitante = CrearPrestamo(solicitante: solicitante);
+        Prestamo delOtroSolicitante = CrearPrestamo(solicitante: otroSolicitante);
+        
+        repositorio.AgregarPrestamo(primeroDelSolicitante);
+        repositorio.AgregarPrestamo(delOtroSolicitante);
+        repositorio.AgregarPrestamo(segundoDelSolicitante);
+
+        IReadOnlyList<Prestamo> resultado =
+            repositorio.ObtenerPrestamosDeSolicitante(dni: solicitante.Dni);
+        
+        CollectionAssert.AreEquivalent(
+            new List<Prestamo> { primeroDelSolicitante, segundoDelSolicitante },
+            resultado.ToList());
+    }
+
+    private static Usuario CrearSolicitante(string dni = "12345672")
     {
         Usuario usuario = new Usuario(
-            dni: "12345672",
+            dni: dni,
             nombre: "Renato",
             apellido: "Alves",
             correo: "renato.alves@ejemplo.com",
