@@ -120,6 +120,22 @@ public class RepositorioPrestamoTests
         Assert.AreEqual(0, resultado.Count);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamosDeSolicitante_PrestamoRechazado_LoIncluye()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+        Usuario solicitante = CrearSolicitante();
+        Prestamo rechazado = CrearPrestamo(solicitante: solicitante);
+        rechazado.RechazarPorFaltaDeUnidades();
+        repositorio.AgregarPrestamo(rechazado);
+        
+        IReadOnlyList<Prestamo> resultado =
+            repositorio.ObtenerPrestamosDeSolicitante(dni: solicitante.Dni);
+        
+        CollectionAssert.Contains(resultado.ToList(), rechazado);
+    }
+
     private static Usuario CrearSolicitante(string dni = "12345672")
     {
         Usuario usuario = new Usuario(
