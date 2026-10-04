@@ -54,6 +54,11 @@ public class Prestamo
         Estado = EstadoPrestamo.Devuelto;
     }
 
+    public bool EstaVigente()
+    {
+        return false;
+    }
+
     private static void ValidarSolicitante(Usuario solicitante)
     {
         if (solicitante is null)

@@ -345,6 +345,17 @@ public sealed class PrestamoTests
         Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
         Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
     }
+
+    [TestMethod]
+    public void EstaVigente_PrestamoSolicitado_DevuelveTrue()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        bool vigente = prestamo.EstaVigente();
+        
+        Assert.IsTrue(vigente);
+    }
+    
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
