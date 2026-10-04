@@ -308,6 +308,16 @@ public sealed class PrestamoTests
         Assert.IsFalse(string.IsNullOrEmpty(prestamo.MotivoRechazo),
             "El prestamo rechazado deberia tener un motivo");
     }
+
+    [TestMethod]
+    public void RechazarPorFaltaDeUnidades_PrestamoSolicitado_QuedaSinEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        
+        prestamo.RechazarPorFaltaDeUnidades();
+        
+        Assert.IsNull(prestamo.Evaluador);
+    }
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
