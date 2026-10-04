@@ -318,6 +318,17 @@ public sealed class PrestamoTests
         
         Assert.IsNull(prestamo.Evaluador);
     }
+
+    [TestMethod]
+    public void RechazarPorFaltaDeUnidades_PrestamoActivo_LanzaExcepcion()
+    {
+        (Prestamo prestamo, _) = CrearPrestamoActivo();
+
+        Assert.ThrowsException<DominioException>(()  => prestamo.RechazarPorFaltaDeUnidades());
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
