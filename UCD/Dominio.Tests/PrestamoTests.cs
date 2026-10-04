@@ -284,7 +284,7 @@ public sealed class PrestamoTests
     public void Constructor_DatosValidos_NaceSinMotivoDeRechazo()
     {
         Prestamo prestamo = CrearPrestamo();
-        
+
         Assert.IsNull(prestamo.MotivoRechazo);
     }
 
@@ -294,7 +294,7 @@ public sealed class PrestamoTests
         Prestamo prestamo = CrearPrestamo();
 
         prestamo.RechazarPorFaltaDeUnidades();
-        
+
         Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
     }
 
@@ -302,10 +302,10 @@ public sealed class PrestamoTests
     public void RechazarPorFaltaDeUnidades_PrestamoSolicitado_GuardaElMotivo()
     {
         Prestamo prestamo = CrearPrestamo();
-        
+
         prestamo.RechazarPorFaltaDeUnidades();
-        
-        Assert.IsFalse(string.IsNullOrEmpty(prestamo.MotivoRechazo),
+
+        Assert.IsFalse(string.IsNullOrWhiteSpace(prestamo.MotivoRechazo),
             "El prestamo rechazado deberia tener un motivo");
     }
 
@@ -313,9 +313,9 @@ public sealed class PrestamoTests
     public void RechazarPorFaltaDeUnidades_PrestamoSolicitado_QuedaSinEvaluador()
     {
         Prestamo prestamo = CrearPrestamo();
-        
+
         prestamo.RechazarPorFaltaDeUnidades();
-        
+
         Assert.IsNull(prestamo.Evaluador);
     }
 
@@ -324,7 +324,7 @@ public sealed class PrestamoTests
     {
         (Prestamo prestamo, _) = CrearPrestamoActivo();
 
-        Assert.ThrowsException<DominioException>(()  => prestamo.RechazarPorFaltaDeUnidades());
+        Assert.ThrowsException<DominioException>(() => prestamo.RechazarPorFaltaDeUnidades());
         Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
         Assert.IsNull(prestamo.MotivoRechazo);
     }
@@ -336,7 +336,6 @@ public sealed class PrestamoTests
         List<UnidadFisica> unidades = CrearUnidadesFisicas(cantidad: CantidadSolicitadaPorDefecto);
         
         Assert.ThrowsException<DominioException>(() => prestamo.Activar(unidades));
-
         foreach (UnidadFisica unidad in unidades)
         {
             Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado,
@@ -347,7 +346,7 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
-    public void EstaVigente_PrestamoSolicitado_DevuelveTrue()
+    public void EstaVigente_PrestamoSolicitado_DevuelveVerdadero()
     {
         Prestamo prestamo = CrearPrestamo();
 
@@ -359,9 +358,9 @@ public sealed class PrestamoTests
     [TestMethod]
     public void EstaVigente_PrestamoActivo_DevuelveVerdadero()
     {
-        (Prestamo Prestamo, _) = CrearPrestamoActivo();
+        (Prestamo prestamo, _) = CrearPrestamoActivo();
         
-        bool vigente = Prestamo.EstaVigente();
+        bool vigente = prestamo.EstaVigente();
         
         Assert.IsTrue(vigente);
     }
@@ -385,6 +384,7 @@ public sealed class PrestamoTests
         
         Assert.IsFalse(vigente);
     }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
