@@ -170,6 +170,29 @@ public sealed class ServicioPrestamoTests
             "La solicitud rechazada deberia tener un motivo");
     }
 
+    [TestMethod]
+    public void Solicitar_TipoSinAprobacionSinUnidadesSuficientes_LoGuardaSinPrestarNiRegistrarMovimientos()
+    {
+
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 4);
+
+        servicio.Solicitar(datos, DniDocente);
+
+        IReadOnlyList<Prestamo> guardados =
+            new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniDocente);
+
+        Assert.AreEqual(1, guardados.Count);
+        Assert.AreEqual(EstadoPrestamo.Rechazado, guardados[0].Estado);
+
+        Assert.AreEqual(0, guardados[0].UnidadesAsignadas.Count);
+        TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoSinAprobacion)!;
+        Assert.AreEqual(3, tipo.CantidadDisponibles());
+
+        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
