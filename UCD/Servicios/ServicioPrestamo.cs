@@ -33,6 +33,11 @@ public class ServicioPrestamo
             throw new ServicioException("El solicitante no existe");
         }
 
+        if (solicitante.Estado == EstadoUsuario.Desactivado)
+        {
+            throw new ServicioException("El solicitante esta desactivado");
+        }
+
         return new PrestamoDto();
     }
 }
