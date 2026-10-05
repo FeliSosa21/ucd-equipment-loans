@@ -15,11 +15,13 @@ public sealed class ServicioPrestamoTests
     private const string DniFuncionario = "23456783";
     private const string DniDocenteDesactivado = "34567894";
     private const string DniInexistente = "56789016";
-    
+
     private const string NombreTipoSinAprobacion = "Proyector Epson PowerLite";
     private const string NombreTipoSinUnidades = "Parlante JBL Flip";
     private const string NombreTipoConAprobacion = "Camara Canon EOS R50";
     private const string NombreTipoDiscontinuado = "Retroproyector 3M";
+
+    private const int CantidadSolicitadaPorDefecto = 2;
 
     [TestMethod]
     public void Solicitar_DatosNulos_LanzaArgumentNullException()
@@ -33,6 +35,18 @@ public sealed class ServicioPrestamoTests
         VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
     }
 
+    [TestMethod]
+    public void Solicitar_SolicitanteInexistente_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud();
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(datos, DniInexistente));
+
+        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniInexistente);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
@@ -44,6 +58,17 @@ public sealed class ServicioPrestamoTests
             catalogo: new RepositorioCatalogo(memoria),
             movimientos: new RepositorioMovimiento(memoria),
             reloj: new RelojFijo(FechaFija));
+    }
+
+    private static SolicitudPrestamoDto CrearSolicitud(
+        string tipoEquipamiento = NombreTipoSinAprobacion,
+        int cantidadSolicitada = CantidadSolicitadaPorDefecto)
+    {
+        return new SolicitudPrestamoDto
+        {
+            TipoEquipamiento = tipoEquipamiento,
+            CantidadSolicitada = cantidadSolicitada
+        };
     }
 
     private static void CargarCatalogo(Memoria memoria)
