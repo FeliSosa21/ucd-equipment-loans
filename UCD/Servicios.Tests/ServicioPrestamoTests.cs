@@ -100,6 +100,21 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(1, tipo.CantidadDisponibles());
     }
 
+    [TestMethod]
+    public void Solicitar_DatosValidos_LoGuarda()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud();
+
+        servicio.Solicitar(datos, DniDocente);
+
+        IReadOnlyList<Prestamo> guardados = new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniDocente);
+
+        Assert.AreEqual(1, guardados.Count);
+        Assert.AreEqual(EstadoPrestamo.Activo, guardados[0].Estado);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
