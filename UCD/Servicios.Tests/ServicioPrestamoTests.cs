@@ -59,6 +59,20 @@ public sealed class ServicioPrestamoTests
         VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocenteDesactivado);
     }
 
+    [TestMethod]
+    public void Solicitar_SolicitanteSinPermiso_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud();
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Solicitar(datos, DniFuncionario));
+        Assert.AreEqual("El solicitante no tiene permiso para solicitar prestamos", excepcion.Message);
+
+        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniFuncionario);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
