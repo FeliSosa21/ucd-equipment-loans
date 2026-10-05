@@ -73,30 +73,36 @@ public class ServicioPrestamo
             throw new ServicioException("El solicitante alcanzo el maximo de prestamos vigentes");
         }
 
-        Prestamo prestamo = new Prestamo(solicitante, tipo, datos.CantidadSolicitada, _reloj.GetLocalNow().DateTime);
-
-        if (!tipo.RequiereAprobacion)
+        try
         {
-            if (tipo.CantidadDisponibles() < datos.CantidadSolicitada)
+            Prestamo prestamo = new Prestamo(solicitante, tipo, datos.CantidadSolicitada, _reloj.GetLocalNow().DateTime);
+
+            if (!tipo.RequiereAprobacion)
             {
-                prestamo.RechazarPorFaltaDeUnidades();
+                if (tipo.CantidadDisponibles() < datos.CantidadSolicitada)
+                {
+                    prestamo.RechazarPorFaltaDeUnidades();
+                }
+                else
+                {
+                    List<UnidadFisica> unidades = tipo.UnidadesDisponibles().Take(datos.CantidadSolicitada).ToList();
+                    prestamo.Activar(unidades);
+                }
             }
-            else
+
+            _prestamos.AgregarPrestamo(prestamo);
+            RegistrarMovimientos(prestamo);
+
+            return new PrestamoDto
             {
-                List<UnidadFisica> unidades = tipo.UnidadesDisponibles().Take(datos.CantidadSolicitada).ToList();
-                prestamo.Activar(unidades);
-            }
+                Estado = prestamo.Estado.ToString(),
+                MotivoRechazo = prestamo.MotivoRechazo
+            };
         }
-
-        _prestamos.AgregarPrestamo(prestamo);
-
-        RegistrarMovimientos(prestamo);
-
-        return new PrestamoDto
+        catch (DominioException excepcion)
         {
-            Estado = prestamo.Estado.ToString(),
-            MotivoRechazo = prestamo.MotivoRechazo
-        };
+            throw new ServicioException(excepcion.Message, excepcion);
+        }
     }
 
     private void RegistrarMovimientos(Prestamo prestamo)
