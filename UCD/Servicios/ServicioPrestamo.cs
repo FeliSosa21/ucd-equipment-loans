@@ -26,52 +26,9 @@ public class ServicioPrestamo
     {
         ArgumentNullException.ThrowIfNull(datos);
 
-        Usuario? solicitante = _usuarios.ObtenerUsuarioPorDni(dniSolicitante);
-
-        if (solicitante is null)
-        {
-            throw new ServicioException("El solicitante no existe");
-        }
-
-        if (solicitante.Estado == EstadoUsuario.Desactivado)
-        {
-            throw new ServicioException("El solicitante esta desactivado");
-        }
-
-        if (!solicitante.Tipo.TienePermiso(Permiso.SolicitarPrestamo))
-        {
-            throw new ServicioException("El solicitante no tiene permiso para solicitar prestamos");
-        }
-
-        if (datos.TipoEquipamiento is null)
-        {
-            throw new ServicioException("Debe indicar un tipo de equipamiento");
-        }
-
-        TipoEquipamiento? tipo = _catalogo.ObtenerTipoPorNombre(datos.TipoEquipamiento);
-
-        if (tipo is null)
-        {
-            throw new ServicioException("El tipo de equipamiento no existe");
-        }
-
-        if (!tipo.EstaActivo)
-        {
-            throw new ServicioException("El tipo de equipamiento esta descontinuado");
-        }
-
-        if (!solicitante.Tipo.PermiteUnidades(datos.CantidadSolicitada))
-        {
-            throw new ServicioException("La cantidad solicitada supera el maximo de unidades por prestamo");
-        }
-
-        int prestamosVigentes = _prestamos.ObtenerPrestamosDeSolicitante(solicitante.Dni)
-            .Count(prestamo => prestamo.EstaVigente());
-
-        if (!solicitante.Tipo.PuedeAgregarPrestamo(prestamosVigentes))
-        {
-            throw new ServicioException("El solicitante alcanzo el maximo de prestamos vigentes");
-        }
+        Usuario solicitante = ObtenerSolicitante(dniSolicitante);
+        TipoEquipamiento tipo = ObtenerTipoEquipamiento(datos.TipoEquipamiento);
+        ValidarLimites(solicitante, datos.CantidadSolicitada);
 
         try
         {
@@ -93,20 +50,71 @@ public class ServicioPrestamo
             _prestamos.AgregarPrestamo(prestamo);
             RegistrarMovimientos(prestamo);
 
-            return new PrestamoDto
-            {
-                Id = prestamo.Id,
-                TipoEquipamiento = prestamo.TipoEquipamiento.Nombre,
-                CantidadSolicitada = prestamo.CantidadSolicitada,
-                FechaHoraPrestamo = prestamo.FechaHoraPrestamo,
-                Estado = prestamo.Estado.ToString(),
-                MotivoRechazo = prestamo.MotivoRechazo,
-                Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList()
-            };
+            return CrearPrestamoDto(prestamo);
         }
         catch (DominioException excepcion)
         {
             throw new ServicioException(excepcion.Message, excepcion);
+        }
+    }
+
+    private Usuario ObtenerSolicitante(string dniSolicitante)
+    {
+        Usuario? solicitante = _usuarios.ObtenerUsuarioPorDni(dniSolicitante);
+
+        if (solicitante is null)
+        {
+            throw new ServicioException("El solicitante no existe");
+        }
+
+        if (solicitante.Estado == EstadoUsuario.Desactivado)
+        {
+            throw new ServicioException("El solicitante esta desactivado");
+        }
+
+        if (!solicitante.Tipo.TienePermiso(Permiso.SolicitarPrestamo))
+        {
+            throw new ServicioException("El solicitante no tiene permiso para solicitar prestamos");
+        }
+
+        return solicitante;
+    }
+
+    private TipoEquipamiento ObtenerTipoEquipamiento(string nombreTipo)
+    {
+        if (nombreTipo is null)
+        {
+            throw new ServicioException("Debe indicar un tipo de equipamiento");
+        }
+
+        TipoEquipamiento? tipo = _catalogo.ObtenerTipoPorNombre(nombreTipo);
+
+        if (tipo is null)
+        {
+            throw new ServicioException("El tipo de equipamiento no existe");
+        }
+
+        if (!tipo.EstaActivo)
+        {
+            throw new ServicioException("El tipo de equipamiento esta discontinuado");
+        }
+
+        return tipo;
+    }
+
+    private void ValidarLimites(Usuario solicitante, int cantidadSolicitada)
+    {
+        if (!solicitante.Tipo.PermiteUnidades(cantidadSolicitada))
+        {
+            throw new ServicioException("La cantidad solicitada supera el maximo de unidades por prestamo");
+        }
+
+        int prestamosVigentes = _prestamos.ObtenerPrestamosDeSolicitante(solicitante.Dni)
+            .Count(prestamo => prestamo.EstaVigente());
+
+        if (!solicitante.Tipo.PuedeAgregarPrestamo(prestamosVigentes))
+        {
+            throw new ServicioException("El solicitante alcanzo el maximo de prestamos vigentes");
         }
     }
 
@@ -122,4 +130,19 @@ public class ServicioPrestamo
                 unidad: unidad));
         }
     }
+
+    private static PrestamoDto CrearPrestamoDto(Prestamo prestamo)
+    {
+        return new PrestamoDto
+        {
+            Id = prestamo.Id,
+            TipoEquipamiento = prestamo.TipoEquipamiento.Nombre,
+            CantidadSolicitada = prestamo.CantidadSolicitada,
+            FechaHoraPrestamo = prestamo.FechaHoraPrestamo,
+            Estado = prestamo.Estado.ToString(),
+            MotivoRechazo = prestamo.MotivoRechazo,
+            Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList()
+        };
+    }
+
 }
