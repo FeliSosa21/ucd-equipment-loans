@@ -208,6 +208,22 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(3, tipo.CantidadDisponibles());
     }
 
+    [TestMethod]
+    public void Solicitar_TipoConAprobacion_LoGuardaSinRegistrarMovimientos()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion);
+
+        servicio.Solicitar(datos, DniDocente);
+
+        IReadOnlyList<Prestamo> guardados = new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniDocente);
+        Assert.AreEqual(1, guardados.Count);
+        Assert.AreEqual(EstadoPrestamo.Solicitado, guardados[0].Estado);
+
+        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
