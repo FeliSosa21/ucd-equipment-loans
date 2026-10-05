@@ -73,6 +73,18 @@ public sealed class ServicioPrestamoTests
         VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniFuncionario);
     }
 
+    [TestMethod]
+    public void Solicitar_TipoSinAprobacionConUnidades_QuedaActivo()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud();
+
+        PrestamoDto resultado = servicio.Solicitar(datos, DniDocente);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
