@@ -25,6 +25,26 @@ public sealed class UnidadDevueltaTests
     }
 
     [TestMethod]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void Constructor_ObservacionesEnBlanco_LasDejaNulas(string observaciones)
+    {
+        UnidadDevuelta devuelta = new UnidadDevuelta(CrearUnidadPrestada(), CondicionDevolucion.ConFallas,
+            observaciones);
+
+        Assert.IsNull(devuelta.Observaciones);
+    }
+
+    [TestMethod]
+    public void Constructor_ObservacionesConEspaciosAlBorde_LasRecorta()
+    {
+        UnidadDevuelta devuelta = new UnidadDevuelta(CrearUnidadPrestada(), CondicionDevolucion.ConFallas,
+            "  Pantalla rayada  ");
+
+        Assert.AreEqual("Pantalla rayada", devuelta.Observaciones);
+    }
+
+    [TestMethod]
     public void Constructor_UnidadNula_LanzaExcepcion()
     {
         Assert.ThrowsException<DominioException>(() =>

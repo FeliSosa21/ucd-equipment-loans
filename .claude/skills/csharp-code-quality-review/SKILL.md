@@ -1,11 +1,12 @@
 ---
 name: csharp-code-quality-review
-description: Revisa clases C#, tests MSTest y componentes Razor contra los lineamientos de Clean Code (capítulos 1-10 y 12) y las convenciones de codificación de C# de Microsoft. Usar cuando el usuario pida revisar calidad de código, chequear Clean Code, o antes de commitear una clase nueva o modificada del proyecto UCD (Obligatorio 1, DA1).
+description: Revisa clases C#, tests MSTest y componentes Razor contra los lineamientos de Clean Code (capítulos 1-10 y 12), las convenciones de codificación de C# de Microsoft, la robustez (autorización, entradas, doble envío) y la usabilidad de las pantallas. Usar cuando el usuario pida revisar calidad de código, chequear Clean Code, o antes de commitear una clase nueva o modificada del proyecto UCD (Obligatorio 1, DA1).
 ---
 
 # Revisión de calidad de código C# (Clean Code + convenciones .NET)
 
-Cubre los capítulos de Clean Code que pide la letra: 1 al 10 y 12. Fuentes del curso:
+Cubre los capítulos de Clean Code que pide la letra: 1 al 10 y 12, más robustez
+(sección 13) y usabilidad (sección 14), que la letra también pide revisar con IA. Fuentes del curso:
 diapositivas "04.10e Clean Code 1" y "04.20e Clean Code Parte 2" (G. Mousqués), que
 complementan el libro con *A Philosophy of Software Design* (J. Ousterhout).
 
@@ -41,7 +42,9 @@ y por qué importa (no solo "está mal", explicar el motivo).
 
 No hace falta que reportes cada punto que SÍ se cumple — enfocate en lo que falta
 o está mal. Si el código está limpio, decilo brevemente y no inventes objeciones
-menores solo para tener algo que decir.
+menores solo para tener algo que decir: el reporte se usa para decidir qué cambiar,
+y cada hallazgo de relleno le quita peso a los importantes. Los detalles cosméticos
+de un mismo archivo van juntos en un solo ítem de severidad Baja.
 
 ### 1. Nombres (Clean Code cap. 2)
 Fuente principal: diapositivas del curso "04.10e Clean Code 1" (G. Mousqués).
@@ -218,10 +221,50 @@ Aplicar a los archivos `.razor` y `.razor.css`:
 - Bloque `@code` corto; si crece mucho, pasar a un archivo `.razor.cs` o a un componente hijo
 - Markup repetido en varias páginas → extraer a un componente en `Components/Shared`
 - Handlers con verbos (`Registrar`, `IniciarSesion`); para los campos privados ver sección 11
+- **Doble envío / estado entre eventos.** Un doble clic dispara el handler dos veces: si
+  el primero cierra el formulario (`_seleccionado = null`) y el segundo arranca con
+  `_seleccionado!`, la app se rompe con `NullReferenceException` y Blazor corta la
+  conexión. Los handlers de envío empiezan con una guarda (`if (_seleccionado is null)
+  return;`) en vez de `!`. Lo mismo para un segundo envío que repite una acción ya hecha
+  y muestra un error engañoso (por ejemplo, cambiar la contraseña dos veces)
 - Un método no puede llamarse igual que la página (ej. método `Ingresar` en `Ingresar.razor`)
 - Estilos en el `.razor.css` de cada componente o en `app.css` usando las variables
   de color (`var(--navy)`), no colores sueltos
 - Accesibilidad básica: cada input con su `<label for>`, mensajes de error con `role="alert"`
+
+### 13. Robustez (complementa los caps. 3 y 7)
+Los atributos de calidad no son solo legibilidad: el código también tiene que
+comportarse bien cuando el uso real no es el ideal. En las pruebas de la app
+aparecieron bugs que ninguna regla de estilo detecta; buscalos explícitamente:
+- **Autorización en el servicio.** Toda operación que solo puede hacer cierto tipo de
+  usuario (administrar usuarios, registrar devoluciones, evaluar préstamos) valida en
+  el servicio que el responsable exista, esté activo y tenga el permiso, en el momento
+  de ejecutarla. Que la UI oculte el botón no alcanza: la pantalla puede haberse abierto
+  antes de que al usuario lo desactivaran o le cambiaran el tipo. Señalar como Alta un
+  método de servicio que recibe un `dniResponsable` (o similar) y no lo valida, o que
+  no recibe quién hace la acción cuando la regla depende de eso
+- **Entradas normalizadas antes de validarlas.** Textos que llegan del usuario se
+  recortan (`Trim`) antes de medir su largo o compararlos (si no, `"  P  "` pasa un
+  mínimo de 2 caracteres y `"ana@x.com "` no coincide con `"ana@x.com"`); textos en
+  blanco opcionales se guardan como `null`; números con rango (`horas`, `cantidad`)
+  se validan `> 0`. Ojo con normalizar un valor que puede ser `null` (`dto.Nombre.Trim()`
+  rompe antes de que el dominio lo valide)
+- **`!` (null-forgiving) sobre resultados que pueden ser null.** `repositorio.Obtener(...)!`
+  convierte un caso esperable (no existe) en una `NullReferenceException`; el servicio
+  debería informar con `ServicioException`
+- **Lógica de negocio que depende de la hora.** `DateTime.Now` dentro del dominio hace el
+  comportamiento difícil de testear; preferir recibir la fecha por parámetro
+
+### 14. Usabilidad de las pantallas (heurísticas de Nielsen, pedido de la letra)
+Aplicar a los `.razor` junto con la sección 12, solo con lo que se ve en el código:
+- Visibilidad del estado: después de cada acción hay un mensaje de éxito o de error,
+  y no queda un mensaje viejo de una acción anterior en pantalla
+- Prevención de errores: botones deshabilitados mientras el formulario está incompleto;
+  confirmación o posibilidad de deshacer en acciones destructivas (desactivar, dar de baja)
+- Mensajes de error en lenguaje del usuario, que digan qué pasó y cómo seguir
+  (no "Error" ni el texto de una excepción del lenguaje)
+- Consistencia: los mismos nombres y ubicaciones para las mismas acciones en todas
+  las páginas (Guardar/Cancelar, búsqueda arriba de la tabla, etc.)
 
 ## Formato del reporte
 
@@ -236,6 +279,10 @@ Organizá los hallazgos por archivo. Para cada uno:
 
 Severidad:
 - **Alta**: puede causar un bug, rompe una regla del dominio o deja un caso sin test.
+  Para marcar Alta tenés que poder describir el caso concreto (entrada o secuencia de
+  pasos → resultado incorrecto) y que sea alcanzable con el código tal como está. Si
+  depende de que otra capa se comporte mal ("si algún día el DTO llega con null"),
+  es Media.
 - **Media**: dificulta leer o mantener el código (nombres engañosos, métodos largos,
   duplicación, números mágicos).
 - **Baja**: formato o estilo.

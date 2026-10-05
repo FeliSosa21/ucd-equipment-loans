@@ -83,7 +83,7 @@
             </div>
             <div class="acciones">
                 <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                <button type="button" class="btn btn-ghost" @onclick="() => _editando = null">Cancelar</button>
+                <button type="button" class="btn btn-ghost" @onclick="CancelarEdicion">Cancelar</button>
             </div>
         </form>
     </div>
@@ -111,7 +111,7 @@
                 <th></th>
             </tr>
         </thead>
-        <tbody>
+        <tbody @key="_recargas">
             @foreach (UsuarioResumenDto usuario in UsuariosFiltrados)
             {
                 <tr>

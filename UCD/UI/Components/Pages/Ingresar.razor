@@ -28,6 +28,11 @@
 
         <MostrarContrasena @bind-Visible="_mostrarContrasena" />
 
+        @if (SesionActual.AvisoDeCierre is not null && _error is null)
+        {
+            <div class="alert alert-info" role="status">@SesionActual.AvisoDeCierre</div>
+        }
+
         @if (_error is not null)
         {
             <div class="alert alert-error" role="alert">@_error</div>
@@ -51,6 +56,15 @@
 
     private bool FormularioCompleto =>
         !string.IsNullOrWhiteSpace(_correo) && !string.IsNullOrEmpty(_contrasena);
+
+    // Con una sesion iniciada no tiene sentido volver a ingresar.
+    protected override void OnInitialized()
+    {
+        if (SesionActual.EstaIniciada)
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
 
     private void IniciarSesion()
     {

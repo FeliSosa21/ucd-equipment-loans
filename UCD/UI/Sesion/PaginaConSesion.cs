@@ -19,9 +19,15 @@ public abstract class PaginaConSesion : ComponentBase
         return true;
     }
 
+    // Sin sesion se va a ingresar; con sesion pero sin el permiso, al inicio.
     protected bool RedirigirSiNoTienePermiso(string permiso)
     {
-        if (SesionActual.EstaIniciada && SesionActual.Usuario!.Permisos.Contains(permiso))
+        if (RedirigirSiNoHaySesion())
+        {
+            return true;
+        }
+
+        if (SesionActual.Usuario!.Permisos.Contains(permiso))
         {
             return false;
         }

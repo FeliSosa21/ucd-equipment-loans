@@ -6,7 +6,7 @@ namespace UI.Components.Pages;
 
 public partial class Usuarios
 {
-        private List<UsuarioResumenDto> _usuarios = new List<UsuarioResumenDto>();
+    private List<UsuarioResumenDto> _usuarios = new List<UsuarioResumenDto>();
     private List<string> _tipos = new List<string>();
     private string _busqueda = string.Empty;
     private string? _error;
@@ -15,6 +15,7 @@ public partial class Usuarios
     private UsuarioDto _nuevo = new UsuarioDto();
     private string _tipoNuevo = string.Empty;
     private UsuarioResumenDto? _editando;
+    private int _recargas;
 
     private IEnumerable<UsuarioResumenDto> UsuariosFiltrados =>
         _usuarios.Where(usuario => string.IsNullOrWhiteSpace(_busqueda) ||
@@ -37,15 +38,27 @@ public partial class Usuarios
     {
         _mostrarAlta = !_mostrarAlta;
         _editando = null;
+        LimpiarMensajes();
     }
 
     private void CrearUsuario()
     {
-        Ejecutar(() => ServicioAdministracion.CrearUsuario(_nuevo, _tipoNuevo));
+        // Un doble clic manda dos envios: el segundo llega con el formulario ya cerrado.
+        if (!_mostrarAlta)
+        {
+            return;
+        }
+
+        UsuarioDto datos = new UsuarioDto
+        {
+            Dni = _nuevo.Dni.Trim(), Nombre = _nuevo.Nombre.Trim(), Apellido = _nuevo.Apellido.Trim(),
+            Correo = _nuevo.Correo.Trim()
+        };
+        Ejecutar(() => ServicioAdministracion.CrearUsuario(datos, _tipoNuevo, SesionActual.Usuario!.Dni));
 
         if (_error is null)
         {
-            _exito = $"Se creó la cuenta de {_nuevo.Nombre} {_nuevo.Apellido}.";
+            _exito = $"Se creó la cuenta de {datos.Nombre} {datos.Apellido}.";
             _nuevo = new UsuarioDto();
             _mostrarAlta = false;
         }
@@ -54,6 +67,7 @@ public partial class Usuarios
     private void AbrirEdicion(UsuarioResumenDto usuario)
     {
         _mostrarAlta = false;
+        LimpiarMensajes();
         _editando = new UsuarioResumenDto
         {
             Dni = usuario.Dni, Nombre = usuario.Nombre, Apellido = usuario.Apellido, Correo = usuario.Correo
@@ -62,7 +76,15 @@ public partial class Usuarios
 
     private void GuardarEdicion()
     {
-        UsuarioResumenDto editado = _editando!;
+        // Un doble clic manda dos envios: el segundo llega con el formulario ya cerrado.
+        if (_editando is null)
+        {
+            return;
+        }
+
+        UsuarioResumenDto editado = _editando;
+        editado.Nombre = editado.Nombre.Trim();
+        editado.Apellido = editado.Apellido.Trim();
         editado.Correo = editado.Correo.Trim();
         Ejecutar(() => ServicioAdministracion.ModificarDatos(editado, SesionActual.Usuario!.Dni));
 
@@ -96,13 +118,25 @@ public partial class Usuarios
             return;
         }
 
-        Ejecutar(() => ServicioAdministracion.Reactivar(usuario.Dni));
+        Ejecutar(() => ServicioAdministracion.Reactivar(usuario.Dni, SesionActual.Usuario!.Dni));
+    }
+
+    private void CancelarEdicion()
+    {
+        _editando = null;
+        LimpiarMensajes();
+    }
+
+    // Al abrir o cerrar un formulario se borran los mensajes de la accion anterior.
+    private void LimpiarMensajes()
+    {
+        _error = null;
+        _exito = null;
     }
 
     private void Ejecutar(Action accion)
     {
-        _error = null;
-        _exito = null;
+        LimpiarMensajes();
         try
         {
             accion();
@@ -115,8 +149,11 @@ public partial class Usuarios
         Recargar();
     }
 
+    // Cambiar la clave de la tabla la vuelve a dibujar entera: si el servicio rechaza un cambio de tipo,
+    // el desplegable vuelve a mostrar el tipo real y no el que se habia elegido.
     private void Recargar()
     {
         _usuarios = ServicioAdministracion.ListarUsuarios();
+        _recargas++;
     }
 }

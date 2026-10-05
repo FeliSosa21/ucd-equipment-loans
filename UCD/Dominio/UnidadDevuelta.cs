@@ -16,7 +16,7 @@ public class UnidadDevuelta
 
         Unidad = unidad;
         Condicion = condicion;
-        Observaciones = observaciones;
+        Observaciones = string.IsNullOrWhiteSpace(observaciones) ? null : observaciones.Trim();
     }
 
     public void ActualizarEstadoDeLaUnidad()

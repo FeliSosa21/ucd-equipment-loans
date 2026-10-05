@@ -46,6 +46,7 @@
     {
         RenovarSesion();
         ExigirCambioDeContrasena();
+        ExigirActivacion();
     }
 
     // En cada navegacion se traen los datos actuales: si el usuario fue desactivado, se cierra la sesion,
@@ -63,7 +64,7 @@
         }
         catch (ServicioException)
         {
-            SesionActual.Cerrar();
+            SesionActual.Expirar("Tu sesión se cerró porque tu cuenta ya no está activa.");
             Navigation.NavigateTo("/ingresar");
         }
     }
@@ -75,6 +76,16 @@
             !Navigation.Uri.EndsWith("/cambiar-contrasena", StringComparison.OrdinalIgnoreCase))
         {
             Navigation.NavigateTo("/cambiar-contrasena");
+        }
+    }
+
+    // Un usuario sin tipo asignado solo puede ver la pantalla que le explica que espere la activacion.
+    private void ExigirActivacion()
+    {
+        if (SesionActual.EstaIniciada && SesionActual.Usuario!.PendienteDeActivacion &&
+            !SesionActual.Usuario.DebeCambiarContrasena)
+        {
+            Navigation.NavigateTo("/pendiente-activacion");
         }
     }
 

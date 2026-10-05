@@ -5,10 +5,13 @@ using DTOs;
 namespace Servicios;
 
 // Gestion de cuentas: el administrador crea, lista, asigna tipo, modifica, desactiva y reactiva;
-// cualquier usuario puede modificar sus propios datos (la UI controla quien edita a quien).
+// cualquier usuario puede modificar sus propios datos. Cada operacion valida que el responsable sea un
+// administrador activo, asi un administrador desactivado con la pantalla abierta no puede seguir operando.
+// Como ademas no puede actuar sobre si mismo, siempre queda al menos un administrador activo.
 public class ServicioAdministracionUsuarios
 {
     public const string ContrasenaPredeterminada = "Ucd12345";
+    private const string MensajeSoloAdministrador = "Solo un administrador activo puede gestionar usuarios";
 
     private readonly RepositorioUsuario _repositorio;
     private readonly ServicioUsuario _servicioUsuario;
@@ -19,9 +22,10 @@ public class ServicioAdministracionUsuarios
         _servicioUsuario = servicioUsuario;
     }
 
-    public void CrearUsuario(UsuarioDto dto, string nombreTipo)
+    public void CrearUsuario(UsuarioDto dto, string nombreTipo, string dniResponsable)
     {
         ArgumentNullException.ThrowIfNull(dto);
+        ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         TipoUsuario tipo = ObtenerTipo(nombreTipo);
 
         _servicioUsuario.Registrar(new UsuarioDto
@@ -51,15 +55,9 @@ public class ServicioAdministracionUsuarios
     public void AsignarTipo(string dni, string nombreTipo, string dniResponsable)
     {
         ValidarQueNoSeaElMismo(dni, dniResponsable, "Un administrador no puede cambiar su propio tipo");
+        ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         Usuario usuario = ObtenerUsuario(dni);
-        TipoUsuario tipo = ObtenerTipo(nombreTipo);
-
-        if (tipo != TipoUsuario.Administrador)
-        {
-            ValidarQueQuedeOtroAdministradorActivo(usuario);
-        }
-
-        usuario.AsignarTipo(tipo);
+        usuario.AsignarTipo(ObtenerTipo(nombreTipo));
     }
 
     public UsuarioResumenDto ObtenerResumen(string dni)
@@ -92,13 +90,13 @@ public class ServicioAdministracionUsuarios
     public void Desactivar(string dni, string dniResponsable)
     {
         ValidarQueNoSeaElMismo(dni, dniResponsable, "Un administrador no puede desactivarse a si mismo");
-        Usuario usuario = ObtenerUsuario(dni);
-        ValidarQueQuedeOtroAdministradorActivo(usuario);
-        usuario.Desactivar();
+        ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
+        ObtenerUsuario(dni).Desactivar();
     }
 
-    public void Reactivar(string dni)
+    public void Reactivar(string dni, string dniResponsable)
     {
+        ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         ObtenerUsuario(dni).Reactivar();
     }
 
@@ -109,11 +107,17 @@ public class ServicioAdministracionUsuarios
             return;
         }
 
+        ValidarQueSeaAdministradorActivo(dniResponsable,
+            "Solo un administrador puede modificar los datos de otro usuario");
+    }
+
+    private void ValidarQueSeaAdministradorActivo(string dniResponsable, string mensaje)
+    {
         Usuario? responsable = _repositorio.ObtenerUsuarioPorDni(dniResponsable);
 
         if (responsable is null || !EsAdministradorActivo(responsable))
         {
-            throw new ServicioException("Solo un administrador puede modificar los datos de otro usuario");
+            throw new ServicioException(mensaje);
         }
     }
 
@@ -122,21 +126,6 @@ public class ServicioAdministracionUsuarios
         if (dni == dniResponsable)
         {
             throw new ServicioException(mensaje);
-        }
-    }
-
-    private void ValidarQueQuedeOtroAdministradorActivo(Usuario usuario)
-    {
-        if (!EsAdministradorActivo(usuario))
-        {
-            return;
-        }
-
-        bool hayOtro = _repositorio.ObtenerTodos().Any(otro => otro != usuario && EsAdministradorActivo(otro));
-
-        if (!hayOtro)
-        {
-            throw new ServicioException("Debe quedar al menos un administrador activo");
         }
     }
 

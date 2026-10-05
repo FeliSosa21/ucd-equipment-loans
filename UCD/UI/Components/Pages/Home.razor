@@ -1,26 +1,45 @@
 @page "/"
+@inject SesionActual SesionActual
 
-<PageTitle>UCD · Mis solicitudes</PageTitle>
+@if (!SesionActual.EstaIniciada)
+{
+    <PageTitle>UCD · Inicio</PageTitle>
 
-<div class="page-header">
-    <h1>Mis solicitudes y retiros</h1>
-    <p>Tus solicitudes y préstamos con su estado, fecha de inicio y fecha esperada de devolución.</p>
-</div>
+    <div class="page-header">
+        <h1>Bienvenido a UCD</h1>
+        <p>Pedí equipamiento prestado de la universidad y seguí tus solicitudes.</p>
+    </div>
 
-<div class="card table-card">
-    <table>
-        <thead>
-            <tr>
-                <th>Equipamiento</th>
-                <th>Estado</th>
-                <th>Fecha de inicio</th>
-                <th>Devolución esperada</th>
-                <th>Unidades asignadas</th>
-            </tr>
-        </thead>
-    </table>
-    <EstadoVacio Titulo="Todavía no tenés solicitudes"
-                 Mensaje="Buscá un equipo en el catálogo para solicitar tu primer préstamo.">
-        <a class="btn btn-primary btn-sm" href="catalogo">Ir al catálogo</a>
+    <EstadoVacio Titulo="Ingresá para empezar"
+                 Mensaje="Con tu cuenta podés consultar el catálogo y solicitar préstamos.">
+        <a class="btn btn-primary btn-sm" href="ingresar">Ingresar</a>
+        <a class="btn btn-ghost btn-sm" href="registro">Crear cuenta</a>
     </EstadoVacio>
-</div>
+}
+else
+{
+    <PageTitle>UCD · Mis solicitudes</PageTitle>
+
+    <div class="page-header">
+        <h1>Mis solicitudes y retiros</h1>
+        <p>Tus solicitudes y préstamos con su estado, fecha de inicio y fecha esperada de devolución.</p>
+    </div>
+
+    <div class="card table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Equipamiento</th>
+                    <th>Estado</th>
+                    <th>Fecha de inicio</th>
+                    <th>Devolución esperada</th>
+                    <th>Unidades asignadas</th>
+                </tr>
+            </thead>
+        </table>
+        <EstadoVacio Titulo="Todavía no tenés solicitudes"
+                     Mensaje="Buscá un equipo en el catálogo para solicitar tu primer préstamo.">
+            <a class="btn btn-primary btn-sm" href="catalogo">Ir al catálogo</a>
+        </EstadoVacio>
+    </div>
+}
