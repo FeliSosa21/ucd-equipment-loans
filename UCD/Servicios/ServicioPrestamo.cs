@@ -55,6 +55,11 @@ public class ServicioPrestamo
             throw new ServicioException("El tipo de equipamiento no existe");
         }
 
+        if (!tipo.EstaActivo)
+        {
+            throw new ServicioException("El tipo de equipamiento esta descontinuado");
+        }
+
         Prestamo prestamo = new Prestamo(solicitante, tipo, datos.CantidadSolicitada, _reloj.GetLocalNow().DateTime);
 
         if (!tipo.RequiereAprobacion)
