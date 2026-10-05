@@ -156,6 +156,20 @@ public sealed class ServicioPrestamoTests
             movimientos.Select(movimiento => movimiento.Unidad).ToList());
     }
 
+    [TestMethod]
+    public void Solicitar_TipoSinAprobacionSinUnidadesSuficientes_QuedaRechazadoConMotivo()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades);
+
+        PrestamoDto resultado = servicio.Solicitar(datos, DniDocente);
+
+        Assert.AreEqual("Rechazado", resultado.Estado);
+        Assert.IsFalse(string.IsNullOrWhiteSpace(resultado.MotivoRechazo),
+            "La solicitud rechazada deberia tener un motivo");
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
