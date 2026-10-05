@@ -20,6 +20,7 @@ public sealed class ServicioPrestamoTests
     private const string NombreTipoSinUnidades = "Parlante JBL Flip";
     private const string NombreTipoConAprobacion = "Camara Canon EOS R50";
     private const string NombreTipoDiscontinuado = "Retroproyector 3M";
+    private const string NombreTipoInexistente = "Microscopio Zeiss Primo";
 
     private const int CantidadSolicitadaPorDefecto = 2;
 
@@ -222,6 +223,18 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(EstadoPrestamo.Solicitado, guardados[0].Estado);
 
         Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count);
+    }
+
+    [TestMethod]
+    public void Solicitar_TipoInexistente_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoInexistente);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(datos, DniDocente));
+
+        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
     }
 
     private static ServicioPrestamo CrearServicio(Memoria memoria)
