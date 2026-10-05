@@ -97,7 +97,8 @@ public sealed class ServicioPrestamoTests
 
         TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoSinAprobacion)!;
 
-        Assert.AreEqual(CantidadSolicitadaPorDefecto, tipo.Unidades.Count(unidad => unidad.Estado == EstadoUnidadFisica.Prestada));
+        Assert.AreEqual(CantidadSolicitadaPorDefecto,
+            tipo.Unidades.Count(unidad => unidad.Estado == EstadoUnidadFisica.Prestada));
         Assert.AreEqual(1, tipo.CantidadDisponibles());
     }
 
@@ -131,9 +132,9 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(FechaFija, guardado.FechaHoraPrestamo);
     }
 
-    [TestMethod] public void Solicitar_TipoSinAprobacionConUnidades_RegistraUnMovimientoDePrestamoPorUnidad()
+    [TestMethod]
+    public void Solicitar_TipoSinAprobacionConUnidades_RegistraUnMovimientoDePrestamoPorUnidad()
     {
-
         Memoria memoria = new Memoria();
         ServicioPrestamo servicio = CrearServicio(memoria);
         SolicitudPrestamoDto datos = CrearSolicitud();
@@ -174,7 +175,6 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Solicitar_TipoSinAprobacionSinUnidadesSuficientes_LoGuardaSinPrestarNiRegistrarMovimientos()
     {
-
         Memoria memoria = new Memoria();
         ServicioPrestamo servicio = CrearServicio(memoria);
         SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 4);
@@ -278,6 +278,7 @@ public sealed class ServicioPrestamoTests
     {
         Memoria memoria = new Memoria();
         ServicioPrestamo servicio = CrearServicio(memoria);
+
         servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniEstudiante);
         servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1),
             DniEstudiante);
@@ -332,6 +333,7 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(NombreTipoSinAprobacion, resultado.TipoEquipamiento);
         Assert.AreEqual(CantidadSolicitadaPorDefecto, resultado.CantidadSolicitada);
         Assert.AreEqual(FechaFija, resultado.FechaHoraPrestamo);
+
         CollectionAssert.AreEquivalent(guardado.UnidadesAsignadas.Select(
             unidad => unidad.IdInstitucional).ToList(), resultado.Unidades);
     }
