@@ -249,6 +249,18 @@ public sealed class ServicioPrestamoTests
         VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
     }
 
+    [TestMethod]
+    public void Solicitar_TipoDiscontinuado_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoDiscontinuado);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(datos, DniDocente));
+
+        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
