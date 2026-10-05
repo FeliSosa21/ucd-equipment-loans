@@ -95,8 +95,13 @@ public class ServicioPrestamo
 
             return new PrestamoDto
             {
+                Id = prestamo.Id,
+                TipoEquipamiento = prestamo.TipoEquipamiento.Nombre,
+                CantidadSolicitada = prestamo.CantidadSolicitada,
+                FechaHoraPrestamo = prestamo.FechaHoraPrestamo,
                 Estado = prestamo.Estado.ToString(),
-                MotivoRechazo = prestamo.MotivoRechazo
+                MotivoRechazo = prestamo.MotivoRechazo,
+                Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList()
             };
         }
         catch (DominioException excepcion)
