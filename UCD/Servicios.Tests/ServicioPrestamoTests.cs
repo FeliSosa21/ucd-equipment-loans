@@ -318,6 +318,24 @@ public sealed class ServicioPrestamoTests
         VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
     }
 
+    [TestMethod]
+    public void Solicitar_TipoSinAprobacionConUnidades_DevuelveSusDatos()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud();
+
+        PrestamoDto resultado = servicio.Solicitar(datos, DniDocente);
+
+        Prestamo guardado = new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniDocente).Single();
+        Assert.AreEqual(guardado.Id, resultado.Id);
+        Assert.AreEqual(NombreTipoSinAprobacion, resultado.TipoEquipamiento);
+        Assert.AreEqual(CantidadSolicitadaPorDefecto, resultado.CantidadSolicitada);
+        Assert.AreEqual(FechaFija, resultado.FechaHoraPrestamo);
+        CollectionAssert.AreEquivalent(guardado.UnidadesAsignadas.Select(
+            unidad => unidad.IdInstitucional).ToList(), resultado.Unidades);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
