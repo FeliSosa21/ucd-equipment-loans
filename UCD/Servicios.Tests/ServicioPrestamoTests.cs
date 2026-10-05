@@ -273,6 +273,24 @@ public sealed class ServicioPrestamoTests
         VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniEstudiante);
     }
 
+    [TestMethod]
+    public void Solicitar_SuperaPrestamosConcurrentes_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniEstudiante);
+        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1),
+            DniEstudiante);
+        SolicitudPrestamoDto tercera = CrearSolicitud(cantidadSolicitada: 1);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(tercera, DniEstudiante));
+
+        Assert.AreEqual(2, new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniEstudiante).Count);
+        Assert.AreEqual(1, new RepositorioMovimiento(memoria).ObtenerTodos().Count);
+        TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoSinAprobacion)!;
+        Assert.AreEqual(2, tipo.CantidadDisponibles());
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
