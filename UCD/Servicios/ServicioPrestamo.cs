@@ -43,6 +43,17 @@ public class ServicioPrestamo
             throw new ServicioException("El solicitante no tiene permiso para solicitar prestamos");
         }
 
-        return new PrestamoDto();
+        TipoEquipamiento tipo = _catalogo.ObtenerTipoPorNombre(datos.TipoEquipamiento)!;
+
+        Prestamo prestamo = new Prestamo(solicitante, tipo, datos.CantidadSolicitada, _reloj.GetLocalNow().DateTime);
+
+        List<UnidadFisica> unidades = tipo.UnidadesDisponibles().Take(datos.CantidadSolicitada).ToList();
+
+        prestamo.Activar(unidades);
+
+        return new PrestamoDto
+        {
+            Estado = prestamo.Estado.ToString()
+        };
     }
 }
