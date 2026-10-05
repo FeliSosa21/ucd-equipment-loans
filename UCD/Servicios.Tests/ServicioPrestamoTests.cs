@@ -291,6 +291,19 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(2, tipo.CantidadDisponibles());
     }
 
+    [TestMethod]
+    public void Solicitar_SolicitudesRechazadasPrevias_NoCuentanParaElLimite()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades), DniEstudiante);
+        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades), DniEstudiante);
+
+        PrestamoDto resultado = servicio.Solicitar(CrearSolicitud(), DniEstudiante);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
