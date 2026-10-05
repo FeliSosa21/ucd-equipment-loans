@@ -59,6 +59,11 @@ public class ServicioPrestamo
         {
             throw new ServicioException("El tipo de equipamiento esta descontinuado");
         }
+        
+        if (!solicitante.Tipo.PermiteUnidades(datos.CantidadSolicitada))
+        {
+            throw new ServicioException("La cantidad solicitada supera el maximo de unidades por prestamo");
+        }
 
         Prestamo prestamo = new Prestamo(solicitante, tipo, datos.CantidadSolicitada, _reloj.GetLocalNow().DateTime);
 
