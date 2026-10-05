@@ -42,6 +42,11 @@ public class ServicioPrestamo
         {
             throw new ServicioException("El solicitante no tiene permiso para solicitar prestamos");
         }
+        
+        if (datos.TipoEquipamiento is null)
+        {
+            throw new ServicioException("Debe indicar un tipo de equipamiento");
+        }
 
         TipoEquipamiento? tipo = _catalogo.ObtenerTipoPorNombre(datos.TipoEquipamiento);
 
