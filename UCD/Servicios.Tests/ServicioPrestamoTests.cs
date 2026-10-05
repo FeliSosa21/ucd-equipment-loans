@@ -130,6 +130,32 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(FechaFija, guardado.FechaHoraPrestamo);
     }
 
+    [TestMethod] public void Solicitar_TipoSinAprobacionConUnidades_RegistraUnMovimientoDePrestamoPorUnidad()
+    {
+
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud();
+
+        servicio.Solicitar(datos, DniDocente);
+
+        Prestamo guardado =
+            new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniDocente).Single();
+        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+
+        Assert.AreEqual(CantidadSolicitadaPorDefecto, movimientos.Count);
+        foreach (Movimiento movimiento in movimientos)
+        {
+            Assert.AreEqual(TipoMovimiento.Prestamo, movimiento.Tipo);
+            Assert.AreEqual(FechaFija, movimiento.FechaHora);
+            Assert.AreSame(guardado.Solicitante, movimiento.Solicitante);
+            Assert.IsNull(movimiento.Evaluador);
+        }
+        CollectionAssert.AreEquivalent(
+            guardado.UnidadesAsignadas.ToList(),
+            movimientos.Select(movimiento => movimiento.Unidad).ToList());
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
