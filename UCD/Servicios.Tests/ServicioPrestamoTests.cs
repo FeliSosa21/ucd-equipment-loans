@@ -115,6 +115,21 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(EstadoPrestamo.Activo, guardados[0].Estado);
     }
 
+    [TestMethod]
+    public void Solicitar_DatosValidos_UsaElMomentoDelReloj()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud();
+
+        servicio.Solicitar(datos, DniDocente);
+
+        Prestamo guardado =
+            new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniDocente).Single();
+
+        Assert.AreEqual(FechaFija, guardado.FechaHoraPrestamo);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
