@@ -351,7 +351,7 @@ public sealed class PrestamoTests
         Prestamo prestamo = CrearPrestamo();
 
         bool vigente = prestamo.EstaVigente();
-        
+
         Assert.IsTrue(vigente);
     }
 
@@ -359,9 +359,9 @@ public sealed class PrestamoTests
     public void EstaVigente_PrestamoActivo_DevuelveVerdadero()
     {
         (Prestamo prestamo, _) = CrearPrestamoActivo();
-        
+
         bool vigente = prestamo.EstaVigente();
-        
+
         Assert.IsTrue(vigente);
     }
 
@@ -369,9 +369,9 @@ public sealed class PrestamoTests
     public void EstaVigente_PrestamoRechazado_DevuelveFalso()
     {
         Prestamo prestamo = CrearPrestamoRechazado();
-        
+
         bool vigente = prestamo.EstaVigente();
-        
+
         Assert.IsFalse(vigente);
     }
 
@@ -379,9 +379,9 @@ public sealed class PrestamoTests
     public void EstaVigente_PrestamoDevuelto_DevuelveFalso()
     {
         (Prestamo prestamo, _) = CrearPrestamoDevuelto();
-        
+
         bool vigente = prestamo.EstaVigente();
-        
+
         Assert.IsFalse(vigente);
     }
 
@@ -469,9 +469,9 @@ public sealed class PrestamoTests
     private static Prestamo CrearPrestamoRechazado()
     {
         Prestamo prestamo = CrearPrestamo();
-        
+
         prestamo.RechazarPorFaltaDeUnidades();
-        
+
         return prestamo;
     }
 }

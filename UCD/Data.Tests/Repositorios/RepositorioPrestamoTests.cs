@@ -17,9 +17,9 @@ public class RepositorioPrestamoTests
         RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
         Prestamo prestamo = CrearPrestamo();
         repositorio.AgregarPrestamo(prestamo);
-        
+
         Prestamo? resultado = repositorio.ObtenerPrestamoPorId(id: prestamo.Id);
-        
+
         Assert.AreSame(prestamo, resultado);
     }
 
@@ -32,7 +32,7 @@ public class RepositorioPrestamoTests
         repositorio.AgregarPrestamo(prestamo);
 
         Prestamo? resultado = repositorio.ObtenerPrestamoPorId(id: Guid.NewGuid());
-        
+
         Assert.IsNull(resultado);
     }
 
@@ -47,7 +47,7 @@ public class RepositorioPrestamoTests
         repositorio.AgregarPrestamo(activo);
 
         IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosActivos();
-        
+
         CollectionAssert.AreEquivalent(new List<Prestamo> { activo }, resultado.ToList());
     }
 
@@ -93,14 +93,14 @@ public class RepositorioPrestamoTests
         Prestamo primeroDelSolicitante = CrearPrestamo(solicitante: solicitante);
         Prestamo segundoDelSolicitante = CrearPrestamo(solicitante: solicitante);
         Prestamo delOtroSolicitante = CrearPrestamo(solicitante: otroSolicitante);
-        
+
         repositorio.AgregarPrestamo(primeroDelSolicitante);
         repositorio.AgregarPrestamo(delOtroSolicitante);
         repositorio.AgregarPrestamo(segundoDelSolicitante);
 
         IReadOnlyList<Prestamo> resultado =
             repositorio.ObtenerPrestamosDeSolicitante(dni: solicitante.Dni);
-        
+
         CollectionAssert.AreEquivalent(
             new List<Prestamo> { primeroDelSolicitante, segundoDelSolicitante },
             resultado.ToList());
@@ -112,10 +112,10 @@ public class RepositorioPrestamoTests
         Memoria memoria = new Memoria();
         RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
         Usuario solicitante = CrearSolicitante();
-        
-        IReadOnlyList<Prestamo>  resultado =
+
+        IReadOnlyList<Prestamo> resultado =
             repositorio.ObtenerPrestamosDeSolicitante(dni: solicitante.Dni);
-        
+
         Assert.IsNotNull(resultado);
         Assert.AreEqual(0, resultado.Count);
     }
@@ -129,10 +129,10 @@ public class RepositorioPrestamoTests
         Prestamo rechazado = CrearPrestamo(solicitante: solicitante);
         rechazado.RechazarPorFaltaDeUnidades();
         repositorio.AgregarPrestamo(rechazado);
-        
+
         IReadOnlyList<Prestamo> resultado =
             repositorio.ObtenerPrestamosDeSolicitante(dni: solicitante.Dni);
-        
+
         CollectionAssert.Contains(resultado.ToList(), rechazado);
     }
 

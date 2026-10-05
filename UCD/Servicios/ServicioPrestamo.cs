@@ -144,5 +144,4 @@ public class ServicioPrestamo
             Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList()
         };
     }
-
 }

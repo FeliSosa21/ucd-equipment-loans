@@ -5,7 +5,7 @@ namespace Data.Repositorios;
 public class RepositorioPrestamo
 {
     private readonly Memoria _memoria;
-    
+
     public RepositorioPrestamo(Memoria memoria)
     {
         _memoria = memoria;
