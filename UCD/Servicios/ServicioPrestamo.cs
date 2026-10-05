@@ -42,7 +42,7 @@ public class ServicioPrestamo
         {
             throw new ServicioException("El solicitante no tiene permiso para solicitar prestamos");
         }
-        
+
         if (datos.TipoEquipamiento is null)
         {
             throw new ServicioException("Debe indicar un tipo de equipamiento");
@@ -59,10 +59,18 @@ public class ServicioPrestamo
         {
             throw new ServicioException("El tipo de equipamiento esta descontinuado");
         }
-        
+
         if (!solicitante.Tipo.PermiteUnidades(datos.CantidadSolicitada))
         {
             throw new ServicioException("La cantidad solicitada supera el maximo de unidades por prestamo");
+        }
+
+        int prestamosVigentes = _prestamos.ObtenerPrestamosDeSolicitante(solicitante.Dni)
+            .Count(prestamo => prestamo.EstaVigente());
+
+        if (!solicitante.Tipo.PuedeAgregarPrestamo(prestamosVigentes))
+        {
+            throw new ServicioException("El solicitante alcanzo el maximo de prestamos vigentes");
         }
 
         Prestamo prestamo = new Prestamo(solicitante, tipo, datos.CantidadSolicitada, _reloj.GetLocalNow().DateTime);
