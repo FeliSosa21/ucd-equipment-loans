@@ -23,6 +23,8 @@ public class ServicioPrestamo
 
     public PrestamoDto Solicitar(SolicitudPrestamoDto datos, string dniSolicitante)
     {
+        ArgumentNullException.ThrowIfNull(datos);
+
         return new PrestamoDto();
     }
 }
