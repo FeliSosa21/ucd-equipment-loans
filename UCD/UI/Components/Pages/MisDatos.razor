@@ -76,7 +76,7 @@
         {
             UsuarioResumenDto datos = new UsuarioResumenDto
             {
-                Dni = _dni, Nombre = _nombre, Apellido = _apellido, Correo = _correo.Trim()
+                Dni = _dni, Nombre = _nombre.Trim(), Apellido = _apellido.Trim(), Correo = _correo.Trim()
             };
             ServicioAdministracion.ModificarDatos(datos, SesionActual.Usuario!.Dni);
             SesionActual.ActualizarDatos(datos.Nombre, datos.Correo);

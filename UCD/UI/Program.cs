@@ -20,6 +20,7 @@ builder.Services.AddScoped<RepositorioMovimiento>();
 builder.Services.AddScoped<ServicioUsuario>();
 builder.Services.AddScoped<ServicioSesion>();
 builder.Services.AddScoped<CargaInicial>();
+builder.Services.AddScoped<DatosDeEjemplo>();
 builder.Services.AddScoped<ServicioAdministracionUsuarios>();
 builder.Services.AddScoped<ServicioDevolucion>();
 
@@ -28,10 +29,11 @@ builder.Services.AddScoped<SesionActual>();
 
 WebApplication app = builder.Build();
 
-// Precarga el usuario root al arrancar (la Memoria empieza vacia).
+// Precarga el usuario root y los datos de ejemplo al arrancar (la Memoria empieza vacia).
 using (IServiceScope scope = app.Services.CreateScope())
 {
     scope.ServiceProvider.GetRequiredService<CargaInicial>().CargarRoot();
+    scope.ServiceProvider.GetRequiredService<DatosDeEjemplo>().Cargar();
 }
 
 if (!app.Environment.IsDevelopment())

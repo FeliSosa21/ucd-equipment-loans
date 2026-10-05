@@ -66,6 +66,11 @@
     <div class="alert alert-success mensaje" role="status">@_exito</div>
 }
 
+@if (_avisoLista is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_avisoLista</div>
+}
+
 <div class="card table-card">
     <table>
         <thead>
@@ -94,9 +99,14 @@
             }
         </tbody>
     </table>
-    @if (!PrestamosFiltrados.Any())
+    @if (!_prestamos.Any())
     {
         <EstadoVacio Titulo="No hay préstamos activos"
                      Mensaje="Los préstamos que estén en curso van a aparecer acá para registrar su devolución." />
+    }
+    else if (!PrestamosFiltrados.Any())
+    {
+        <EstadoVacio Titulo="No hay préstamos que coincidan"
+                     Mensaje="Probá buscando por otro nombre de usuario o de equipo." />
     }
 </div>

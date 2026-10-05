@@ -73,6 +73,48 @@ public class ServicioDevolucionTests
     }
 
     [TestMethod]
+    public void RegistrarDevolucion_DatosValidos_RegistraUnMovimientoPorUnidad()
+    {
+        Memoria memoria = new Memoria();
+        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
+        DevolucionDto datos = CrearDatos(prestamo.Id);
+
+        servicio.RegistrarDevolucion(datos, DniFuncionario);
+
+        List<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos().ToList();
+        Assert.AreEqual(2, movimientos.Count);
+        CollectionAssert.AreEquivalent(prestamo.UnidadesAsignadas.ToList(),
+            movimientos.Select(movimiento => movimiento.Unidad).ToList());
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_DatosValidos_ElMovimientoTieneTipoFechaYSolicitante()
+    {
+        Memoria memoria = new Memoria();
+        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
+        DevolucionDto datos = CrearDatos(prestamo.Id);
+
+        servicio.RegistrarDevolucion(datos, DniFuncionario);
+
+        Movimiento movimiento = new RepositorioMovimiento(memoria).ObtenerTodos()[0];
+        Assert.AreEqual(TipoMovimiento.Devolucion, movimiento.Tipo);
+        Assert.AreEqual(datos.FechaHoraDevolucion, movimiento.FechaHora);
+        Assert.AreSame(prestamo.Solicitante, movimiento.Solicitante);
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_DevolucionFallida_NoRegistraMovimientos()
+    {
+        Memoria memoria = new Memoria();
+        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
+        DevolucionDto datos = CrearDatos(prestamo.Id);
+        datos.Unidades.RemoveAt(1);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.RegistrarDevolucion(datos, DniFuncionario));
+        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count);
+    }
+
+    [TestMethod]
     public void RegistrarDevolucion_DatosNulos_LanzaArgumentNullException()
     {
         ServicioDevolucion servicio = CrearServicio(out _);
@@ -196,6 +238,7 @@ public class ServicioDevolucionTests
         });
         prestamos.AgregarPrestamo(prestamo);
 
-        return new ServicioDevolucion(prestamos, usuarios, new RepositorioDevolucion(memoria));
+        return new ServicioDevolucion(prestamos, usuarios, new RepositorioDevolucion(memoria),
+            new RepositorioMovimiento(memoria));
     }
 }

@@ -4,6 +4,7 @@
 @using Servicios
 @inject NavigationManager Navigation
 @inject ServicioUsuario ServicioUsuario
+@inject SesionActual SesionActual
 
 <PageTitle>UCD · Crear cuenta</PageTitle>
 
@@ -95,6 +96,15 @@
         !string.IsNullOrEmpty(_contrasena) &&
         !string.IsNullOrEmpty(_repetirContrasena);
 
+    // Con una sesion iniciada no tiene sentido crear otra cuenta.
+    protected override void OnInitialized()
+    {
+        if (SesionActual.EstaIniciada)
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+
     private void Registrar()
     {
         _error = null;
@@ -121,8 +131,8 @@
         return new UsuarioDto
         {
             Dni = _ci.Trim(),
-            Nombre = _nombre,
-            Apellido = _apellido,
+            Nombre = _nombre.Trim(),
+            Apellido = _apellido.Trim(),
             Correo = _correo.Trim(),
             Contrasena = _contrasena
         };
