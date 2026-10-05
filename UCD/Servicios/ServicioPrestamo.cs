@@ -1,4 +1,5 @@
 ﻿using Data.Repositorios;
+using Dominio;
 using DTOs;
 
 namespace Servicios;
@@ -24,6 +25,13 @@ public class ServicioPrestamo
     public PrestamoDto Solicitar(SolicitudPrestamoDto datos, string dniSolicitante)
     {
         ArgumentNullException.ThrowIfNull(datos);
+
+        Usuario? solicitante = _usuarios.ObtenerUsuarioPorDni(dniSolicitante);
+
+        if (solicitante is null)
+        {
+            throw new ServicioException("El solicitante no existe");
+        }
 
         return new PrestamoDto();
     }
