@@ -43,7 +43,12 @@ public class ServicioPrestamo
             throw new ServicioException("El solicitante no tiene permiso para solicitar prestamos");
         }
 
-        TipoEquipamiento tipo = _catalogo.ObtenerTipoPorNombre(datos.TipoEquipamiento)!;
+        TipoEquipamiento? tipo = _catalogo.ObtenerTipoPorNombre(datos.TipoEquipamiento);
+
+        if (tipo is null)
+        {
+            throw new ServicioException("El tipo de equipamiento no existe");
+        }
 
         Prestamo prestamo = new Prestamo(solicitante, tipo, datos.CantidadSolicitada, _reloj.GetLocalNow().DateTime);
 
