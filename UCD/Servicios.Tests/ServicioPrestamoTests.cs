@@ -304,6 +304,20 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual("Activo", resultado.Estado);
     }
 
+    [TestMethod]
+    public void Solicitar_CantidadCero_LanzaExcepcionConCausaDeDominio()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 0);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Solicitar(datos, DniDocente));
+        Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
+
+        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
