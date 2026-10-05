@@ -176,7 +176,8 @@ public class RepositorioPrestamoTests
         return prestamo;
     }
 
-    private static List<UnidadFisica> CrearUnidadesFisicas(
+    private static List<UnidadFisica> CrearUnidadesDelTipo(
+        TipoEquipamiento tipo,
         int cantidad,
         int primerNumero = 1)
     {
@@ -186,10 +187,13 @@ public class RepositorioPrestamoTests
         {
             int numero = primerNumero + i;
 
-            unidades.Add(new UnidadFisica(
+            UnidadFisica unidad = new UnidadFisica(
                 idInstitucional: $"EQP-{numero:D4}",
                 ubiFisica: "Laboratorio Prueba",
-                numSerie: null));
+                numSerie: null);
+
+            tipo.AgregarUnidad(unidad);
+            unidades.Add(unidad);
         }
 
         return unidades;
@@ -198,7 +202,8 @@ public class RepositorioPrestamoTests
     private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoActivo()
     {
         Prestamo prestamo = CrearPrestamo();
-        List<UnidadFisica> unidades = CrearUnidadesFisicas(cantidad: CantidadSolicitadaPorDefecto);
+        List<UnidadFisica> unidades =
+            CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: CantidadSolicitadaPorDefecto);
 
         prestamo.Activar(unidades);
 

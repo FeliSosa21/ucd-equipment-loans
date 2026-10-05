@@ -103,7 +103,8 @@ public sealed class PrestamoTests
     public void Activar_CantidadSolicitadaDeUnidadesDisponibles_QuedaActivo()
     {
         Prestamo prestamo = CrearPrestamo();
-        List<UnidadFisica> unidades = CrearUnidadesFisicas(cantidad: CantidadSolicitadaPorDefecto);
+        List<UnidadFisica> unidades =
+            CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: CantidadSolicitadaPorDefecto);
 
         prestamo.Activar(unidades);
 
@@ -114,7 +115,8 @@ public sealed class PrestamoTests
     public void Activar_CantidadSolicitadaDeUnidadesDisponibles_AsignaEsasUnidades()
     {
         Prestamo prestamo = CrearPrestamo();
-        List<UnidadFisica> unidades = CrearUnidadesFisicas(cantidad: CantidadSolicitadaPorDefecto);
+        List<UnidadFisica> unidades =
+            CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: CantidadSolicitadaPorDefecto);
 
         prestamo.Activar(unidades);
 
@@ -125,7 +127,8 @@ public sealed class PrestamoTests
     public void Activar_CantidadSolicitadaDeUnidadesDisponibles_UnidadesQuedanPrestadas()
     {
         Prestamo prestamo = CrearPrestamo();
-        List<UnidadFisica> unidades = CrearUnidadesFisicas(cantidad: CantidadSolicitadaPorDefecto);
+        List<UnidadFisica> unidades =
+            CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: CantidadSolicitadaPorDefecto);
 
         prestamo.Activar(unidades);
 
@@ -142,7 +145,8 @@ public sealed class PrestamoTests
     public void Activar_CantidadDistintaALaSolicitada_LanzaExcepcion(int cantidadEntregada)
     {
         Prestamo prestamo = CrearPrestamo();
-        List<UnidadFisica> unidades = CrearUnidadesFisicas(cantidad: cantidadEntregada);
+        List<UnidadFisica> unidades =
+            CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: cantidadEntregada);
 
         Assert.ThrowsException<DominioException>(() => prestamo.Activar(unidades));
         Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
@@ -152,7 +156,8 @@ public sealed class PrestamoTests
     public void Activar_AlgunaUnidadNoDisponible_LanzaExcepcionYNoPrestaNinguna()
     {
         Prestamo prestamo = CrearPrestamo();
-        List<UnidadFisica> unidades = CrearUnidadesFisicas(cantidad: CantidadSolicitadaPorDefecto);
+        List<UnidadFisica> unidades =
+            CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: CantidadSolicitadaPorDefecto);
         UnidadFisica disponible = unidades[0];
         UnidadFisica prestada = unidades[1];
 
@@ -169,7 +174,8 @@ public sealed class PrestamoTests
     {
         (Prestamo prestamo, List<UnidadFisica> primerasUnidades) = CrearPrestamoActivo();
 
-        List<UnidadFisica> nuevasUnidades = CrearUnidadesFisicas(
+        List<UnidadFisica> nuevasUnidades = CrearUnidadesDelTipo(
+            tipo: prestamo.TipoEquipamiento,
             cantidad: CantidadSolicitadaPorDefecto,
             primerNumero: CantidadSolicitadaPorDefecto + 1);
 
@@ -188,7 +194,8 @@ public sealed class PrestamoTests
     {
         (Prestamo prestamo, List<UnidadFisica> primerasUnidades) = CrearPrestamoDevuelto();
 
-        List<UnidadFisica> nuevasUnidades = CrearUnidadesFisicas(
+        List<UnidadFisica> nuevasUnidades = CrearUnidadesDelTipo(
+            tipo: prestamo.TipoEquipamiento,
             cantidad: CantidadSolicitadaPorDefecto,
             primerNumero: CantidadSolicitadaPorDefecto + 1);
 
@@ -218,7 +225,7 @@ public sealed class PrestamoTests
     public void Activar_UnidadRepetida_LanzaExcepcionYNoPrestaNinguna()
     {
         Prestamo prestamo = CrearPrestamo();
-        UnidadFisica unidad = CrearUnidadesFisicas(cantidad: 1)[0];
+        UnidadFisica unidad = CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: 1)[0];
         List<UnidadFisica> mismaUnidadDosVeces = new List<UnidadFisica> { unidad, unidad };
 
         Assert.ThrowsException<DominioException>(() => prestamo.Activar(mismaUnidadDosVeces));
@@ -231,7 +238,8 @@ public sealed class PrestamoTests
     public void Activar_PrestamoRechazado_LanzaExcepcion()
     {
         Prestamo prestamo = CrearPrestamoRechazado();
-        List<UnidadFisica> unidades = CrearUnidadesFisicas(cantidad: CantidadSolicitadaPorDefecto);
+        List<UnidadFisica> unidades =
+            CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: CantidadSolicitadaPorDefecto);
 
         Assert.ThrowsException<DominioException>(() => prestamo.Activar(unidades));
         foreach (UnidadFisica unidad in unidades)
@@ -425,7 +433,10 @@ public sealed class PrestamoTests
         return prestamo;
     }
 
-    private static List<UnidadFisica> CrearUnidadesFisicas(int cantidad, int primerNumero = 1)
+    private static List<UnidadFisica> CrearUnidadesDelTipo(
+        TipoEquipamiento tipo,
+        int cantidad,
+        int primerNumero = 1)
     {
         List<UnidadFisica> unidades = new List<UnidadFisica>();
 
@@ -433,10 +444,13 @@ public sealed class PrestamoTests
         {
             int numero = primerNumero + i;
 
-            unidades.Add(new UnidadFisica(
+            UnidadFisica unidad = new UnidadFisica(
                 idInstitucional: $"EQP-{numero:D4}",
                 ubiFisica: "Laboratorio Prueba",
-                numSerie: null));
+                numSerie: null);
+
+            tipo.AgregarUnidad(unidad);
+            unidades.Add(unidad);
         }
 
         return unidades;
@@ -445,7 +459,8 @@ public sealed class PrestamoTests
     private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoActivo()
     {
         Prestamo prestamo = CrearPrestamo();
-        List<UnidadFisica> unidades = CrearUnidadesFisicas(cantidad: CantidadSolicitadaPorDefecto);
+        List<UnidadFisica> unidades =
+            CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: CantidadSolicitadaPorDefecto);
 
         prestamo.Activar(unidades);
 
