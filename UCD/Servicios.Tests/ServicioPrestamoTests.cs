@@ -261,6 +261,18 @@ public sealed class ServicioPrestamoTests
         VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
     }
 
+    [TestMethod]
+    public void Solicitar_SuperaUnidadesPorPrestamo_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 3);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(datos, DniEstudiante));
+
+        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniEstudiante);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
