@@ -51,6 +51,8 @@ public class ServicioPrestamo
 
         prestamo.Activar(unidades);
 
+        _prestamos.AgregarPrestamo(prestamo);
+
         return new PrestamoDto
         {
             Estado = prestamo.Estado.ToString()
