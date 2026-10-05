@@ -38,6 +38,11 @@ public class ServicioPrestamo
             throw new ServicioException("El solicitante esta desactivado");
         }
 
+        if (!solicitante.Tipo.TienePermiso(Permiso.SolicitarPrestamo))
+        {
+            throw new ServicioException("El solicitante no tiene permiso para solicitar prestamos");
+        }
+
         return new PrestamoDto();
     }
 }
