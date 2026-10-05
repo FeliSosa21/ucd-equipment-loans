@@ -47,9 +47,15 @@ public class ServicioPrestamo
 
         Prestamo prestamo = new Prestamo(solicitante, tipo, datos.CantidadSolicitada, _reloj.GetLocalNow().DateTime);
 
-        List<UnidadFisica> unidades = tipo.UnidadesDisponibles().Take(datos.CantidadSolicitada).ToList();
-
-        prestamo.Activar(unidades);
+        if (tipo.CantidadDisponibles() < datos.CantidadSolicitada)
+        {
+            prestamo.RechazarPorFaltaDeUnidades();
+        }
+        else
+        {
+            List<UnidadFisica> unidades = tipo.UnidadesDisponibles().Take(datos.CantidadSolicitada).ToList();
+            prestamo.Activar(unidades);
+        }
 
         _prestamos.AgregarPrestamo(prestamo);
 
@@ -57,7 +63,8 @@ public class ServicioPrestamo
 
         return new PrestamoDto
         {
-            Estado = prestamo.Estado.ToString()
+            Estado = prestamo.Estado.ToString(),
+            MotivoRechazo = prestamo.MotivoRechazo
         };
     }
 
