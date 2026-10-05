@@ -85,6 +85,21 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual("Activo", resultado.Estado);
     }
 
+    [TestMethod]
+    public void Solicitar_TipoSinAprobacionConUnidades_PrestaLaCantidadSolicitada()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud();
+
+        servicio.Solicitar(datos, DniDocente);
+
+        TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoSinAprobacion)!;
+
+        Assert.AreEqual(CantidadSolicitadaPorDefecto, tipo.Unidades.Count(unidad => unidad.Estado == EstadoUnidadFisica.Prestada));
+        Assert.AreEqual(1, tipo.CantidadDisponibles());
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
