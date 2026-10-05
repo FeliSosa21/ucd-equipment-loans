@@ -47,14 +47,17 @@ public class ServicioPrestamo
 
         Prestamo prestamo = new Prestamo(solicitante, tipo, datos.CantidadSolicitada, _reloj.GetLocalNow().DateTime);
 
-        if (tipo.CantidadDisponibles() < datos.CantidadSolicitada)
+        if (!tipo.RequiereAprobacion)
         {
-            prestamo.RechazarPorFaltaDeUnidades();
-        }
-        else
-        {
-            List<UnidadFisica> unidades = tipo.UnidadesDisponibles().Take(datos.CantidadSolicitada).ToList();
-            prestamo.Activar(unidades);
+            if (tipo.CantidadDisponibles() < datos.CantidadSolicitada)
+            {
+                prestamo.RechazarPorFaltaDeUnidades();
+            }
+            else
+            {
+                List<UnidadFisica> unidades = tipo.UnidadesDisponibles().Take(datos.CantidadSolicitada).ToList();
+                prestamo.Activar(unidades);
+            }
         }
 
         _prestamos.AgregarPrestamo(prestamo);
