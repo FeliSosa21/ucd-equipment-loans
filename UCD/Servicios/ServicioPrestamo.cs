@@ -53,9 +53,24 @@ public class ServicioPrestamo
 
         _prestamos.AgregarPrestamo(prestamo);
 
+        RegistrarMovimientos(prestamo);
+
         return new PrestamoDto
         {
             Estado = prestamo.Estado.ToString()
         };
+    }
+
+    private void RegistrarMovimientos(Prestamo prestamo)
+    {
+        foreach (UnidadFisica unidad in prestamo.UnidadesAsignadas)
+        {
+            _movimientos.AgregarMovimiento(new Movimiento(
+                fechaHora: prestamo.FechaHoraPrestamo,
+                tipo: TipoMovimiento.Prestamo,
+                solicitante: prestamo.Solicitante,
+                evaluador: null,
+                unidad: unidad));
+        }
     }
 }
