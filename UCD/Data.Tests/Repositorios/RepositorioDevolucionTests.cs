@@ -50,6 +50,7 @@ public class RepositorioDevolucionTests
             duracionMaxPrestamo: 5, requiereAprobacion: false, categoria: Categoria.Audiovisual);
         Prestamo prestamo = new Prestamo(solicitante, tipo, cantidadSolicitada: 1, fechaHoraPrestamo: InicioPrestamo);
         UnidadFisica unidad = new UnidadFisica(idInstitucional: "EQP-0001", ubiFisica: "Deposito A", numSerie: null);
+        tipo.AgregarUnidad(unidad);
         prestamo.Activar(new List<UnidadFisica> { unidad });
         Usuario funcionario = new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa",
             correo: "felipe@hotmail.com", contrasena: "VivaLaOrt2026");

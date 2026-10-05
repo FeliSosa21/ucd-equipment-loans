@@ -231,11 +231,16 @@ public class ServicioDevolucionTests
         TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",
             duracionMaxPrestamo: 5, requiereAprobacion: false, categoria: Categoria.Audiovisual);
         prestamo = new Prestamo(solicitante, tipo, cantidadSolicitada: 2, fechaHoraPrestamo: InicioPrestamo);
-        prestamo.Activar(new List<UnidadFisica>
+        List<UnidadFisica> unidades = new List<UnidadFisica>
         {
             new UnidadFisica(idInstitucional: "EQP-0001", ubiFisica: "Deposito A", numSerie: null),
             new UnidadFisica(idInstitucional: "EQP-0002", ubiFisica: "Deposito A", numSerie: null)
-        });
+        };
+        foreach (UnidadFisica unidad in unidades)
+        {
+            tipo.AgregarUnidad(unidad);
+        }
+        prestamo.Activar(unidades);
         prestamos.AgregarPrestamo(prestamo);
 
         return new ServicioDevolucion(prestamos, usuarios, new RepositorioDevolucion(memoria),
