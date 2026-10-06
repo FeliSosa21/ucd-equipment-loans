@@ -492,6 +492,19 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Rechazar_PrestamoAprobado_QuedaRechazadoConEvaluadorYMotivo()
+    {
+        (Prestamo prestamo, _) = CrearPrestamoAprobado();
+        Usuario evaluador = CrearEvaluador();
+
+        prestamo.Rechazar(evaluador, MotivoDeRechazo);
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreSame(evaluador, prestamo.Evaluador);
+        Assert.AreEqual(MotivoDeRechazo, prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
     public void RechazarPorFaltaDeUnidades_PrestamoSolicitado_QuedaRechazado()
     {
         Prestamo prestamo = CrearPrestamo();
