@@ -32,7 +32,11 @@ public class ServicioPrestamo
 
         try
         {
-            Prestamo prestamo = new Prestamo(solicitante, tipo, datos.CantidadSolicitada, _reloj.GetLocalNow().DateTime);
+            Prestamo prestamo = new Prestamo(
+                solicitante,
+                tipo,
+                datos.CantidadSolicitada,
+                _reloj.GetLocalNow().DateTime);
 
             if (!tipo.RequiereAprobacion)
             {

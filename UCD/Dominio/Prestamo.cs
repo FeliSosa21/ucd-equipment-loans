@@ -89,7 +89,6 @@ public class Prestamo
         return Estado == EstadoPrestamo.Solicitado
                || Estado == EstadoPrestamo.Aprobado
                || Estado == EstadoPrestamo.Activo;
-
     }
 
     private static void ValidarSolicitante(Usuario solicitante)
