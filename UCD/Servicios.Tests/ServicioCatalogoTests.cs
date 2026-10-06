@@ -181,6 +181,24 @@ public class ServicioCatalogoTests
         Assert.AreEqual(1, resultado[0].CantidadDisponibles);
     }
 
+    [TestMethod]
+    public void ObtenerUnidadesDisponibles_TipoExistente_DevuelveSoloDisponibles()
+    {
+        var proyector = CrearTipo(nombre: "Proyector Sony");
+        var teclado = CrearTipo(nombre: "Teclado HP");
+        var disponible = CrearUnidad(idInstitucional: "EQP-0002");
+        var prestada = CrearUnidad(idInstitucional: "EQP-0003");
+        teclado.AgregarUnidad(disponible);
+        teclado.AgregarUnidad(prestada);
+        prestada.Prestada();
+        var servicio = CrearServicio(proyector, teclado);
+
+        var resultado = servicio.ObtenerUnidadesDisponibles("Teclado HP");
+
+        Assert.AreEqual(1, resultado.Count);
+        Assert.AreEqual("EQP-0002", resultado[0].IdInstitucional);
+    }
+
     private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var memoria = new Memoria();
