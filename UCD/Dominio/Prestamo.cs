@@ -64,6 +64,7 @@ public class Prestamo
 
     public void Rechazar(Usuario evaluador, string motivo)
     {
+        ValidarEvaluador(evaluador);
         ValidarMotivo(motivo);
 
         Estado = EstadoPrestamo.Rechazado;
