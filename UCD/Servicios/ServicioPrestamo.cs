@@ -127,7 +127,18 @@ public class ServicioPrestamo
 
     public PrestamoDto Realizar(Guid idPrestamo, string dniResponsable)
     {
-        return new PrestamoDto();
+        Prestamo prestamo = _prestamos.ObtenerPrestamoPorId(idPrestamo)!;
+
+        try
+        {
+            prestamo.Realizar();
+
+            return CrearPrestamoDto(prestamo);
+        }
+        catch (DominioException excepcion)
+        {
+            throw new ServicioException(excepcion.Message, excepcion);
+        }
     }
 
     private Usuario ObtenerSolicitante(string dniSolicitante)
