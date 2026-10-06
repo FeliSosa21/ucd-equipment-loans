@@ -95,6 +95,20 @@ public class ServicioCatalogoTests
         Assert.AreEqual(0, resultado.Count);
     }
 
+    [TestMethod]
+    public void ConsultarTipos_MinimoCero_Devuelvetodos()
+    {
+        var teclado = CrearTipo(nombre: "Teclado HP");
+        var monitor = CrearTipo(nombre: "Monitor Dell");
+        monitor.AgregarUnidad(CrearUnidad(idInstitucional:"EQP-0001"));
+        var servicio = CrearServicio(teclado, monitor);
+        var filtro = new FiltroCatalogoDto { MinimoDisponibles = 0 };
+
+        var resultado = servicio.ConsultarTipos(filtro);
+
+        Assert.AreEqual(2, resultado.Count);
+    }
+
     private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var memoria = new Memoria();
