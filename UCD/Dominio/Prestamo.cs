@@ -31,6 +31,7 @@ public class Prestamo
     public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         ValidarQueEsteSolicitado();
+        ValidarQueNoRequieraAprobacion();
         ValidarQueLaListaExista(unidadesFisicas);
         ValidarCantidad(unidadesFisicas);
         ValidarQueNoHayaUnidadesRepetidas(unidadesFisicas);
@@ -126,6 +127,14 @@ public class Prestamo
         if (Estado != EstadoPrestamo.Solicitado)
         {
             throw new DominioException("El prestamo debe estar solicitado");
+        }
+    }
+
+    private void ValidarQueNoRequieraAprobacion()
+    {
+        if (TipoEquipamiento.RequiereAprobacion)
+        {
+            throw new DominioException("El prestamo requiere aprobacion antes de activarse");
         }
     }
 
@@ -225,7 +234,7 @@ public class Prestamo
         {
             unidadFisica.Disponible();
         }
-        
+
         _unidadesAsignadas.Clear();
     }
 
