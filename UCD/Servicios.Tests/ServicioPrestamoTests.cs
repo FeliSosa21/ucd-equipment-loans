@@ -367,6 +367,36 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual("Aprobado", resultado.Estado);
     }
 
+    [TestMethod]
+    public void Aprobar_SolicitudPendienteConUnidades_AsignaLasUnidadesYGuardaElEvaluador()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+
+        servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        TipoEquipamiento camara = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoConAprobacion)!;
+        Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
+
+        Assert.AreEqual(CantidadSolicitadaPorDefecto, guardado.UnidadesAsignadas.Count);
+        Assert.AreEqual(1, camara.CantidadDisponibles());
+        Assert.AreSame(supervisor, guardado.Evaluador);
+    }
+
+    [TestMethod]
+    public void Aprobar_SolicitudPendienteConUnidades_NoRegistraMovimientos()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+
+        servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
@@ -397,6 +427,11 @@ public sealed class ServicioPrestamoTests
         PrestamoDto pendiente = servicio.Solicitar(datos, DniDocente);
 
         return pendiente.Id;
+    }
+
+    private static Prestamo ObtenerPrestamoGuardado(Memoria memoria, Guid idPrestamo)
+    {
+        return new RepositorioPrestamo(memoria).ObtenerPrestamoPorId(idPrestamo)!;
     }
 
     private static void CargarCatalogo(Memoria memoria)
