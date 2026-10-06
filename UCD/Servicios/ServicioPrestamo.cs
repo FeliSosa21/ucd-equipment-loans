@@ -82,7 +82,7 @@ public class ServicioPrestamo
 
     private TipoEquipamiento ObtenerTipoEquipamiento(string nombreTipo)
     {
-        if (nombreTipo is null)
+        if (string.IsNullOrWhiteSpace(nombreTipo))
         {
             throw new ServicioException("Debe indicar un tipo de equipamiento");
         }
