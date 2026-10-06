@@ -16,16 +16,16 @@ public class ServicioCatalogo
     public List<TipoEquipamientoDto> ConsultarTipos(FiltroCatalogoDto filtro)
     {
         var catalogo = _repositorioCatalogo.Obtener();
-        List<TipoEquipamientoDto> listaTipoEquipamientos = new List<TipoEquipamientoDto>();
+        List<TipoEquipamientoDto> resultado = new List<TipoEquipamientoDto>();
         foreach (var tipo in catalogo!.Tipos)
         {
             if (CumpleFiltro(tipo, filtro))
             {
-                listaTipoEquipamientos.Add(new TipoEquipamientoDto { Nombre = tipo.Nombre });
+                resultado.Add(new TipoEquipamientoDto { Nombre = tipo.Nombre });
             }
         }
 
-        return listaTipoEquipamientos;
+        return resultado;
     }
 
     private static bool CumpleFiltro(TipoEquipamiento tipo, FiltroCatalogoDto filtro)
