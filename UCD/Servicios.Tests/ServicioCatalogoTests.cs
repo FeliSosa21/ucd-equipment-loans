@@ -109,6 +109,17 @@ public class ServicioCatalogoTests
         Assert.AreEqual(2, resultado.Count);
     }
 
+    [TestMethod]
+    public void ConsultarTipos_CatalogoSinTipos_DevuelvelistaVacia()
+    {
+        var servicio = CrearServicio();
+        var filtro = new FiltroCatalogoDto();
+
+        var resultado  = servicio.ConsultarTipos(filtro);
+
+        Assert.AreEqual(0, resultado.Count);
+    }
+
     private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var memoria = new Memoria();
