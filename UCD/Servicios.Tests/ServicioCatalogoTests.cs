@@ -83,6 +83,18 @@ public class ServicioCatalogoTests
         Assert.AreEqual("Notebook Lenovo", resultado[0].Nombre);
     }
 
+    [TestMethod]
+    public void ConsultarTipos_SinCoincidencias_DevuelveListaVacia()
+    {
+        var teclado = CrearTipo(nombre: "Teclado HP", categoria: Categoria.Computacion);
+        var servicio = CrearServicio(teclado);
+        var filtro = new FiltroCatalogoDto { Categoria = "Audiovisual" };
+
+        var resultado = servicio.ConsultarTipos(filtro);
+
+        Assert.AreEqual(0, resultado.Count);
+    }
+
     private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var memoria = new Memoria();
