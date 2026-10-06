@@ -64,6 +64,9 @@ public class Prestamo
 
     public void Rechazar(Usuario evaluador, string motivo)
     {
+        Estado = EstadoPrestamo.Rechazado;
+        Evaluador = evaluador;
+        MotivoRechazo = motivo;
     }
 
     public void RechazarPorFaltaDeUnidades()
