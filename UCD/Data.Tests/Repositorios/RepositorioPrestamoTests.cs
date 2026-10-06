@@ -70,6 +70,29 @@ public class RepositorioPrestamoTests
     }
 
     [TestMethod]
+    public void ObtenerPrestamosPendientes_PrestamosEnVariosEstados_DevuelveSoloLosSolicitados()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+        (Prestamo primerPendiente, _) = CrearSolicitudDeTipoConAprobacion();
+        (Prestamo segundoPendiente, _) = CrearSolicitudDeTipoConAprobacion();
+        (Prestamo aprobado, _) = CrearPrestamoAprobado();
+        (Prestamo activo, _) = CrearPrestamoActivo();
+        Prestamo rechazado = CrearPrestamoRechazado();
+
+        repositorio.AgregarPrestamo(primerPendiente);
+        repositorio.AgregarPrestamo(aprobado);
+        repositorio.AgregarPrestamo(activo);
+        repositorio.AgregarPrestamo(rechazado);
+        repositorio.AgregarPrestamo(segundoPendiente);
+
+        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosPendientes();
+
+        CollectionAssert.AreEquivalent(
+            new List<Prestamo> { primerPendiente, segundoPendiente }, resultado.ToList());
+    }
+
+    [TestMethod]
     public void ObtenerPrestamoPorId_OtroRepositorioSobreLaMismaMemoria_LoEncuentra()
     {
         Memoria memoria = new Memoria();
@@ -150,13 +173,27 @@ public class RepositorioPrestamoTests
         return usuario;
     }
 
-    private static TipoEquipamiento CrearTipoEquipamiento()
+    private static Usuario CrearEvaluador()
+    {
+        Usuario usuario = new Usuario(
+            dni: "67890127",
+            nombre: "Sofia",
+            apellido: "Martinez",
+            correo: "sofia.martinez@ejemplo.com",
+            contrasena: "VivalaOrt2026");
+
+        usuario.AsignarTipo(TipoUsuario.Supervisor);
+
+        return usuario;
+    }
+
+    private static TipoEquipamiento CrearTipoEquipamiento(bool requiereAprobacion = false)
     {
         TipoEquipamiento tipo = new TipoEquipamiento(
             nombre: "Proyector Epson PowerLite",
             descripcion: "Proyector para aulas",
             duracionMaxPrestamo: 5,
-            requiereAprobacion: false,
+            requiereAprobacion: requiereAprobacion,
             categoria: Categoria.Audiovisual);
 
         return tipo;
@@ -199,6 +236,24 @@ public class RepositorioPrestamoTests
         return unidades;
     }
 
+    private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearSolicitudDeTipoConAprobacion()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento(requiereAprobacion: true);
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: tipo);
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: tipo, cantidad: CantidadSolicitadaPorDefecto);
+
+        return (prestamo, unidades);
+    }
+
+    private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoAprobado()
+    {
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearSolicitudDeTipoConAprobacion();
+
+        prestamo.Aprobar(CrearEvaluador(), unidades);
+
+        return (prestamo, unidades);
+    }
+
     private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoActivo()
     {
         Prestamo prestamo = CrearPrestamo();
@@ -208,5 +263,14 @@ public class RepositorioPrestamoTests
         prestamo.Activar(unidades);
 
         return (prestamo, unidades);
+    }
+
+    private static Prestamo CrearPrestamoRechazado()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        prestamo.RechazarPorFaltaDeUnidades();
+
+        return prestamo;
     }
 }
