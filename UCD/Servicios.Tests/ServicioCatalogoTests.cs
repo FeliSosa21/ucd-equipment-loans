@@ -135,7 +135,7 @@ public class ServicioCatalogoTests
     [TestMethod]
     public void ConsultarTipos_MinimoNegativo_LanzaServicioException()
     {
-        var teclado = CrearTipo(nombre:"Teclado HP");
+        var teclado = CrearTipo(nombre: "Teclado HP");
         var servicio = CrearServicio(teclado);
         var filtro = new FiltroCatalogoDto { MinimoDisponibles = -1 };
 
@@ -153,7 +153,7 @@ public class ServicioCatalogoTests
     }
 
     [TestMethod]
-    public void ConsultarTipos_FiltroNull_LanzaAgumentNullException()
+    public void ConsultarTipos_FiltroNull_LanzaArgumentNullException()
     {
         var teclado = CrearTipo(nombre: "Teclado HP");
         var servicio = CrearServicio(teclado);
@@ -165,11 +165,11 @@ public class ServicioCatalogoTests
     public void ConsultarTipos_TipoConUnidades_DtoTraeDatosYDisponibles()
     {
         var teclado = CrearTipo(nombre: "Teclado HP", categoria: Categoria.Computacion);
-        var primeraUnidad = CrearUnidad(idInstitucional: "EQP-0001");
-        var segundaUnidad = CrearUnidad(idInstitucional: "EQP-0002");
-        teclado.AgregarUnidad(primeraUnidad);
-        teclado.AgregarUnidad(segundaUnidad);
-        segundaUnidad.Prestada();
+        var disponible = CrearUnidad(idInstitucional: "EQP-0001");
+        var prestada = CrearUnidad(idInstitucional: "EQP-0002");
+        teclado.AgregarUnidad(disponible);
+        teclado.AgregarUnidad(prestada);
+        prestada.Prestada();
         var servicio = CrearServicio(teclado);
         var filtro = new FiltroCatalogoDto();
 
@@ -186,8 +186,10 @@ public class ServicioCatalogoTests
     {
         var proyector = CrearTipo(nombre: "Proyector Sony");
         var teclado = CrearTipo(nombre: "Teclado HP");
+        var unidadProyector = CrearUnidad(idInstitucional: "EQP-0001");
         var disponible = CrearUnidad(idInstitucional: "EQP-0002");
         var prestada = CrearUnidad(idInstitucional: "EQP-0003");
+        proyector.AgregarUnidad(unidadProyector);
         teclado.AgregarUnidad(disponible);
         teclado.AgregarUnidad(prestada);
         prestada.Prestada();
