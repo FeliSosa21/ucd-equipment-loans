@@ -47,6 +47,7 @@ public class Prestamo
         ValidarQueLaListaExista(unidadesFisicas);
         ValidarCantidad(unidadesFisicas);
         ValidarQueNoHayaUnidadesRepetidas(unidadesFisicas);
+        ValidarQueSeanDelTipo(unidadesFisicas);
         ValidarQueEstenDisponibles(unidadesFisicas);
         AsignarUnidades(unidadesFisicas);
 
@@ -137,6 +138,18 @@ public class Prestamo
         if (unidadesFisicas.Distinct().Count() != unidadesFisicas.Count)
         {
             throw new DominioException("Una unidad no puede prestarse dos veces");
+        }
+    }
+
+    private void ValidarQueSeanDelTipo(IReadOnlyList<UnidadFisica> unidadesFisicas)
+    {
+        foreach (var unidadFisica in unidadesFisicas)
+        {
+            if (!TipoEquipamiento.Unidades.Contains(unidadFisica))
+            {
+                throw new DominioException(
+                    $"La unidad {unidadFisica.IdInstitucional} no pertenece al tipo de equipamiento del prestamo");
+            }
         }
     }
 
