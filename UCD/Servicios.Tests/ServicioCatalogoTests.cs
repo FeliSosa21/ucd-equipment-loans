@@ -164,7 +164,7 @@ public class ServicioCatalogoTests
     [TestMethod]
     public void ConsultarTipos_TipoConUnidades_DtoTraeDatosYDisponibles()
     {
-        var teclado = CrearTipo(nombre: "Teclado HP", categoria: Categoria.Laboratorio);
+        var teclado = CrearTipo(nombre: "Teclado HP", categoria: Categoria.Computacion);
         var primeraUnidad = CrearUnidad(idInstitucional: "EQP-0001");
         var segundaUnidad = CrearUnidad(idInstitucional: "EQP-0002");
         teclado.AgregarUnidad(primeraUnidad);
