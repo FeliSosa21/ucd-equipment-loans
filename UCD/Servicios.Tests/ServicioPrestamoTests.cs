@@ -28,6 +28,8 @@ public sealed class ServicioPrestamoTests
 
     private const int CantidadSolicitadaPorDefecto = 2;
 
+    private const string MotivoDeRechazo = "El equipo esta reservado para un examen";
+
     [TestMethod]
     public void Solicitar_DatosNulos_LanzaArgumentNullException()
     {
@@ -496,6 +498,23 @@ public sealed class ServicioPrestamoTests
 
         Assert.AreEqual(EstadoPrestamo.Aprobado, guardado.Estado, "El prestamo deberia seguir aprobado");
         Assert.AreEqual(CantidadSolicitadaPorDefecto, guardado.UnidadesAsignadas.Count, "Deberia conservar sus unidades");
+    }
+
+    [TestMethod]
+    public void Rechazar_SolicitudPendiente_QuedaRechazadoConMotivoYEvaluador()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+
+        PrestamoDto resultado = servicio.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
+
+        Assert.AreEqual("Rechazado", resultado.Estado);
+        Assert.AreEqual(MotivoDeRechazo, resultado.MotivoRechazo);
+        Assert.AreSame(supervisor, guardado.Evaluador);
     }
 
     private static ServicioPrestamo CrearServicio(Memoria memoria)

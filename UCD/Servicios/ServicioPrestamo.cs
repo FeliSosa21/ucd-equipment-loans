@@ -101,6 +101,11 @@ public class ServicioPrestamo
         }
     }
 
+    public PrestamoDto Rechazar(Guid idPrestamo, string motivo, string dniEvaluador)
+    {
+        return new PrestamoDto();
+    }
+
     private Usuario ObtenerSolicitante(string dniSolicitante)
     {
         Usuario? solicitante = _usuarios.ObtenerUsuarioPorDni(dniSolicitante);
