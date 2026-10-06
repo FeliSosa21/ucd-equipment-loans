@@ -30,10 +30,17 @@ public class ServicioCatalogo
 
     private static bool CumpleFiltro(TipoEquipamiento tipo, FiltroCatalogoDto filtro)
     {
-        if ((filtro.Categoria != null && tipo.Categoria.ToString() != filtro.Categoria.ToString()) ||
-            (filtro.Estado != null && filtro.Estado.ToString() != tipo.Estado.ToString()) ||
-            (filtro.MinimoDisponibles != null && tipo.CantidadDisponibles() < filtro.MinimoDisponibles)
-            )
+        if (filtro.Categoria != null && tipo.Categoria.ToString() != filtro.Categoria)
+        {
+            return false;
+        }
+
+        if (filtro.Estado != null && tipo.Estado.ToString() != filtro.Estado)
+        {
+            return false;
+        }
+
+        if (filtro.MinimoDisponibles != null && tipo.CantidadDisponibles() < filtro.MinimoDisponibles)
         {
             return false;
         }
