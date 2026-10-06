@@ -463,6 +463,23 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow(" ")]
+    public void Rechazar_MotivoVacio_LanzaExcepcion(string? motivoInvalido)
+    {
+        (Prestamo prestamo, _) = CrearSolicitudDeTipoConAprobacion();
+        Usuario evaluador = CrearEvaluador();
+
+        Assert.ThrowsException<DominioException>(
+            () => prestamo.Rechazar(evaluador, motivoInvalido!));
+
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.IsNull(prestamo.MotivoRechazo);
+        Assert.IsNull(prestamo.Evaluador);
+    }
+
+    [TestMethod]
     public void RechazarPorFaltaDeUnidades_PrestamoSolicitado_QuedaRechazado()
     {
         Prestamo prestamo = CrearPrestamo();
