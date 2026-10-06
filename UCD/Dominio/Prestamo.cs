@@ -57,6 +57,8 @@ public class Prestamo
 
     public void Realizar()
     {
+        ValidarQueEsteAprobado();
+
         Estado = EstadoPrestamo.Activo;
     }
 
@@ -179,6 +181,14 @@ public class Prestamo
         }
 
         _unidadesAsignadas.AddRange(unidadesFisicas);
+    }
+
+    private void ValidarQueEsteAprobado()
+    {
+        if (Estado != EstadoPrestamo.Aprobado)
+        {
+            throw new DominioException("El prestamo debe estar aprobado");
+        }
     }
 
     private void ValidarQueEsteActivo()
