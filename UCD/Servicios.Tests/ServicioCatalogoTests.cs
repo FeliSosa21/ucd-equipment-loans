@@ -11,7 +11,7 @@ public class ServicioCatalogoTests
     [TestMethod]
     public void ConsultarTipos_FiltroVacio_DevuelveTodos()
     {
-        var servicio = CrearServicio(CrearTipo(nombre:"Proyector Sony"), CrearTipo(nombre:"Proyector Microsoft"));
+        var servicio = CrearServicio(CrearTipo(nombre: "Proyector Sony"), CrearTipo(nombre:"Proyector Microsoft"));
 
         var resultado = servicio.ConsultarTipos(new FiltroCatalogoDto());
 
@@ -23,7 +23,7 @@ public class ServicioCatalogoTests
     [TestMethod]
     public void ConsultarTipos_FiltroPorCategoria_DevuelveSoloEsaCategoria()
     {
-        var proyector = CrearTipo(nombre: "Proyector Sony",categoria: Categoria.Audiovisual);
+        var proyector = CrearTipo(nombre: "Proyector Sony", categoria: Categoria.Audiovisual);
         var notebook = CrearTipo(nombre: "notebook", categoria: Categoria.Computacion);
         var servicio = CrearServicio(proyector, notebook);
         var filtro = new FiltroCatalogoDto { Categoria = "Computacion" };
@@ -55,10 +55,10 @@ public class ServicioCatalogoTests
         var proyector = CrearTipo(nombre: "Proyector Sony");
         var notebook = CrearTipo(nombre: "notebook");
         proyector.AgregarUnidad(CrearUnidad(idInstitucional: "EQP-0001"));
-        notebook.AgregarUnidad(CrearUnidad(idInstitucional:"EQP-0002"));
-        notebook.AgregarUnidad(CrearUnidad(idInstitucional:"EQP-0003"));
+        notebook.AgregarUnidad(CrearUnidad(idInstitucional: "EQP-0002"));
+        notebook.AgregarUnidad(CrearUnidad(idInstitucional: "EQP-0003"));
         var servicio = CrearServicio(proyector, notebook);
-        var filtro = new FiltroCatalogoDto{ MinimoDisponibles = 2};
+        var filtro = new FiltroCatalogoDto{ MinimoDisponibles = 2 };
 
         var resultado = servicio.ConsultarTipos(filtro);
 
@@ -96,11 +96,11 @@ public class ServicioCatalogoTests
     }
 
     [TestMethod]
-    public void ConsultarTipos_MinimoCero_Devuelvetodos()
+    public void ConsultarTipos_MinimoCero_DevuelveTodos()
     {
         var teclado = CrearTipo(nombre: "Teclado HP");
         var monitor = CrearTipo(nombre: "Monitor Dell");
-        monitor.AgregarUnidad(CrearUnidad(idInstitucional:"EQP-0001"));
+        monitor.AgregarUnidad(CrearUnidad(idInstitucional: "EQP-0001"));
         var servicio = CrearServicio(teclado, monitor);
         var filtro = new FiltroCatalogoDto { MinimoDisponibles = 0 };
 
@@ -110,12 +110,12 @@ public class ServicioCatalogoTests
     }
 
     [TestMethod]
-    public void ConsultarTipos_CatalogoSinTipos_DevuelvelistaVacia()
+    public void ConsultarTipos_CatalogoSinTipos_DevuelveListaVacia()
     {
         var servicio = CrearServicio();
         var filtro = new FiltroCatalogoDto();
 
-        var resultado  = servicio.ConsultarTipos(filtro);
+        var resultado = servicio.ConsultarTipos(filtro);
 
         Assert.AreEqual(0, resultado.Count);
     }
