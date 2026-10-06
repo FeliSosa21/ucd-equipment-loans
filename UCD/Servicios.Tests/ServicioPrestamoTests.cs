@@ -629,6 +629,21 @@ public sealed class ServicioPrestamoTests
         VerificarQueSigueAprobadoSinMovimientos(memoria, idPrestamo);
     }
 
+    [TestMethod]
+    public void Realizar_PrestamoSolicitado_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Realizar(idPrestamo, DniFuncionario));
+        Assert.AreEqual("El prestamo debe estar aprobado", excepcion.Message);
+        Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
+
+        VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
