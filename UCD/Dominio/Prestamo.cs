@@ -35,6 +35,7 @@ public class Prestamo
         ValidarQueLaListaExista(unidadesFisicas);
         ValidarCantidad(unidadesFisicas);
         ValidarQueNoHayaUnidadesRepetidas(unidadesFisicas);
+        ValidarQueSeanDelTipo(unidadesFisicas);
         ValidarQueEstenDisponibles(unidadesFisicas);
         AsignarUnidades(unidadesFisicas);
 
