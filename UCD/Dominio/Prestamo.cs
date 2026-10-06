@@ -43,6 +43,7 @@ public class Prestamo
     public void Aprobar(Usuario evaluador, IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         ValidarQueEsteSolicitado();
+        ValidarEvaluador(evaluador);
         ValidarQueLaListaExista(unidadesFisicas);
         ValidarCantidad(unidadesFisicas);
         ValidarQueNoHayaUnidadesRepetidas(unidadesFisicas);
@@ -103,6 +104,14 @@ public class Prestamo
         if (Estado != EstadoPrestamo.Solicitado)
         {
             throw new DominioException("El prestamo debe estar solicitado");
+        }
+    }
+
+    private static void ValidarEvaluador(Usuario evaluador)
+    {
+        if (evaluador is null)
+        {
+            throw new DominioException("El prestamo debe tener un evaluador");
         }
     }
 
