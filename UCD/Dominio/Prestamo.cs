@@ -64,6 +64,8 @@ public class Prestamo
 
     public void Rechazar(Usuario evaluador, string motivo)
     {
+        ValidarMotivo(motivo);
+
         Estado = EstadoPrestamo.Rechazado;
         Evaluador = evaluador;
         MotivoRechazo = motivo;
@@ -195,6 +197,14 @@ public class Prestamo
         if (Estado != EstadoPrestamo.Aprobado)
         {
             throw new DominioException("El prestamo debe estar aprobado");
+        }
+    }
+
+    private static void ValidarMotivo(string motivo)
+    {
+        if (string.IsNullOrWhiteSpace(motivo))
+        {
+            throw new DominioException("El motivo de rechazo no puede ser vacio");
         }
     }
 
