@@ -104,7 +104,14 @@ public class ServicioPrestamo
     public PrestamoDto Rechazar(Guid idPrestamo, string motivo, string dniEvaluador)
     {
         Prestamo prestamo = _prestamos.ObtenerPrestamoPorId(idPrestamo)!;
-        Usuario evaluador = _usuarios.ObtenerUsuarioPorDni(dniEvaluador)!;
+        Usuario? evaluador = _usuarios.ObtenerUsuarioPorDni(dniEvaluador);
+
+        if (evaluador is null
+            || evaluador.Estado == EstadoUsuario.Desactivado
+            || !evaluador.Tipo.TienePermiso(Permiso.EvaluarSolicitud))
+        {
+            throw new ServicioException("El usuario no tiene permiso para evaluar solicitudes");
+        }
 
         try
         {
