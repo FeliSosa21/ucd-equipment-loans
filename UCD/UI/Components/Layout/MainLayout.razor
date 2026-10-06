@@ -42,16 +42,16 @@
         SesionActual.Cambio += StateHasChanged;
     }
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
-        RenovarSesion();
+        await RenovarSesionAsync();
         ExigirCambioDeContrasena();
         ExigirActivacion();
     }
 
     // En cada navegacion se traen los datos actuales: si el usuario fue desactivado, se cierra la sesion,
     // y si le cambiaron el tipo, el menu refleja los permisos nuevos.
-    private void RenovarSesion()
+    private async Task RenovarSesionAsync()
     {
         if (!SesionActual.EstaIniciada)
         {
@@ -64,7 +64,7 @@
         }
         catch (ServicioException)
         {
-            SesionActual.Expirar("Tu sesión se cerró porque tu cuenta ya no está activa.");
+            await SesionActual.ExpirarAsync("Tu sesión se cerró porque tu cuenta ya no está activa.");
             Navigation.NavigateTo("/ingresar");
         }
     }
@@ -89,9 +89,9 @@
         }
     }
 
-    private void CerrarSesion()
+    private async Task CerrarSesion()
     {
-        SesionActual.Cerrar();
+        await SesionActual.CerrarAsync();
         Navigation.NavigateTo("/");
     }
 

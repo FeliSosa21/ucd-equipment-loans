@@ -25,9 +25,9 @@
 </div>
 
 @code {
-    private void Salir()
+    private async Task Salir()
     {
-        SesionActual.Cerrar();
+        await SesionActual.CerrarAsync();
         Navigation.NavigateTo("/");
     }
 }
