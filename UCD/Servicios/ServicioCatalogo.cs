@@ -29,6 +29,11 @@ public class ServicioCatalogo
                 continue;
             }
 
+            if (filtro.MinimoDisponibles != null && tipo.CantidadDisponibles() < filtro.MinimoDisponibles)
+            {
+                continue;
+            }
+
             listaTipoEquipamientos.Add(new TipoEquipamientoDto { Nombre = tipo.Nombre });
         }
 
