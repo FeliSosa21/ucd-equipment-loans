@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Data.Repositorios;
+﻿using Data.Repositorios;
 using Dominio;
 using DTOs;
 
@@ -17,15 +16,10 @@ public class ServicioCatalogo
     public List<TipoEquipamientoDto> ConsultarTipos(FiltroCatalogoDto filtro)
     {
         ArgumentNullException.ThrowIfNull(filtro);
-
-        if (filtro.MinimoDisponibles != null && filtro.MinimoDisponibles < 0)
-        {
-            throw new ServicioException("La cantidad minima de unidades disponibles no puede ser negativa");
-        }
-
+        ValidarFiltro(filtro);
         var catalogo = ObtenerCatalogo();
+        var resultado = new List<TipoEquipamientoDto>();
 
-        List<TipoEquipamientoDto> resultado = new List<TipoEquipamientoDto>();
         foreach (var tipo in catalogo.Tipos)
         {
             if (CumpleFiltro(tipo, filtro))
@@ -41,12 +35,12 @@ public class ServicioCatalogo
     {
         var tipo = _repositorioCatalogo.ObtenerTipoPorNombre(nombreTipo);
 
-        if (tipo == null)
+        if (tipo is null)
         {
             throw new ServicioException("No existe un tipo de equipamiento con ese nombre");
         }
 
-        List<UnidadFisicaDto> resultado = new List<UnidadFisicaDto>();
+        var resultado = new List<UnidadFisicaDto>();
 
         foreach (var unidad in tipo.UnidadesDisponibles())
         {
@@ -56,26 +50,24 @@ public class ServicioCatalogo
         return resultado;
     }
 
+    private void ValidarFiltro (FiltroCatalogoDto filtro)
+    {
+        if (filtro.MinimoDisponibles != null && filtro.MinimoDisponibles < 0)
+        {
+            throw new ServicioException("La cantidad minima de unidades disponibles no puede ser negativa");
+        }
+    }
+
     private Catalogo ObtenerCatalogo()
     {
         var catalogo = _repositorioCatalogo.Obtener();
 
-        if (catalogo == null)
+        if (catalogo is null)
         {
             throw new ServicioException("Todavia no hay un catalogo cargado");
         }
 
         return catalogo;
-    }
-
-    private static UnidadFisicaDto CrearUnidadDto(UnidadFisica unidad)
-    {
-        return new UnidadFisicaDto
-        {
-            IdInstitucional = unidad.IdInstitucional,
-            UbiFisica = unidad.UbiFisica,
-            NumSerie = unidad.NumSerie
-        };
     }
 
     private static bool CumpleFiltro(TipoEquipamiento tipo, FiltroCatalogoDto filtro)
@@ -106,6 +98,16 @@ public class ServicioCatalogo
             Categoria = tipo.Categoria.ToString(),
             Estado = tipo.Estado.ToString(),
             CantidadDisponibles = tipo.CantidadDisponibles()
+        };
+    }
+
+    private static UnidadFisicaDto CrearUnidadDto(UnidadFisica unidad)
+    {
+        return new UnidadFisicaDto
+        {
+            IdInstitucional = unidad.IdInstitucional,
+            UbiFisica = unidad.UbiFisica,
+            NumSerie = unidad.NumSerie
         };
     }
 }
