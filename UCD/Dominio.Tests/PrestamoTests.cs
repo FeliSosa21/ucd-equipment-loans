@@ -480,6 +480,18 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Rechazar_EvaluadorNulo_LanzaExcepcion()
+    {
+        (Prestamo prestamo, _) = CrearSolicitudDeTipoConAprobacion();
+
+        Assert.ThrowsException<DominioException>(
+            () => prestamo.Rechazar(null!, MotivoDeRechazo));
+
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
     public void RechazarPorFaltaDeUnidades_PrestamoSolicitado_QuedaRechazado()
     {
         Prestamo prestamo = CrearPrestamo();
