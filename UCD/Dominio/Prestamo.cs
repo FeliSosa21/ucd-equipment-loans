@@ -55,6 +55,10 @@ public class Prestamo
         Evaluador = evaluador;
     }
 
+    public void Realizar()
+    {
+    }
+
     public void RechazarPorFaltaDeUnidades()
     {
         ValidarQueEsteSolicitado();
