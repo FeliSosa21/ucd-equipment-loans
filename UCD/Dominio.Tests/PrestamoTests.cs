@@ -270,6 +270,22 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Activar_UnidadDeOtroTipo_LanzaExcepcionYNoPrestaNinguna()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        UnidadFisica propia = CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: 1)[0];
+        UnidadFisica ajena = CrearUnidadDeOtroTipo();
+        List<UnidadFisica> unaPropiaYUnaAjena = new List<UnidadFisica> { propia, ajena };
+
+        Assert.ThrowsException<DominioException>(() => prestamo.Activar(unaPropiaYUnaAjena));
+
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, propia.Estado);
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, ajena.Estado);
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+    }
+
+    [TestMethod]
     public void Aprobar_SolicitudDeTipoConAprobacion_QuedaAprobado()
     {
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearSolicitudDeTipoConAprobacion();
