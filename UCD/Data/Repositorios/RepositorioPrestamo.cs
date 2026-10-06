@@ -31,7 +31,10 @@ public class RepositorioPrestamo
 
     public IReadOnlyList<Prestamo> ObtenerPrestamosPendientes()
     {
-        return new List<Prestamo>().AsReadOnly();
+        return _memoria.Prestamos
+            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Solicitado)
+            .ToList()
+            .AsReadOnly();
     }
 
     public IReadOnlyList<Prestamo> ObtenerPrestamosDeSolicitante(string dni)
