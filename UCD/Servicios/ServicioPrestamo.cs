@@ -69,10 +69,16 @@ public class ServicioPrestamo
 
         try
         {
-            List<UnidadFisica> unidades = prestamo.TipoEquipamiento.UnidadesDisponibles()
-                .Take(prestamo.CantidadSolicitada).ToList();
-            prestamo.Aprobar(evaluador, unidades);
-
+            if (prestamo.TipoEquipamiento.CantidadDisponibles() < prestamo.CantidadSolicitada)
+            {
+                prestamo.RechazarPorFaltaDeUnidades();
+            }
+            else
+            {
+                List<UnidadFisica> unidades = prestamo.TipoEquipamiento.UnidadesDisponibles()
+                                .Take(prestamo.CantidadSolicitada).ToList();
+                            prestamo.Aprobar(evaluador, unidades);
+            }
             return CrearPrestamoDto(prestamo);
         }
         catch (DominioException excepcion)
