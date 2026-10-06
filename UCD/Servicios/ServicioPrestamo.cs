@@ -152,7 +152,7 @@ public class ServicioPrestamo
 
     public List<PrestamoDto> ListarSolicitudesPendientes()
     {
-        return new List<PrestamoDto>();
+        return _prestamos.ObtenerPrestamosPendientes().Select(CrearPrestamoDto).ToList();
     }
 
     private Usuario ObtenerSolicitante(string dniSolicitante)
@@ -233,6 +233,7 @@ public class ServicioPrestamo
         return new PrestamoDto
         {
             Id = prestamo.Id,
+            Solicitante = $"{prestamo.Solicitante.Nombre} {prestamo.Solicitante.Apellido}",
             TipoEquipamiento = prestamo.TipoEquipamiento.Nombre,
             CantidadSolicitada = prestamo.CantidadSolicitada,
             FechaHoraPrestamo = prestamo.FechaHoraPrestamo,
