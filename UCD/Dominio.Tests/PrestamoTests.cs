@@ -271,10 +271,29 @@ public sealed class PrestamoTests
         Prestamo prestamo = CrearPrestamo(tipoEquipamiento: tipo);
         List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo, cantidad: CantidadSolicitadaPorDefecto);
         Usuario evaluador = CrearEvaluador();
-        
+
         prestamo.Aprobar(evaluador, unidades);
-        
+
         Assert.AreSame(evaluador, prestamo.Evaluador);
+    }
+
+    [TestMethod]
+    public void Aprobar_SolicitudDeTipoConAprobacion_AsignaYPrestaLasUnidades()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento(requiereAprobacion: true);
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: tipo);
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo, cantidad: CantidadSolicitadaPorDefecto);
+        Usuario evaluador = CrearEvaluador();
+
+        prestamo.Aprobar(evaluador, unidades);
+
+        CollectionAssert.AreEquivalent(unidades, prestamo.UnidadesAsignadas.ToList());
+
+        foreach (UnidadFisica unidad in unidades)
+        {
+            Assert.AreEqual(EstadoUnidadFisica.Prestada, unidad.Estado,
+                $"La unidad {unidad.IdInstitucional} deberia estar prestada");
+        }
     }
 
     [TestMethod]
