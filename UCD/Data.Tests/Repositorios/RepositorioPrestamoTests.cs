@@ -93,6 +93,29 @@ public class RepositorioPrestamoTests
     }
 
     [TestMethod]
+    public void ObtenerPrestamosAprobados_PrestamosEnVariosEstados_DevuelveSoloLosAprobados()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+        (Prestamo primerAprobado, _) = CrearPrestamoAprobado();
+        (Prestamo segundoAprobado, _) = CrearPrestamoAprobado();
+        (Prestamo pendiente, _) = CrearSolicitudDeTipoConAprobacion();
+        (Prestamo activo, _) = CrearPrestamoActivo();
+        Prestamo rechazado = CrearPrestamoRechazado();
+
+        repositorio.AgregarPrestamo(primerAprobado);
+        repositorio.AgregarPrestamo(pendiente);
+        repositorio.AgregarPrestamo(activo);
+        repositorio.AgregarPrestamo(rechazado);
+        repositorio.AgregarPrestamo(segundoAprobado);
+
+        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosAprobados();
+
+        CollectionAssert.AreEquivalent(
+            new List<Prestamo> { primerAprobado, segundoAprobado }, resultado.ToList());
+    }
+
+    [TestMethod]
     public void ObtenerPrestamoPorId_OtroRepositorioSobreLaMismaMemoria_LoEncuentra()
     {
         Memoria memoria = new Memoria();

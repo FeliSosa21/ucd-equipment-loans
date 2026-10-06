@@ -37,6 +37,11 @@ public class RepositorioPrestamo
             .AsReadOnly();
     }
 
+    public IReadOnlyList<Prestamo> ObtenerPrestamosAprobados()
+    {
+        return new List<Prestamo>().AsReadOnly();
+    }
+
     public IReadOnlyList<Prestamo> ObtenerPrestamosDeSolicitante(string dni)
     {
         return _memoria.Prestamos
