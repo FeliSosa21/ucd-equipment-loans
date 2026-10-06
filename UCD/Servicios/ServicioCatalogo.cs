@@ -19,6 +19,11 @@ public class ServicioCatalogo
         List<TipoEquipamientoDto> listaTipoEquipamientos = new List<TipoEquipamientoDto>();
         foreach (var tipo in catalogo!.Tipos)
         {
+            if (filtro.Categoria != null && tipo.Categoria.ToString() != filtro.Categoria.ToString())
+            {
+                continue;
+            }
+
             listaTipoEquipamientos.Add(new TipoEquipamientoDto { Nombre = tipo.Nombre });
         }
 
