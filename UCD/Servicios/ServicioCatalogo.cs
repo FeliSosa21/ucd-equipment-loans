@@ -19,24 +19,25 @@ public class ServicioCatalogo
         List<TipoEquipamientoDto> listaTipoEquipamientos = new List<TipoEquipamientoDto>();
         foreach (var tipo in catalogo!.Tipos)
         {
-            if (filtro.Categoria != null && tipo.Categoria.ToString() != filtro.Categoria.ToString())
+            if (CumpleFiltro(tipo, filtro))
             {
-                continue;
+                listaTipoEquipamientos.Add(new TipoEquipamientoDto { Nombre = tipo.Nombre });
             }
-
-            if (filtro.Estado != null && filtro.Estado.ToString() != tipo.Estado.ToString())
-            {
-                continue;
-            }
-
-            if (filtro.MinimoDisponibles != null && tipo.CantidadDisponibles() < filtro.MinimoDisponibles)
-            {
-                continue;
-            }
-
-            listaTipoEquipamientos.Add(new TipoEquipamientoDto { Nombre = tipo.Nombre });
         }
 
         return listaTipoEquipamientos;
+    }
+
+    private static bool CumpleFiltro(TipoEquipamiento tipo, FiltroCatalogoDto filtro)
+    {
+        if ((filtro.Categoria != null && tipo.Categoria.ToString() != filtro.Categoria.ToString()) ||
+            (filtro.Estado != null && filtro.Estado.ToString() != tipo.Estado.ToString()) ||
+            (filtro.MinimoDisponibles != null && tipo.CantidadDisponibles() < filtro.MinimoDisponibles)
+            )
+        {
+            return false;
+        }
+
+        return true;
     }
 }
