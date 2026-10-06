@@ -21,8 +21,14 @@ public class ServicioCatalogo
         }
 
         var catalogo = _repositorioCatalogo.Obtener();
+
+        if (catalogo == null)
+        {
+            throw new ServicioException("Todavia no hay un catalogo cargado");
+        }
+
         List<TipoEquipamientoDto> resultado = new List<TipoEquipamientoDto>();
-        foreach (var tipo in catalogo!.Tipos)
+        foreach (var tipo in catalogo.Tipos)
         {
             if (CumpleFiltro(tipo, filtro))
             {
