@@ -64,6 +64,7 @@ public class Prestamo
 
     public void Rechazar(Usuario evaluador, string motivo)
     {
+        ValidarQueSePuedaRechazar();
         ValidarEvaluador(evaluador);
         ValidarMotivo(motivo);
         LiberarUnidades();
@@ -199,6 +200,14 @@ public class Prestamo
         if (Estado != EstadoPrestamo.Aprobado)
         {
             throw new DominioException("El prestamo debe estar aprobado");
+        }
+    }
+
+    private void ValidarQueSePuedaRechazar()
+    {
+        if (Estado != EstadoPrestamo.Solicitado && Estado != EstadoPrestamo.Aprobado)
+        {
+            throw new DominioException("Solo se puede rechazar un prestamo solicitado o aprobado");
         }
     }
 
