@@ -103,7 +103,19 @@ public class ServicioPrestamo
 
     public PrestamoDto Rechazar(Guid idPrestamo, string motivo, string dniEvaluador)
     {
-        return new PrestamoDto();
+        Prestamo prestamo = _prestamos.ObtenerPrestamoPorId(idPrestamo)!;
+        Usuario evaluador = _usuarios.ObtenerUsuarioPorDni(dniEvaluador)!;
+
+        try
+        {
+            prestamo.Rechazar(evaluador, motivo);
+
+            return CrearPrestamoDto(prestamo);
+        }
+        catch (DominioException excepcion)
+        {
+            throw new ServicioException(excepcion.Message, excepcion);
+        }
     }
 
     private Usuario ObtenerSolicitante(string dniSolicitante)
