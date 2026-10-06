@@ -34,7 +34,7 @@ public class ServicioCatalogo
         {
             if (CumpleFiltro(tipo, filtro))
             {
-                resultado.Add(new TipoEquipamientoDto { Nombre = tipo.Nombre, Categoria = tipo.Categoria.ToString(), Estado = tipo.Estado.ToString(), CantidadDisponibles = tipo.CantidadDisponibles() });
+                resultado.Add(CrearTipoDto(tipo));
             }
         }
 
@@ -59,5 +59,16 @@ public class ServicioCatalogo
         }
 
         return true;
+    }
+
+    private static TipoEquipamientoDto CrearTipoDto(TipoEquipamiento tipo)
+    {
+        return new TipoEquipamientoDto
+        {
+            Nombre = tipo.Nombre,
+            Categoria = tipo.Categoria.ToString(),
+            Estado = tipo.Estado.ToString(),
+            CantidadDisponibles = tipo.CantidadDisponibles()
+        };
     }
 }
