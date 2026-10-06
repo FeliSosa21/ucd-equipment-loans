@@ -17,6 +17,7 @@ public sealed class ServicioPrestamoTests
     private const string DniInexistente = "56789016";
     private const string DniSupervisor = "67890127";
     private const string DniSupervisorDesactivado = "78901238";
+    private const string DniAdministrador = "89012349";
 
     private const string NombreTipoSinAprobacion = "Proyector Epson PowerLite";
     private const string NombreTipoSinUnidades = "Parlante JBL Flip";
@@ -463,6 +464,40 @@ public sealed class ServicioPrestamoTests
         VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
     }
 
+    [TestMethod]
+    public void Aprobar_AdministradorApruebaSuPropiaSolicitud_QuedaAprobado()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudPendiente(servicio, dniSolicitante: DniAdministrador);
+
+        PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniAdministrador);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+
+        Assert.AreEqual("Aprobado", resultado.Estado);
+        Assert.AreSame(guardado.Solicitante, guardado.Evaluador);
+    }
+
+    [TestMethod]
+    public void Aprobar_PrestamoYaAprobado_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudAprobada(servicio);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Aprobar(idPrestamo, DniSupervisor));
+
+        Assert.AreEqual("El prestamo debe estar solicitado", excepcion.Message);
+        Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+
+        Assert.AreEqual(EstadoPrestamo.Aprobado, guardado.Estado, "El prestamo deberia seguir aprobado");
+        Assert.AreEqual(CantidadSolicitadaPorDefecto, guardado.UnidadesAsignadas.Count, "Deberia conservar sus unidades");
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
@@ -489,12 +524,21 @@ public sealed class ServicioPrestamoTests
 
     private static Guid CrearSolicitudPendiente(
         ServicioPrestamo servicio,
-        string tipoEquipamiento = NombreTipoConAprobacion)
+        string tipoEquipamiento = NombreTipoConAprobacion,
+        string dniSolicitante = DniDocente)
     {
         SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: tipoEquipamiento);
-        PrestamoDto pendiente = servicio.Solicitar(datos, DniDocente);
+        PrestamoDto pendiente = servicio.Solicitar(datos, dniSolicitante);
 
         return pendiente.Id;
+    }
+
+    private static Guid CrearSolicitudAprobada(ServicioPrestamo servicio)
+    {
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        return idPrestamo;
     }
 
     private static Prestamo ObtenerPrestamoGuardado(Memoria memoria, Guid idPrestamo)
@@ -572,6 +616,9 @@ public sealed class ServicioPrestamoTests
         Usuario desactivado = CrearUsuario(dni: DniDocenteDesactivado, tipoUsuario: TipoUsuario.Docente);
         Usuario supervisorDesactivado = CrearUsuario(dni: DniSupervisorDesactivado, tipoUsuario: TipoUsuario.Supervisor,
             nombre: "Diego", apellido: "Rodriguez");
+        usuarios.AgregarUsuario(CrearUsuario(dni: DniAdministrador, tipoUsuario: TipoUsuario.Administrador,
+            nombre: "Lucia", apellido: "Fernandez"));
+
         desactivado.Desactivar();
         supervisorDesactivado.Desactivar();
         usuarios.AgregarUsuario(desactivado);
