@@ -522,6 +522,28 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Rechazar_PrestamoActivo_LanzaExcepcion()
+    {
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
+        Usuario evaluador = CrearEvaluador();
+
+        Assert.ThrowsException<DominioException>(
+            () => prestamo.Rechazar(evaluador, MotivoDeRechazo));
+
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+
+        foreach (UnidadFisica unidad in unidades)
+        {
+            Assert.AreEqual(EstadoUnidadFisica.Prestada, unidad.Estado,
+                $"La unidad {unidad.IdInstitucional} deberia seguir prestada");
+        }
+
+        CollectionAssert.AreEquivalent(unidades, prestamo.UnidadesAsignadas.ToList());
+        Assert.IsNull(prestamo.MotivoRechazo);
+        Assert.IsNull(prestamo.Evaluador);
+    }
+
+    [TestMethod]
     public void RechazarPorFaltaDeUnidades_PrestamoSolicitado_QuedaRechazado()
     {
         Prestamo prestamo = CrearPrestamo();
