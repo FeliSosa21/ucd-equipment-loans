@@ -378,6 +378,16 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Realizar_PrestamoSolicitado_LanzaExcepcion()
+    {
+        (Prestamo prestamo, _) = CrearSolicitudDeTipoConAprobacion();
+
+        Assert.ThrowsException<DominioException>(() => prestamo.Realizar());
+
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+    }
+
+    [TestMethod]
     public void MarcarDevuelto_PrestamoActivoSinUnidadesPrestadas_QuedaDevuelto()
     {
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
