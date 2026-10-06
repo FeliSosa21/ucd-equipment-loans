@@ -73,7 +73,9 @@ public class Prestamo
 
     public bool EstaVigente()
     {
-        return Estado == EstadoPrestamo.Solicitado || Estado == EstadoPrestamo.Activo;
+        return Estado == EstadoPrestamo.Solicitado
+               || Estado == EstadoPrestamo.Activo
+               || Estado == EstadoPrestamo.Aprobado;
     }
 
     private static void ValidarSolicitante(Usuario solicitante)
