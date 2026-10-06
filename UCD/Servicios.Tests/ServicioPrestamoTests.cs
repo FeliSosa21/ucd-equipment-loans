@@ -532,6 +532,22 @@ public sealed class ServicioPrestamoTests
         VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
     }
 
+    [TestMethod]
+    [DataRow(DniFuncionario)]
+    [DataRow(DniSupervisorDesactivado)]
+    [DataRow(DniInexistente)]
+    public void Rechazar_EvaluadorNoHabilitado_LanzaExcepcion(string dniEvaluador)
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Rechazar(idPrestamo, MotivoDeRechazo, dniEvaluador));
+
+        VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
