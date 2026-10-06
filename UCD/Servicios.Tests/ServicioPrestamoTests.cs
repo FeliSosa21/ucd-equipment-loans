@@ -548,6 +548,28 @@ public sealed class ServicioPrestamoTests
         VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
     }
 
+    [TestMethod]
+    public void Rechazar_PrestamoAprobado_LiberaLasUnidades()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudAprobada(servicio);
+
+        List<UnidadFisica> unidades = ObtenerPrestamoGuardado(memoria, idPrestamo).UnidadesAsignadas.ToList();
+
+        servicio.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        TipoEquipamiento camara = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoConAprobacion)!;
+
+        Assert.AreEqual(CantidadSolicitadaPorDefecto, unidades.Count,
+            "Deberia haber copiado las unidades asignadas");
+        Assert.IsTrue(unidades.All(unidad => unidad.EstaDisponible()),
+            "Las unidades deberian estar disponibles");
+        Assert.AreEqual(3, camara.CantidadDisponibles());
+        Assert.AreEqual(0, guardado.UnidadesAsignadas.Count);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
