@@ -517,6 +517,21 @@ public sealed class ServicioPrestamoTests
         Assert.AreSame(supervisor, guardado.Evaluador);
     }
 
+    [TestMethod]
+    public void Rechazar_MotivoVacio_LanzaExcepcionConCausaDeDominio()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Rechazar(idPrestamo, "", DniSupervisor));
+        Assert.AreEqual("El motivo de rechazo no puede ser vacio", excepcion.Message);
+        Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
+
+        VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
