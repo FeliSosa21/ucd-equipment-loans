@@ -15,6 +15,8 @@ public class ServicioCatalogo
 
     public List<TipoEquipamientoDto> ConsultarTipos(FiltroCatalogoDto filtro)
     {
+        ArgumentNullException.ThrowIfNull(filtro);
+
         if (filtro.MinimoDisponibles != null && filtro.MinimoDisponibles < 0)
         {
             throw new ServicioException("La cantidad minima de unidades disponibles no puede ser negativa");
