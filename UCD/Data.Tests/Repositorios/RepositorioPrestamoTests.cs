@@ -116,6 +116,40 @@ public class RepositorioPrestamoTests
     }
 
     [TestMethod]
+    public void ObtenerPrestamosPendientes_SinPendientes_DevuelveListaVacia()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+        (Prestamo aprobado, _) = CrearPrestamoAprobado();
+        (Prestamo activo, _) = CrearPrestamoActivo();
+
+        repositorio.AgregarPrestamo(aprobado);
+        repositorio.AgregarPrestamo(activo);
+
+        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosPendientes();
+
+        Assert.IsNotNull(resultado);
+        Assert.AreEqual(0, resultado.Count);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamosAprobados_SinAprobados_DevuelveListaVacia()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+        (Prestamo pendiente, _) = CrearSolicitudDeTipoConAprobacion();
+        (Prestamo activo, _) = CrearPrestamoActivo();
+
+        repositorio.AgregarPrestamo(pendiente);
+        repositorio.AgregarPrestamo(activo);
+
+        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosAprobados();
+
+        Assert.IsNotNull(resultado);
+        Assert.AreEqual(0, resultado.Count);
+    }
+
+    [TestMethod]
     public void ObtenerPrestamoPorId_OtroRepositorioSobreLaMismaMemoria_LoEncuentra()
     {
         Memoria memoria = new Memoria();
