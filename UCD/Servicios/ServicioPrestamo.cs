@@ -91,7 +91,7 @@ public class ServicioPrestamo
             {
                 List<UnidadFisica> unidades = prestamo.TipoEquipamiento.UnidadesDisponibles()
                                 .Take(prestamo.CantidadSolicitada).ToList();
-                            prestamo.Aprobar(evaluador, unidades);
+                prestamo.Aprobar(evaluador, unidades);
             }
             return CrearPrestamoDto(prestamo);
         }
