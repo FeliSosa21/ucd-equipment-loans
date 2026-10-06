@@ -125,6 +125,11 @@ public class ServicioPrestamo
         }
     }
 
+    public PrestamoDto Realizar(Guid idPrestamo, string dniResponsable)
+    {
+        return new PrestamoDto();
+    }
+
     private Usuario ObtenerSolicitante(string dniSolicitante)
     {
         Usuario? solicitante = _usuarios.ObtenerUsuarioPorDni(dniSolicitante);

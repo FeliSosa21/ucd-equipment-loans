@@ -570,6 +570,18 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(0, guardado.UnidadesAsignadas.Count);
     }
 
+    [TestMethod]
+    public void Realizar_PrestamoAprobado_QuedaActivo()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudAprobada(servicio);
+
+        PrestamoDto resultado = servicio.Realizar(idPrestamo, DniFuncionario);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
