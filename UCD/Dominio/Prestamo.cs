@@ -40,6 +40,11 @@ public class Prestamo
         Estado = EstadoPrestamo.Activo;
     }
 
+    public void Aprobar(Usuario evaluador, IReadOnlyList<UnidadFisica> unidadesFisicas)
+    {
+        
+    }
+
     public void RechazarPorFaltaDeUnidades()
     {
         ValidarQueEsteSolicitado();

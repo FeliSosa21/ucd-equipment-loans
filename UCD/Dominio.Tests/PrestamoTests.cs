@@ -252,6 +252,19 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_SolicitudDeTipoConAprobacion_QuedaAprobado()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento(requiereAprobacion: true);
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: tipo);
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo, cantidad: CantidadSolicitadaPorDefecto);
+        Usuario evaluador = CrearEvaluador();
+
+        prestamo.Aprobar(evaluador, unidades);
+
+        Assert.AreEqual(EstadoPrestamo.Aprobado, prestamo.Estado);
+    }
+
+    [TestMethod]
     public void MarcarDevuelto_PrestamoActivoSinUnidadesPrestadas_QuedaDevuelto()
     {
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
@@ -407,7 +420,7 @@ public sealed class PrestamoTests
         return usuario;
     }
 
-    private static TipoEquipamiento CrearTipoEquipamiento()
+    private static TipoEquipamiento CrearTipoEquipamiento(bool requiereAprobacion = false)
     {
         TipoEquipamiento tipo = new TipoEquipamiento(
             nombre: "Proyector Epson PowerLite",
@@ -488,5 +501,19 @@ public sealed class PrestamoTests
         prestamo.RechazarPorFaltaDeUnidades();
 
         return prestamo;
+    }
+
+    private static Usuario CrearEvaluador()
+    {
+        Usuario usuario = new Usuario(
+            dni: "67890127",
+            nombre: "Sofia",
+            apellido: "Martinez",
+            correo: "sofia.martinez@ejemplo.com",
+            contrasena: "VivalaOrt2026");
+
+        usuario.AsignarTipo(TipoUsuario.Supervisor);
+
+        return usuario;
     }
 }
