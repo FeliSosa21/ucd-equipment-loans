@@ -32,11 +32,7 @@ public class Prestamo
     {
         ValidarQueEsteSolicitado();
         ValidarQueNoRequieraAprobacion();
-        ValidarQueLaListaExista(unidadesFisicas);
-        ValidarCantidad(unidadesFisicas);
-        ValidarQueNoHayaUnidadesRepetidas(unidadesFisicas);
-        ValidarQueSeanDelTipo(unidadesFisicas);
-        ValidarQueEstenDisponibles(unidadesFisicas);
+        ValidarUnidades(unidadesFisicas);
         AsignarUnidades(unidadesFisicas);
 
         Estado = EstadoPrestamo.Activo;
@@ -46,11 +42,7 @@ public class Prestamo
     {
         ValidarQueEsteSolicitado();
         ValidarEvaluador(evaluador);
-        ValidarQueLaListaExista(unidadesFisicas);
-        ValidarCantidad(unidadesFisicas);
-        ValidarQueNoHayaUnidadesRepetidas(unidadesFisicas);
-        ValidarQueSeanDelTipo(unidadesFisicas);
-        ValidarQueEstenDisponibles(unidadesFisicas);
+        ValidarUnidades(unidadesFisicas);
         AsignarUnidades(unidadesFisicas);
 
         Estado = EstadoPrestamo.Aprobado;
@@ -95,8 +87,9 @@ public class Prestamo
     public bool EstaVigente()
     {
         return Estado == EstadoPrestamo.Solicitado
-               || Estado == EstadoPrestamo.Activo
-               || Estado == EstadoPrestamo.Aprobado;
+               || Estado == EstadoPrestamo.Aprobado
+               || Estado == EstadoPrestamo.Activo;
+
     }
 
     private static void ValidarSolicitante(Usuario solicitante)
@@ -147,6 +140,15 @@ public class Prestamo
         }
     }
 
+    private void ValidarUnidades(IReadOnlyList<UnidadFisica> unidadesFisicas)
+    {
+        ValidarQueLaListaExista(unidadesFisicas);
+        ValidarCantidad(unidadesFisicas);
+        ValidarQueNoHayaUnidadesRepetidas(unidadesFisicas);
+        ValidarQueSeanDelTipo(unidadesFisicas);
+        ValidarQueEstenDisponibles(unidadesFisicas);
+    }
+
     private static void ValidarQueLaListaExista(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         if (unidadesFisicas is null)
@@ -174,7 +176,7 @@ public class Prestamo
 
     private void ValidarQueSeanDelTipo(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
-        foreach (var unidadFisica in unidadesFisicas)
+        foreach (UnidadFisica unidadFisica in unidadesFisicas)
         {
             if (!TipoEquipamiento.Unidades.Contains(unidadFisica))
             {
