@@ -142,6 +142,16 @@ public class ServicioCatalogoTests
         Assert.ThrowsException<ServicioException>(() => servicio.ConsultarTipos(filtro));
     }
 
+    [TestMethod]
+    public void ConsultarTipos_SinCatalogoGuardado_LanzaServicioException()
+    {
+        var memoria = new Memoria();
+        var repositorio = new RepositorioCatalogo(memoria);
+        var servicio = new ServicioCatalogo(repositorio);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ConsultarTipos(new FiltroCatalogoDto()));
+    }
+
     private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var memoria = new Memoria();
