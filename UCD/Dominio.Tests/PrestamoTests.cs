@@ -254,9 +254,7 @@ public sealed class PrestamoTests
     [TestMethod]
     public void Aprobar_SolicitudDeTipoConAprobacion_QuedaAprobado()
     {
-        TipoEquipamiento tipo = CrearTipoEquipamiento(requiereAprobacion: true);
-        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: tipo);
-        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo, cantidad: CantidadSolicitadaPorDefecto);
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearSolicitudDeTipoConAprobacion();
         Usuario evaluador = CrearEvaluador();
 
         prestamo.Aprobar(evaluador, unidades);
@@ -267,9 +265,7 @@ public sealed class PrestamoTests
     [TestMethod]
     public void Aprobar_SolicitudDeTipoConAprobacion_GuardaElEvaluador()
     {
-        TipoEquipamiento tipo = CrearTipoEquipamiento(requiereAprobacion: true);
-        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: tipo);
-        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo, cantidad: CantidadSolicitadaPorDefecto);
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearSolicitudDeTipoConAprobacion();
         Usuario evaluador = CrearEvaluador();
 
         prestamo.Aprobar(evaluador, unidades);
@@ -280,9 +276,7 @@ public sealed class PrestamoTests
     [TestMethod]
     public void Aprobar_SolicitudDeTipoConAprobacion_AsignaYPrestaLasUnidades()
     {
-        TipoEquipamiento tipo = CrearTipoEquipamiento(requiereAprobacion: true);
-        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: tipo);
-        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo, cantidad: CantidadSolicitadaPorDefecto);
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearSolicitudDeTipoConAprobacion();
         Usuario evaluador = CrearEvaluador();
 
         prestamo.Aprobar(evaluador, unidades);
@@ -452,13 +446,27 @@ public sealed class PrestamoTests
         return usuario;
     }
 
+    private static Usuario CrearEvaluador()
+    {
+        Usuario usuario = new Usuario(
+            dni: "67890127",
+            nombre: "Sofia",
+            apellido: "Martinez",
+            correo: "sofia.martinez@ejemplo.com",
+            contrasena: "VivalaOrt2026");
+
+        usuario.AsignarTipo(TipoUsuario.Supervisor);
+
+        return usuario;
+    }
+
     private static TipoEquipamiento CrearTipoEquipamiento(bool requiereAprobacion = false)
     {
         TipoEquipamiento tipo = new TipoEquipamiento(
             nombre: "Proyector Epson PowerLite",
             descripcion: "Proyector para aulas",
             duracionMaxPrestamo: 5,
-            requiereAprobacion: false,
+            requiereAprobacion: requiereAprobacion,
             categoria: Categoria.Audiovisual);
 
         return tipo;
@@ -501,6 +509,15 @@ public sealed class PrestamoTests
         return unidades;
     }
 
+    private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearSolicitudDeTipoConAprobacion()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento(requiereAprobacion: true);
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: tipo);
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: tipo, cantidad: CantidadSolicitadaPorDefecto);
+
+        return (prestamo, unidades);
+    }
+
     private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoActivo()
     {
         Prestamo prestamo = CrearPrestamo();
@@ -533,19 +550,5 @@ public sealed class PrestamoTests
         prestamo.RechazarPorFaltaDeUnidades();
 
         return prestamo;
-    }
-
-    private static Usuario CrearEvaluador()
-    {
-        Usuario usuario = new Usuario(
-            dni: "67890127",
-            nombre: "Sofia",
-            apellido: "Martinez",
-            correo: "sofia.martinez@ejemplo.com",
-            contrasena: "VivalaOrt2026");
-
-        usuario.AsignarTipo(TipoUsuario.Supervisor);
-
-        return usuario;
     }
 }
