@@ -132,6 +132,16 @@ public class ServicioCatalogoTests
         Assert.AreEqual(0, resultado.Count);
     }
 
+    [TestMethod]
+    public void ConsultarTipos_MinimoNegativo_LanzaServicioException()
+    {
+        var teclado = CrearTipo(nombre:"Teclado HP");
+        var servicio = CrearServicio(teclado);
+        var filtro = new FiltroCatalogoDto { MinimoDisponibles = -1 };
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ConsultarTipos(filtro));
+    }
+
     private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var memoria = new Memoria();
