@@ -446,6 +446,23 @@ public sealed class ServicioPrestamoTests
         VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
     }
 
+    [TestMethod]
+    public void Aprobar_SolicitanteDesactivadoDespuesDeSolicitar_LanzaExcepcionYSigueSolicitado()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+
+        Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
+        docente.Desactivar();
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Aprobar(idPrestamo, DniSupervisor));
+        Assert.AreEqual("El solicitante esta desactivado", excepcion.Message);
+
+        VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
