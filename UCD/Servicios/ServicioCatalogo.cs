@@ -15,6 +15,11 @@ public class ServicioCatalogo
 
     public List<TipoEquipamientoDto> ConsultarTipos(FiltroCatalogoDto filtro)
     {
+        if (filtro.MinimoDisponibles != null && filtro.MinimoDisponibles < 0)
+        {
+            throw new ServicioException("La cantidad minima de unidades disponibles no puede ser negativa");
+        }
+
         var catalogo = _repositorioCatalogo.Obtener();
         List<TipoEquipamientoDto> resultado = new List<TipoEquipamientoDto>();
         foreach (var tipo in catalogo!.Tipos)
