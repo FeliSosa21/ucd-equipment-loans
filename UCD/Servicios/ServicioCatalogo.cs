@@ -24,6 +24,11 @@ public class ServicioCatalogo
                 continue;
             }
 
+            if (filtro.Estado != null && filtro.Estado.ToString() != tipo.Estado.ToString())
+            {
+                continue;
+            }
+
             listaTipoEquipamientos.Add(new TipoEquipamientoDto { Nombre = tipo.Nombre });
         }
 

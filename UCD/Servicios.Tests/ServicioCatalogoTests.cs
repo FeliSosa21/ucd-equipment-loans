@@ -41,7 +41,9 @@ public class ServicioCatalogoTests
         var notebook = CrearTipo(nombre: "notebook");
         notebook.Discontinuar();
         var servicio = CrearServicio(proyector, notebook);
-        var resultado = new FiltroCatalogoDto { Estado = "Discontinuado" };
+        var filtro = new FiltroCatalogoDto { Estado = "Discontinuado" };
+
+        var resultado = servicio.ConsultarTipos(filtro);
 
         Assert.AreEqual(1, resultado.Count);
         Assert.AreEqual("notebook", resultado[0].Nombre);
