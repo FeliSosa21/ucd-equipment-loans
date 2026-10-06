@@ -1,4 +1,5 @@
-﻿using Data.Repositorios;
+﻿using System.Reflection;
+using Data.Repositorios;
 using Dominio;
 using DTOs;
 
@@ -36,6 +37,18 @@ public class ServicioCatalogo
             {
                 resultado.Add(CrearTipoDto(tipo));
             }
+        }
+
+        return resultado;
+    }
+
+    public List<UnidadFisicaDto> ObtenerUnidadesDisponibles(string nombreTipo)
+    {
+        var tipo = _repositorioCatalogo.ObtenerTipoPorNombre(nombreTipo);
+        List<UnidadFisicaDto> resultado = new List<UnidadFisicaDto>();
+        foreach (var unidad in tipo.UnidadesDisponibles())
+        {
+            resultado.Add(new UnidadFisicaDto {IdInstitucional = unidad.IdInstitucional, UbiFisica = unidad.UbiFisica, NumSerie = unidad.NumSerie});
         }
 
         return resultado;
