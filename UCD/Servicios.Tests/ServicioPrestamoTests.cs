@@ -15,6 +15,7 @@ public sealed class ServicioPrestamoTests
     private const string DniFuncionario = "23456783";
     private const string DniDocenteDesactivado = "34567894";
     private const string DniInexistente = "56789016";
+    private const string DniSupervisor = "67890127";
 
     private const string NombreTipoSinAprobacion = "Proyector Epson PowerLite";
     private const string NombreTipoSinUnidades = "Parlante JBL Flip";
@@ -354,6 +355,18 @@ public sealed class ServicioPrestamoTests
         VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
     }
 
+    [TestMethod]
+    public void Aprobar_SolicitudPendienteConUnidades_QuedaAprobado()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+
+        PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        Assert.AreEqual("Aprobado", resultado.Estado);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
@@ -376,6 +389,14 @@ public sealed class ServicioPrestamoTests
             TipoEquipamiento = tipoEquipamiento,
             CantidadSolicitada = cantidadSolicitada
         };
+    }
+
+    private static Guid CrearSolicitudPendiente(ServicioPrestamo servicio)
+    {
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion);
+        PrestamoDto pendiente = servicio.Solicitar(datos, DniDocente);
+
+        return pendiente.Id;
     }
 
     private static void CargarCatalogo(Memoria memoria)
@@ -438,18 +459,24 @@ public sealed class ServicioPrestamoTests
         usuarios.AgregarUsuario(CrearUsuario(dni: DniDocente, tipoUsuario: TipoUsuario.Docente));
         usuarios.AgregarUsuario(CrearUsuario(dni: DniEstudiante, tipoUsuario: TipoUsuario.Estudiante));
         usuarios.AgregarUsuario(CrearUsuario(dni: DniFuncionario, tipoUsuario: TipoUsuario.FuncionarioCE));
+        usuarios.AgregarUsuario(CrearUsuario(dni: DniSupervisor, tipoUsuario: TipoUsuario.Supervisor,
+            nombre: "Sofia", apellido: "Martinez"));
 
         Usuario desactivado = CrearUsuario(dni: DniDocenteDesactivado, tipoUsuario: TipoUsuario.Docente);
         desactivado.Desactivar();
         usuarios.AgregarUsuario(desactivado);
     }
 
-    private static Usuario CrearUsuario(string dni, TipoUsuario tipoUsuario)
+    private static Usuario CrearUsuario(
+        string dni,
+        TipoUsuario tipoUsuario,
+        string nombre = "Renato",
+        string apellido = "Alves")
     {
         Usuario usuario = new Usuario(
             dni: dni,
-            nombre: "Renato",
-            apellido: "Alves",
+            nombre: nombre,
+            apellido: apellido,
             correo: $"usuario{dni}@ejemplo.com",
             contrasena: "Vivalaort2026");
 
