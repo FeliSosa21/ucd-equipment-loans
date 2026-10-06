@@ -19,6 +19,7 @@ public sealed class ServicioPrestamoTests
     private const string DniSupervisor = "67890127";
     private const string DniSupervisorDesactivado = "78901238";
     private const string DniAdministrador = "89012349";
+    private const string DniFuncionarioDesactivado = "90123450";
 
     private const string NombreTipoSinAprobacion = "Proyector Epson PowerLite";
     private const string NombreTipoSinUnidades = "Parlante JBL Flip";
@@ -611,6 +612,23 @@ public sealed class ServicioPrestamoTests
             movimientos.Select(movimiento => movimiento.Unidad).ToList());
     }
 
+    [TestMethod]
+    [DataRow(DniSupervisor)]
+    [DataRow(DniFuncionarioDesactivado)]
+    [DataRow(DniInexistente)]
+    public void Realizar_ResponsableNoHabilitado_LanzaExcepcion(string dniResponsable)
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudAprobada(servicio);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Realizar(idPrestamo, dniResponsable));
+        Assert.AreEqual("El usuario no tiene permiso para realizar prestamos", excepcion.Message);
+
+        VerificarQueSigueAprobadoSinMovimientos(memoria, idPrestamo);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
@@ -734,13 +752,20 @@ public sealed class ServicioPrestamoTests
         Usuario desactivado = CrearUsuario(dni: DniDocenteDesactivado, tipoUsuario: TipoUsuario.Docente);
         Usuario supervisorDesactivado = CrearUsuario(dni: DniSupervisorDesactivado, tipoUsuario: TipoUsuario.Supervisor,
             nombre: "Diego", apellido: "Rodriguez");
+        Usuario funcionarioDesactivado = CrearUsuario(
+            dni: DniFuncionarioDesactivado,
+            tipoUsuario: TipoUsuario.FuncionarioCE,
+            nombre: "Marcos",
+            apellido: "Pereira");
         usuarios.AgregarUsuario(CrearUsuario(dni: DniAdministrador, tipoUsuario: TipoUsuario.Administrador,
             nombre: "Lucia", apellido: "Fernandez"));
 
         desactivado.Desactivar();
         supervisorDesactivado.Desactivar();
+        funcionarioDesactivado.Desactivar();
         usuarios.AgregarUsuario(desactivado);
         usuarios.AgregarUsuario(supervisorDesactivado);
+        usuarios.AgregarUsuario(funcionarioDesactivado);
     }
 
     private static Usuario CrearUsuario(
@@ -781,6 +806,18 @@ public sealed class ServicioPrestamoTests
             "El prestamo deberia seguir solicitado");
         Assert.AreEqual(0, guardado.UnidadesAsignadas.Count,
             "No deberia haberse asignado ninguna unidad");
+        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count,
+            "No deberia haberse registrado ningun movimiento");
+    }
+
+    private static void VerificarQueSigueAprobadoSinMovimientos(Memoria memoria, Guid idPrestamo)
+    {
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+
+        Assert.AreEqual(EstadoPrestamo.Aprobado, guardado.Estado,
+            "El prestamo deberia seguir aprobado");
+        Assert.AreEqual(CantidadSolicitadaPorDefecto, guardado.UnidadesAsignadas.Count,
+            "Deberia conservar sus unidades");
         Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count,
             "No deberia haberse registrado ningun movimiento");
     }
