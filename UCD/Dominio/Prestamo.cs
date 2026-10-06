@@ -42,7 +42,7 @@ public class Prestamo
 
     public void Aprobar(Usuario evaluador, IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
-        
+        Estado = EstadoPrestamo.Aprobado;
     }
 
     public void RechazarPorFaltaDeUnidades()
