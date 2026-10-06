@@ -64,7 +64,21 @@ public class ServicioPrestamo
 
     public PrestamoDto Aprobar(Guid idPrestamo, string dniEvaluador)
     {
-        return new PrestamoDto();
+        Prestamo prestamo = _prestamos.ObtenerPrestamoPorId(idPrestamo)!;
+        Usuario evaluador = _usuarios.ObtenerUsuarioPorDni(dniEvaluador)!;
+
+        try
+        {
+            List<UnidadFisica> unidades = prestamo.TipoEquipamiento.UnidadesDisponibles()
+                .Take(prestamo.CantidadSolicitada).ToList();
+            prestamo.Aprobar(evaluador, unidades);
+
+            return CrearPrestamoDto(prestamo);
+        }
+        catch (DominioException excepcion)
+        {
+            throw new ServicioException(excepcion.Message, excepcion);
+        }
     }
 
     private Usuario ObtenerSolicitante(string dniSolicitante)
