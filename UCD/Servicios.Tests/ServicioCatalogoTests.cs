@@ -152,6 +152,15 @@ public class ServicioCatalogoTests
         Assert.ThrowsException<ServicioException>(() => servicio.ConsultarTipos(new FiltroCatalogoDto()));
     }
 
+    [TestMethod]
+    public void ConsultarTipos_FiltroNull_LanzaAgumentNullException()
+    {
+        var teclado = CrearTipo(nombre: "Teclado HP");
+        var servicio = CrearServicio(teclado);
+
+        Assert.ThrowsException<ArgumentNullException>(() => servicio.ConsultarTipos(null!));
+    }
+
     private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var memoria = new Memoria();
