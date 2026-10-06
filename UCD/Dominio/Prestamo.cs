@@ -62,6 +62,10 @@ public class Prestamo
         Estado = EstadoPrestamo.Activo;
     }
 
+    public void Rechazar(Usuario evaluador, string motivo)
+    {
+    }
+
     public void RechazarPorFaltaDeUnidades()
     {
         ValidarQueEsteSolicitado();

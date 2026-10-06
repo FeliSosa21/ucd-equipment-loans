@@ -5,6 +5,7 @@ public sealed class PrestamoTests
 {
     private static readonly DateTime FechaFija = new(2026, 10, 5, 10, 0, 0);
     private const int CantidadSolicitadaPorDefecto = 2;
+    private const string MotivoDeRechazo = "El equipo esta reservado para un examen";
 
     [TestMethod]
     public void Constructor_DatosValidos_NaceSolicitado()
@@ -446,6 +447,19 @@ public sealed class PrestamoTests
 
         Assert.AreEqual(EstadoUnidadFisica.Disponible, disponible.Estado);
         Assert.AreEqual(EstadoUnidadFisica.EnMantenimiento, enMantenimiento.Estado);
+    }
+
+    [TestMethod]
+    public void Rechazar_SolicitudPendiente_QuedaRechazadoConEvaluadorYMotivo()
+    {
+        (Prestamo prestamo, _) = CrearSolicitudDeTipoConAprobacion();
+        Usuario evaluador = CrearEvaluador();
+
+        prestamo.Rechazar(evaluador, MotivoDeRechazo);
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreSame(evaluador, prestamo.Evaluador);
+        Assert.AreEqual(MotivoDeRechazo, prestamo.MotivoRechazo);
     }
 
     [TestMethod]
