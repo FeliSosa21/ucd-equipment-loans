@@ -36,18 +36,18 @@ public class RepositorioPrestamo
         return ObtenerPorEstado(EstadoPrestamo.Aprobado);
     }
 
-    private IReadOnlyList<Prestamo> ObtenerPorEstado(EstadoPrestamo estado)
-    {
-        return _memoria.Prestamos
-            .Where(prestamo => prestamo.Estado == estado)
-            .ToList()
-            .AsReadOnly();
-    }
-
     public IReadOnlyList<Prestamo> ObtenerPrestamosDeSolicitante(string dni)
     {
         return _memoria.Prestamos
             .Where(prestamo => prestamo.Solicitante.Dni == dni)
+            .ToList()
+            .AsReadOnly();
+    }
+
+    private IReadOnlyList<Prestamo> ObtenerPorEstado(EstadoPrestamo estado)
+    {
+        return _memoria.Prestamos
+            .Where(prestamo => prestamo.Estado == estado)
             .ToList()
             .AsReadOnly();
     }
