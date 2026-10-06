@@ -52,7 +52,7 @@ public class ServicioPrestamo
             }
 
             _prestamos.AgregarPrestamo(prestamo);
-            RegistrarMovimientos(prestamo);
+            RegistrarMovimientos(prestamo, prestamo.FechaHoraPrestamo);
 
             return CrearPrestamoDto(prestamo);
         }
@@ -132,6 +132,7 @@ public class ServicioPrestamo
         try
         {
             prestamo.Realizar();
+            RegistrarMovimientos(prestamo, _reloj.GetLocalNow().DateTime);
 
             return CrearPrestamoDto(prestamo);
         }
@@ -201,15 +202,15 @@ public class ServicioPrestamo
         }
     }
 
-    private void RegistrarMovimientos(Prestamo prestamo)
+    private void RegistrarMovimientos(Prestamo prestamo, DateTime fechaHora)
     {
         foreach (UnidadFisica unidad in prestamo.UnidadesAsignadas)
         {
             _movimientos.AgregarMovimiento(new Movimiento(
-                fechaHora: prestamo.FechaHoraPrestamo,
+                fechaHora: fechaHora,
                 tipo: TipoMovimiento.Prestamo,
                 solicitante: prestamo.Solicitante,
-                evaluador: null,
+                evaluador: prestamo.Evaluador,
                 unidad: unidad));
         }
     }
