@@ -505,6 +505,23 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Rechazar_PrestamoAprobado_LiberaLasUnidadesYQuedaSinAsignadas()
+    {
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoAprobado();
+        Usuario evaluador = CrearEvaluador();
+
+        prestamo.Rechazar(evaluador, MotivoDeRechazo);
+
+        foreach (UnidadFisica unidad in unidades)
+        {
+            Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado,
+                $"La unidad {unidad.IdInstitucional} deberia quedar disponible");
+        }
+
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+    }
+
+    [TestMethod]
     public void RechazarPorFaltaDeUnidades_PrestamoSolicitado_QuedaRechazado()
     {
         Prestamo prestamo = CrearPrestamo();
