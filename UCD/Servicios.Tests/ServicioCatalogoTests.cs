@@ -20,6 +20,20 @@ public class ServicioCatalogoTests
         Assert.AreEqual("Proyector Microsoft", resultado[1].Nombre);
     }
 
+    [TestMethod]
+    public void ConsultarTipos_FiltroPorCategoria_DevuelveSoloEsaCategoria()
+    {
+        var proyector = CrearTipo(nombre: "Proyector Sony",categoria: Categoria.Audiovisual);
+        var notebook = CrearTipo(nombre: "notebook", categoria: Categoria.Computacion);
+        var servicio = CrearServicio(proyector, notebook);
+        var filtro = new FiltroCatalogoDto { Categoria = "Computacion" };
+
+        var resultado = servicio.ConsultarTipos(filtro);
+
+        Assert.AreEqual(1, resultado.Count);
+        Assert.AreEqual("notebook", resultado[0].Nombre);
+    }
+
     private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var memoria = new Memoria();
