@@ -34,6 +34,19 @@ public class ServicioCatalogoTests
         Assert.AreEqual("notebook", resultado[0].Nombre);
     }
 
+    [TestMethod]
+    public void ConsultarTipos_FiltroPorEstado_DevuelveSoloEseEstado()
+    {
+        var proyector = CrearTipo(nombre: "Proyector Sony");
+        var notebook = CrearTipo(nombre: "notebook");
+        notebook.Discontinuar();
+        var servicio = CrearServicio(proyector, notebook);
+        var resultado = new FiltroCatalogoDto { Estado = "Discontinuado" };
+
+        Assert.AreEqual(1, resultado.Count);
+        Assert.AreEqual("notebook", resultado[0].Nombre);
+    }
+
     private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var memoria = new Memoria();
