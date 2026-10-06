@@ -23,24 +23,23 @@ public class RepositorioPrestamo
 
     public IReadOnlyList<Prestamo> ObtenerPrestamosActivos()
     {
-        return _memoria.Prestamos
-            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Activo)
-            .ToList()
-            .AsReadOnly();
+        return ObtenerPorEstado(EstadoPrestamo.Activo);
     }
 
     public IReadOnlyList<Prestamo> ObtenerPrestamosPendientes()
     {
-        return _memoria.Prestamos
-            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Solicitado)
-            .ToList()
-            .AsReadOnly();
+        return ObtenerPorEstado(EstadoPrestamo.Solicitado);
     }
 
     public IReadOnlyList<Prestamo> ObtenerPrestamosAprobados()
     {
+        return ObtenerPorEstado(EstadoPrestamo.Aprobado);
+    }
+
+    private IReadOnlyList<Prestamo> ObtenerPorEstado(EstadoPrestamo estado)
+    {
         return _memoria.Prestamos
-            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Aprobado)
+            .Where(prestamo => prestamo.Estado == estado)
             .ToList()
             .AsReadOnly();
     }
