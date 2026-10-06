@@ -79,6 +79,8 @@ public class ServicioPrestamo
             throw new ServicioException("El prestamo no existe");
         }
 
+        ObtenerSolicitante(prestamo.Solicitante.Dni);
+
         try
         {
             if (prestamo.TipoEquipamiento.CantidadDisponibles() < prestamo.CantidadSolicitada)
