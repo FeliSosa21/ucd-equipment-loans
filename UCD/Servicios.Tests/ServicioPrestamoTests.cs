@@ -16,6 +16,7 @@ public sealed class ServicioPrestamoTests
     private const string DniDocenteDesactivado = "34567894";
     private const string DniInexistente = "56789016";
     private const string DniSupervisor = "67890127";
+    private const string DniSupervisorDesactivado = "78901238";
 
     private const string NombreTipoSinAprobacion = "Proyector Epson PowerLite";
     private const string NombreTipoSinUnidades = "Parlante JBL Flip";
@@ -427,6 +428,24 @@ public sealed class ServicioPrestamoTests
         VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
     }
 
+    [TestMethod]
+    [DataRow(DniFuncionario)]
+    [DataRow(DniSupervisorDesactivado)]
+    [DataRow(DniInexistente)]
+    public void Aprobar_EvaluadorNoHabilitado_LanzaExcepcion(string dniEvaluador)
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Aprobar(idPrestamo, dniEvaluador));
+
+        Assert.AreEqual("El usuario no tiene permiso para evaluar solicitudes", excepcion.Message);
+
+        VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
@@ -534,8 +553,12 @@ public sealed class ServicioPrestamoTests
             nombre: "Sofia", apellido: "Martinez"));
 
         Usuario desactivado = CrearUsuario(dni: DniDocenteDesactivado, tipoUsuario: TipoUsuario.Docente);
+        Usuario supervisorDesactivado = CrearUsuario(dni: DniSupervisorDesactivado, tipoUsuario: TipoUsuario.Supervisor,
+            nombre: "Diego", apellido: "Rodriguez");
         desactivado.Desactivar();
+        supervisorDesactivado.Desactivar();
         usuarios.AgregarUsuario(desactivado);
+        usuarios.AgregarUsuario(supervisorDesactivado);
     }
 
     private static Usuario CrearUsuario(
@@ -566,5 +589,17 @@ public sealed class ServicioPrestamoTests
         Catalogo catalogo = new RepositorioCatalogo(memoria).Obtener()!;
         Assert.IsTrue(catalogo.Tipos.SelectMany(tipo => tipo.Unidades).All(unidad => unidad.EstaDisponible()),
             "Ninguna unidad deberia estar prestada");
+    }
+
+    private static void VerificarQueSigueSolicitadaSinPrestarNada(Memoria memoria, Guid idPrestamo)
+    {
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+
+        Assert.AreEqual(EstadoPrestamo.Solicitado, guardado.Estado,
+            "El prestamo deberia seguir solicitado");
+        Assert.AreEqual(0, guardado.UnidadesAsignadas.Count,
+            "No deberia haberse asignado ninguna unidad");
+        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count,
+            "No deberia haberse registrado ningun movimiento");
     }
 }
