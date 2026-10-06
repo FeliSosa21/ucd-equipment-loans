@@ -480,6 +480,16 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void EstaVigente_PrestamoAprobado_DevuelveVerdadero()
+    {
+        (Prestamo prestamo, _) = CrearPrestamoAprobado();
+
+        bool vigente = prestamo.EstaVigente();
+
+        Assert.IsTrue(vigente);
+    }
+
+    [TestMethod]
     public void EstaVigente_PrestamoActivo_DevuelveVerdadero()
     {
         (Prestamo prestamo, _) = CrearPrestamoActivo();
@@ -610,6 +620,15 @@ public sealed class PrestamoTests
         TipoEquipamiento tipo = CrearTipoEquipamiento(requiereAprobacion: true);
         Prestamo prestamo = CrearPrestamo(tipoEquipamiento: tipo);
         List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: tipo, cantidad: CantidadSolicitadaPorDefecto);
+
+        return (prestamo, unidades);
+    }
+
+    private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoAprobado()
+    {
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearSolicitudDeTipoConAprobacion();
+
+        prestamo.Aprobar(CrearEvaluador(), unidades);
 
         return (prestamo, unidades);
     }
