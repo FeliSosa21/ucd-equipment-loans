@@ -265,6 +265,19 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_SolicitudDeTipoConAprobacion_GuardaElEvaluador()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento(requiereAprobacion: true);
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: tipo);
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo, cantidad: CantidadSolicitadaPorDefecto);
+        Usuario evaluador = CrearEvaluador();
+        
+        prestamo.Aprobar(evaluador, unidades);
+        
+        Assert.AreSame(evaluador, prestamo.Evaluador);
+    }
+
+    [TestMethod]
     public void MarcarDevuelto_PrestamoActivoSinUnidadesPrestadas_QuedaDevuelto()
     {
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
