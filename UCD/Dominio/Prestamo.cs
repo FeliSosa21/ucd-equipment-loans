@@ -66,6 +66,7 @@ public class Prestamo
     {
         ValidarEvaluador(evaluador);
         ValidarMotivo(motivo);
+        LiberarUnidades();
 
         Estado = EstadoPrestamo.Rechazado;
         Evaluador = evaluador;
@@ -207,6 +208,16 @@ public class Prestamo
         {
             throw new DominioException("El motivo de rechazo no puede ser vacio");
         }
+    }
+
+    private void LiberarUnidades()
+    {
+        foreach (UnidadFisica unidadFisica in _unidadesAsignadas)
+        {
+            unidadFisica.Disponible();
+        }
+        
+        _unidadesAsignadas.Clear();
     }
 
     private void ValidarQueEsteActivo()
