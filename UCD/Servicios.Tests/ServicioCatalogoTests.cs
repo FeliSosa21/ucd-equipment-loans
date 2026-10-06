@@ -161,6 +161,26 @@ public class ServicioCatalogoTests
         Assert.ThrowsException<ArgumentNullException>(() => servicio.ConsultarTipos(null!));
     }
 
+    [TestMethod]
+    public void ConsultarTipos_TipoConUnidades_DtoTraeDatosYDisponibles()
+    {
+        var teclado = CrearTipo(nombre: "Teclado HP", categoria: Categoria.Laboratorio);
+        var primeraUnidad = CrearUnidad(idInstitucional: "EQP-0001");
+        var segundaUnidad = CrearUnidad(idInstitucional: "EQP-0002");
+        teclado.AgregarUnidad(primeraUnidad);
+        teclado.AgregarUnidad(segundaUnidad);
+        segundaUnidad.Prestada();
+        var servicio = CrearServicio(teclado);
+        var filtro = new FiltroCatalogoDto();
+
+        var resultado = servicio.ConsultarTipos(filtro);
+
+        Assert.AreEqual(1, resultado.Count);
+        Assert.AreEqual("Computacion", resultado[0].Categoria);
+        Assert.AreEqual("Activo", resultado[0].Estado);
+        Assert.AreEqual(1, resultado[0].CantidadDisponibles);
+    }
+
     private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var memoria = new Memoria();
