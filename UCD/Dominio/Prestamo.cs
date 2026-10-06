@@ -57,6 +57,7 @@ public class Prestamo
 
     public void Realizar()
     {
+        Estado = EstadoPrestamo.Activo;
     }
 
     public void RechazarPorFaltaDeUnidades()
