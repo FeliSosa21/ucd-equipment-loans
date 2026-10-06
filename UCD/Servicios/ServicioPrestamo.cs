@@ -64,8 +64,13 @@ public class ServicioPrestamo
 
     public PrestamoDto Aprobar(Guid idPrestamo, string dniEvaluador)
     {
-        Prestamo prestamo = _prestamos.ObtenerPrestamoPorId(idPrestamo)!;
+        Prestamo? prestamo = _prestamos.ObtenerPrestamoPorId(idPrestamo);
         Usuario evaluador = _usuarios.ObtenerUsuarioPorDni(dniEvaluador)!;
+
+        if (prestamo is null)
+        {
+            throw new ServicioException("El prestamo no existe");
+        }
 
         try
         {
