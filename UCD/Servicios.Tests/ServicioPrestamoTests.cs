@@ -338,6 +338,22 @@ public sealed class ServicioPrestamoTests
             unidad => unidad.IdInstitucional).ToList(), resultado.Unidades);
     }
 
+    [TestMethod]
+    [DataRow("")]
+    [DataRow(" ")]
+    public void Solicitar_TipoVacio_LanzaExcepcionConMensaje(string nombreTipo)
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: nombreTipo);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Solicitar(datos, DniDocente));
+        Assert.AreEqual("Debe indicar un tipo de equipamiento", excepcion.Message);
+
+        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
