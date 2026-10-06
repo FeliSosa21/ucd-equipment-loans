@@ -66,6 +66,23 @@ public class ServicioCatalogoTests
         Assert.AreEqual("notebook", resultado[0].Nombre);
     }
 
+    [TestMethod]
+    public void ConsultarTipos_CategoriaYEstado_DevuelveLosQueCumplenAmbos()
+    {
+        var teclado = CrearTipo(nombre: "Teclado HP", categoria: Categoria.Computacion);
+        var monitor = CrearTipo(nombre: "Monitor Dell", categoria: Categoria.Audiovisual);
+        var notebook = CrearTipo(nombre: "Notebook Lenovo", categoria: Categoria.Computacion);
+        monitor.Discontinuar();
+        notebook.Discontinuar();
+        var servicio = CrearServicio(teclado, monitor, notebook);
+        var filtro = new FiltroCatalogoDto { Categoria = "Computacion", Estado = "Discontinuado" };
+
+        var resultado = servicio.ConsultarTipos(filtro);
+
+        Assert.AreEqual(1, resultado.Count);
+        Assert.AreEqual("Notebook Lenovo", resultado[0].Nombre);
+    }
+
     private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var memoria = new Memoria();
