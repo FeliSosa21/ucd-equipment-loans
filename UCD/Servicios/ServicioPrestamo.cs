@@ -150,6 +150,11 @@ public class ServicioPrestamo
         }
     }
 
+    public List<PrestamoDto> ListarSolicitudesPendientes()
+    {
+        return new List<PrestamoDto>();
+    }
+
     private Usuario ObtenerSolicitante(string dniSolicitante)
     {
         Usuario? solicitante = _usuarios.ObtenerUsuarioPorDni(dniSolicitante);

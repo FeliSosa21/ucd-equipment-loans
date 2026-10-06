@@ -644,6 +644,32 @@ public sealed class ServicioPrestamoTests
         VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
     }
 
+    [TestMethod]
+    public void ListarSolicitudesPendientes_VariosEstados_DevuelveSoloLasPendientesConSuSolicitante()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPendienteDocente = CrearSolicitudPendiente(servicio);
+        Guid idPendienteAdministrador = CrearSolicitudPendiente(servicio, dniSolicitante: DniAdministrador);
+
+        CrearSolicitudAprobada(servicio);
+        Guid idRechazada = CrearSolicitudPendiente(servicio, dniSolicitante: DniAdministrador);
+        servicio.Rechazar(idRechazada, MotivoDeRechazo, DniSupervisor);
+        servicio.Solicitar(CrearSolicitud(), DniAdministrador);
+
+        List<PrestamoDto> resultado = servicio.ListarSolicitudesPendientes();
+
+        Assert.AreEqual(2, resultado.Count);
+        CollectionAssert.AreEquivalent(
+            new List<Guid> { idPendienteDocente, idPendienteAdministrador }, 
+            resultado.Select(prestamo => prestamo.Id).ToList());
+
+        Assert.AreEqual("Renato Alves", resultado.Single(
+            prestamo => prestamo.Id == idPendienteDocente).Solicitante);
+        Assert.AreEqual("Lucia Fernandez", resultado.Single(
+            prestamo => prestamo.Id == idPendienteAdministrador).Solicitante);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
