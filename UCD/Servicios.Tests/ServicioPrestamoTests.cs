@@ -20,6 +20,7 @@ public sealed class ServicioPrestamoTests
     private const string NombreTipoSinAprobacion = "Proyector Epson PowerLite";
     private const string NombreTipoSinUnidades = "Parlante JBL Flip";
     private const string NombreTipoConAprobacion = "Camara Canon EOS R50";
+    private const string NombreTipoConAprobacionSinUnidades = "Tablet Samsung Galaxy Tab S9";
     private const string NombreTipoDiscontinuado = "Retroproyector 3M";
     private const string NombreTipoInexistente = "Microscopio Zeiss Primo";
 
@@ -397,6 +398,22 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count);
     }
 
+    [TestMethod]
+    public void Aprobar_SinUnidadesSuficientes_QuedaRechazadoSinEvaluador()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudPendiente(servicio, tipoEquipamiento: NombreTipoConAprobacionSinUnidades);
+
+        PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+
+        Assert.AreEqual("Rechazado", resultado.Estado);
+        Assert.IsNull(guardado.Evaluador);
+        
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
@@ -421,9 +438,11 @@ public sealed class ServicioPrestamoTests
         };
     }
 
-    private static Guid CrearSolicitudPendiente(ServicioPrestamo servicio)
+    private static Guid CrearSolicitudPendiente(
+        ServicioPrestamo servicio,
+        string tipoEquipamiento = NombreTipoConAprobacion)
     {
-        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion);
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: tipoEquipamiento);
         PrestamoDto pendiente = servicio.Solicitar(datos, DniDocente);
 
         return pendiente.Id;
@@ -451,6 +470,10 @@ public sealed class ServicioPrestamoTests
             requiereAprobacion: true,
             cantidadUnidades: 3,
             primerNumero: 101));
+        catalogo.AgregarTipo(CrearTipoEquipamiento(
+            nombre: NombreTipoConAprobacionSinUnidades,
+            requiereAprobacion: true,
+            cantidadUnidades: 0));
 
         TipoEquipamiento tipoEquipamientoDiscontinuado = CrearTipoEquipamiento(
             nombre: NombreTipoDiscontinuado,
