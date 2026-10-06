@@ -49,6 +49,23 @@ public class ServicioCatalogoTests
         Assert.AreEqual("notebook", resultado[0].Nombre);
     }
 
+    [TestMethod]
+    public void ConsultarTipos_MinimoDisponibles_DevuelveLosQueTienenAlMenosN()
+    {
+        var proyector = CrearTipo(nombre: "Proyector Sony");
+        var notebook = CrearTipo(nombre: "notebook");
+        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "EQP-0001"));
+        notebook.AgregarUnidad(CrearUnidad(idInstitucional:"EQP-0002"));
+        notebook.AgregarUnidad(CrearUnidad(idInstitucional:"EQP-0003"));
+        var servicio = CrearServicio(proyector, notebook);
+        var filtro = new FiltroCatalogoDto{ MinimoDisponibles = 2};
+
+        var resultado = servicio.ConsultarTipos(filtro);
+
+        Assert.AreEqual(1, resultado.Count);
+        Assert.AreEqual("notebook", resultado[0].Nombre);
+    }
+
     private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var memoria = new Memoria();
@@ -71,5 +88,13 @@ public class ServicioCatalogoTests
         Categoria categoria = Categoria.Audiovisual)
     {
         return new TipoEquipamiento(nombre, descripcion, duracionMaxPrestamo, requiereAprobacion, categoria);
+    }
+
+    private static UnidadFisica CrearUnidad(
+        string idInstitucional = "EQP-0001",
+        string ubiFisica = "Laboratorio Prueba",
+        string? numSerie = "PF3A7X21")
+    {
+        return new UnidadFisica(idInstitucional, ubiFisica, numSerie);
     }
 }
