@@ -45,6 +45,11 @@ public class ServicioCatalogo
     public List<UnidadFisicaDto> ObtenerUnidadesDisponibles(string nombreTipo)
     {
         var tipo = _repositorioCatalogo.ObtenerTipoPorNombre(nombreTipo);
+        if (tipo == null)
+        {
+            throw new ServicioException("No existe un tipo de equipamiento con ese nombre");
+        }
+
         List<UnidadFisicaDto> resultado = new List<UnidadFisicaDto>();
         foreach (var unidad in tipo.UnidadesDisponibles())
         {
