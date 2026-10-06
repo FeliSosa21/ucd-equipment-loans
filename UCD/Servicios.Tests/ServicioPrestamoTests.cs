@@ -9,6 +9,7 @@ namespace Servicios.Tests;
 public sealed class ServicioPrestamoTests
 {
     private static readonly DateTime FechaFija = new DateTime(2026, 10, 5, 10, 0, 0);
+    private static readonly DateTime FechaDeRealizacion = new DateTime(2026, 10, 6, 9, 30, 0);
 
     private const string DniDocente = "12345672";
     private const string DniEstudiante = "45678905";
@@ -582,17 +583,50 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual("Activo", resultado.Estado);
     }
 
+    [TestMethod]
+    public void Realizar_PrestamoAprobado_RegistraUnMovimientoDePrestamoPorUnidadConElEvaluador()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudAprobada(servicio);
+        ServicioPrestamo servicioDeLaEntrega =
+            CrearServicioConReloj(memoria, new RelojFijo(FechaDeRealizacion));
+
+        servicioDeLaEntrega.Realizar(idPrestamo, DniFuncionario);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
+        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+
+        Assert.AreEqual(CantidadSolicitadaPorDefecto, movimientos.Count);
+        foreach (Movimiento movimiento in movimientos)
+        {
+            Assert.AreEqual(TipoMovimiento.Prestamo, movimiento.Tipo);
+            Assert.AreEqual(FechaDeRealizacion, movimiento.FechaHora);
+            Assert.AreSame(guardado.Solicitante, movimiento.Solicitante);
+            Assert.AreSame(supervisor, movimiento.Evaluador);
+        }
+        CollectionAssert.AreEquivalent(
+            guardado.UnidadesAsignadas.ToList(),
+            movimientos.Select(movimiento => movimiento.Unidad).ToList());
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
         CargarUsuarios(memoria);
 
+        return CrearServicioConReloj(memoria, new RelojFijo(FechaFija));
+    }
+
+    private static ServicioPrestamo CrearServicioConReloj(Memoria memoria, TimeProvider reloj)
+    {
         return new ServicioPrestamo(
             prestamos: new RepositorioPrestamo(memoria),
             usuarios: new RepositorioUsuario(memoria),
             catalogo: new RepositorioCatalogo(memoria),
             movimientos: new RepositorioMovimiento(memoria),
-            reloj: new RelojFijo(FechaFija));
+            reloj: reloj);
     }
 
     private static SolicitudPrestamoDto CrearSolicitud(
