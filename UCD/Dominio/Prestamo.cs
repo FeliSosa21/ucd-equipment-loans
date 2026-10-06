@@ -42,6 +42,13 @@ public class Prestamo
 
     public void Aprobar(Usuario evaluador, IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
+        ValidarQueEsteSolicitado();
+        ValidarQueLaListaExista(unidadesFisicas);
+        ValidarCantidad(unidadesFisicas);
+        ValidarQueNoHayaUnidadesRepetidas(unidadesFisicas);
+        ValidarQueEstenDisponibles(unidadesFisicas);
+        AsignarUnidades(unidadesFisicas);
+
         Estado = EstadoPrestamo.Aprobado;
         Evaluador = evaluador;
     }
