@@ -120,6 +120,18 @@ public class ServicioCatalogoTests
         Assert.AreEqual(0, resultado.Count);
     }
 
+    [TestMethod]
+    public void ConsultarTipos_CategoriaInexistente_DevuelveListaVacia()
+    {
+        var teclado = CrearTipo(nombre: "Teclado HP");
+        var servicio = CrearServicio(teclado);
+        var filtro = new FiltroCatalogoDto { Categoria = "Inexistente" };
+
+        var resultado = servicio.ConsultarTipos(filtro);
+
+        Assert.AreEqual(0, resultado.Count);
+    }
+
     private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var memoria = new Memoria();
