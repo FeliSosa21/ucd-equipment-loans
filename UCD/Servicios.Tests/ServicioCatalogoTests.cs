@@ -199,6 +199,15 @@ public class ServicioCatalogoTests
         Assert.AreEqual("EQP-0002", resultado[0].IdInstitucional);
     }
 
+    [TestMethod]
+    public void ObtenerUnidadesDisponibles_TipoInexistente_LanzaServicioException()
+    {
+        var teclado = CrearTipo(nombre: "Teclado HP");
+        var servicio = CrearServicio(teclado);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ObtenerUnidadesDisponibles("Teclado Lenovo"));
+    }
+
     private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var memoria = new Memoria();
