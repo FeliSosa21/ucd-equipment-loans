@@ -351,6 +351,23 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_UnidadDeOtroTipo_LanzaExcepcionYNoPrestaNinguna()
+    {
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearSolicitudDeTipoConAprobacion();
+        Usuario evaluador = CrearEvaluador();
+        UnidadFisica propia = unidades[0];
+        UnidadFisica ajena = CrearUnidadDeOtroTipo();
+        List<UnidadFisica> unaPropiaYUnaAjena = new List<UnidadFisica> { propia, ajena };
+
+        Assert.ThrowsException<DominioException>(() => prestamo.Aprobar(evaluador, unaPropiaYUnaAjena));
+
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, propia.Estado);
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, ajena.Estado);
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+    }
+
+    [TestMethod]
     public void MarcarDevuelto_PrestamoActivoSinUnidadesPrestadas_QuedaDevuelto()
     {
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
@@ -567,6 +584,25 @@ public sealed class PrestamoTests
         }
 
         return unidades;
+    }
+
+    private static UnidadFisica CrearUnidadDeOtroTipo()
+    {
+        TipoEquipamiento otroTipo = new TipoEquipamiento(
+            nombre: "Parlante JBL Flip",
+            descripcion: "Parlante portatil para eventos",
+            duracionMaxPrestamo: 3,
+            requiereAprobacion: false,
+            categoria: Categoria.Audiovisual);
+
+        UnidadFisica unidad = new UnidadFisica(
+            idInstitucional: "EQP-0901",
+            ubiFisica: "Deposito Central",
+            numSerie: null);
+
+        otroTipo.AgregarUnidad(unidad);
+
+        return unidad;
     }
 
     private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearSolicitudDeTipoConAprobacion()
