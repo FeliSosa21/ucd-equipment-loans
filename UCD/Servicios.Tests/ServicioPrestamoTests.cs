@@ -411,7 +411,20 @@ public sealed class ServicioPrestamoTests
 
         Assert.AreEqual("Rechazado", resultado.Estado);
         Assert.IsNull(guardado.Evaluador);
-        
+    }
+
+    [TestMethod]
+    public void Aprobar_PrestamoInexistente_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idInexistente = Guid.NewGuid();
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Aprobar(idInexistente, DniSupervisor));
+
+        Assert.AreEqual("El prestamo no existe", excepcion.Message);
+        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
     }
 
     private static ServicioPrestamo CrearServicio(Memoria memoria)
