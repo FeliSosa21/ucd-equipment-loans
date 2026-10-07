@@ -142,6 +142,11 @@ public class ServicioPrestamo
         return _prestamos.ObtenerPrestamosDeSolicitante(dniSolicitante).Select(CrearPrestamoDto).ToList();
     }
 
+    public List<PrestamoDto> ListarPrestamosPorEntregar()
+    {
+        return new List<PrestamoDto>();
+    }
+
     private Usuario ObtenerSolicitante(string dniSolicitante)
     {
         Usuario? solicitante = _usuarios.ObtenerUsuarioPorDni(dniSolicitante);

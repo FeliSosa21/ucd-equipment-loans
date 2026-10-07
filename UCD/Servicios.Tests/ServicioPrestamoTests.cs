@@ -731,6 +731,25 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void ListarPrestamosPorEntregar_VariosEstados_DevuelveSoloLosActivosSinEntrega()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion), DniAdministrador);
+        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades), DniAdministrador);
+        Guid idActivoSinEntrega =
+            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+        Guid idEntregado =
+            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+        servicio.RegistrarEntrega(idEntregado, DniFuncionario);
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamosPorEntregar();
+
+        CollectionAssert.AreEquivalent(
+            new List<Guid> { idActivoSinEntrega }, resultado.Select(prestamo => prestamo.Id).ToList());
+    }
+
+    [TestMethod]
     public void ListarSolicitudesPendientes_VariosEstados_DevuelveSoloLasPendientesConSuSolicitante()
     {
         Memoria memoria = new Memoria();
