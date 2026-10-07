@@ -89,6 +89,16 @@ tr:last-child td { border-bottom: none; }
 .alert-info { background: var(--navy-soft); color: var(--navy); }
 .alert-success { background: var(--green-soft); color: var(--green); }
 
+.badge {
+    display: inline-flex; align-items: center;
+    padding: .18rem .6rem; border-radius: 999px;
+    font-size: .74rem; font-weight: 600; white-space: nowrap;
+    border: 1px solid transparent;
+}
+.badge-ok { background: var(--green-soft); color: var(--green); }
+.badge-alerta { background: var(--amber-soft); color: var(--amber); }
+.badge-error { background: var(--red-soft); color: var(--red); }
+.badge-neutro { background: var(--surface-2); color: var(--ink-soft); border-color: var(--border) }
 .blazor-error-boundary { background: var(--red); padding: 1rem; color: white; }
 .blazor-error-boundary::after { content: "Ocurrió un error inesperado."; }
 
