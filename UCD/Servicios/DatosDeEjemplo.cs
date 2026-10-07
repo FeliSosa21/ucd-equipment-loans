@@ -87,7 +87,7 @@ public class DatosDeEjemplo
             duracionMaxPrestamo: 7, requiereAprobacion: false, categoria: categoria);
         foreach (string id in idsUnidades)
         {
-            tipo.AgregarUnidad(new UnidadFisica(idInstitucional: id, ubiFisica: Deposito, numSerie: null));
+            tipo.AgregarUnidad(new UnidadFisica(idInstitucional: id, ubiFisica: Deposito, numSerie: "SN" + id.Replace("-", "")));
         }
 
         return tipo;
