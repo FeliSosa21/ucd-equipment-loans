@@ -1,5 +1,8 @@
 @page "/"
+@using DTOs
+@using Servicios
 @inject SesionActual SesionActual
+@inject ServicioPrestamo ServicioPrestamo
 
 @if (!SesionActual.EstaIniciada)
 {
@@ -36,10 +39,56 @@ else
                     <th>Unidades asignadas</th>
                 </tr>
             </thead>
+            <tbody>
+                @foreach (PrestamoDto prestamo in _prestamos)
+                {
+                    <tr>
+                        <td>@prestamo.TipoEquipamiento</td>
+                        <td>
+                            @prestamo.Estado
+                            @if (prestamo.MotivoRechazo is not null)
+                            {
+                                <div class="hint">Motivo: @prestamo.MotivoRechazo</div>
+                            }
+                        </td>
+                        <td>@(EsRechazado(prestamo) ? SinDato : prestamo.FechaHoraPrestamo.ToString(FormatoFecha))</td>
+                        <td>@(EsRechazado(prestamo) ? SinDato : prestamo.FechaEsperadaDevolucion.ToString(FormatoFechaEsperada))</td>
+                        <td class="mono">@(prestamo.Unidades.Any() ? string.Join(", ", prestamo.Unidades) : SinDato)</td>
+                    </tr>
+                }
+            </tbody>
         </table>
-        <EstadoVacio Titulo="Todavía no tenés solicitudes"
-                     Mensaje="Buscá un equipo en el catálogo para solicitar tu primer préstamo.">
-            <a class="btn btn-primary btn-sm" href="catalogo">Ir al catálogo</a>
-        </EstadoVacio>
+        @if (!_prestamos.Any())
+        {
+            <EstadoVacio Titulo="Todavía no tenés solicitudes"
+                         Mensaje="Buscá un equipo en el catálogo para solicitar tu primer préstamo.">
+                <a class="btn btn-primary btn-sm" href="catalogo">Ir al catálogo</a>
+            </EstadoVacio>
+        }
     </div>
+}
+
+@code {
+    private const string FormatoFecha = "dd/MM/yyyy HH:mm";
+    private const string FormatoFechaEsperada = "dd/MM/yyyy";
+    private const string EstadoRechazado = "Rechazado";
+    private const string SinDato = "—";
+
+    private List<PrestamoDto> _prestamos = new List<PrestamoDto>();
+
+    // Requerimiento 7: las solicitudes y préstamos del usuario logueado, los más recientes primero.
+    protected override void OnInitialized()
+    {
+        if (!SesionActual.EstaIniciada)
+        {
+            return;
+        }
+
+        _prestamos = ServicioPrestamo.ListarPrestamosDeSolicitante(SesionActual.Usuario!.Dni)
+            .OrderByDescending(prestamo => prestamo.FechaHoraPrestamo)
+            .ToList();
+    }
+
+    // Una solicitud rechazada nunca empezó: no tiene inicio ni devolución esperada que mostrar.
+    private static bool EsRechazado(PrestamoDto prestamo) => prestamo.Estado == EstadoRechazado;
 }
