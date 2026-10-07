@@ -32,26 +32,38 @@
     </select>
 </div>
 
-<div class="card table-card">
-    <table>
-        <thead>
-        <tr>
-            <th>Tipo de equipamiento</th>
-            <th>Categoría</th>
-            <th>Estado</th>
-            <th>Disponibles</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (TipoEquipamientoDto tipo in _tipos)
-        {
+<p class ="hint resultados" role ="status">@TextoResultados()</p>
+
+@if (_tipos.Count == 0)
+{
+    <div class="card">
+        <EstadoVacio Titulo="No hay equipamiento que coincida con los filtros"
+                     Mensaje="Probá con otra categoría, otro estado o un mínimo de disponibles más bajo." />
+    </div>
+}
+else
+{
+    <div class="card table-card">
+        <table>
+            <thead>
             <tr>
-                <td><strong>@tipo.Nombre</strong></td>
-                <td>@tipo.Categoria</td>
-                <td><span class="badge @ClaseDeEstado(tipo.Estado)">@tipo.Estado</span></td>
-                <td>@tipo.CantidadDisponibles</td>
+                <th>Tipo de equipamiento</th>
+                <th>Categoría</th>
+                <th>Estado</th>
+                <th>Disponibles</th>
             </tr>
-        }
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+            @foreach (TipoEquipamientoDto tipo in _tipos)
+            {
+                <tr>
+                    <td><strong>@tipo.Nombre</strong></td>
+                    <td>@tipo.Categoria</td>
+                    <td><span class="badge @ClaseDeEstado(tipo.Estado)">@tipo.Estado</span></td>
+                    <td>@tipo.CantidadDisponibles</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
