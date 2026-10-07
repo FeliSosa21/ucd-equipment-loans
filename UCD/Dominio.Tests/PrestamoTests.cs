@@ -5,6 +5,7 @@ public sealed class PrestamoTests
 {
     private static readonly DateTime FechaFija = new(2026, 10, 5, 10, 0, 0);
     private static readonly DateTime FechaDeEntrega = new(2026, 10, 6, 9, 30, 0);
+    private static readonly DateTime SegundaFechaDeEntrega = new(2026, 10, 7, 11, 0, 0);
     private const int CantidadSolicitadaPorDefecto = 2;
     private const string MotivoDeRechazo = "El equipo esta reservado para un examen";
 
@@ -743,6 +744,22 @@ public sealed class PrestamoTests
         Assert.IsNull(prestamo.FechaHoraEntrega);
     }
 
+    [TestMethod]
+    public void RegistrarEntrega_EntregaYaRegistrada_LanzaExcepcion()
+    {
+        (Prestamo prestamo, _) = CrearPrestamoActivo();
+        Usuario primerResponsable = CrearResponsableDeEntrega();
+        Usuario otroResponsable = CrearOtroResponsableDeEntrega();
+        prestamo.RegistrarEntrega(primerResponsable, FechaDeEntrega);
+
+        DominioException excepcion = Assert.ThrowsException<DominioException>(
+            () => prestamo.RegistrarEntrega(otroResponsable, SegundaFechaDeEntrega));
+
+        Assert.AreEqual("La entrega del prestamo ya fue registrada", excepcion.Message);
+        Assert.AreSame(primerResponsable, prestamo.ResponsableEntrega);
+        Assert.AreEqual(FechaDeEntrega, prestamo.FechaHoraEntrega);
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
@@ -778,6 +795,20 @@ public sealed class PrestamoTests
             nombre: "Laura",
             apellido: "Diaz",
             correo: "laura.diaz@ejemplo.com",
+            contrasena: "VivalaOrt2026");
+
+        usuario.AsignarTipo(TipoUsuario.FuncionarioCE);
+
+        return usuario;
+    }
+
+    private static Usuario CrearOtroResponsableDeEntrega()
+    {
+        Usuario usuario = new Usuario(
+            dni: "90123450",
+            nombre: "Marcos",
+            apellido: "Pereira",
+            correo: "marcos.pereira@ejemplo.com",
             contrasena: "VivalaOrt2026");
 
         usuario.AsignarTipo(TipoUsuario.FuncionarioCE);
