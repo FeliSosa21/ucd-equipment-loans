@@ -17,12 +17,17 @@ builder.Services.AddScoped<RepositorioUsuario>();
 builder.Services.AddScoped<RepositorioPrestamo>();
 builder.Services.AddScoped<RepositorioDevolucion>();
 builder.Services.AddScoped<RepositorioMovimiento>();
+builder.Services.AddScoped<RepositorioCatalogo>();
 builder.Services.AddScoped<ServicioUsuario>();
 builder.Services.AddScoped<ServicioSesion>();
 builder.Services.AddScoped<CargaInicial>();
 builder.Services.AddScoped<DatosDeEjemplo>();
 builder.Services.AddScoped<ServicioAdministracionUsuarios>();
 builder.Services.AddScoped<ServicioDevolucion>();
+builder.Services.AddScoped<ServicioPrestamo>();
+
+// Reloj del sistema: los servicios piden la hora a TimeProvider (en los tests se usa uno fijo).
+builder.Services.AddSingleton(TimeProvider.System);
 
 // Quien esta logueado: uno por conexion del navegador.
 builder.Services.AddScoped<SesionActual>();
