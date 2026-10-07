@@ -433,6 +433,26 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_UnidadesInsuficientesPeroNoCero_QuedaRechazadoSinEvaluador()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idDelAdministrador = CrearSolicitudPendiente(servicio, dniSolicitante: DniAdministrador);
+        servicio.Aprobar(idDelAdministrador, DniSupervisor);
+        Guid idDelDocente = CrearSolicitudPendiente(servicio);
+
+        PrestamoDto resultado = servicio.Aprobar(idDelDocente, DniSupervisor);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idDelDocente);
+        TipoEquipamiento camara = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoConAprobacion)!;
+
+        Assert.AreEqual("Rechazado", resultado.Estado);
+        Assert.IsNull(guardado.Evaluador);
+        Assert.AreEqual(0, guardado.UnidadesAsignadas.Count);
+        Assert.AreEqual(1, camara.CantidadDisponibles());
+    }
+
+    [TestMethod]
     public void Aprobar_PrestamoInexistente_LanzaExcepcion()
     {
         Memoria memoria = new Memoria();
