@@ -670,6 +670,37 @@ public sealed class ServicioPrestamoTests
             prestamo => prestamo.Id == idPendienteAdministrador).Solicitante);
     }
 
+    [TestMethod]
+    public void ListarPrestamosAprobados_VariosEstados_DevuelveSoloLosAprobados()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+
+        Guid idAprobadaDocente = CrearSolicitudAprobada(servicio);
+        SolicitudPrestamoDto datosAdministrador =
+            CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1);
+        PrestamoDto solicitudAdministrador = servicio.Solicitar(datosAdministrador, DniAdministrador);
+        servicio.Aprobar(solicitudAdministrador.Id, DniSupervisor);
+        Guid idAprobadaAdministrador = solicitudAdministrador.Id;
+
+        CrearSolicitudPendiente(servicio);
+        Guid idRechazada = CrearSolicitudPendiente(servicio, dniSolicitante: DniAdministrador);
+        servicio.Rechazar(idRechazada, MotivoDeRechazo, DniSupervisor);
+        servicio.Solicitar(CrearSolicitud(), DniAdministrador);
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamosAprobados();
+
+        Assert.AreEqual(2, resultado.Count);
+        CollectionAssert.AreEquivalent(
+            new List<Guid> { idAprobadaDocente, idAprobadaAdministrador },
+            resultado.Select(prestamo => prestamo.Id).ToList());
+
+        Assert.AreEqual("Renato Alves", resultado.Single(
+            prestamo => prestamo.Id == idAprobadaDocente).Solicitante);
+        Assert.AreEqual("Lucia Fernandez", resultado.Single(
+            prestamo => prestamo.Id == idAprobadaAdministrador).Solicitante);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
