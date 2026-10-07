@@ -347,6 +347,19 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_DatosValidos_DevuelveLaFechaEsperadaDeDevolucion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 1);
+        DateTime fechaEsperada = new DateTime(2026, 10, 12);
+
+        PrestamoDto resultado = servicio.Solicitar(datos, DniDocente);
+
+        Assert.AreEqual(fechaEsperada, resultado.FechaEsperadaDevolucion);
+    }
+
+    [TestMethod]
     [DataRow("")]
     [DataRow(" ")]
     public void Solicitar_TipoVacio_LanzaExcepcionConMensaje(string nombreTipo)
@@ -417,6 +430,26 @@ public sealed class ServicioPrestamoTests
 
         Assert.AreEqual("Rechazado", resultado.Estado);
         Assert.IsNull(guardado.Evaluador);
+    }
+
+    [TestMethod]
+    public void Aprobar_UnidadesInsuficientesPeroNoCero_QuedaRechazadoSinEvaluador()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idDelAdministrador = CrearSolicitudPendiente(servicio, dniSolicitante: DniAdministrador);
+        servicio.Aprobar(idDelAdministrador, DniSupervisor);
+        Guid idDelDocente = CrearSolicitudPendiente(servicio);
+
+        PrestamoDto resultado = servicio.Aprobar(idDelDocente, DniSupervisor);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idDelDocente);
+        TipoEquipamiento camara = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoConAprobacion)!;
+
+        Assert.AreEqual("Rechazado", resultado.Estado);
+        Assert.IsNull(guardado.Evaluador);
+        Assert.AreEqual(0, guardado.UnidadesAsignadas.Count);
+        Assert.AreEqual(1, camara.CantidadDisponibles());
     }
 
     [TestMethod]
@@ -732,6 +765,37 @@ public sealed class ServicioPrestamoTests
             prestamo => prestamo.Id == idAprobadaDocente).Solicitante);
         Assert.AreEqual("Lucia Fernandez", resultado.Single(
             prestamo => prestamo.Id == idAprobadaAdministrador).Solicitante);
+    }
+
+    [TestMethod]
+    public void ListarPrestamosDeSolicitante_ConPrestamosDeVariosUsuarios_DevuelveSoloLosSuyos()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        PrestamoDto activoDelDocente =
+            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniDocente);
+        PrestamoDto pendienteDelDocente =
+            servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1), DniDocente);
+        servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniEstudiante);
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamosDeSolicitante(DniDocente);
+
+        Assert.AreEqual(2, resultado.Count);
+        CollectionAssert.AreEquivalent(new List<Guid>
+            { activoDelDocente.Id, pendienteDelDocente.Id }, resultado.Select(prestamo => prestamo.Id).ToList());
+    }
+
+    [TestMethod]
+    public void ListarPrestamosDeSolicitante_SinPrestamos_DevuelveListaVacia()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniDocente);
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamosDeSolicitante(DniAdministrador);
+
+        Assert.IsNotNull(resultado);
+        Assert.AreEqual(0, resultado.Count);
     }
 
     private static ServicioPrestamo CrearServicio(Memoria memoria)

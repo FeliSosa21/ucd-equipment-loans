@@ -101,6 +101,31 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Constructor_DatosValidos_CalculaLaFechaEsperadaDeDevolucion()
+    {
+        DateTime fechaEsperada = new DateTime(2026, 10, 12);
+        Prestamo prestamo = CrearPrestamo();
+
+        Assert.AreEqual(fechaEsperada, prestamo.FechaEsperadaDevolucion);
+    }
+
+    [TestMethod]
+    public void Constructor_DatosValidos_LaFechaEsperadaNoCambiaSiSeModificaElTipo()
+    {
+        TipoEquipamiento tipoEquipamiento = CrearTipoEquipamiento();
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: tipoEquipamiento);
+        DateTime fechaEsperada = new DateTime(2026, 10, 12);
+
+        tipoEquipamiento.Modificar(
+            nombre: "Proyector Epson PowerLite",
+            descripcion: "Proyector para aulas",
+            duracionMaxPrestamo: 10,
+            requiereAprobacion: false,
+            categoria: Categoria.Audiovisual);
+        Assert.AreEqual(fechaEsperada, prestamo.FechaEsperadaDevolucion);
+    }
+
+    [TestMethod]
     public void Activar_CantidadSolicitadaDeUnidadesDisponibles_QuedaActivo()
     {
         Prestamo prestamo = CrearPrestamo();

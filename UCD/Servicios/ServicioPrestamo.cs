@@ -140,6 +140,11 @@ public class ServicioPrestamo
         return _prestamos.ObtenerPrestamosAprobados().Select(CrearPrestamoDto).ToList();
     }
 
+    public List<PrestamoDto> ListarPrestamosDeSolicitante(string dniSolicitante)
+    {
+        return _prestamos.ObtenerPrestamosDeSolicitante(dniSolicitante).Select(CrearPrestamoDto).ToList();
+    }
+
     private Usuario ObtenerSolicitante(string dniSolicitante)
     {
         Usuario? solicitante = _usuarios.ObtenerUsuarioPorDni(dniSolicitante);
@@ -248,6 +253,7 @@ public class ServicioPrestamo
             TipoEquipamiento = prestamo.TipoEquipamiento.Nombre,
             CantidadSolicitada = prestamo.CantidadSolicitada,
             FechaHoraPrestamo = prestamo.FechaHoraPrestamo,
+            FechaEsperadaDevolucion = prestamo.FechaEsperadaDevolucion,
             Estado = prestamo.Estado.ToString(),
             MotivoRechazo = prestamo.MotivoRechazo,
             Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList()
