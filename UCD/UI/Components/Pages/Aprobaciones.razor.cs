@@ -10,11 +10,10 @@ public partial class Aprobaciones
     private const string FormatoFechaEsperada = "dd/MM/yyyy";
     private const int LargoMaximoMotivo = 300;
 
-    // Estado del prestamo que devuelve el servicio cuando lo pudo aprobar.
-    private const string EstadoAprobado = "Aprobado";
+    // Estado del prestamo que devuelve el servicio cuando lo pudo aprobar: aprobar lo deja activo.
+    private const string EstadoActivo = "Activo";
 
     private List<PrestamoDto> _pendientes = new List<PrestamoDto>();
-    private List<PrestamoDto> _aprobados = new List<PrestamoDto>();
     private PrestamoDto? _rechazando;
     private string _motivo = string.Empty;
     private string? _error;
@@ -59,9 +58,9 @@ public partial class Aprobaciones
     // Si ya no hay unidades suficientes, el servicio no aprueba: deja el prestamo rechazado con el motivo.
     private void InformarAprobacion(PrestamoDto resultado)
     {
-        if (resultado.Estado == EstadoAprobado)
+        if (resultado.Estado == EstadoActivo)
         {
-            _exito = $"Se aprobó el préstamo de {resultado.TipoEquipamiento} de {resultado.Solicitante}. " +
+            _exito = $"Se aprobó el préstamo de {resultado.TipoEquipamiento} de {resultado.Solicitante} y quedó activo. " +
                      $"Unidades asignadas: {string.Join(", ", resultado.Unidades)}.";
             return;
         }
@@ -108,25 +107,22 @@ public partial class Aprobaciones
         }
     }
 
-    // Si otro evaluador lo resolvio mientras tanto, se cierra el formulario y se avisa arriba de las listas.
+    // Si otro evaluador lo resolvio mientras tanto, se cierra el formulario y se avisa arriba de la lista.
     private void CerrarSiYaNoSePuedeRechazar(PrestamoDto prestamo)
     {
-        if (SePuedeRechazar(prestamo))
+        if (EstaPendiente(prestamo))
         {
             return;
         }
 
         _rechazando = null;
         _error = null;
-        _avisoLista = $"El préstamo de {prestamo.TipoEquipamiento} de {prestamo.Solicitante} ya no está pendiente " +
-                      "ni aprobado; las listas se actualizaron.";
+        _avisoLista = $"El préstamo de {prestamo.TipoEquipamiento} de {prestamo.Solicitante} ya no está pendiente; " +
+                      "la lista se actualizó.";
     }
 
     private bool EstaPendiente(PrestamoDto prestamo) =>
         _pendientes.Any(pendiente => pendiente.Id == prestamo.Id);
-
-    private bool SePuedeRechazar(PrestamoDto prestamo) =>
-        EstaPendiente(prestamo) || _aprobados.Any(aprobado => aprobado.Id == prestamo.Id);
 
     // Al abrir un formulario o hacer otra accion se borran los mensajes de la accion anterior.
     private void LimpiarMensajes()
@@ -140,6 +136,5 @@ public partial class Aprobaciones
     private void Recargar()
     {
         _pendientes = ServicioPrestamo.ListarSolicitudesPendientes();
-        _aprobados = ServicioPrestamo.ListarPrestamosAprobados();
     }
 }
