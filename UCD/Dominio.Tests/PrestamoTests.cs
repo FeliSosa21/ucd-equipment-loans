@@ -745,6 +745,21 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void RegistrarEntrega_PrestamoAprobado_LanzaExcepcion()
+    {
+        (Prestamo prestamo, _) = CrearPrestamoAprobado();
+        Usuario responsable = CrearResponsableDeEntrega();
+
+        DominioException excepcion = Assert.ThrowsException<DominioException>(
+            () => prestamo.RegistrarEntrega(responsable, FechaDeEntrega));
+
+        Assert.AreEqual("Solo se puede registrar la entrega de un prestamo activo", excepcion.Message);
+        Assert.AreEqual(EstadoPrestamo.Aprobado, prestamo.Estado);
+        Assert.IsNull(prestamo.ResponsableEntrega);
+        Assert.IsNull(prestamo.FechaHoraEntrega);
+    }
+
+    [TestMethod]
     public void RegistrarEntrega_EntregaYaRegistrada_LanzaExcepcion()
     {
         (Prestamo prestamo, _) = CrearPrestamoActivo();
