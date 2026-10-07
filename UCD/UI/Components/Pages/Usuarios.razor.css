@@ -1,5 +1,5 @@
 select.field { width: auto; min-width: 150px; }
 select.field:disabled { opacity: .6; }
 .alta { padding: 1.25rem; margin-bottom: 1rem; }
+.pregunta { margin: 0 0 1rem; }
 td .btn + .btn { margin-left: .4rem; }
-.busqueda { min-width: 320px; }

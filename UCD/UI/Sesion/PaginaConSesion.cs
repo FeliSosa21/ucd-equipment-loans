@@ -8,6 +8,9 @@ public abstract class PaginaConSesion : ComponentBase
     [Inject] protected SesionActual SesionActual { get; set; } = null!;
     [Inject] protected NavigationManager Navigation { get; set; } = null!;
 
+    // DNI del usuario logueado: es quien hace cada accion (responsable) en los servicios.
+    protected string DniUsuario => SesionActual.Usuario!.Dni;
+
     protected bool RedirigirSiNoHaySesion()
     {
         if (SesionActual.EstaIniciada)

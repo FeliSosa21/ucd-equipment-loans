@@ -73,26 +73,11 @@
         {
             UsuarioSesionDto sesion = ServicioSesion.IniciarSesion(_correo.Trim(), _contrasena);
             await SesionActual.IniciarAsync(sesion);
-            Navigation.NavigateTo(PaginaDeInicio(sesion));
+            Navigation.NavigateTo(SesionActual.PaginaObligatoria() ?? "/");
         }
         catch (ServicioException ex)
         {
             _error = ex.Message;
         }
-    }
-
-    private static string PaginaDeInicio(UsuarioSesionDto sesion)
-    {
-        if (sesion.DebeCambiarContrasena)
-        {
-            return "/cambiar-contrasena";
-        }
-
-        if (sesion.PendienteDeActivacion)
-        {
-            return "/pendiente-activacion";
-        }
-
-        return "/";
     }
 }

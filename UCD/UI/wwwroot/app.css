@@ -58,6 +58,7 @@ h1:focus { outline: none; }
 
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-bottom: 1.25rem; }
 .toolbar .field { width: auto; min-width: 200px; }
+.toolbar .busqueda { min-width: 320px; }
 .toolbar .espacio { flex: 1; }
 
 .table-card { overflow-x: auto; }

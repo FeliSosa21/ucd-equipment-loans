@@ -27,6 +27,7 @@ public class Devolucion
     public void Aplicar()
     {
         ValidarPrestamo(Prestamo);
+        ValidarQueTodasEstenPrestadas();
 
         foreach (UnidadDevuelta unidadDevuelta in _unidades)
         {
@@ -72,9 +73,23 @@ public class Devolucion
             throw new DominioException("La devolucion debe incluir las unidades del prestamo");
         }
 
+        if (unidades.Any(unidadDevuelta => unidadDevuelta is null))
+        {
+            throw new DominioException("La devolucion no puede incluir unidades nulas");
+        }
+
         List<UnidadFisica> devueltas = unidades.Select(unidadDevuelta => unidadDevuelta.Unidad).ToList();
         ValidarQueNoHayaRepetidas(devueltas);
         ValidarQueSeanLasDelPrestamo(devueltas, prestamo);
+    }
+
+    // Se valida antes de cambiar cualquier unidad, para no dejar la devolucion aplicada a medias.
+    private void ValidarQueTodasEstenPrestadas()
+    {
+        if (_unidades.Any(unidadDevuelta => unidadDevuelta.Unidad.Estado != EstadoUnidadFisica.Prestada))
+        {
+            throw new DominioException("Todas las unidades deben estar prestadas para registrar la devolucion");
+        }
     }
 
     private static void ValidarQueNoHayaRepetidas(List<UnidadFisica> devueltas)

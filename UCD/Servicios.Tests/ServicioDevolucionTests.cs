@@ -11,6 +11,7 @@ public class ServicioDevolucionTests
     private const string DniFuncionario = "12345672";
     private const string DniSolicitante = "45678905";
     private static readonly DateTime InicioPrestamo = new DateTime(2026, 9, 22, 10, 0, 0);
+    private static readonly DateTime MomentoDevolucion = InicioPrestamo.AddDays(2);
 
     [TestMethod]
     public void CondicionesPosibles_DevuelveLasTresCondiciones()
@@ -27,13 +28,21 @@ public class ServicioDevolucionTests
     {
         ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
 
-        List<PrestamoActivoDto> activos = servicio.ListarPrestamosActivos();
+        List<PrestamoActivoDto> activos = servicio.ListarPrestamosActivos(DniFuncionario);
 
         Assert.AreEqual(1, activos.Count);
         Assert.AreEqual(prestamo.Id, activos[0].Id);
         Assert.AreEqual("Ana Perez", activos[0].Solicitante);
         Assert.AreEqual("Proyector Epson", activos[0].TipoEquipamiento);
         CollectionAssert.AreEqual(new List<string> { "EQP-0001", "EQP-0002" }, activos[0].Unidades);
+    }
+
+    [TestMethod]
+    public void ListarPrestamosActivos_ResponsableSinPermiso_LanzaExcepcion()
+    {
+        ServicioDevolucion servicio = CrearServicio(out _);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ListarPrestamosActivos(DniSolicitante));
     }
 
     [TestMethod]
@@ -44,7 +53,7 @@ public class ServicioDevolucionTests
         servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
 
         Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
-        Assert.AreEqual(0, servicio.ListarPrestamosActivos().Count);
+        Assert.AreEqual(0, servicio.ListarPrestamosActivos(DniFuncionario).Count);
     }
 
     [TestMethod]
@@ -70,6 +79,19 @@ public class ServicioDevolucionTests
         Devolucion guardada = new RepositorioDevolucion(memoria).ObtenerTodas().Single();
         Assert.AreSame(prestamo, guardada.Prestamo);
         Assert.AreEqual(DniFuncionario, guardada.RegistradaPor.Dni);
+        Assert.AreEqual(MomentoDevolucion, guardada.FechaHoraDevolucion);
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_Supervisor_LaRegistra()
+    {
+        Memoria memoria = new Memoria();
+        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
+        new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniFuncionario)!.AsignarTipo(TipoUsuario.Supervisor);
+
+        servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
+
+        Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
     }
 
     [TestMethod]
@@ -98,7 +120,7 @@ public class ServicioDevolucionTests
 
         Movimiento movimiento = new RepositorioMovimiento(memoria).ObtenerTodos()[0];
         Assert.AreEqual(TipoMovimiento.Devolucion, movimiento.Tipo);
-        Assert.AreEqual(datos.FechaHoraDevolucion, movimiento.FechaHora);
+        Assert.AreEqual(MomentoDevolucion, movimiento.FechaHora);
         Assert.AreSame(prestamo.Solicitante, movimiento.Solicitante);
     }
 
@@ -120,6 +142,16 @@ public class ServicioDevolucionTests
         ServicioDevolucion servicio = CrearServicio(out _);
 
         Assert.ThrowsException<ArgumentNullException>(() => servicio.RegistrarDevolucion(null!, DniFuncionario));
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_UnidadesNulas_LanzaArgumentNullException()
+    {
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+        DevolucionDto datos = CrearDatos(prestamo.Id);
+        datos.Unidades = null!;
+
+        Assert.ThrowsException<ArgumentNullException>(() => servicio.RegistrarDevolucion(datos, DniFuncionario));
     }
 
     [TestMethod]
@@ -188,11 +220,11 @@ public class ServicioDevolucionTests
     [TestMethod]
     public void RegistrarDevolucion_FechaAnteriorAlPrestamo_LanzaExcepcion()
     {
-        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
-        DevolucionDto datos = CrearDatos(prestamo.Id);
-        datos.FechaHoraDevolucion = InicioPrestamo.AddDays(-1);
+        ServicioDevolucion servicio = CrearServicio(new Memoria(), out Prestamo prestamo, InicioPrestamo.AddDays(-1));
 
-        Assert.ThrowsException<ServicioException>(() => servicio.RegistrarDevolucion(datos, DniFuncionario));
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario));
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
     }
 
     [TestMethod]
@@ -237,7 +269,6 @@ public class ServicioDevolucionTests
         return new DevolucionDto
         {
             IdPrestamo = idPrestamo,
-            FechaHoraDevolucion = InicioPrestamo.AddDays(2),
             Unidades = new List<UnidadDevueltaDto>
             {
                 new UnidadDevueltaDto { IdInstitucional = "EQP-0001", Condicion = "Sin observaciones" },
@@ -252,6 +283,11 @@ public class ServicioDevolucionTests
     }
 
     private static ServicioDevolucion CrearServicio(Memoria memoria, out Prestamo prestamo)
+    {
+        return CrearServicio(memoria, out prestamo, MomentoDevolucion);
+    }
+
+    private static ServicioDevolucion CrearServicio(Memoria memoria, out Prestamo prestamo, DateTime ahora)
     {
         RepositorioUsuario usuarios = new RepositorioUsuario(memoria);
         RepositorioPrestamo prestamos = new RepositorioPrestamo(memoria);
@@ -281,6 +317,6 @@ public class ServicioDevolucionTests
         prestamos.AgregarPrestamo(prestamo);
 
         return new ServicioDevolucion(prestamos, usuarios, new RepositorioDevolucion(memoria),
-            new RepositorioMovimiento(memoria));
+            new RepositorioMovimiento(memoria), new RelojFijo(ahora));
     }
 }

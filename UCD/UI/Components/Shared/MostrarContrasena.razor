@@ -11,9 +11,9 @@
 
     public static string TipoDeCampo(bool visible) => visible ? "text" : "password";
 
+    // No se modifica el propio parametro: se avisa al padre, que vuelve a pasar el valor nuevo.
     private async Task Alternar(ChangeEventArgs evento)
     {
-        Visible = evento.Value is true;
-        await VisibleChanged.InvokeAsync(Visible);
+        await VisibleChanged.InvokeAsync(evento.Value is true);
     }
 }

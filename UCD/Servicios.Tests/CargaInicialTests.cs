@@ -8,7 +8,7 @@ namespace Servicios.Tests;
 public class CargaInicialTests
 {
     [TestMethod]
-    public void CargarRoot_MemoriaVacia_GuardaAdministradorQueDebeCambiarContrasena()
+    public void CargarRoot_MemoriaVacia_GuardaAdministradorQueNoDebeCambiarContrasena()
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
@@ -19,7 +19,7 @@ public class CargaInicialTests
         Usuario? root = repositorio.ObtenerUsuarioPorCorreo(CargaInicial.CorreoRoot);
         Assert.IsNotNull(root);
         Assert.AreEqual(TipoUsuario.Administrador, root.Tipo);
-        Assert.IsTrue(root.DebeCambiarContrasena);
+        Assert.IsFalse(root.DebeCambiarContrasena);
     }
 
     [TestMethod]

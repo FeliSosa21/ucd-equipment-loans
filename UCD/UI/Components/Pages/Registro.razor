@@ -85,6 +85,7 @@
     private string _repetirContrasena = string.Empty;
     private string? _error;
     private bool _mostrarContrasena;
+    private bool _registrado;
 
     private string TipoContrasena => MostrarContrasena.TipoDeCampo(_mostrarContrasena);
 
@@ -107,6 +108,12 @@
 
     private void Registrar()
     {
+        // Un doble clic manda dos envios: el segundo llega con la cuenta ya creada y daria "ya existe".
+        if (_registrado)
+        {
+            return;
+        }
+
         _error = null;
 
         if (_contrasena != _repetirContrasena)
@@ -118,6 +125,7 @@
         try
         {
             ServicioUsuario.Registrar(CrearDto());
+            _registrado = true;
             Navigation.NavigateTo("/pendiente-activacion");
         }
         catch (ServicioException ex)

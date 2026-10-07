@@ -3,7 +3,7 @@
 
 @* Cada item se muestra solo si el tipo del usuario logueado tiene el permiso (letra, req. 1) *@
 <nav class="nav">
-    @if (Puede(Permisos.ConsultarMisSolicitudes) || Puede(Permisos.ConsultarCatalogo))
+    @if (PuedeAlguno(Permisos.ConsultarMisSolicitudes, Permisos.ConsultarCatalogo, Permisos.SolicitarPrestamo))
     {
         <div class="nav-section">General</div>
         @if (Puede(Permisos.ConsultarMisSolicitudes))
@@ -14,10 +14,14 @@
         {
             <NavLink class="nav-item" href="catalogo">Catálogo</NavLink>
         }
+        @if (Puede(Permisos.SolicitarPrestamo))
+        {
+            <NavLink class="nav-item" href="solicitar-prestamo">Solicitar préstamo</NavLink>
+        }
     }
 
-    @if (Puede(Permisos.GestionarCatalogo) || Puede(Permisos.GestionarUnidades) || Puede(Permisos.EvaluarSolicitud) ||
-         Puede(Permisos.RegistrarDevolucion) || Puede(Permisos.ConsultarHistorico))
+    @if (PuedeAlguno(Permisos.GestionarCatalogo, Permisos.GestionarUnidades, Permisos.EvaluarSolicitud,
+             Permisos.RegistrarDevolucion, Permisos.ConsultarHistorico))
     {
         <div class="nav-section">Gestión</div>
         @if (Puede(Permisos.GestionarCatalogo))
@@ -69,6 +73,9 @@
     private bool Puede(string permiso) =>
         SesionActual.EstaIniciada && !SesionActual.Usuario!.DebeCambiarContrasena &&
         SesionActual.Usuario.Permisos.Contains(permiso);
+
+    // Una seccion se muestra si el usuario puede ver al menos uno de sus items.
+    private bool PuedeAlguno(params string[] permisos) => permisos.Any(Puede);
 
     public void Dispose()
     {

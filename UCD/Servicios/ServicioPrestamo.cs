@@ -7,7 +7,6 @@ namespace Servicios;
 public class ServicioPrestamo
 {
     private const string MensajeSinPermisoParaEvaluar = "El usuario no tiene permiso para evaluar solicitudes";
-    private const string MensajeSinPermisoParaRealizar = "El usuario no tiene permiso para realizar prestamos";
 
     private readonly RepositorioPrestamo _prestamos;
     private readonly RepositorioUsuario _usuarios;
@@ -84,6 +83,8 @@ public class ServicioPrestamo
                 List<UnidadFisica> unidades = prestamo.TipoEquipamiento.UnidadesDisponibles()
                     .Take(prestamo.CantidadSolicitada).ToList();
                 prestamo.Aprobar(evaluador, unidades);
+                prestamo.Realizar();
+                RegistrarMovimientos(prestamo, _reloj.GetLocalNow().DateTime);
             }
 
             return CrearPrestamoDto(prestamo);
@@ -112,32 +113,14 @@ public class ServicioPrestamo
         }
     }
 
-    public PrestamoDto Realizar(Guid idPrestamo, string dniResponsable)
-    {
-        ObtenerUsuarioHabilitado(dniResponsable, Permiso.RealizarPrestamo, MensajeSinPermisoParaRealizar);
-        Prestamo prestamo = ObtenerPrestamo(idPrestamo);
-
-        try
-        {
-            prestamo.Realizar();
-            RegistrarMovimientos(prestamo, _reloj.GetLocalNow().DateTime);
-
-            return CrearPrestamoDto(prestamo);
-        }
-        catch (DominioException excepcion)
-        {
-            throw new ServicioException(excepcion.Message, excepcion);
-        }
-    }
-
     public List<PrestamoDto> ListarSolicitudesPendientes()
     {
         return _prestamos.ObtenerPrestamosPendientes().Select(CrearPrestamoDto).ToList();
     }
 
-    public List<PrestamoDto> ListarPrestamosAprobados()
+    public List<PrestamoDto> ListarPrestamosDeSolicitante(string dniSolicitante)
     {
-        return _prestamos.ObtenerPrestamosAprobados().Select(CrearPrestamoDto).ToList();
+        return _prestamos.ObtenerPrestamosDeSolicitante(dniSolicitante).Select(CrearPrestamoDto).ToList();
     }
 
     private Usuario ObtenerSolicitante(string dniSolicitante)
@@ -212,13 +195,18 @@ public class ServicioPrestamo
 
     private void ValidarLimites(Usuario solicitante, int cantidadSolicitada)
     {
-        if (!solicitante.Tipo.PermiteUnidades(cantidadSolicitada))
+        IReadOnlyList<Prestamo> prestamosDelSolicitante = _prestamos.ObtenerPrestamosDeSolicitante(solicitante.Dni);
+
+        int unidadesActivas = prestamosDelSolicitante
+            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Activo)
+            .Sum(prestamo => prestamo.UnidadesAsignadas.Count);
+
+        if (!solicitante.Tipo.PermiteUnidades(unidadesActivas + cantidadSolicitada))
         {
-            throw new ServicioException("La cantidad solicitada supera el maximo de unidades por prestamo");
+            throw new ServicioException("La cantidad solicitada supera el maximo de unidades del solicitante");
         }
 
-        int prestamosVigentes = _prestamos.ObtenerPrestamosDeSolicitante(solicitante.Dni)
-            .Count(prestamo => prestamo.EstaVigente());
+        int prestamosVigentes = prestamosDelSolicitante.Count(prestamo => prestamo.EstaVigente());
 
         if (!solicitante.Tipo.PuedeAgregarPrestamo(prestamosVigentes))
         {
@@ -248,6 +236,7 @@ public class ServicioPrestamo
             TipoEquipamiento = prestamo.TipoEquipamiento.Nombre,
             CantidadSolicitada = prestamo.CantidadSolicitada,
             FechaHoraPrestamo = prestamo.FechaHoraPrestamo,
+            FechaEsperadaDevolucion = prestamo.FechaEsperadaDevolucion,
             Estado = prestamo.Estado.ToString(),
             MotivoRechazo = prestamo.MotivoRechazo,
             Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList()

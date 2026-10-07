@@ -1,5 +1,6 @@
 using DTOs;
 using Servicios;
+using UI.Components.Shared;
 using UI.Sesion;
 
 namespace UI.Components.Pages;
@@ -14,13 +15,25 @@ public partial class Usuarios
     private bool _mostrarAlta;
     private UsuarioDto _nuevo = new UsuarioDto();
     private string _tipoNuevo = string.Empty;
-    private UsuarioResumenDto? _editando;
+    private DatosPersonalesDto? _editando;
+    private Confirmacion? _confirmacion;
     private int _recargas;
+
+    // Accion delicada que espera que el administrador la confirme antes de ejecutarse.
+    private sealed record Confirmacion(string Pregunta, string TextoBoton, Action Accion);
 
     private IEnumerable<UsuarioResumenDto> UsuariosFiltrados =>
         _usuarios.Where(usuario => string.IsNullOrWhiteSpace(_busqueda) ||
                                    $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
                                        .Contains(_busqueda.Trim(), StringComparison.OrdinalIgnoreCase));
+
+    private bool AltaCompleta =>
+        !string.IsNullOrWhiteSpace(_nuevo.Dni) &&
+        CamposDatosPersonales.EstanCompletos(_nuevo.Nombre, _nuevo.Apellido, _nuevo.Correo);
+
+    private bool EdicionCompleta =>
+        _editando is not null &&
+        CamposDatosPersonales.EstanCompletos(_editando.Nombre, _editando.Apellido, _editando.Correo);
 
     protected override void OnInitialized()
     {
@@ -34,10 +47,17 @@ public partial class Usuarios
         Recargar();
     }
 
-    private void AlternarAlta()
+    private void AbrirAlta()
     {
-        _mostrarAlta = !_mostrarAlta;
+        _mostrarAlta = true;
         _editando = null;
+        _confirmacion = null;
+        LimpiarMensajes();
+    }
+
+    private void CancelarAlta()
+    {
+        _mostrarAlta = false;
         LimpiarMensajes();
     }
 
@@ -54,9 +74,8 @@ public partial class Usuarios
             Dni = _nuevo.Dni.Trim(), Nombre = _nuevo.Nombre.Trim(), Apellido = _nuevo.Apellido.Trim(),
             Correo = _nuevo.Correo.Trim()
         };
-        Ejecutar(() => ServicioAdministracion.CrearUsuario(datos, _tipoNuevo, SesionActual.Usuario!.Dni));
 
-        if (_error is null)
+        if (Ejecutar(() => ServicioAdministracion.CrearUsuario(datos, _tipoNuevo, DniUsuario)))
         {
             _exito = $"Se creó la cuenta de {datos.Nombre} {datos.Apellido}.";
             _nuevo = new UsuarioDto();
@@ -67,8 +86,9 @@ public partial class Usuarios
     private void AbrirEdicion(UsuarioResumenDto usuario)
     {
         _mostrarAlta = false;
+        _confirmacion = null;
         LimpiarMensajes();
-        _editando = new UsuarioResumenDto
+        _editando = new DatosPersonalesDto
         {
             Dni = usuario.Dni, Nombre = usuario.Nombre, Apellido = usuario.Apellido, Correo = usuario.Correo
         };
@@ -82,13 +102,12 @@ public partial class Usuarios
             return;
         }
 
-        UsuarioResumenDto editado = _editando;
+        DatosPersonalesDto editado = _editando;
         editado.Nombre = editado.Nombre.Trim();
         editado.Apellido = editado.Apellido.Trim();
         editado.Correo = editado.Correo.Trim();
-        Ejecutar(() => ServicioAdministracion.ModificarDatos(editado, SesionActual.Usuario!.Dni));
 
-        if (_error is null)
+        if (Ejecutar(() => ServicioAdministracion.ModificarDatos(editado, DniUsuario)))
         {
             if (EsElMismoDni(editado.Dni))
             {
@@ -104,21 +123,78 @@ public partial class Usuarios
 
     private bool EsElMismo(UsuarioResumenDto usuario) => EsElMismoDni(usuario.Dni);
 
+    // Dar permisos de Administrador es lo unico que se confirma: le da acceso a todo el sistema.
     private void AsignarTipo(UsuarioResumenDto usuario, string? tipo)
     {
-        Ejecutar(() => ServicioAdministracion.AsignarTipo(usuario.Dni, tipo ?? string.Empty,
-            SesionActual.Usuario!.Dni));
+        if (tipo == ServicioAdministracionUsuarios.NombreTipoAdministrador)
+        {
+            PedirConfirmacion($"¿Querés que {usuario.Nombre} {usuario.Apellido} sea Administrador? " +
+                              "Va a poder hacer cualquier operación, incluso gestionar usuarios.",
+                "Sí, hacerlo Administrador", () => EjecutarAsignarTipo(usuario, tipo));
+            return;
+        }
+
+        EjecutarAsignarTipo(usuario, tipo);
+    }
+
+    private void EjecutarAsignarTipo(UsuarioResumenDto usuario, string? tipo)
+    {
+        if (Ejecutar(() => ServicioAdministracion.AsignarTipo(usuario.Dni, tipo ?? string.Empty, DniUsuario)))
+        {
+            _exito = $"{usuario.Nombre} {usuario.Apellido} ahora es {tipo}.";
+        }
     }
 
     private void CambiarEstado(UsuarioResumenDto usuario)
     {
         if (usuario.Activo)
         {
-            Ejecutar(() => ServicioAdministracion.Desactivar(usuario.Dni, SesionActual.Usuario!.Dni));
+            PedirConfirmacion($"¿Querés desactivar la cuenta de {usuario.Nombre} {usuario.Apellido}? " +
+                              "No va a poder ingresar hasta que la reactives.",
+                "Sí, desactivar", () => Desactivar(usuario));
             return;
         }
 
-        Ejecutar(() => ServicioAdministracion.Reactivar(usuario.Dni, SesionActual.Usuario!.Dni));
+        if (Ejecutar(() => ServicioAdministracion.Reactivar(usuario.Dni, DniUsuario)))
+        {
+            _exito = $"Se reactivó la cuenta de {usuario.Nombre} {usuario.Apellido}.";
+        }
+    }
+
+    private void Desactivar(UsuarioResumenDto usuario)
+    {
+        if (Ejecutar(() => ServicioAdministracion.Desactivar(usuario.Dni, DniUsuario)))
+        {
+            _exito = $"Se desactivó la cuenta de {usuario.Nombre} {usuario.Apellido}.";
+        }
+    }
+
+    private void PedirConfirmacion(string pregunta, string textoBoton, Action accion)
+    {
+        _mostrarAlta = false;
+        _editando = null;
+        LimpiarMensajes();
+        _confirmacion = new Confirmacion(pregunta, textoBoton, accion);
+    }
+
+    private void Confirmar()
+    {
+        // Un doble clic manda dos envios: el segundo llega con la confirmacion ya cerrada.
+        if (_confirmacion is null)
+        {
+            return;
+        }
+
+        Action accion = _confirmacion.Accion;
+        _confirmacion = null;
+        accion();
+    }
+
+    // Al cancelar se recarga la tabla para que el desplegable vuelva a mostrar el tipo real.
+    private void CancelarConfirmacion()
+    {
+        _confirmacion = null;
+        Recargar();
     }
 
     private void CancelarEdicion()
@@ -134,9 +210,11 @@ public partial class Usuarios
         _exito = null;
     }
 
-    private void Ejecutar(Action accion)
+    // Devuelve si la accion se pudo hacer; si no, deja el mensaje del servicio en _error.
+    private bool Ejecutar(Action accion)
     {
         LimpiarMensajes();
+        bool exito = true;
         try
         {
             accion();
@@ -144,16 +222,28 @@ public partial class Usuarios
         catch (ServicioException ex)
         {
             _error = ex.Message;
+            exito = false;
         }
 
         Recargar();
+        return exito;
     }
 
     // Cambiar la clave de la tabla la vuelve a dibujar entera: si el servicio rechaza un cambio de tipo,
     // el desplegable vuelve a mostrar el tipo real y no el que se habia elegido.
+    // Si quien mira la lista dejo de ser administrador, el servicio la niega y se muestra el motivo.
     private void Recargar()
     {
-        _usuarios = ServicioAdministracion.ListarUsuarios();
+        try
+        {
+            _usuarios = ServicioAdministracion.ListarUsuarios(DniUsuario);
+        }
+        catch (ServicioException ex)
+        {
+            _usuarios = new List<UsuarioResumenDto>();
+            _error = ex.Message;
+        }
+
         _recargas++;
     }
 }

@@ -31,11 +31,6 @@ public class RepositorioPrestamo
         return ObtenerPorEstado(EstadoPrestamo.Solicitado);
     }
 
-    public IReadOnlyList<Prestamo> ObtenerPrestamosAprobados()
-    {
-        return ObtenerPorEstado(EstadoPrestamo.Aprobado);
-    }
-
     public IReadOnlyList<Prestamo> ObtenerPrestamosDeSolicitante(string dni)
     {
         return _memoria.Prestamos

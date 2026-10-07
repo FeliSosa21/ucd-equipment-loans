@@ -5,12 +5,14 @@ using DTOs;
 namespace Servicios;
 
 // Gestion de cuentas: el administrador crea, lista, asigna tipo, modifica, desactiva y reactiva;
-// cualquier usuario puede modificar sus propios datos. Cada operacion valida que el responsable sea un
-// administrador activo, asi un administrador desactivado con la pantalla abierta no puede seguir operando.
-// Como ademas no puede actuar sobre si mismo, siempre queda al menos un administrador activo.
+// cualquier usuario activo puede ver y modificar sus propios datos. Cada operacion valida al responsable
+// (administrador activo, o el mismo usuario activo), asi nadie desactivado con la pantalla abierta puede seguir
+// operando. Como un administrador no puede actuar sobre si mismo, siempre queda al menos uno activo.
+// NombresDeTipos no valida al responsable: solo devuelve los nombres fijos de los tipos, sin datos de usuarios.
 public class ServicioAdministracionUsuarios
 {
     public const string ContrasenaPredeterminada = "Ucd12345";
+    public static readonly string NombreTipoAdministrador = TipoUsuario.Administrador.Nombre;
     private const string MensajeSoloAdministrador = "Solo un administrador activo puede gestionar usuarios";
 
     private readonly RepositorioUsuario _repositorio;
@@ -37,13 +39,21 @@ public class ServicioAdministracionUsuarios
             Contrasena = ContrasenaPredeterminada
         });
 
-        Usuario creado = _repositorio.ObtenerUsuarioPorCorreo(dto.Correo)!;
+        // Se busca por correo porque el registro puede normalizar el DNI (cedulas de 7 digitos).
+        Usuario? creado = _repositorio.ObtenerUsuarioPorCorreo(dto.Correo);
+
+        if (creado is null)
+        {
+            throw new ServicioException("No se pudo crear el usuario");
+        }
+
         creado.AsignarTipo(tipo);
         creado.ExigirCambioDeContrasena();
     }
 
-    public List<UsuarioResumenDto> ListarUsuarios()
+    public List<UsuarioResumenDto> ListarUsuarios(string dniResponsable)
     {
+        ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         return _repositorio.ObtenerTodos().Select(CrearResumen).ToList();
     }
 
@@ -60,17 +70,21 @@ public class ServicioAdministracionUsuarios
         usuario.AsignarTipo(ObtenerTipo(nombreTipo));
     }
 
-    public UsuarioResumenDto ObtenerResumen(string dni)
+    public UsuarioResumenDto ObtenerResumen(string dni, string dniResponsable)
     {
+        ValidarQuePuedeModificar(dni, dniResponsable);
         return CrearResumen(ObtenerUsuario(dni));
     }
 
-    public void ModificarDatos(UsuarioResumenDto datos, string dniResponsable)
+    public void ModificarDatos(DatosPersonalesDto datos, string dniResponsable)
     {
         ArgumentNullException.ThrowIfNull(datos);
         ValidarQuePuedeModificar(datos.Dni, dniResponsable);
         Usuario usuario = ObtenerUsuario(datos.Dni);
-        Usuario? duenoDelCorreo = _repositorio.ObtenerUsuarioPorCorreo(datos.Correo);
+        string nombre = Recortar(datos.Nombre);
+        string apellido = Recortar(datos.Apellido);
+        string correo = Recortar(datos.Correo);
+        Usuario? duenoDelCorreo = _repositorio.ObtenerUsuarioPorCorreo(correo);
 
         if (duenoDelCorreo != null && duenoDelCorreo != usuario)
         {
@@ -79,7 +93,7 @@ public class ServicioAdministracionUsuarios
 
         try
         {
-            usuario.ModificarDatos(datos.Nombre, datos.Apellido, datos.Correo);
+            usuario.ModificarDatos(nombre, apellido, correo);
         }
         catch (DominioException ex)
         {
@@ -100,10 +114,12 @@ public class ServicioAdministracionUsuarios
         ObtenerUsuario(dni).Reactivar();
     }
 
+    // El mismo usuario puede ver y modificar sus datos mientras siga activo; a otro, solo un administrador.
     private void ValidarQuePuedeModificar(string dni, string dniResponsable)
     {
         if (dni == dniResponsable)
         {
+            ValidarQueEsteActivo(dniResponsable);
             return;
         }
 
@@ -118,6 +134,16 @@ public class ServicioAdministracionUsuarios
         if (responsable is null || !EsAdministradorActivo(responsable))
         {
             throw new ServicioException(mensaje);
+        }
+    }
+
+    private void ValidarQueEsteActivo(string dni)
+    {
+        Usuario? usuario = _repositorio.ObtenerUsuarioPorDni(dni);
+
+        if (usuario is null || usuario.Estado == EstadoUsuario.Desactivado)
+        {
+            throw new ServicioException("La sesion ya no es valida");
         }
     }
 
@@ -156,6 +182,12 @@ public class ServicioAdministracionUsuarios
         }
 
         return usuario;
+    }
+
+    // Los espacios de alrededor no cuentan para el largo minimo ni se guardan.
+    private static string Recortar(string? valor)
+    {
+        return valor?.Trim() ?? string.Empty;
     }
 
     private static UsuarioResumenDto CrearResumen(Usuario usuario)

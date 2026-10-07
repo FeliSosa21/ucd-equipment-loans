@@ -13,6 +13,8 @@ public class DatosDeEjemploTests
     private RepositorioCatalogo _repositorioCatalogo = null!;
     private DatosDeEjemplo _datos = null!;
 
+    private static readonly DateTime Hoy = new DateTime(2026, 10, 7, 9, 0, 0);
+
     [TestInitialize]
     public void Inicializar()
     {
@@ -21,7 +23,7 @@ public class DatosDeEjemploTests
         _prestamos = new RepositorioPrestamo(_memoria);
         _repositorioCatalogo = new RepositorioCatalogo(_memoria);
         _repositorioCatalogo.Guardar(new Catalogo(CargaInicial.NombreCatalogo));
-        _datos = new DatosDeEjemplo(_usuarios, _prestamos, _repositorioCatalogo);
+        _datos = new DatosDeEjemplo(_usuarios, _prestamos, _repositorioCatalogo, new RelojFijo(Hoy));
     }
 
     [TestMethod]
@@ -66,7 +68,33 @@ public class DatosDeEjemploTests
         Catalogo catalogo = _repositorioCatalogo.Obtener()!;
         Assert.AreEqual(5, catalogo.Tipos.Count);
         Assert.IsNotNull(catalogo.BuscarTipoPorNombre("Notebook"));
-        Assert.IsFalse(catalogo.BuscarTipoPorNombre("Osciloscopio")!.EstaActivo);
+    }
+
+    [TestMethod]
+    public void Cargar_ConCatalogo_DejaElOsciloscopioDiscontinuado()
+    {
+        _datos.Cargar();
+
+        Assert.IsFalse(_repositorioCatalogo.ObtenerTipoPorNombre("Osciloscopio")!.EstaActivo);
+    }
+
+    [TestMethod]
+    public void Cargar_ConCatalogo_DejaUnaUnidadDelKitEnMantenimiento()
+    {
+        _datos.Cargar();
+
+        TipoEquipamiento kit = _repositorioCatalogo.ObtenerTipoPorNombre("Kit Arduino")!;
+        Assert.AreEqual(EstadoUnidadFisica.EnMantenimiento, kit.Unidades.Last().Estado);
+    }
+
+    [TestMethod]
+    public void Cargar_MemoriaVacia_LosPrestamosTomanLaFechaDelReloj()
+    {
+        _datos.Cargar();
+
+        Prestamo prestamoDelDocente = _prestamos.ObtenerPrestamosActivos()
+            .Single(prestamo => prestamo.Solicitante.Correo == DatosDeEjemplo.CorreoDocente);
+        Assert.AreEqual(Hoy.AddDays(-2), prestamoDelDocente.FechaHoraPrestamo);
     }
 
     [TestMethod]
@@ -83,7 +111,7 @@ public class DatosDeEjemploTests
     {
         Memoria memoria = new Memoria();
         DatosDeEjemplo datos = new DatosDeEjemplo(new RepositorioUsuario(memoria),
-            new RepositorioPrestamo(memoria), new RepositorioCatalogo(memoria));
+            new RepositorioPrestamo(memoria), new RepositorioCatalogo(memoria), new RelojFijo(Hoy));
 
         Assert.ThrowsException<InvalidOperationException>(() => datos.Cargar());
     }

@@ -9,7 +9,7 @@ namespace Servicios.Tests;
 public sealed class ServicioPrestamoTests
 {
     private static readonly DateTime FechaFija = new DateTime(2026, 10, 5, 10, 0, 0);
-    private static readonly DateTime FechaDeRealizacion = new DateTime(2026, 10, 6, 9, 30, 0);
+    private static readonly DateTime FechaDeEvaluacion = new DateTime(2026, 10, 6, 9, 30, 0);
 
     private const string DniDocente = "12345672";
     private const string DniEstudiante = "45678905";
@@ -282,6 +282,38 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_UnidadesActivasMasSolicitadasSuperanElMaximo_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        servicio.Solicitar(CrearSolicitud(), DniEstudiante);
+        SolicitudPrestamoDto segunda = CrearSolicitud(cantidadSolicitada: 1);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Solicitar(segunda, DniEstudiante));
+        Assert.AreEqual("La cantidad solicitada supera el maximo de unidades del solicitante", excepcion.Message);
+
+        Assert.AreEqual(1, new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniEstudiante).Count);
+        TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoSinAprobacion)!;
+        Assert.IsTrue(tipo.Unidades.Single(unidad => unidad.IdInstitucional == "EQP-0003").EstaDisponible(),
+            "La unidad EQP-0003 deberia seguir disponible");
+    }
+
+    [TestMethod]
+    public void Solicitar_SolicitudesPendientesNoCuentanParaElMaximoDeUnidades()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion), DniEstudiante);
+        SolicitudPrestamoDto segunda = CrearSolicitud();
+
+        PrestamoDto resultado = servicio.Solicitar(segunda, DniEstudiante);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+        Assert.AreEqual(CantidadSolicitadaPorDefecto, resultado.Unidades.Count);
+    }
+
+    [TestMethod]
     public void Solicitar_SuperaPrestamosConcurrentes_LanzaExcepcion()
     {
         Memoria memoria = new Memoria();
@@ -347,6 +379,19 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_DatosValidos_DevuelveLaFechaEsperadaDeDevolucion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 1);
+        DateTime fechaEsperada = new DateTime(2026, 10, 12);
+
+        PrestamoDto resultado = servicio.Solicitar(datos, DniDocente);
+
+        Assert.AreEqual(fechaEsperada, resultado.FechaEsperadaDevolucion);
+    }
+
+    [TestMethod]
     [DataRow("")]
     [DataRow(" ")]
     public void Solicitar_TipoVacio_LanzaExcepcionConMensaje(string nombreTipo)
@@ -363,7 +408,7 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void Aprobar_SolicitudPendienteConUnidades_QuedaAprobado()
+    public void Aprobar_SolicitudPendienteConUnidades_QuedaActivo()
     {
         Memoria memoria = new Memoria();
         ServicioPrestamo servicio = CrearServicio(memoria);
@@ -371,7 +416,7 @@ public sealed class ServicioPrestamoTests
 
         PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
 
-        Assert.AreEqual("Aprobado", resultado.Estado);
+        Assert.AreEqual("Activo", resultado.Estado);
     }
 
     [TestMethod]
@@ -393,15 +438,31 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void Aprobar_SolicitudPendienteConUnidades_NoRegistraMovimientos()
+    public void Aprobar_SolicitudPendienteConUnidades_RegistraUnMovimientoDePrestamoPorUnidadConElEvaluador()
     {
         Memoria memoria = new Memoria();
         ServicioPrestamo servicio = CrearServicio(memoria);
         Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        ServicioPrestamo servicioDeLaEvaluacion =
+            CrearServicioConReloj(memoria, new RelojFijo(FechaDeEvaluacion));
 
-        servicio.Aprobar(idPrestamo, DniSupervisor);
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
 
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count);
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
+        List<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos()
+            .Where(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo).ToList();
+
+        Assert.AreEqual(CantidadSolicitadaPorDefecto, movimientos.Count);
+        foreach (Movimiento movimiento in movimientos)
+        {
+            Assert.AreEqual(FechaDeEvaluacion, movimiento.FechaHora);
+            Assert.AreSame(guardado.Solicitante, movimiento.Solicitante);
+            Assert.AreSame(supervisor, movimiento.Evaluador);
+        }
+        CollectionAssert.AreEquivalent(
+            guardado.UnidadesAsignadas.ToList(),
+            movimientos.Select(movimiento => movimiento.Unidad).ToList());
     }
 
     [TestMethod]
@@ -417,6 +478,26 @@ public sealed class ServicioPrestamoTests
 
         Assert.AreEqual("Rechazado", resultado.Estado);
         Assert.IsNull(guardado.Evaluador);
+    }
+
+    [TestMethod]
+    public void Aprobar_UnidadesInsuficientesPeroNoCero_QuedaRechazadoSinEvaluador()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idDelAdministrador = CrearSolicitudPendiente(servicio, dniSolicitante: DniAdministrador);
+        servicio.Aprobar(idDelAdministrador, DniSupervisor);
+        Guid idDelDocente = CrearSolicitudPendiente(servicio);
+
+        PrestamoDto resultado = servicio.Aprobar(idDelDocente, DniSupervisor);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idDelDocente);
+        TipoEquipamiento camara = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoConAprobacion)!;
+
+        Assert.AreEqual("Rechazado", resultado.Estado);
+        Assert.IsNull(guardado.Evaluador);
+        Assert.AreEqual(0, guardado.UnidadesAsignadas.Count);
+        Assert.AreEqual(1, camara.CantidadDisponibles());
     }
 
     [TestMethod]
@@ -469,7 +550,7 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void Aprobar_AdministradorApruebaSuPropiaSolicitud_QuedaAprobado()
+    public void Aprobar_AdministradorApruebaSuPropiaSolicitud_QuedaActivo()
     {
         Memoria memoria = new Memoria();
         ServicioPrestamo servicio = CrearServicio(memoria);
@@ -479,7 +560,7 @@ public sealed class ServicioPrestamoTests
 
         Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
 
-        Assert.AreEqual("Aprobado", resultado.Estado);
+        Assert.AreEqual("Activo", resultado.Estado);
         Assert.AreSame(guardado.Solicitante, guardado.Evaluador);
     }
 
@@ -498,8 +579,8 @@ public sealed class ServicioPrestamoTests
 
         Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
 
-        Assert.AreEqual(EstadoPrestamo.Aprobado, guardado.Estado,
-            "El prestamo deberia seguir aprobado");
+        Assert.AreEqual(EstadoPrestamo.Activo, guardado.Estado,
+            "El prestamo deberia seguir activo");
         Assert.AreEqual(CantidadSolicitadaPorDefecto, guardado.UnidadesAsignadas.Count,
             "Deberia conservar sus unidades");
     }
@@ -555,28 +636,6 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void Rechazar_PrestamoAprobado_LiberaLasUnidades()
-    {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
-        Guid idPrestamo = CrearSolicitudAprobada(servicio);
-
-        List<UnidadFisica> unidades = ObtenerPrestamoGuardado(memoria, idPrestamo).UnidadesAsignadas.ToList();
-
-        servicio.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor);
-
-        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
-        TipoEquipamiento camara = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoConAprobacion)!;
-
-        Assert.AreEqual(CantidadSolicitadaPorDefecto, unidades.Count,
-            "Deberia haber copiado las unidades asignadas");
-        Assert.IsTrue(unidades.All(unidad => unidad.EstaDisponible()),
-            "Las unidades deberian estar disponibles");
-        Assert.AreEqual(3, camara.CantidadDisponibles());
-        Assert.AreEqual(0, guardado.UnidadesAsignadas.Count);
-    }
-
-    [TestMethod]
     public void Rechazar_PrestamoInexistente_LanzaExcepcion()
     {
         Memoria memoria = new Memoria();
@@ -585,92 +644,6 @@ public sealed class ServicioPrestamoTests
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(
             () => servicio.Rechazar(idInexistente, MotivoDeRechazo, DniSupervisor));
-
-        Assert.AreEqual("El prestamo no existe", excepcion.Message);
-        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
-    }
-
-    [TestMethod]
-    public void Realizar_PrestamoAprobado_QuedaActivo()
-    {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
-        Guid idPrestamo = CrearSolicitudAprobada(servicio);
-
-        PrestamoDto resultado = servicio.Realizar(idPrestamo, DniFuncionario);
-
-        Assert.AreEqual("Activo", resultado.Estado);
-    }
-
-    [TestMethod]
-    public void Realizar_PrestamoAprobado_RegistraUnMovimientoDePrestamoPorUnidadConElEvaluador()
-    {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
-        Guid idPrestamo = CrearSolicitudAprobada(servicio);
-        ServicioPrestamo servicioDeLaEntrega =
-            CrearServicioConReloj(memoria, new RelojFijo(FechaDeRealizacion));
-
-        servicioDeLaEntrega.Realizar(idPrestamo, DniFuncionario);
-
-        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
-        Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
-        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
-
-        Assert.AreEqual(CantidadSolicitadaPorDefecto, movimientos.Count);
-        foreach (Movimiento movimiento in movimientos)
-        {
-            Assert.AreEqual(TipoMovimiento.Prestamo, movimiento.Tipo);
-            Assert.AreEqual(FechaDeRealizacion, movimiento.FechaHora);
-            Assert.AreSame(guardado.Solicitante, movimiento.Solicitante);
-            Assert.AreSame(supervisor, movimiento.Evaluador);
-        }
-        CollectionAssert.AreEquivalent(
-            guardado.UnidadesAsignadas.ToList(),
-            movimientos.Select(movimiento => movimiento.Unidad).ToList());
-    }
-
-    [TestMethod]
-    [DataRow(DniSupervisor)]
-    [DataRow(DniFuncionarioDesactivado)]
-    [DataRow(DniInexistente)]
-    public void Realizar_ResponsableNoHabilitado_LanzaExcepcion(string dniResponsable)
-    {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
-        Guid idPrestamo = CrearSolicitudAprobada(servicio);
-
-        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
-            () => servicio.Realizar(idPrestamo, dniResponsable));
-        Assert.AreEqual("El usuario no tiene permiso para realizar prestamos", excepcion.Message);
-
-        VerificarQueSigueAprobadoSinMovimientos(memoria, idPrestamo);
-    }
-
-    [TestMethod]
-    public void Realizar_PrestamoSolicitado_LanzaExcepcion()
-    {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
-        Guid idPrestamo = CrearSolicitudPendiente(servicio);
-
-        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
-            () => servicio.Realizar(idPrestamo, DniFuncionario));
-        Assert.AreEqual("El prestamo debe estar aprobado", excepcion.Message);
-        Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
-
-        VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
-    }
-
-    [TestMethod]
-    public void Realizar_PrestamoInexistente_LanzaExcepcion()
-    {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
-        Guid idInexistente = Guid.NewGuid();
-
-        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
-            () => servicio.Realizar(idInexistente, DniFuncionario));
 
         Assert.AreEqual("El prestamo no existe", excepcion.Message);
         VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
@@ -703,35 +676,34 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void ListarPrestamosAprobados_VariosEstados_DevuelveSoloLosAprobados()
+    public void ListarPrestamosDeSolicitante_ConPrestamosDeVariosUsuarios_DevuelveSoloLosSuyos()
     {
         Memoria memoria = new Memoria();
         ServicioPrestamo servicio = CrearServicio(memoria);
+        PrestamoDto activoDelDocente =
+            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniDocente);
+        PrestamoDto pendienteDelDocente =
+            servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1), DniDocente);
+        servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniEstudiante);
 
-        // La camara tiene 3 unidades: la del administrador pide 1 para que no se rechace por falta de unidades
-        Guid idAprobadaDocente = CrearSolicitudAprobada(servicio);
-        SolicitudPrestamoDto datosAdministrador =
-            CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1);
-        PrestamoDto solicitudAdministrador = servicio.Solicitar(datosAdministrador, DniAdministrador);
-        servicio.Aprobar(solicitudAdministrador.Id, DniSupervisor);
-        Guid idAprobadaAdministrador = solicitudAdministrador.Id;
-
-        CrearSolicitudPendiente(servicio);
-        Guid idRechazada = CrearSolicitudPendiente(servicio, dniSolicitante: DniAdministrador);
-        servicio.Rechazar(idRechazada, MotivoDeRechazo, DniSupervisor);
-        servicio.Solicitar(CrearSolicitud(), DniAdministrador);
-
-        List<PrestamoDto> resultado = servicio.ListarPrestamosAprobados();
+        List<PrestamoDto> resultado = servicio.ListarPrestamosDeSolicitante(DniDocente);
 
         Assert.AreEqual(2, resultado.Count);
-        CollectionAssert.AreEquivalent(
-            new List<Guid> { idAprobadaDocente, idAprobadaAdministrador },
-            resultado.Select(prestamo => prestamo.Id).ToList());
+        CollectionAssert.AreEquivalent(new List<Guid>
+            { activoDelDocente.Id, pendienteDelDocente.Id }, resultado.Select(prestamo => prestamo.Id).ToList());
+    }
 
-        Assert.AreEqual("Renato Alves", resultado.Single(
-            prestamo => prestamo.Id == idAprobadaDocente).Solicitante);
-        Assert.AreEqual("Lucia Fernandez", resultado.Single(
-            prestamo => prestamo.Id == idAprobadaAdministrador).Solicitante);
+    [TestMethod]
+    public void ListarPrestamosDeSolicitante_SinPrestamos_DevuelveListaVacia()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniDocente);
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamosDeSolicitante(DniAdministrador);
+
+        Assert.IsNotNull(resultado);
+        Assert.AreEqual(0, resultado.Count);
     }
 
     private static ServicioPrestamo CrearServicio(Memoria memoria)
@@ -912,18 +884,6 @@ public sealed class ServicioPrestamoTests
             "El prestamo deberia seguir solicitado");
         Assert.AreEqual(0, guardado.UnidadesAsignadas.Count,
             "No deberia haberse asignado ninguna unidad");
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count,
-            "No deberia haberse registrado ningun movimiento");
-    }
-
-    private static void VerificarQueSigueAprobadoSinMovimientos(Memoria memoria, Guid idPrestamo)
-    {
-        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
-
-        Assert.AreEqual(EstadoPrestamo.Aprobado, guardado.Estado,
-            "El prestamo deberia seguir aprobado");
-        Assert.AreEqual(CantidadSolicitadaPorDefecto, guardado.UnidadesAsignadas.Count,
-            "Deberia conservar sus unidades");
         Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count,
             "No deberia haberse registrado ningun movimiento");
     }

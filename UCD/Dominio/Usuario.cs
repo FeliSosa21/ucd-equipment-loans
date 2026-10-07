@@ -43,11 +43,6 @@ public class Usuario
         return Contrasena == contrasena;
     }
 
-    public void Desactivar()
-    {
-        Estado = EstadoUsuario.Desactivado;
-    }
-
     public void ModificarDatos(string nombre, string apellido, string correo)
     {
         ValidarNombreOApellido(nombre, "nombre");
@@ -57,6 +52,11 @@ public class Usuario
         Nombre = nombre;
         Apellido = apellido;
         Correo = correo;
+    }
+
+    public void Desactivar()
+    {
+        Estado = EstadoUsuario.Desactivado;
     }
 
     public void Reactivar()

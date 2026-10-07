@@ -11,29 +11,24 @@ public class ServicioSesionTests
     private const string DniValido = "12345672";
     private const string CorreoValido = "felipe@hotmail.com";
     private const string ContrasenaValida = "VivaLaOrt2026";
+    private const string ContrasenaNueva = "NuevaClave2026";
 
     [TestMethod]
     public void IniciarSesion_CredencialesCorrectas_DevuelveLaSesion()
     {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio).Registrar(CrearDto());
-        ServicioSesion servicio = new ServicioSesion(repositorio);
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
 
         UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, ContrasenaValida);
 
         Assert.AreEqual(CorreoValido, sesion.Correo);
         Assert.AreEqual("Felipe", sesion.Nombre);
-        Assert.AreEqual("12345672", sesion.Dni);
+        Assert.AreEqual(DniValido, sesion.Dni);
     }
 
     [TestMethod]
     public void IniciarSesion_ContrasenaIncorrecta_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio).Registrar(CrearDto());
-        ServicioSesion servicio = new ServicioSesion(repositorio);
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
 
         Assert.ThrowsException<ServicioException>(() => servicio.IniciarSesion(CorreoValido, "OtraClave2026"));
     }
@@ -41,10 +36,7 @@ public class ServicioSesionTests
     [TestMethod]
     public void IniciarSesion_CorreoInexistente_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio).Registrar(CrearDto());
-        ServicioSesion servicio = new ServicioSesion(repositorio);
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
 
         Assert.ThrowsException<ServicioException>(() => servicio.IniciarSesion("otro@hotmail.com", ContrasenaValida));
     }
@@ -52,36 +44,36 @@ public class ServicioSesionTests
     [TestMethod]
     public void IniciarSesion_UsuarioDesactivado_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio).Registrar(CrearDto());
-        repositorio.ObtenerUsuarioPorCorreo(CorreoValido)!.Desactivar();
-        ServicioSesion servicio = new ServicioSesion(repositorio);
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out RepositorioUsuario repositorio);
+        repositorio.ObtenerUsuarioPorDni(DniValido)!.Desactivar();
 
         Assert.ThrowsException<ServicioException>(() => servicio.IniciarSesion(CorreoValido, ContrasenaValida));
     }
 
     [TestMethod]
-    public void IniciarSesion_UsuarioRecienRegistrado_DevuelveTipoYCambioDeContrasena()
+    public void IniciarSesion_UsuarioRecienRegistrado_TieneTipoSinPermisos()
     {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio).Registrar(CrearDto());
-        ServicioSesion servicio = new ServicioSesion(repositorio);
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
 
         UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, ContrasenaValida);
 
         Assert.AreEqual("Sin permisos", sesion.Tipo);
+    }
+
+    [TestMethod]
+    public void IniciarSesion_UsuarioRecienRegistrado_NoDebeCambiarContrasena()
+    {
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
+
+        UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, ContrasenaValida);
+
         Assert.IsFalse(sesion.DebeCambiarContrasena);
     }
 
     [TestMethod]
     public void IniciarSesion_UsuarioRecienRegistrado_EstaPendienteDeActivacion()
     {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio).Registrar(CrearDto());
-        ServicioSesion servicio = new ServicioSesion(repositorio);
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
 
         UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, ContrasenaValida);
 
@@ -91,11 +83,8 @@ public class ServicioSesionTests
     [TestMethod]
     public void IniciarSesion_Administrador_DevuelveElPermisoDeGestionarUsuarios()
     {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio).Registrar(CrearDto());
-        repositorio.ObtenerUsuarioPorCorreo(CorreoValido)!.AsignarTipo(TipoUsuario.Administrador);
-        ServicioSesion servicio = new ServicioSesion(repositorio);
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out RepositorioUsuario repositorio);
+        repositorio.ObtenerUsuarioPorDni(DniValido)!.AsignarTipo(TipoUsuario.Administrador);
 
         UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, ContrasenaValida);
 
@@ -105,61 +94,71 @@ public class ServicioSesionTests
     [TestMethod]
     public void CambiarContrasena_DatosCorrectos_PermiteIngresarConLaNueva()
     {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio).Registrar(CrearDto());
-        ServicioSesion servicio = new ServicioSesion(repositorio);
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
 
-        servicio.CambiarContrasena(CorreoValido, ContrasenaValida, "NuevaClave2026");
+        servicio.CambiarContrasena(DniValido, ContrasenaValida, ContrasenaNueva);
 
-        UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, "NuevaClave2026");
+        UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, ContrasenaNueva);
         Assert.IsFalse(sesion.DebeCambiarContrasena);
+    }
+
+    [TestMethod]
+    public void CambiarContrasena_CorreoModificado_IdentificaAlUsuarioPorDni()
+    {
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out RepositorioUsuario repositorio);
+        repositorio.ObtenerUsuarioPorDni(DniValido)!.ModificarDatos("Felipe", "Sosa", "nuevo@hotmail.com");
+
+        servicio.CambiarContrasena(DniValido, ContrasenaValida, ContrasenaNueva);
+
+        Assert.IsTrue(repositorio.ObtenerUsuarioPorDni(DniValido)!.ContrasenaEsCorrecta(ContrasenaNueva));
     }
 
     [TestMethod]
     public void CambiarContrasena_ActualIncorrecta_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio).Registrar(CrearDto());
-        ServicioSesion servicio = new ServicioSesion(repositorio);
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.CambiarContrasena(CorreoValido, "OtraClave2026", "NuevaClave2026"));
+            servicio.CambiarContrasena(DniValido, "OtraClave2026", ContrasenaNueva));
     }
 
     [TestMethod]
-    public void CambiarContrasena_NuevaInvalida_LanzaExcepcion()
+    public void CambiarContrasena_NuevaInvalida_LanzaExcepcionConLaDelDominio()
     {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio).Registrar(CrearDto());
-        ServicioSesion servicio = new ServicioSesion(repositorio);
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
 
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.CambiarContrasena(CorreoValido, ContrasenaValida, "corta1A"));
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
+            servicio.CambiarContrasena(DniValido, ContrasenaValida, "corta1A"));
+
+        Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
     }
 
     [TestMethod]
-    public void CambiarContrasena_CorreoInexistente_LanzaExcepcion()
+    public void CambiarContrasena_DniInexistente_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio).Registrar(CrearDto());
-        ServicioSesion servicio = new ServicioSesion(repositorio);
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.CambiarContrasena("ana@hotmail.com", ContrasenaValida, "NuevaClave2026"));
+            servicio.CambiarContrasena("45678905", ContrasenaValida, ContrasenaNueva));
+    }
+
+    [TestMethod]
+    public void CambiarContrasena_UsuarioDesactivado_LanzaExcepcionYNoLaCambia()
+    {
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out RepositorioUsuario repositorio);
+        Usuario usuario = repositorio.ObtenerUsuarioPorDni(DniValido)!;
+        usuario.Desactivar();
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.CambiarContrasena(DniValido, ContrasenaValida, ContrasenaNueva));
+        Assert.IsTrue(usuario.ContrasenaEsCorrecta(ContrasenaValida));
     }
 
     [TestMethod]
     public void RenovarSesion_UsuarioActivo_DevuelveLosDatosActuales()
     {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out RepositorioUsuario repositorio);
         repositorio.ObtenerUsuarioPorDni(DniValido)!.AsignarTipo(TipoUsuario.Docente);
-        ServicioSesion servicio = new ServicioSesion(repositorio);
 
         UsuarioSesionDto sesion = servicio.RenovarSesion(DniValido);
 
@@ -170,11 +169,8 @@ public class ServicioSesionTests
     [TestMethod]
     public void RenovarSesion_UsuarioDesactivado_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio).Registrar(CrearDto());
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out RepositorioUsuario repositorio);
         repositorio.ObtenerUsuarioPorDni(DniValido)!.Desactivar();
-        ServicioSesion servicio = new ServicioSesion(repositorio);
 
         Assert.ThrowsException<ServicioException>(() => servicio.RenovarSesion(DniValido));
     }
@@ -187,11 +183,18 @@ public class ServicioSesionTests
         Assert.ThrowsException<ServicioException>(() => servicio.RenovarSesion(DniValido));
     }
 
-    private static UsuarioDto CrearDto()
+    private static ServicioSesion CrearServicioConUsuarioRegistrado(out RepositorioUsuario repositorio)
     {
-        return new UsuarioDto
+        repositorio = new RepositorioUsuario(new Memoria());
+        new ServicioUsuario(repositorio).Registrar(new UsuarioDto
         {
-            Dni = DniValido, Nombre = "Felipe", Apellido = "Sosa", Correo = CorreoValido, Contrasena = ContrasenaValida
-        };
+            Dni = DniValido,
+            Nombre = "Felipe",
+            Apellido = "Sosa",
+            Correo = CorreoValido,
+            Contrasena = ContrasenaValida
+        });
+
+        return new ServicioSesion(repositorio);
     }
 }
