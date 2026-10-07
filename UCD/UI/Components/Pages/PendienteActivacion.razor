@@ -25,6 +25,15 @@
 </div>
 
 @code {
+    // Con sesion, la pagina solo tiene sentido mientras la cuenta espera un tipo (sin sesion se llega al registrarse).
+    protected override void OnInitialized()
+    {
+        if (SesionActual.EstaIniciada && !SesionActual.Usuario!.PendienteDeActivacion)
+        {
+            Navigation.NavigateTo(SesionActual.PaginaObligatoria() ?? "/");
+        }
+    }
+
     private async Task Salir()
     {
         await SesionActual.CerrarAsync();

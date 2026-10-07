@@ -42,7 +42,8 @@
                     </div>
                     <div>
                         <label class="lbl" for="observaciones-@unidad.IdInstitucional">Observaciones (opcional)</label>
-                        <input id="observaciones-@unidad.IdInstitucional" class="field" maxlength="300"
+                        <input id="observaciones-@unidad.IdInstitucional" class="field"
+                               maxlength="@Servicios.ServicioDevolucion.LargoMaximoObservaciones"
                                @bind="unidad.Observaciones" />
                     </div>
                 </div>

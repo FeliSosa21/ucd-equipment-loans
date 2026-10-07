@@ -10,6 +10,8 @@ namespace UI.Sesion;
 // y solo se guarda el DNI, para que nadie pueda editarla desde el navegador. Los datos se traen del servidor.
 public class SesionActual
 {
+    public const string AvisoCuentaInactiva = "Tu sesión se cerró porque tu cuenta ya no está activa.";
+
     private const string ClaveDni = "dni_sesion";
 
     private readonly ProtectedLocalStorage _almacenamiento;
@@ -52,12 +54,34 @@ public class SesionActual
             }
             catch (ServicioException)
             {
+                AvisoDeCierre = AvisoCuentaInactiva;
                 await _almacenamiento.DeleteAsync(ClaveDni);
             }
         }
 
         Cargada = true;
         Cambio?.Invoke();
+    }
+
+    // Pagina a la que el usuario tiene que ir antes que a cualquier otra, o null si puede navegar libremente.
+    public string? PaginaObligatoria()
+    {
+        if (Usuario is null)
+        {
+            return null;
+        }
+
+        if (Usuario.DebeCambiarContrasena)
+        {
+            return "/cambiar-contrasena";
+        }
+
+        if (Usuario.PendienteDeActivacion)
+        {
+            return "/pendiente-activacion";
+        }
+
+        return null;
     }
 
     public async Task IniciarAsync(UsuarioSesionDto usuario)

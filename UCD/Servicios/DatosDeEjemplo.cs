@@ -7,22 +7,26 @@ namespace Servicios;
 // Los prestamos se crean ya activos porque todavia no hay pantalla para solicitarlos y aprobarlos.
 public class DatosDeEjemplo
 {
-    public const string ContrasenaEjemplo = "Ucd12345";
+    public const string ContrasenaEjemplo = ServicioAdministracionUsuarios.ContrasenaPredeterminada;
     public const string CorreoDocente = "ana.perez@ucd.edu.uy";
     public const string CorreoEstudiante = "juan.gomez@ucd.edu.uy";
     public const string CorreoFuncionario = "laura.diaz@ucd.edu.uy";
 
     private const string Deposito = "Deposito central";
+    private const int DiasMaximosDePrestamo = 7;
 
     private readonly RepositorioUsuario _usuarios;
     private readonly RepositorioPrestamo _prestamos;
     private readonly RepositorioCatalogo _repositorioCatalogo;
+    private readonly TimeProvider _reloj;
 
-    public DatosDeEjemplo(RepositorioUsuario usuarios, RepositorioPrestamo prestamos, RepositorioCatalogo repositorioCatalogo)
+    public DatosDeEjemplo(RepositorioUsuario usuarios, RepositorioPrestamo prestamos,
+        RepositorioCatalogo repositorioCatalogo, TimeProvider reloj)
     {
         _usuarios = usuarios;
         _prestamos = prestamos;
         _repositorioCatalogo = repositorioCatalogo;
+        _reloj = reloj;
     }
 
     public void Cargar()
@@ -31,12 +35,25 @@ public class DatosDeEjemplo
         {
             return;
         }
+
         Catalogo catalogo = ObtenerCatalogo();
+        CargarUsuarios();
+        CargarCatalogo(catalogo);
+        CargarPrestamos(catalogo);
+    }
 
-        Usuario docente = CrearUsuario("12345672", "Ana", "Perez", CorreoDocente, TipoUsuario.Docente);
-        Usuario estudiante = CrearUsuario("23456783", "Juan", "Gomez", CorreoEstudiante, TipoUsuario.Estudiante);
-        CrearUsuario("34567894", "Laura", "Diaz", CorreoFuncionario, TipoUsuario.FuncionarioCE);
+    private void CargarUsuarios()
+    {
+        CrearUsuario(dni: "12345672", nombre: "Ana", apellido: "Perez", correo: CorreoDocente,
+            tipo: TipoUsuario.Docente);
+        CrearUsuario(dni: "23456783", nombre: "Juan", apellido: "Gomez", correo: CorreoEstudiante,
+            tipo: TipoUsuario.Estudiante);
+        CrearUsuario(dni: "34567894", nombre: "Laura", apellido: "Diaz", correo: CorreoFuncionario,
+            tipo: TipoUsuario.FuncionarioCE);
+    }
 
+    private static void CargarCatalogo(Catalogo catalogo)
+    {
         TipoEquipamiento notebook = CrearTipo("Notebook", "Notebook para uso en clase", Categoria.Computacion,
             "NTB-0001", "NTB-0002", "NTB-0003");
         TipoEquipamiento proyector = CrearTipo("Proyector", "Proyector portatil", Categoria.Audiovisual,
@@ -56,9 +73,14 @@ public class DatosDeEjemplo
         catalogo.AgregarTipo(kitArduino);
         catalogo.AgregarTipo(cableHdmi);
         catalogo.AgregarTipo(osciloscopio);
+    }
 
-        CrearPrestamoActivo(docente, notebook, cantidad: 2, haceDias: 2);
-        CrearPrestamoActivo(estudiante, proyector, cantidad: 1, haceDias: 1);
+    private void CargarPrestamos(Catalogo catalogo)
+    {
+        CrearPrestamoActivo(_usuarios.ObtenerUsuarioPorCorreo(CorreoDocente)!,
+            catalogo.BuscarTipoPorNombre("Notebook")!, cantidad: 2, haceDias: 2);
+        CrearPrestamoActivo(_usuarios.ObtenerUsuarioPorCorreo(CorreoEstudiante)!,
+            catalogo.BuscarTipoPorNombre("Proyector")!, cantidad: 1, haceDias: 1);
     }
 
     private Catalogo ObtenerCatalogo()
@@ -71,20 +93,20 @@ public class DatosDeEjemplo
 
         return catalogo;
     }
-    private Usuario CrearUsuario(string dni, string nombre, string apellido, string correo, TipoUsuario tipo)
+
+    private void CrearUsuario(string dni, string nombre, string apellido, string correo, TipoUsuario tipo)
     {
         Usuario usuario = new Usuario(dni: dni, nombre: nombre, apellido: apellido, correo: correo,
             contrasena: ContrasenaEjemplo);
         usuario.AsignarTipo(tipo);
         _usuarios.AgregarUsuario(usuario);
-        return usuario;
     }
 
     private static TipoEquipamiento CrearTipo(string nombre, string descripcion, Categoria categoria,
         params string[] idsUnidades)
     {
         TipoEquipamiento tipo = new TipoEquipamiento(nombre: nombre, descripcion: descripcion,
-            duracionMaxPrestamo: 7, requiereAprobacion: false, categoria: categoria);
+            duracionMaxPrestamo: DiasMaximosDePrestamo, requiereAprobacion: false, categoria: categoria);
         foreach (string id in idsUnidades)
         {
             tipo.AgregarUnidad(new UnidadFisica(idInstitucional: id, ubiFisica: Deposito, numSerie: null));
@@ -93,6 +115,7 @@ public class DatosDeEjemplo
         return tipo;
     }
 
+    // El dominio solo deja pasar a mantenimiento una unidad prestada (al devolverla con fallas).
     private static void EnviarAMantenimiento(UnidadFisica unidad)
     {
         unidad.Prestada();
@@ -102,7 +125,7 @@ public class DatosDeEjemplo
     private void CrearPrestamoActivo(Usuario solicitante, TipoEquipamiento tipo, int cantidad, int haceDias)
     {
         Prestamo prestamo = new Prestamo(solicitante: solicitante, tipoEquipamiento: tipo,
-            cantidadSolicitada: cantidad, fechaHoraPrestamo: DateTime.Now.AddDays(-haceDias));
+            cantidadSolicitada: cantidad, fechaHoraPrestamo: _reloj.GetLocalNow().DateTime.AddDays(-haceDias));
         prestamo.Activar(tipo.UnidadesDisponibles().Take(cantidad).ToList());
         _prestamos.AgregarPrestamo(prestamo);
     }

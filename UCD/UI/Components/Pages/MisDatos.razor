@@ -17,20 +17,7 @@
             <label class="lbl" for="ci">Cédula de identidad</label>
             <input id="ci" class="field mono" value="@_dni" disabled />
         </div>
-        <div class="form-row">
-            <div>
-                <label class="lbl" for="nombre">Nombre</label>
-                <input id="nombre" class="field" @bind="_nombre" @bind:event="oninput" />
-            </div>
-            <div>
-                <label class="lbl" for="apellido">Apellido</label>
-                <input id="apellido" class="field" @bind="_apellido" @bind:event="oninput" />
-            </div>
-        </div>
-        <div>
-            <label class="lbl" for="correo">Correo electrónico</label>
-            <input id="correo" type="email" class="field" @bind="_correo" @bind:event="oninput" />
-        </div>
+        <CamposDatosPersonales @bind-Nombre="_nombre" @bind-Apellido="_apellido" @bind-Correo="_correo" />
 
         @if (_error is not null)
         {
@@ -41,7 +28,7 @@
             <div class="alert alert-success" role="status">Tus datos se guardaron correctamente.</div>
         }
 
-        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        <button type="submit" class="btn btn-primary" disabled="@(!FormularioCompleto)">Guardar cambios</button>
     </form>
 </div>
 
@@ -53,6 +40,8 @@
     private string? _error;
     private bool _exito;
 
+    private bool FormularioCompleto => CamposDatosPersonales.EstanCompletos(_nombre, _apellido, _correo);
+
     protected override void OnInitialized()
     {
         if (RedirigirSiNoHaySesion())
@@ -60,25 +49,38 @@
             return;
         }
 
-        UsuarioResumenDto datos = ServicioAdministracion.ObtenerResumen(SesionActual.Usuario!.Dni);
-        _dni = datos.Dni;
-        _nombre = datos.Nombre;
-        _apellido = datos.Apellido;
-        _correo = datos.Correo;
+        try
+        {
+            UsuarioResumenDto datos = ServicioAdministracion.ObtenerResumen(DniUsuario, DniUsuario);
+            _dni = datos.Dni;
+            _nombre = datos.Nombre;
+            _apellido = datos.Apellido;
+            _correo = datos.Correo;
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+        }
     }
 
     private void Guardar()
     {
+        // Un doble clic con los campos vacios (o la carga fallida) no llega al servicio.
+        if (!FormularioCompleto)
+        {
+            return;
+        }
+
         _error = null;
         _exito = false;
 
         try
         {
-            UsuarioResumenDto datos = new UsuarioResumenDto
+            DatosPersonalesDto datos = new DatosPersonalesDto
             {
                 Dni = _dni, Nombre = _nombre.Trim(), Apellido = _apellido.Trim(), Correo = _correo.Trim()
             };
-            ServicioAdministracion.ModificarDatos(datos, SesionActual.Usuario!.Dni);
+            ServicioAdministracion.ModificarDatos(datos, DniUsuario);
             SesionActual.ActualizarDatos(datos.Nombre, datos.Correo);
             _exito = true;
         }

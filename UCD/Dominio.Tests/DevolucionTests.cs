@@ -76,6 +76,17 @@ public sealed class DevolucionTests
     }
 
     [TestMethod]
+    public void Constructor_UnidadDevueltaNula_LanzaExcepcion()
+    {
+        Prestamo prestamo = CrearPrestamoActivo();
+        List<UnidadDevuelta> unidades = DevolverTodasSinObservaciones(prestamo);
+        unidades[1] = null!;
+
+        Assert.ThrowsException<DominioException>(() =>
+            new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo, unidades));
+    }
+
+    [TestMethod]
     public void Constructor_FaltaUnaUnidadDelPrestamo_LanzaExcepcion()
     {
         Prestamo prestamo = CrearPrestamoActivo();
@@ -154,6 +165,21 @@ public sealed class DevolucionTests
 
         Assert.ThrowsException<DominioException>(() => devolucion.Aplicar());
         Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
+    }
+
+    [TestMethod]
+    public void Aplicar_UnaUnidadYaNoEstaPrestada_LanzaExcepcionYNoCambiaNada()
+    {
+        Prestamo prestamo = CrearPrestamoActivo();
+        UnidadFisica primera = prestamo.UnidadesAsignadas[0];
+        UnidadFisica segunda = prestamo.UnidadesAsignadas[1];
+        Devolucion devolucion = new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo,
+            DevolverTodasSinObservaciones(prestamo));
+        segunda.Disponible();
+
+        Assert.ThrowsException<DominioException>(() => devolucion.Aplicar());
+        Assert.AreEqual(EstadoUnidadFisica.Prestada, primera.Estado);
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
     }
 
     [TestMethod]
