@@ -41,6 +41,24 @@ public class ServicioHistoricoTests
         Assert.AreEqual("EQP-0001", movimiento.Unidad);
     }
 
+    [TestMethod]
+    public void ListarMovimientos_MovimientoSinEvaluadorNiUnidad_DevuelveNulos()
+    {
+        Memoria memoria = new Memoria();
+        new RepositorioMovimiento(memoria).AgregarMovimiento(new Movimiento(
+            fechaHora: FechaFija,
+            tipo: TipoMovimiento.Solicitud,
+            solicitante: CrearSolicitante(),
+            evaluador: null,
+            unidad: null));
+        ServicioHistorico servicio = CrearServicio(memoria);
+
+        MovimientoDto movimiento = servicio.ListarMovimientos().Single();
+
+        Assert.IsNull(movimiento.Evaluador);
+        Assert.IsNull(movimiento.Unidad);
+    }
+
     private static ServicioHistorico CrearServicio(Memoria memoria)
     {
         return new ServicioHistorico(new RepositorioMovimiento(memoria));
