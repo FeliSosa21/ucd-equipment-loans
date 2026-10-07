@@ -9,12 +9,15 @@ public class CargaInicial
     public const string DniRoot = "11111111";
     public const string CorreoRoot = "root@ucd.edu.uy";
     public const string ContrasenaRoot = "Root2026";
+    public const string NombreCatalogo = "Catalogo UCD";
 
     private readonly RepositorioUsuario _repositorio;
+    private readonly RepositorioCatalogo _catalogos;
 
-    public CargaInicial(RepositorioUsuario repositorio)
+    public CargaInicial(RepositorioUsuario repositorio, RepositorioCatalogo catalogos)
     {
         _repositorio = repositorio;
+        _catalogos = catalogos;
     }
 
     public void CargarRoot()
@@ -29,5 +32,10 @@ public class CargaInicial
         root.AsignarTipo(TipoUsuario.Administrador);
         root.ExigirCambioDeContrasena();
         _repositorio.AgregarUsuario(root);
+    }
+
+    public void CargarCatalogo()
+    {
+        _catalogos.Guardar(new Catalogo(NombreCatalogo));
     }
 }
