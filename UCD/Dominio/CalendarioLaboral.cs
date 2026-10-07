@@ -15,6 +15,12 @@ public static class CalendarioLaboral
         ValidarDiasHabiles(diasHabiles);
 
         DateTime fecha = desde.Date;
+
+        while (!EsDiaHabil(fecha))
+        {
+            fecha = fecha.AddDays(1);
+        }
+
         int diasHabilesContados = 0;
 
         while (diasHabilesContados < diasHabiles)
