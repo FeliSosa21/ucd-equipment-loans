@@ -93,7 +93,6 @@ public sealed class CalendarioLaboralTests
 
         DominioException excepcion = Assert.ThrowsException<DominioException>(
             () => CalendarioLaboral.SumarDiasHabiles(desde: desde, diasHabiles: diasHabiles));
- 
         Assert.AreEqual("La cantidad de dias habiles debe ser mayor a cero", excepcion.Message);
     }
 }
