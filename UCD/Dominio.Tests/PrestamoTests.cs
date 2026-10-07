@@ -102,6 +102,15 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Constructor_DatosValidos_NaceSinEntrega()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        Assert.IsNull(prestamo.ResponsableEntrega);
+        Assert.IsNull(prestamo.FechaHoraEntrega);
+    }
+
+    [TestMethod]
     public void Constructor_DatosValidos_CalculaLaFechaEsperadaDeDevolucion()
     {
         DateTime fechaEsperada = new DateTime(2026, 10, 12);
