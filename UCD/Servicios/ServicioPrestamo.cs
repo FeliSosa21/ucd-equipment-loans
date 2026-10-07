@@ -258,7 +258,8 @@ public class ServicioPrestamo
             FechaEsperadaDevolucion = prestamo.FechaEsperadaDevolucion,
             Estado = prestamo.Estado.ToString(),
             MotivoRechazo = prestamo.MotivoRechazo,
-            Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList()
+            Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList(),
+            FechaHoraEntrega = prestamo.FechaHoraEntrega
         };
     }
 }
