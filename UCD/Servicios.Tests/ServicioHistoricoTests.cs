@@ -59,9 +59,35 @@ public class ServicioHistoricoTests
         Assert.IsNull(movimiento.Unidad);
     }
 
+    [TestMethod]
+    public void ListarMovimientos_VariosMovimientos_DevuelveDelMasRecienteAlMasViejo()
+    {
+        Memoria memoria = new Memoria();
+        RegistrarSolicitud(memoria, fechaHora: FechaFija);
+        RegistrarSolicitud(memoria, fechaHora: FechaFija.AddDays(2));
+        RegistrarSolicitud(memoria, fechaHora: FechaFija.AddDays(1));
+        ServicioHistorico servicio = CrearServicio(memoria);
+
+        List<MovimientoDto> movimientos = servicio.ListarMovimientos();
+
+        CollectionAssert.AreEqual(
+            new List<DateTime> { FechaFija.AddDays(2), FechaFija.AddDays(1), FechaFija },
+            movimientos.Select(movimiento => movimiento.FechaHora).ToList());
+    }
+
     private static ServicioHistorico CrearServicio(Memoria memoria)
     {
         return new ServicioHistorico(new RepositorioMovimiento(memoria));
+    }
+
+    private static void RegistrarSolicitud(Memoria memoria, DateTime fechaHora)
+    {
+        new RepositorioMovimiento(memoria).AgregarMovimiento(new Movimiento(
+            fechaHora: fechaHora,
+            tipo: TipoMovimiento.Solicitud,
+            solicitante: CrearSolicitante(),
+            evaluador: null,
+            unidad: null));
     }
 
     private static Usuario CrearSolicitante()
