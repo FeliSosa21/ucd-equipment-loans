@@ -14,9 +14,13 @@ public class ServicioHistorico
     }
 
     // No recibe quien consulta: el permiso lo controla la pagina, como en ListarSolicitudesPendientes.
+    // OrderByDescending es estable: los movimientos con la misma fecha quedan en el orden en que se registraron.
     public List<MovimientoDto> ListarMovimientos()
     {
-        return _movimientos.ObtenerTodos().Select(CrearMovimientoDto).ToList();
+        return _movimientos.ObtenerTodos()
+            .OrderByDescending(movimiento => movimiento.FechaHora)
+            .Select(CrearMovimientoDto)
+            .ToList();
     }
 
     private static MovimientoDto CrearMovimientoDto(Movimiento movimiento)
