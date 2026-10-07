@@ -10,6 +10,7 @@ public sealed class ServicioPrestamoTests
 {
     private static readonly DateTime FechaFija = new DateTime(2026, 10, 5, 10, 0, 0);
     private static readonly DateTime FechaDeEvaluacion = new DateTime(2026, 10, 6, 9, 30, 0);
+    private static readonly DateTime FechaDeEntrega = new DateTime(2026, 10, 6, 9, 30, 0);
 
     private const string DniDocente = "12345672";
     private const string DniEstudiante = "45678905";
@@ -647,6 +648,24 @@ public sealed class ServicioPrestamoTests
 
         Assert.AreEqual("El prestamo no existe", excepcion.Message);
         VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
+    }
+
+    [TestMethod]
+    public void RegistrarEntrega_PrestamoActivo_GuardaResponsableYFechaDelReloj()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = servicio.Solicitar(CrearSolicitud(), DniDocente).Id;
+        ServicioPrestamo servicioDeLaEntrega =
+            CrearServicioConReloj(memoria, new RelojFijo(FechaDeEntrega));
+
+        servicioDeLaEntrega.RegistrarEntrega(idPrestamo, DniFuncionario);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        Usuario funcionario = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniFuncionario)!;
+
+        Assert.AreSame(funcionario, guardado.ResponsableEntrega);
+        Assert.AreEqual(FechaDeEntrega, guardado.FechaHoraEntrega);
     }
 
     [TestMethod]

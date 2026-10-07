@@ -113,6 +113,11 @@ public class ServicioPrestamo
         }
     }
 
+    public PrestamoDto RegistrarEntrega(Guid idPrestamo, string dniResponsable)
+    {
+        return new PrestamoDto();
+    }
+
     public List<PrestamoDto> ListarSolicitudesPendientes()
     {
         return _prestamos.ObtenerPrestamosPendientes().Select(CrearPrestamoDto).ToList();
