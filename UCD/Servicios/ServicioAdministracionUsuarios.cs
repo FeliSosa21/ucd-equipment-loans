@@ -12,6 +12,7 @@ namespace Servicios;
 public class ServicioAdministracionUsuarios
 {
     public const string ContrasenaPredeterminada = "Ucd12345";
+    public static readonly string NombreTipoAdministrador = TipoUsuario.Administrador.Nombre;
     private const string MensajeSoloAdministrador = "Solo un administrador activo puede gestionar usuarios";
 
     private readonly RepositorioUsuario _repositorio;
