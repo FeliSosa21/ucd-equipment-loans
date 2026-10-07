@@ -669,6 +669,25 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    [DataRow(DniDocente)]
+    [DataRow(DniFuncionarioDesactivado)]
+    [DataRow(DniInexistente)]
+    public void RegistrarEntrega_ResponsableNoHabilitado_LanzaExcepcion(string dniResponsable)
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = servicio.Solicitar(CrearSolicitud(), DniDocente).Id;
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.RegistrarEntrega(idPrestamo, dniResponsable));
+        Assert.AreEqual("El usuario no tiene permiso para realizar prestamos", excepcion.Message);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        Assert.IsNull(guardado.ResponsableEntrega);
+        Assert.IsNull(guardado.FechaHoraEntrega);
+    }
+
+    [TestMethod]
     public void ListarSolicitudesPendientes_VariosEstados_DevuelveSoloLasPendientesConSuSolicitante()
     {
         Memoria memoria = new Memoria();
