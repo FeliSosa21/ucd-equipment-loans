@@ -702,6 +702,21 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void RegistrarEntrega_PrestamoYaEntregado_LanzaExcepcionConCausaDeDominio()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = servicio.Solicitar(CrearSolicitud(), DniDocente).Id;
+        servicio.RegistrarEntrega(idPrestamo, DniFuncionario);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.RegistrarEntrega(idPrestamo, DniFuncionario));
+
+        Assert.AreEqual("La entrega del prestamo ya fue registrada", excepcion.Message);
+        Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
+    }
+
+    [TestMethod]
     public void ListarSolicitudesPendientes_VariosEstados_DevuelveSoloLasPendientesConSuSolicitante()
     {
         Memoria memoria = new Memoria();
