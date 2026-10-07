@@ -144,7 +144,10 @@ public class ServicioPrestamo
 
     public List<PrestamoDto> ListarPrestamosPorEntregar()
     {
-        return new List<PrestamoDto>();
+        return _prestamos.ObtenerPrestamosActivos()
+            .Where(prestamo => prestamo.FechaHoraEntrega is null)
+            .Select(CrearPrestamoDto)
+            .ToList();
     }
 
     private Usuario ObtenerSolicitante(string dniSolicitante)
