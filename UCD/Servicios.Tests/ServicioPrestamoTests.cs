@@ -734,6 +734,24 @@ public sealed class ServicioPrestamoTests
             prestamo => prestamo.Id == idAprobadaAdministrador).Solicitante);
     }
 
+    [TestMethod]
+    public void ListarPrestamosDeSolicitante_ConPrestamosDeVariosUsuarios_DevuelveSoloLosSuyos()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        PrestamoDto activoDelDocente =
+            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniDocente);
+        PrestamoDto pendienteDelDocente =
+            servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1), DniDocente);
+        servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniEstudiante);
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamosDeSolicitante(DniDocente);
+
+        Assert.AreEqual(2, resultado.Count);
+        CollectionAssert.AreEquivalent(new List<Guid>
+            { activoDelDocente.Id, pendienteDelDocente.Id }, resultado.Select(prestamo => prestamo.Id).ToList());
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
