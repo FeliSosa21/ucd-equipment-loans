@@ -96,4 +96,13 @@ public class DatosDeEjemploTests
         TipoEquipamiento notebook = _repositorioCatalogo.ObtenerTipoPorNombre("Notebook")!;
         Assert.AreEqual("SNNTB0001", notebook.Unidades.First().NumSerie);
     }
+
+    [TestMethod]
+    public void Cargar_ConCatalogo_LosAccesoriosNoTienenNumeroDeSerie()
+    {
+        _datos.Cargar();
+
+        TipoEquipamiento cableHdmi = _repositorioCatalogo.ObtenerTipoPorNombre("Cable HDMI")!;
+        Assert.IsTrue(cableHdmi.Unidades.All(unidad => unidad.NumSerie is null));
+    }
 }
