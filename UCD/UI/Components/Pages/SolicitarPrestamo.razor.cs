@@ -54,12 +54,28 @@ public partial class SolicitarPrestamo
         }
     }
 
-    private string DetalleResultado =>
-        _resultado is null
-            ? string.Empty
-            : $"{_resultado.TipoEquipamiento} × {_resultado.CantidadSolicitada} · " +
-              $"inicio {_resultado.FechaHoraPrestamo.ToString(FormatoFecha)} · " +
-              $"devolución esperada {_resultado.FechaEsperadaDevolucion.ToString(FormatoFechaEsperada)}";
+    // Un prestamo rechazado no tiene inicio ni devolucion: solo se muestra cuando se pidio.
+    private string DetalleResultado
+    {
+        get
+        {
+            if (_resultado is null)
+            {
+                return string.Empty;
+            }
+
+            string pedido = $"{_resultado.TipoEquipamiento} × {_resultado.CantidadSolicitada}";
+
+            if (_resultado.Estado == EstadoRechazado)
+            {
+                return $"{pedido} · solicitado el {_resultado.FechaHoraPrestamo.ToString(FormatoFecha)}";
+            }
+
+            return $"{pedido} · " +
+                   $"inicio {_resultado.FechaHoraPrestamo.ToString(FormatoFecha)} · " +
+                   $"devolución esperada {_resultado.FechaEsperadaDevolucion.ToString(FormatoFechaEsperada)}";
+        }
+    }
 
     protected override void OnInitialized()
     {
