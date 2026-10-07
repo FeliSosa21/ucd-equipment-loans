@@ -122,7 +122,6 @@ public sealed class PrestamoTests
             duracionMaxPrestamo: 10,
             requiereAprobacion: false,
             categoria: Categoria.Audiovisual);
- 
         Assert.AreEqual(fechaEsperada, prestamo.FechaEsperadaDevolucion);
     }
 
