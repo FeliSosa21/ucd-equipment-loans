@@ -717,6 +717,20 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void RegistrarEntrega_PrestamoActivo_DevuelveLaFechaDeEntrega()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = servicio.Solicitar(CrearSolicitud(), DniDocente).Id;
+        ServicioPrestamo servicioDeLaEntrega =
+            CrearServicioConReloj(memoria, new RelojFijo(FechaDeEntrega));
+
+        PrestamoDto resultado = servicioDeLaEntrega.RegistrarEntrega(idPrestamo, DniFuncionario);
+
+        Assert.AreEqual(FechaDeEntrega, resultado.FechaHoraEntrega);
+    }
+
+    [TestMethod]
     public void ListarSolicitudesPendientes_VariosEstados_DevuelveSoloLasPendientesConSuSolicitante()
     {
         Memoria memoria = new Memoria();
