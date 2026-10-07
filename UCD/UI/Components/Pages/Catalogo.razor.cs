@@ -1,5 +1,6 @@
 ﻿using DTOs;
 using UI.Sesion;
+using Servicios;
 
 namespace UI.Components.Pages;
 
@@ -7,6 +8,7 @@ public partial class Catalogo
 {
     private const string EstadoActivo = "Activo";
     private List<TipoEquipamientoDto> _tipos = new List<TipoEquipamientoDto>();
+    private string? _error;
     protected override void OnInitialized()
     {
         if (RedirigirSiNoTienePermiso(Permisos.ConsultarCatalogo))
@@ -19,8 +21,18 @@ public partial class Catalogo
 
     private void Consultar()
     {
+        _error = null;
         FiltroCatalogoDto filtro = new FiltroCatalogoDto();
-        _tipos = ServicioCatalogo.ConsultarTipos(filtro);
+
+        try
+        {
+            _tipos = ServicioCatalogo.ConsultarTipos(filtro);
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+            _tipos = new List<TipoEquipamientoDto>();
+        }
     }
     private string TextoResultados()
     {

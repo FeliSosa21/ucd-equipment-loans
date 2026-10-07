@@ -32,6 +32,11 @@
     </select>
 </div>
 
+@if (_error is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_error</div>
+}
+
 <p class ="hint resultados" role ="status">@TextoResultados()</p>
 
 @if (_tipos.Count == 0)
