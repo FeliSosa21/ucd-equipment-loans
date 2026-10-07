@@ -217,13 +217,18 @@ public class ServicioPrestamo
 
     private void ValidarLimites(Usuario solicitante, int cantidadSolicitada)
     {
-        if (!solicitante.Tipo.PermiteUnidades(cantidadSolicitada))
+        IReadOnlyList<Prestamo> prestamosDelSolicitante = _prestamos.ObtenerPrestamosDeSolicitante(solicitante.Dni);
+
+        int unidadesActivas = prestamosDelSolicitante
+            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Activo)
+            .Sum(prestamo => prestamo.UnidadesAsignadas.Count);
+
+        if (!solicitante.Tipo.PermiteUnidades(unidadesActivas + cantidadSolicitada))
         {
-            throw new ServicioException("La cantidad solicitada supera el maximo de unidades por prestamo");
+            throw new ServicioException("La cantidad solicitada supera el maximo de unidades del solicitante");
         }
 
-        int prestamosVigentes = _prestamos.ObtenerPrestamosDeSolicitante(solicitante.Dni)
-            .Count(prestamo => prestamo.EstaVigente());
+        int prestamosVigentes = prestamosDelSolicitante.Count(prestamo => prestamo.EstaVigente());
 
         if (!solicitante.Tipo.PuedeAgregarPrestamo(prestamosVigentes))
         {
