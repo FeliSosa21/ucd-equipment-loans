@@ -9,6 +9,7 @@ namespace Servicios.Tests;
 public sealed class ServicioPrestamoTests
 {
     private static readonly DateTime FechaFija = new DateTime(2026, 10, 5, 10, 0, 0);
+    private static readonly DateTime FechaDeEvaluacion = new DateTime(2026, 10, 6, 9, 30, 0);
 
     private const string DniDocente = "12345672";
     private const string DniEstudiante = "45678905";
@@ -434,6 +435,34 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(CantidadSolicitadaPorDefecto, guardado.UnidadesAsignadas.Count);
         Assert.AreEqual(1, camara.CantidadDisponibles());
         Assert.AreSame(supervisor, guardado.Evaluador);
+    }
+
+    [TestMethod]
+    public void Aprobar_SolicitudPendienteConUnidades_RegistraUnMovimientoDePrestamoPorUnidadConElEvaluador()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        ServicioPrestamo servicioDeLaEvaluacion =
+            CrearServicioConReloj(memoria, new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
+        List<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos()
+            .Where(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo).ToList();
+
+        Assert.AreEqual(CantidadSolicitadaPorDefecto, movimientos.Count);
+        foreach (Movimiento movimiento in movimientos)
+        {
+            Assert.AreEqual(FechaDeEvaluacion, movimiento.FechaHora);
+            Assert.AreSame(guardado.Solicitante, movimiento.Solicitante);
+            Assert.AreSame(supervisor, movimiento.Evaluador);
+        }
+        CollectionAssert.AreEquivalent(
+            guardado.UnidadesAsignadas.ToList(),
+            movimientos.Select(movimiento => movimiento.Unidad).ToList());
     }
 
     [TestMethod]
