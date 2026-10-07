@@ -12,13 +12,18 @@
     <link rel="stylesheet" href="@Assets["UI.styles.css"]" />
     <ImportMap />
     <link rel="icon" type="image/png" href="favicon.png" />
-    <HeadOutlet @rendermode="InteractiveServer" />
+    <HeadOutlet @rendermode="ModoInteractivo" />
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <Routes @rendermode="ModoInteractivo" />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 
 </html>
+
+@code {
+    // Sin prerenderizado: la sesion se lee del navegador (JavaScript), que no existe mientras se prerenderiza.
+    private static readonly IComponentRenderMode ModoInteractivo = new InteractiveServerRenderMode(prerender: false);
+}
