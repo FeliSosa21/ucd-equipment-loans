@@ -253,6 +253,7 @@ public class ServicioPrestamo
             TipoEquipamiento = prestamo.TipoEquipamiento.Nombre,
             CantidadSolicitada = prestamo.CantidadSolicitada,
             FechaHoraPrestamo = prestamo.FechaHoraPrestamo,
+            FechaEsperadaDevolucion = prestamo.FechaEsperadaDevolucion,
             Estado = prestamo.Estado.ToString(),
             MotivoRechazo = prestamo.MotivoRechazo,
             Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList()
