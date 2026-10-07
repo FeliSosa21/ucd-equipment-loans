@@ -25,6 +25,7 @@ builder.Services.AddScoped<DatosDeEjemplo>();
 builder.Services.AddScoped<ServicioAdministracionUsuarios>();
 builder.Services.AddScoped<ServicioDevolucion>();
 builder.Services.AddScoped<ServicioPrestamo>();
+builder.Services.AddScoped<ServicioCatalogo>();
 
 // Reloj del sistema: los servicios piden la hora a TimeProvider (en los tests se usa uno fijo).
 builder.Services.AddSingleton(TimeProvider.System);
@@ -34,10 +35,13 @@ builder.Services.AddScoped<SesionActual>();
 
 WebApplication app = builder.Build();
 
-// Precarga el usuario root y los datos de ejemplo al arrancar (la Memoria empieza vacia).
+// Precarga el usuario root, el catalogo unico y los datos de ejemplo al arrancar (la Memoria empieza vacia).
+// El catalogo va antes que los datos de ejemplo: ahi se agregan los tipos de equipamiento.
 using (IServiceScope scope = app.Services.CreateScope())
 {
-    scope.ServiceProvider.GetRequiredService<CargaInicial>().CargarRoot();
+    CargaInicial cargaInicial = scope.ServiceProvider.GetRequiredService<CargaInicial>();
+    cargaInicial.CargarRoot();
+    cargaInicial.CargarCatalogo();
     scope.ServiceProvider.GetRequiredService<DatosDeEjemplo>().Cargar();
 }
 
