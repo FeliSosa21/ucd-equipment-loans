@@ -85,6 +85,7 @@ public class ServicioPrestamo
                     .Take(prestamo.CantidadSolicitada).ToList();
                 prestamo.Aprobar(evaluador, unidades);
                 prestamo.Realizar();
+                RegistrarMovimientos(prestamo, _reloj.GetLocalNow().DateTime);
             }
 
             return CrearPrestamoDto(prestamo);
