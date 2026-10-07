@@ -12,6 +12,8 @@ public static class CalendarioLaboral
 
     public static DateTime SumarDiasHabiles(DateTime desde, int diasHabiles)
     {
+        ValidarDiasHabiles(diasHabiles);
+
         DateTime fecha = desde.Date;
         int diasHabilesContados = 0;
 
@@ -28,5 +30,13 @@ public static class CalendarioLaboral
         }
 
         return fecha;
+    }
+
+    private static void ValidarDiasHabiles(int diasHabiles)
+    {
+        if (diasHabiles <= 0)
+        {
+            throw new DominioException("La cantidad de dias habiles debe ser mayor a cero");
+        }
     }
 }
