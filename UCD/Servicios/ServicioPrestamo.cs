@@ -115,7 +115,19 @@ public class ServicioPrestamo
 
     public PrestamoDto RegistrarEntrega(Guid idPrestamo, string dniResponsable)
     {
-        return new PrestamoDto();
+        Usuario? responsable = _usuarios.ObtenerUsuarioPorDni(dniResponsable);
+        Prestamo prestamo = ObtenerPrestamo(idPrestamo);
+
+        try
+        {
+            prestamo.RegistrarEntrega(responsable!, _reloj.GetLocalNow().DateTime);
+
+            return CrearPrestamoDto(prestamo);
+        }
+        catch (DominioException excepcion)
+        {
+            throw new ServicioException(excepcion.Message, excepcion);
+        }
     }
 
     public List<PrestamoDto> ListarSolicitudesPendientes()
