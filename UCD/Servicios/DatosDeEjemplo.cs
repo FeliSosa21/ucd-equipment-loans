@@ -87,10 +87,20 @@ public class DatosDeEjemplo
             duracionMaxPrestamo: 7, requiereAprobacion: false, categoria: categoria);
         foreach (string id in idsUnidades)
         {
-            tipo.AgregarUnidad(new UnidadFisica(idInstitucional: id, ubiFisica: Deposito, numSerie: "SN" + id.Replace("-", "")));
+            tipo.AgregarUnidad(new UnidadFisica(idInstitucional: id, ubiFisica: Deposito, numSerie: NumeroDeSerieDeEjemplo(id, categoria)));
         }
 
         return tipo;
+    }
+
+    private static string? NumeroDeSerieDeEjemplo(string idInstitucional, Categoria categoria)
+    {
+        if (categoria == Categoria.Accesorios)
+        {
+            return null;
+        }
+
+        return "SN" + idInstitucional.Replace("-", "");
     }
 
     private static void EnviarAMantenimiento(UnidadFisica unidad)
