@@ -64,7 +64,7 @@ else
             <tbody>
             @foreach (TipoEquipamientoDto tipo in _tipos)
             {
-                <tr>
+                <tr class="@ClaseDeFila(tipo.Nombre)">
                     <td><strong>@tipo.Nombre</strong></td>
                     <td>@TextoDeCategoria(tipo.Categoria)</td>
                     <td><span class="badge @ClaseDeEstado(tipo.Estado)">@tipo.Estado</span></td>
@@ -85,7 +85,12 @@ else
 @if (_tipoSeleccionado is not null)
 {
     <section class="card table-card" aria-label="Unidades disponibles">
-        <h2>Unidades disponibles de @_tipoSeleccionado</h2>
+        <div class="panel-cabecera">
+            <h2>Unidades disponibles de @_tipoSeleccionado</h2>
+            <button type="button" class="btn btn-ghost btn-sm" @onclick="CerrarUnidades">
+                Cerrar
+            </button>
+        </div>
 
         @if (_unidades.Count == 0)
         {

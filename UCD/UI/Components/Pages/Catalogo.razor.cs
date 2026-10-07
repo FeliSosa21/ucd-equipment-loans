@@ -44,11 +44,13 @@ public partial class Catalogo
         try
         {
             _tipos = ServicioCatalogo.ConsultarTipos(filtro);
+            CerrarUnidadesSiElTipoNoEstaEnLaLista();
         }
         catch (ServicioException ex)
         {
             _error = ex.Message;
             _tipos = new List<TipoEquipamientoDto>();
+            CerrarUnidades();
         }
     }
 
@@ -83,9 +85,37 @@ public partial class Catalogo
         catch (ServicioException ex)
         {
             _error = ex.Message;
-            _tipoSeleccionado = null;
-            _unidades = new List<UnidadFisicaDto>();
+            CerrarUnidades();
         }
+    }
+
+    private void CerrarUnidades()
+    {
+        _tipoSeleccionado = null;
+        _unidades = new List<UnidadFisicaDto>();
+    }
+
+    private void CerrarUnidadesSiElTipoNoEstaEnLaLista()
+    {
+        if (_tipoSeleccionado is null)
+        {
+            return;
+        }
+
+        if (!_tipos.Any(tipo => tipo.Nombre == _tipoSeleccionado))
+        {
+            CerrarUnidades();
+        }
+    }
+
+    private string ClaseDeFila(string nombreTipo)
+    {
+        if (nombreTipo == _tipoSeleccionado)
+        {
+            return "seleccionada";
+        }
+
+        return string.Empty;
     }
 
     private static string TextoDeSerie(string? numSerie)
