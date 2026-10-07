@@ -39,7 +39,12 @@ public partial class Catalogo
     {
         _error = null;
         // Un filtro vacio (todo en null) trae todos los tipos: el servicio no acepta un filtro null.
-        FiltroCatalogoDto filtro = new FiltroCatalogoDto{ Categoria = ValorONulo(_categoria), Estado = ValorONulo(_estado), MinimoDisponibles = _minimoDisponibles };
+        FiltroCatalogoDto filtro = new FiltroCatalogoDto
+        {
+            Categoria = ValorONulo(_categoria),
+            Estado = ValorONulo(_estado),
+            MinimoDisponibles = _minimoDisponibles
+        };
 
         try
         {
@@ -75,7 +80,6 @@ public partial class Catalogo
     private void VerUnidades(string nombreTipo)
     {
         _error = null;
-
         try
         {
             _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(nombreTipo);
@@ -157,6 +161,7 @@ public partial class Catalogo
 
         return "numero sin-disponibles";
     }
+
     private static string? ValorONulo(string valor)
     {
         if (string.IsNullOrEmpty(valor))
