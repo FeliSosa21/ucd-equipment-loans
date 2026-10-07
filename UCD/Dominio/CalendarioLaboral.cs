@@ -14,13 +14,7 @@ public static class CalendarioLaboral
     {
         ValidarDiasHabiles(diasHabiles);
 
-        DateTime fecha = desde.Date;
-
-        while (!EsDiaHabil(fecha))
-        {
-            fecha = fecha.AddDays(1);
-        }
-
+        DateTime fecha = AvanzarAlPrimerDiaHabil(desde.Date);
         int diasHabilesContados = 0;
 
         while (diasHabilesContados < diasHabiles)
@@ -42,6 +36,16 @@ public static class CalendarioLaboral
         {
             throw new DominioException("La cantidad de dias habiles debe ser mayor a cero");
         }
+    }
+
+    private static DateTime AvanzarAlPrimerDiaHabil(DateTime fecha)
+    {
+        while (!EsDiaHabil(fecha))
+        {
+            fecha = fecha.AddDays(1);
+        }
+
+        return fecha;
     }
 
     private static bool EsDiaHabil(DateTime fecha)
