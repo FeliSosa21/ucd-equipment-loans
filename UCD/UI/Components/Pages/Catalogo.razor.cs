@@ -11,6 +11,7 @@ public partial class Catalogo
     private string? _error;
     private string _categoria = string.Empty;
     private string _estado = string.Empty;
+    private int? _minimoDisponibles;
 
     // Clave: nombre del enum que espera el servicio. Valor: texto que ve el usuario.
     private static readonly Dictionary<string, string> Categorias = new Dictionary<string, string>
@@ -36,7 +37,7 @@ public partial class Catalogo
     {
         _error = null;
         // Un filtro vacio (todo en null) trae todos los tipos: el servicio no acepta un filtro null.
-        FiltroCatalogoDto filtro = new FiltroCatalogoDto{ Categoria = ValorONulo(_categoria), Estado = ValorONulo(_estado) };
+        FiltroCatalogoDto filtro = new FiltroCatalogoDto{ Categoria = ValorONulo(_categoria), Estado = ValorONulo(_estado), MinimoDisponibles = _minimoDisponibles };
 
         try
         {

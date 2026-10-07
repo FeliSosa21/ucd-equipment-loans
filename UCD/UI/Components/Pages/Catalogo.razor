@@ -19,11 +19,9 @@
             <option value="@categoria.Key">@categoria.Value</option>
         }
     </select>
-    <select class="field" aria-label="Disponibilidad">
-        <option value="">Cualquier disponibilidad</option>
-        <option>Con unidades disponibles</option>
-        <option>Sin unidades disponibles</option>
-    </select>
+    <input class="field" type="number" min="0"
+           placeholder="Al menos N disponibles" aria-label="Mínimo de unidades disponibles"
+           @bind="_minimoDisponibles" @bind:event="oninput" @bind:after="Consultar" />
     <select class="field" aria-label="Estado" @bind="_estado" @bind:after="Consultar">
         <option value="">Activos y discontinuados</option>
         <option value="Activo">Solo activos</option>
