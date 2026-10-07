@@ -50,6 +50,20 @@ public class CargaInicialTests
         Assert.AreEqual(0, catalogo.Tipos.Count);
     }
 
+    [TestMethod]
+    public void CargarCatalogo_DosVeces_ConservaElPrimerCatalogo()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioCatalogo catalogos = new RepositorioCatalogo(memoria);
+        CargaInicial carga = CrearCarga(memoria);
+        carga.CargarCatalogo();
+        Catalogo? primero = catalogos.Obtener();
+
+        carga.CargarCatalogo();
+
+        Assert.AreSame(primero, catalogos.Obtener());
+    }
+
     private static CargaInicial CrearCarga(Memoria memoria)
     {
         return new CargaInicial(new RepositorioUsuario(memoria), new RepositorioCatalogo(memoria));
