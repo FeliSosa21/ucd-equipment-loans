@@ -21,9 +21,7 @@ public static class CalendarioLaboral
         {
             fecha = fecha.AddDays(1);
 
-            if (fecha.DayOfWeek != DayOfWeek.Saturday 
-                && fecha.DayOfWeek != DayOfWeek.Sunday
-                && !FeriadosNoLaborables.Contains((fecha.Month, fecha.Day)))
+            if (EsDiaHabil(fecha))
             {
                 diasHabilesContados++;
             }
@@ -38,5 +36,12 @@ public static class CalendarioLaboral
         {
             throw new DominioException("La cantidad de dias habiles debe ser mayor a cero");
         }
+    }
+
+    private static bool EsDiaHabil(DateTime fecha)
+    {
+        return fecha.DayOfWeek != DayOfWeek.Saturday
+               && fecha.DayOfWeek != DayOfWeek.Sunday
+               && !FeriadosNoLaborables.Contains((fecha.Month, fecha.Day));
     }
 }
