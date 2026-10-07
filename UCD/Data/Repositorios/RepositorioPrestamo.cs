@@ -39,6 +39,11 @@ public class RepositorioPrestamo
             .AsReadOnly();
     }
 
+    public IReadOnlyList<Prestamo> ObtenerTodos()
+    {
+        return new List<Prestamo>().AsReadOnly();
+    }
+
     private IReadOnlyList<Prestamo> ObtenerPorEstado(EstadoPrestamo estado)
     {
         return _memoria.Prestamos
