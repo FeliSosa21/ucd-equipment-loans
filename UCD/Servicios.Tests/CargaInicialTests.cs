@@ -12,7 +12,7 @@ public class CargaInicialTests
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        CargaInicial carga = new CargaInicial(repositorio);
+        CargaInicial carga = CrearCarga(memoria);
 
         carga.CargarRoot();
 
@@ -26,12 +26,45 @@ public class CargaInicialTests
     public void CargarRoot_DosVeces_NoLoDuplica()
     {
         Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        CargaInicial carga = new CargaInicial(repositorio);
+        CargaInicial carga = CrearCarga(memoria);
 
         carga.CargarRoot();
         carga.CargarRoot();
 
         Assert.AreEqual(1, memoria.Usuarios.Count);
+    }
+
+    [TestMethod]
+    public void CargarCatalogo_MemoriaVacia_GuardaUnCatalogo()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioCatalogo catalogos = new RepositorioCatalogo(memoria);
+        CargaInicial carga = CrearCarga(memoria);
+
+        carga.CargarCatalogo();
+
+        Catalogo? catalogo = catalogos.Obtener();
+        Assert.IsNotNull(catalogo);
+        Assert.AreEqual(CargaInicial.NombreCatalogo, catalogo.Nombre);
+        Assert.AreEqual(0, catalogo.Tipos.Count);
+    }
+
+    [TestMethod]
+    public void CargarCatalogo_DosVeces_ConservaElPrimerCatalogo()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioCatalogo catalogos = new RepositorioCatalogo(memoria);
+        CargaInicial carga = CrearCarga(memoria);
+        carga.CargarCatalogo();
+        Catalogo? primero = catalogos.Obtener();
+
+        carga.CargarCatalogo();
+
+        Assert.AreSame(primero, catalogos.Obtener());
+    }
+
+    private static CargaInicial CrearCarga(Memoria memoria)
+    {
+        return new CargaInicial(new RepositorioUsuario(memoria), new RepositorioCatalogo(memoria));
     }
 }

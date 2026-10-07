@@ -34,10 +34,7 @@ public class RepositorioCatalogo
 
     private void ValidarQueSePuedaGuardar(Catalogo catalogo)
     {
-        if (catalogo is null)
-        {
-            throw new DominioException("El catálogo no puede ser nulo");
-        }
+        ArgumentNullException.ThrowIfNull(catalogo);
 
         if (_memoria.Catalogo is not null)
         {

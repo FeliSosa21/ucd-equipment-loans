@@ -45,12 +45,12 @@ public sealed class RepositorioCatalogoTests
     }
 
     [TestMethod]
-    public void Guardar_CatalogoNull_LanzaDominioException()
+    public void Guardar_CatalogoNull_LanzaArgumentNullException()
     {
         var memoria = new Memoria();
         var repositorio = new RepositorioCatalogo(memoria);
 
-        Assert.ThrowsException<DominioException>(() => repositorio.Guardar(null!));
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.Guardar(null!));
     }
 
     [TestMethod]

@@ -16,11 +16,13 @@ public class DatosDeEjemplo
 
     private readonly RepositorioUsuario _usuarios;
     private readonly RepositorioPrestamo _prestamos;
+    private readonly RepositorioCatalogo _repositorioCatalogo;
 
-    public DatosDeEjemplo(RepositorioUsuario usuarios, RepositorioPrestamo prestamos)
+    public DatosDeEjemplo(RepositorioUsuario usuarios, RepositorioPrestamo prestamos, RepositorioCatalogo repositorioCatalogo)
     {
         _usuarios = usuarios;
         _prestamos = prestamos;
+        _repositorioCatalogo = repositorioCatalogo;
     }
 
     public void Cargar()
@@ -29,6 +31,7 @@ public class DatosDeEjemplo
         {
             return;
         }
+        Catalogo catalogo = ObtenerCatalogo();
 
         Usuario docente = CrearUsuario("12345672", "Ana", "Perez", CorreoDocente, TipoUsuario.Docente);
         Usuario estudiante = CrearUsuario("23456783", "Juan", "Gomez", CorreoEstudiante, TipoUsuario.Estudiante);
@@ -38,11 +41,36 @@ public class DatosDeEjemplo
             "NTB-0001", "NTB-0002", "NTB-0003");
         TipoEquipamiento proyector = CrearTipo("Proyector", "Proyector portatil", Categoria.Audiovisual,
             "PRY-0001");
+        TipoEquipamiento kitArduino = CrearTipo("Kit Arduino", "Kit de robotica para laboratorio",
+            Categoria.Laboratorio, "KIT-0001", "KIT-0002");
+        TipoEquipamiento cableHdmi = CrearTipo("Cable HDMI", "Cable HDMI de 3 metros", Categoria.Accesorios,
+            "HDM-0001", "HDM-0002", "HDM-0003");
+        TipoEquipamiento osciloscopio = CrearTipo("Osciloscopio", "Osciloscopio digital de dos canales",
+            Categoria.Electronica, "OSC-0001");
+
+        EnviarAMantenimiento(kitArduino.Unidades.Last());
+        osciloscopio.Discontinuar();
+
+        catalogo.AgregarTipo(notebook);
+        catalogo.AgregarTipo(proyector);
+        catalogo.AgregarTipo(kitArduino);
+        catalogo.AgregarTipo(cableHdmi);
+        catalogo.AgregarTipo(osciloscopio);
 
         CrearPrestamoActivo(docente, notebook, cantidad: 2, haceDias: 2);
         CrearPrestamoActivo(estudiante, proyector, cantidad: 1, haceDias: 1);
     }
 
+    private Catalogo ObtenerCatalogo()
+    {
+        Catalogo? catalogo = _repositorioCatalogo.Obtener();
+        if (catalogo is null)
+        {
+            throw new InvalidOperationException("La carga inicial debe crear el catalogo antes de cargar los datos de ejemplo");
+        }
+
+        return catalogo;
+    }
     private Usuario CrearUsuario(string dni, string nombre, string apellido, string correo, TipoUsuario tipo)
     {
         Usuario usuario = new Usuario(dni: dni, nombre: nombre, apellido: apellido, correo: correo,
@@ -63,6 +91,12 @@ public class DatosDeEjemplo
         }
 
         return tipo;
+    }
+
+    private static void EnviarAMantenimiento(UnidadFisica unidad)
+    {
+        unidad.Prestada();
+        unidad.AMantenimiento();
     }
 
     private void CrearPrestamoActivo(Usuario solicitante, TipoEquipamiento tipo, int cantidad, int haceDias)
