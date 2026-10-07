@@ -27,6 +27,9 @@ public class Prestamo
         TipoEquipamiento = tipoEquipamiento;
         CantidadSolicitada = cantidadSolicitada;
         FechaHoraPrestamo = fechaHoraPrestamo;
+        FechaEsperadaDevolucion = CalendarioLaboral.SumarDiasHabiles(
+            desde: fechaHoraPrestamo,
+            diasHabiles: tipoEquipamiento.DuracionMaxPrestamo);
     }
 
     public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
