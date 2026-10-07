@@ -347,6 +347,19 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_DatosValidos_DevuelveLaFechaEsperadaDeDevolucion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 1);
+        DateTime fechaEsperada = new DateTime(2026, 10, 12);
+
+        PrestamoDto resultado = servicio.Solicitar(datos, DniDocente);
+
+        Assert.AreEqual(fechaEsperada, resultado.FechaEsperadaDevolucion);
+    }
+
+    [TestMethod]
     [DataRow("")]
     [DataRow(" ")]
     public void Solicitar_TipoVacio_LanzaExcepcionConMensaje(string nombreTipo)
