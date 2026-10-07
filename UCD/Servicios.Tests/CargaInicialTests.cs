@@ -12,7 +12,7 @@ public class CargaInicialTests
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        CargaInicial carga = new CargaInicial(repositorio);
+        CargaInicial carga = CrearCarga(memoria);
 
         carga.CargarRoot();
 
@@ -26,8 +26,7 @@ public class CargaInicialTests
     public void CargarRoot_DosVeces_NoLoDuplica()
     {
         Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        CargaInicial carga = new CargaInicial(repositorio);
+        CargaInicial carga = CrearCarga(memoria);
 
         carga.CargarRoot();
         carga.CargarRoot();

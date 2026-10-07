@@ -10,7 +10,7 @@ public class DatosDeEjemploTests
     private Memoria _memoria = null!;
     private RepositorioUsuario _usuarios = null!;
     private RepositorioPrestamo _prestamos = null!;
-    private RepositorioCatalogo _catalogos = null!;
+    private RepositorioCatalogo _repositorioCatalogo = null!;
     private DatosDeEjemplo _datos = null!;
 
     [TestInitialize]
@@ -19,9 +19,9 @@ public class DatosDeEjemploTests
         _memoria = new Memoria();
         _usuarios = new RepositorioUsuario(_memoria);
         _prestamos = new RepositorioPrestamo(_memoria);
-        _catalogos = new RepositorioCatalogo(_memoria);
-        _catalogos.Guardar(new Catalogo(CargaInicial.NombreCatalogo));
-        _datos = new DatosDeEjemplo(_usuarios, _prestamos);
+        _repositorioCatalogo = new RepositorioCatalogo(_memoria);
+        _repositorioCatalogo.Guardar(new Catalogo(CargaInicial.NombreCatalogo));
+        _datos = new DatosDeEjemplo(_usuarios, _prestamos, _repositorioCatalogo);
     }
 
     [TestMethod]
@@ -55,18 +55,18 @@ public class DatosDeEjemploTests
 
         Assert.AreEqual(3, _memoria.Usuarios.Count);
         Assert.AreEqual(2, _prestamos.ObtenerPrestamosActivos().Count);
-        Assert.AreEqual(5, _catalogos.Obtener()!.Tipos.Count);
+        Assert.AreEqual(5, _repositorioCatalogo.Obtener()!.Tipos.Count);
     }
 
     [TestMethod]
-    public void Cargar_ConCatalogo_AgregarLosTiposDeEjemploAlCatalogo()
+    public void Cargar_ConCatalogo_AgregaLosTiposDeEjemploAlCatalogo()
     {
         _datos.Cargar();
 
-        Catalogo catalogo = _catalogos.Obtener()!;
+        Catalogo catalogo = _repositorioCatalogo.Obtener()!;
         Assert.AreEqual(5, catalogo.Tipos.Count);
         Assert.IsNotNull(catalogo.BuscarTipoPorNombre("Notebook"));
-        Assert.IsNotNull(catalogo.BuscarTipoPorNombre("Osciloscopio")!.EstaActivo);
+        Assert.IsFalse(catalogo.BuscarTipoPorNombre("Osciloscopio")!.EstaActivo);
     }
 
     [TestMethod]
@@ -74,7 +74,7 @@ public class DatosDeEjemploTests
     {
         _datos.Cargar();
 
-        TipoEquipamiento notebook = _catalogos.ObtenerTipoPorNombre("Notebook")!;
+        TipoEquipamiento notebook = _repositorioCatalogo.ObtenerTipoPorNombre("Notebook")!;
         Assert.AreEqual(1, notebook.CantidadDisponibles());
     }
 
