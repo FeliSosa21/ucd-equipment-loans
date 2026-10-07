@@ -104,7 +104,7 @@ public class ServicioPrestamo
 
     public PrestamoDto Rechazar(Guid idPrestamo, string motivo, string dniEvaluador)
     {
-        Prestamo prestamo = _prestamos.ObtenerPrestamoPorId(idPrestamo)!;
+        Prestamo? prestamo = _prestamos.ObtenerPrestamoPorId(idPrestamo);
         Usuario? evaluador = _usuarios.ObtenerUsuarioPorDni(dniEvaluador);
 
         if (evaluador is null
@@ -112,6 +112,11 @@ public class ServicioPrestamo
             || !evaluador.Tipo.TienePermiso(Permiso.EvaluarSolicitud))
         {
             throw new ServicioException("El usuario no tiene permiso para evaluar solicitudes");
+        }
+
+        if (prestamo is null)
+        {
+            throw new ServicioException("El prestamo no existe");
         }
 
         try
