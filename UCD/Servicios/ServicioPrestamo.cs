@@ -7,6 +7,7 @@ namespace Servicios;
 public class ServicioPrestamo
 {
     private const string MensajeSinPermisoParaEvaluar = "El usuario no tiene permiso para evaluar solicitudes";
+    private const string MensajeSinPermisoParaRealizar = "El usuario no tiene permiso para realizar prestamos";
 
     private readonly RepositorioPrestamo _prestamos;
     private readonly RepositorioUsuario _usuarios;
@@ -115,12 +116,13 @@ public class ServicioPrestamo
 
     public PrestamoDto RegistrarEntrega(Guid idPrestamo, string dniResponsable)
     {
-        Usuario? responsable = _usuarios.ObtenerUsuarioPorDni(dniResponsable);
+        Usuario responsable = ObtenerUsuarioHabilitado(
+            dniResponsable, Permiso.RealizarPrestamo, MensajeSinPermisoParaRealizar);
         Prestamo prestamo = ObtenerPrestamo(idPrestamo);
 
         try
         {
-            prestamo.RegistrarEntrega(responsable!, _reloj.GetLocalNow().DateTime);
+            prestamo.RegistrarEntrega(responsable, _reloj.GetLocalNow().DateTime);
 
             return CrearPrestamoDto(prestamo);
         }
