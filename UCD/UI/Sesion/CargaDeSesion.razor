@@ -1,0 +1,17 @@
+@* Lee la sesion guardada en el navegador antes de mostrar cualquier pagina, asi al recargar (F5)
+   las paginas no redirigen a ingresar por no encontrar la sesion todavia. *@
+@inject SesionActual SesionActual
+
+@if (SesionActual.Cargada)
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SesionActual.CargarAsync();
+    }
+}

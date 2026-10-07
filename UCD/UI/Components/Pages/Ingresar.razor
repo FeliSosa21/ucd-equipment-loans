@@ -66,13 +66,13 @@
         }
     }
 
-    private void IniciarSesion()
+    private async Task IniciarSesion()
     {
         _error = null;
         try
         {
             UsuarioSesionDto sesion = ServicioSesion.IniciarSesion(_correo.Trim(), _contrasena);
-            SesionActual.Iniciar(sesion);
+            await SesionActual.IniciarAsync(sesion);
             Navigation.NavigateTo(PaginaDeInicio(sesion));
         }
         catch (ServicioException ex)

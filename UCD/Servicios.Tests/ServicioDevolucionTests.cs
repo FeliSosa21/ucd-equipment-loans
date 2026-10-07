@@ -195,6 +195,43 @@ public class ServicioDevolucionTests
         Assert.ThrowsException<ServicioException>(() => servicio.RegistrarDevolucion(datos, DniFuncionario));
     }
 
+    [TestMethod]
+    public void RegistrarDevolucion_ResponsableDesactivado_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
+        new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniFuncionario)!.Desactivar();
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario));
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_ObservacionesDemasiadoLargas_LanzaExcepcionConLaDelDominio()
+    {
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+        DevolucionDto datos = CrearDatos(prestamo.Id, condicionSegunda: "Con fallas");
+        datos.Unidades[1].Observaciones = new string('a', 301);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
+            servicio.RegistrarDevolucion(datos, DniFuncionario));
+        Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_PrestamoYaDevuelto_LanzaExcepcionYNoLaGuardaDosVeces()
+    {
+        Memoria memoria = new Memoria();
+        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
+        servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario));
+        Assert.AreEqual(1, new RepositorioDevolucion(memoria).ObtenerTodas().Count);
+    }
+
     private static DevolucionDto CrearDatos(Guid idPrestamo, string condicionSegunda = "Sin observaciones")
     {
         return new DevolucionDto
