@@ -58,6 +58,7 @@ else
                 <th>Categoría</th>
                 <th>Estado</th>
                 <th>Disponibles</th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
@@ -68,9 +69,50 @@ else
                     <td>@TextoDeCategoria(tipo.Categoria)</td>
                     <td><span class="badge @ClaseDeEstado(tipo.Estado)">@tipo.Estado</span></td>
                     <td>@tipo.CantidadDisponibles</td>
+                    <td>
+                        <button type="button" class="btn btn-ghost btn-sm"
+                                @onclick="() => VerUnidades(tipo.Nombre)">
+                            Ver unidades
+                        </button>
+                    </td>
                 </tr>
             }
             </tbody>
         </table>
     </div>
+}
+
+@if (_tipoSeleccionado is not null)
+{
+    <section class="card table-card" aria-label="Unidades disponibles">
+        <h2>Unidades disponibles de @_tipoSeleccionado</h2>
+
+        @if (_unidades.Count == 0)
+        {
+            <EstadoVacio Titulo="Este tipo no tiene unidades disponibles"
+                         Mensaje="Todas sus unidades están prestadas, en mantenimiento o dadas de baja." />
+        }
+        else
+        {
+            <table>
+                <thead>
+                <tr>
+                    <th>ID institucional</th>
+                    <th>N.º de serie</th>
+                    <th>Ubicación</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (UnidadFisicaDto unidad in _unidades)
+                {
+                    <tr>
+                        <td class="mono">@unidad.IdInstitucional</td>
+                        <td class="mono">@TextoDeSerie(unidad.NumSerie)</td>
+                        <td>@unidad.UbiFisica</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </section>
 }

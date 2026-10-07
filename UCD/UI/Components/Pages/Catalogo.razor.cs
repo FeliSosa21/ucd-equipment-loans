@@ -12,6 +12,8 @@ public partial class Catalogo
     private string _categoria = string.Empty;
     private string _estado = string.Empty;
     private int? _minimoDisponibles;
+    private string? _tipoSeleccionado;
+    private List<UnidadFisicaDto> _unidades = new List<UnidadFisicaDto>();
 
     // Clave: nombre del enum que espera el servicio. Valor: texto que ve el usuario.
     private static readonly Dictionary<string, string> Categorias = new Dictionary<string, string>
@@ -66,6 +68,34 @@ public partial class Catalogo
         }
 
         return _minimoDisponibles is not null;
+    }
+
+    private void VerUnidades(string nombreTipo)
+    {
+        _error = null;
+
+        try
+        {
+            _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(nombreTipo);
+            _tipoSeleccionado = nombreTipo;
+
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+            _tipoSeleccionado = null;
+            _unidades = new List<UnidadFisicaDto>();
+        }
+    }
+
+    private static string TextoDeSerie(string? numSerie)
+    {
+        if (string.IsNullOrEmpty(numSerie))
+        {
+            return "—";
+        }
+
+        return numSerie;
     }
 
     private string TextoResultados()
