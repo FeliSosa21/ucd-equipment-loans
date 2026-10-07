@@ -187,7 +187,12 @@ public sealed class DevolucionTests
     private static Prestamo CrearPrestamoActivo()
     {
         Prestamo prestamo = CrearPrestamoSolicitado();
-        prestamo.Activar(new List<UnidadFisica> { CrearUnidad("EQP-0001"), CrearUnidad("EQP-0002") });
+        List<UnidadFisica> unidades = new List<UnidadFisica> { CrearUnidad("EQP-0001"), CrearUnidad("EQP-0002") };
+        foreach (UnidadFisica unidad in unidades)
+        {
+            prestamo.TipoEquipamiento.AgregarUnidad(unidad);
+        }
+        prestamo.Activar(unidades);
         return prestamo;
     }
 

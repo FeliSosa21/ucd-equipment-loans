@@ -13,6 +13,6 @@ public class RelojFijo : TimeProvider
     {
         return _instante;
     }
-    
+
     public override TimeZoneInfo LocalTimeZone => TimeZoneInfo.Utc;
 }

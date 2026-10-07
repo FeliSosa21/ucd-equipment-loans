@@ -31,13 +31,41 @@ public class Prestamo
     public void Activar(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         ValidarQueEsteSolicitado();
-        ValidarQueLaListaExista(unidadesFisicas);
-        ValidarCantidad(unidadesFisicas);
-        ValidarQueNoHayaUnidadesRepetidas(unidadesFisicas);
-        ValidarQueEstenDisponibles(unidadesFisicas);
+        ValidarQueNoRequieraAprobacion();
+        ValidarUnidades(unidadesFisicas);
         AsignarUnidades(unidadesFisicas);
 
         Estado = EstadoPrestamo.Activo;
+    }
+
+    public void Aprobar(Usuario evaluador, IReadOnlyList<UnidadFisica> unidadesFisicas)
+    {
+        ValidarQueEsteSolicitado();
+        ValidarEvaluador(evaluador);
+        ValidarUnidades(unidadesFisicas);
+        AsignarUnidades(unidadesFisicas);
+
+        Estado = EstadoPrestamo.Aprobado;
+        Evaluador = evaluador;
+    }
+
+    public void Realizar()
+    {
+        ValidarQueEsteAprobado();
+
+        Estado = EstadoPrestamo.Activo;
+    }
+
+    public void Rechazar(Usuario evaluador, string motivo)
+    {
+        ValidarQueSePuedaRechazar();
+        ValidarEvaluador(evaluador);
+        ValidarMotivo(motivo);
+        LiberarUnidades();
+
+        Estado = EstadoPrestamo.Rechazado;
+        Evaluador = evaluador;
+        MotivoRechazo = motivo;
     }
 
     public void RechazarPorFaltaDeUnidades()
@@ -58,7 +86,9 @@ public class Prestamo
 
     public bool EstaVigente()
     {
-        return Estado == EstadoPrestamo.Solicitado || Estado == EstadoPrestamo.Activo;
+        return Estado == EstadoPrestamo.Solicitado
+               || Estado == EstadoPrestamo.Aprobado
+               || Estado == EstadoPrestamo.Activo;
     }
 
     private static void ValidarSolicitante(Usuario solicitante)
@@ -93,6 +123,31 @@ public class Prestamo
         }
     }
 
+    private void ValidarQueNoRequieraAprobacion()
+    {
+        if (TipoEquipamiento.RequiereAprobacion)
+        {
+            throw new DominioException("El prestamo requiere aprobacion antes de activarse");
+        }
+    }
+
+    private static void ValidarEvaluador(Usuario evaluador)
+    {
+        if (evaluador is null)
+        {
+            throw new DominioException("El prestamo debe tener un evaluador");
+        }
+    }
+
+    private void ValidarUnidades(IReadOnlyList<UnidadFisica> unidadesFisicas)
+    {
+        ValidarQueLaListaExista(unidadesFisicas);
+        ValidarCantidad(unidadesFisicas);
+        ValidarQueNoHayaUnidadesRepetidas(unidadesFisicas);
+        ValidarQueSeanDelTipo(unidadesFisicas);
+        ValidarQueEstenDisponibles(unidadesFisicas);
+    }
+
     private static void ValidarQueLaListaExista(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         if (unidadesFisicas is null)
@@ -118,6 +173,18 @@ public class Prestamo
         }
     }
 
+    private void ValidarQueSeanDelTipo(IReadOnlyList<UnidadFisica> unidadesFisicas)
+    {
+        foreach (UnidadFisica unidadFisica in unidadesFisicas)
+        {
+            if (!TipoEquipamiento.Unidades.Contains(unidadFisica))
+            {
+                throw new DominioException(
+                    $"La unidad {unidadFisica.IdInstitucional} no pertenece al tipo de equipamiento del prestamo");
+            }
+        }
+    }
+
     private static void ValidarQueEstenDisponibles(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         foreach (UnidadFisica unidadFisica in unidadesFisicas)
@@ -137,6 +204,40 @@ public class Prestamo
         }
 
         _unidadesAsignadas.AddRange(unidadesFisicas);
+    }
+
+    private void ValidarQueEsteAprobado()
+    {
+        if (Estado != EstadoPrestamo.Aprobado)
+        {
+            throw new DominioException("El prestamo debe estar aprobado");
+        }
+    }
+
+    private void ValidarQueSePuedaRechazar()
+    {
+        if (Estado != EstadoPrestamo.Solicitado && Estado != EstadoPrestamo.Aprobado)
+        {
+            throw new DominioException("Solo se puede rechazar un prestamo solicitado o aprobado");
+        }
+    }
+
+    private static void ValidarMotivo(string motivo)
+    {
+        if (string.IsNullOrWhiteSpace(motivo))
+        {
+            throw new DominioException("El motivo de rechazo no puede ser vacio");
+        }
+    }
+
+    private void LiberarUnidades()
+    {
+        foreach (UnidadFisica unidadFisica in _unidadesAsignadas)
+        {
+            unidadFisica.Disponible();
+        }
+
+        _unidadesAsignadas.Clear();
     }
 
     private void ValidarQueEsteActivo()
