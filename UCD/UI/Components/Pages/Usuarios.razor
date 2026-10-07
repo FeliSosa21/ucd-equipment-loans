@@ -12,9 +12,7 @@
 </div>
 
 <div class="toolbar">
-    <button class="btn btn-primary btn-sm" @onclick="AlternarAlta">
-        @(_mostrarAlta ? "Cancelar" : "Nuevo usuario")
-    </button>
+    <button class="btn btn-primary btn-sm" @onclick="AbrirAlta" disabled="@_mostrarAlta">Nuevo usuario</button>
     <input class="field busqueda" type="search" placeholder="Buscar por nombre, CI o correo"
            aria-label="Buscar usuario"
            @bind="_busqueda" @bind:event="oninput" />
@@ -27,7 +25,8 @@
             <div class="form-row">
                 <div>
                     <label class="lbl" for="alta-ci">Cédula de identidad</label>
-                    <input id="alta-ci" class="field mono" inputmode="numeric" @bind="_nuevo.Dni" />
+                    <input id="alta-ci" class="field mono" inputmode="numeric"
+                           @bind="_nuevo.Dni" @bind:event="oninput" />
                 </div>
                 <div>
                     <label class="lbl" for="alta-tipo">Tipo de usuario</label>
@@ -39,25 +38,16 @@
                     </select>
                 </div>
             </div>
-            <div class="form-row">
-                <div>
-                    <label class="lbl" for="alta-nombre">Nombre</label>
-                    <input id="alta-nombre" class="field" @bind="_nuevo.Nombre" />
-                </div>
-                <div>
-                    <label class="lbl" for="alta-apellido">Apellido</label>
-                    <input id="alta-apellido" class="field" @bind="_nuevo.Apellido" />
-                </div>
-            </div>
-            <div>
-                <label class="lbl" for="alta-correo">Correo electrónico</label>
-                <input id="alta-correo" type="email" class="field" @bind="_nuevo.Correo" />
-            </div>
+            <CamposDatosPersonales Prefijo="alta-" @bind-Nombre="_nuevo.Nombre" @bind-Apellido="_nuevo.Apellido"
+                                   @bind-Correo="_nuevo.Correo" />
             <div class="hint">
                 La cuenta se crea con la contraseña <strong class="mono">@ServicioAdministracionUsuarios.ContrasenaPredeterminada</strong>
                 y el usuario debe cambiarla en su primer ingreso.
             </div>
-            <button type="submit" class="btn btn-primary">Crear usuario</button>
+            <div class="acciones">
+                <button type="submit" class="btn btn-primary" disabled="@(!AltaCompleta)">Crear usuario</button>
+                <button type="button" class="btn btn-ghost" @onclick="CancelarAlta">Cancelar</button>
+            </div>
         </form>
     </div>
 }
@@ -67,22 +57,10 @@
     <div class="card alta">
         <form class="form-grid" @onsubmit="GuardarEdicion" novalidate>
             <div class="lbl">Editar datos de la cédula <span class="mono">@_editando.Dni</span></div>
-            <div class="form-row">
-                <div>
-                    <label class="lbl" for="edicion-nombre">Nombre</label>
-                    <input id="edicion-nombre" class="field" @bind="_editando.Nombre" />
-                </div>
-                <div>
-                    <label class="lbl" for="edicion-apellido">Apellido</label>
-                    <input id="edicion-apellido" class="field" @bind="_editando.Apellido" />
-                </div>
-            </div>
-            <div>
-                <label class="lbl" for="edicion-correo">Correo electrónico</label>
-                <input id="edicion-correo" type="email" class="field" @bind="_editando.Correo" />
-            </div>
+            <CamposDatosPersonales Prefijo="edicion-" @bind-Nombre="_editando.Nombre"
+                                   @bind-Apellido="_editando.Apellido" @bind-Correo="_editando.Correo" />
             <div class="acciones">
-                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                <button type="submit" class="btn btn-primary" disabled="@(!EdicionCompleta)">Guardar cambios</button>
                 <button type="button" class="btn btn-ghost" @onclick="CancelarEdicion">Cancelar</button>
             </div>
         </form>

@@ -62,13 +62,12 @@ public partial class Devoluciones
         DevolucionDto datos = new DevolucionDto
         {
             IdPrestamo = prestamo.Id,
-            FechaHoraDevolucion = DateTime.Now,
             Unidades = _unidades
         };
 
         try
         {
-            ServicioDevolucion.RegistrarDevolucion(datos, SesionActual.Usuario!.Dni);
+            ServicioDevolucion.RegistrarDevolucion(datos, DniUsuario);
             _exito = $"Se registró la devolución de {prestamo.TipoEquipamiento} de {prestamo.Solicitante}.";
             _seleccionado = null;
             Recargar();
@@ -76,8 +75,10 @@ public partial class Devoluciones
         catch (ServicioException ex)
         {
             _error = ex.Message;
-            Recargar();
-            CerrarSiYaNoEstaActivo(prestamo);
+            if (Recargar())
+            {
+                CerrarSiYaNoEstaActivo(prestamo);
+            }
         }
     }
 
@@ -95,8 +96,22 @@ public partial class Devoluciones
                       "la lista se actualizó.";
     }
 
-    private void Recargar()
+    // Si quien registra perdio el permiso, el servicio niega la lista: se cierra el formulario y se avisa.
+    private bool Recargar()
     {
-        _prestamos = ServicioDevolucion.ListarPrestamosActivos();
+        try
+        {
+            _prestamos = ServicioDevolucion.ListarPrestamosActivos(DniUsuario);
+            return true;
+        }
+        catch (ServicioException ex)
+        {
+            _prestamos = new List<PrestamoActivoDto>();
+            _seleccionado = null;
+            _error = null;
+            _exito = null;
+            _avisoLista = ex.Message;
+            return false;
+        }
     }
 }

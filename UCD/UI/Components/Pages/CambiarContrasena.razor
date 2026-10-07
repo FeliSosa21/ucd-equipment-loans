@@ -92,8 +92,9 @@
 
         try
         {
-            ServicioSesion.CambiarContrasena(SesionActual.Usuario!.Correo, _actual, _nueva);
+            ServicioSesion.CambiarContrasena(DniUsuario, _actual, _nueva);
             SesionActual.MarcarContrasenaCambiada();
+            VaciarCampos();
             ContinuarOAvisar();
         }
         catch (ServicioException ex)
@@ -102,23 +103,22 @@
         }
     }
 
+    // Se vacian siempre, tambien antes de salir de la pagina: asi un doble clic no vuelve a enviar la vieja.
+    private void VaciarCampos()
+    {
+        _actual = string.Empty;
+        _nueva = string.Empty;
+        _repetir = string.Empty;
+    }
+
     private void ContinuarOAvisar()
     {
         if (!_obligatorio)
         {
-            _actual = string.Empty;
-            _nueva = string.Empty;
-            _repetir = string.Empty;
             _exito = true;
             return;
         }
 
-        if (SesionActual.Usuario!.PendienteDeActivacion)
-        {
-            Navigation.NavigateTo("/pendiente-activacion");
-            return;
-        }
-
-        Navigation.NavigateTo("/");
+        Navigation.NavigateTo(SesionActual.PaginaObligatoria() ?? "/");
     }
 }

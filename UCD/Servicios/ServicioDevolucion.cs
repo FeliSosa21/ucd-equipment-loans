@@ -5,8 +5,11 @@ using DTOs;
 namespace Servicios;
 
 // Registro de devoluciones: lo hace un funcionario o supervisor sobre un prestamo activo.
+// La fecha y hora de la devolucion es la del momento en que se registra (la da el servidor, no la pantalla).
 public class ServicioDevolucion
 {
+    public const int LargoMaximoObservaciones = UnidadDevuelta.LargoMaximoObservaciones;
+
     private static readonly Dictionary<string, CondicionDevolucion> Condiciones =
         new Dictionary<string, CondicionDevolucion>
         {
@@ -19,14 +22,16 @@ public class ServicioDevolucion
     private readonly RepositorioUsuario _usuarios;
     private readonly RepositorioDevolucion _devoluciones;
     private readonly RepositorioMovimiento _movimientos;
+    private readonly TimeProvider _reloj;
 
     public ServicioDevolucion(RepositorioPrestamo prestamos, RepositorioUsuario usuarios,
-        RepositorioDevolucion devoluciones, RepositorioMovimiento movimientos)
+        RepositorioDevolucion devoluciones, RepositorioMovimiento movimientos, TimeProvider reloj)
     {
         _prestamos = prestamos;
         _usuarios = usuarios;
         _devoluciones = devoluciones;
         _movimientos = movimientos;
+        _reloj = reloj;
     }
 
     public List<string> CondicionesPosibles()
@@ -34,14 +39,16 @@ public class ServicioDevolucion
         return Condiciones.Keys.ToList();
     }
 
-    public List<PrestamoActivoDto> ListarPrestamosActivos()
+    public List<PrestamoActivoDto> ListarPrestamosActivos(string dniResponsable)
     {
+        ObtenerResponsable(dniResponsable);
         return _prestamos.ObtenerPrestamosActivos().Select(CrearPrestamoActivoDto).ToList();
     }
 
     public void RegistrarDevolucion(DevolucionDto datos, string dniResponsable)
     {
         ArgumentNullException.ThrowIfNull(datos);
+        ArgumentNullException.ThrowIfNull(datos.Unidades);
         Usuario responsable = ObtenerResponsable(dniResponsable);
         Prestamo prestamo = ObtenerPrestamo(datos.IdPrestamo);
 
@@ -50,7 +57,8 @@ public class ServicioDevolucion
             List<UnidadDevuelta> unidades = datos.Unidades
                 .Select(unidad => CrearUnidadDevuelta(unidad, prestamo))
                 .ToList();
-            Devolucion devolucion = new Devolucion(prestamo, responsable, datos.FechaHoraDevolucion, unidades);
+            DateTime ahora = _reloj.GetLocalNow().DateTime;
+            Devolucion devolucion = new Devolucion(prestamo, responsable, ahora, unidades);
             devolucion.Aplicar();
             _devoluciones.AgregarDevolucion(devolucion);
             RegistrarMovimientos(devolucion);
@@ -107,7 +115,7 @@ public class ServicioDevolucion
             throw new ServicioException($"La unidad {datos.IdInstitucional} no pertenece al prestamo");
         }
 
-        if (!Condiciones.TryGetValue(datos.Condicion, out CondicionDevolucion condicion))
+        if (datos.Condicion is null || !Condiciones.TryGetValue(datos.Condicion, out CondicionDevolucion condicion))
         {
             throw new ServicioException("La condicion de devolucion no existe");
         }

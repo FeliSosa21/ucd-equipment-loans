@@ -42,11 +42,17 @@ public class ServicioSesion
         return CrearSesion(usuario);
     }
 
-    public void CambiarContrasena(string correo, string actual, string nueva)
+    // Se identifica por DNI (el correo se puede modificar) y solo un usuario activo puede cambiarla.
+    public void CambiarContrasena(string dni, string actual, string nueva)
     {
-        Usuario? usuario = _repositorio.ObtenerUsuarioPorCorreo(correo);
+        Usuario? usuario = _repositorio.ObtenerUsuarioPorDni(dni);
 
-        if (usuario is null || !usuario.ContrasenaEsCorrecta(actual))
+        if (usuario is null || usuario.Estado == EstadoUsuario.Desactivado)
+        {
+            throw new ServicioException("La sesion ya no es valida");
+        }
+
+        if (!usuario.ContrasenaEsCorrecta(actual))
         {
             throw new ServicioException("La contrasena actual es incorrecta");
         }
@@ -57,7 +63,7 @@ public class ServicioSesion
         }
         catch (DominioException ex)
         {
-            throw new ServicioException(ex.Message);
+            throw new ServicioException(ex.Message, ex);
         }
     }
 

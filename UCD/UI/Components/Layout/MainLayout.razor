@@ -45,8 +45,7 @@
     protected override async Task OnParametersSetAsync()
     {
         await RenovarSesionAsync();
-        ExigirCambioDeContrasena();
-        ExigirActivacion();
+        ExigirPaginaObligatoria();
     }
 
     // En cada navegacion se traen los datos actuales: si el usuario fue desactivado, se cierra la sesion,
@@ -64,28 +63,19 @@
         }
         catch (ServicioException)
         {
-            await SesionActual.ExpirarAsync("Tu sesión se cerró porque tu cuenta ya no está activa.");
+            await SesionActual.ExpirarAsync(SesionActual.AvisoCuentaInactiva);
             Navigation.NavigateTo("/ingresar");
         }
     }
 
-    // Si el usuario debe cambiar la contrasena, no puede ir a otra pantalla hasta hacerlo.
-    private void ExigirCambioDeContrasena()
+    // Si debe cambiar la contrasena o espera la activacion, no puede ir a otra pantalla hasta resolverlo.
+    private void ExigirPaginaObligatoria()
     {
-        if (SesionActual.EstaIniciada && SesionActual.Usuario!.DebeCambiarContrasena &&
-            !Navigation.Uri.EndsWith("/cambiar-contrasena", StringComparison.OrdinalIgnoreCase))
-        {
-            Navigation.NavigateTo("/cambiar-contrasena");
-        }
-    }
+        string? pagina = SesionActual.PaginaObligatoria();
 
-    // Un usuario sin tipo asignado solo puede ver la pantalla que le explica que espere la activacion.
-    private void ExigirActivacion()
-    {
-        if (SesionActual.EstaIniciada && SesionActual.Usuario!.PendienteDeActivacion &&
-            !SesionActual.Usuario.DebeCambiarContrasena)
+        if (pagina is not null && !Navigation.Uri.EndsWith(pagina, StringComparison.OrdinalIgnoreCase))
         {
-            Navigation.NavigateTo("/pendiente-activacion");
+            Navigation.NavigateTo(pagina);
         }
     }
 

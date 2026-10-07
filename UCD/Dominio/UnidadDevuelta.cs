@@ -3,7 +3,7 @@ namespace Dominio;
 // Una unidad de un prestamo al momento de devolverla: su condicion y, si hace falta, observaciones.
 public class UnidadDevuelta
 {
-    private const int LargoMaximoObservaciones = 300;
+    public const int LargoMaximoObservaciones = 300;
 
     public UnidadFisica Unidad { get; }
     public CondicionDevolucion Condicion { get; }
@@ -11,12 +11,13 @@ public class UnidadDevuelta
 
     public UnidadDevuelta(UnidadFisica unidad, CondicionDevolucion condicion, string? observaciones)
     {
+        string? normalizadas = Normalizar(observaciones);
         ValidarUnidad(unidad);
-        ValidarObservaciones(observaciones);
+        ValidarObservaciones(normalizadas);
 
         Unidad = unidad;
         Condicion = condicion;
-        Observaciones = string.IsNullOrWhiteSpace(observaciones) ? null : observaciones.Trim();
+        Observaciones = normalizadas;
     }
 
     public void ActualizarEstadoDeLaUnidad()
@@ -28,6 +29,12 @@ public class UnidadDevuelta
         }
 
         Unidad.AMantenimiento();
+    }
+
+    // Se recorta antes de validar el largo: lo que cuenta es lo que se guarda.
+    private static string? Normalizar(string? observaciones)
+    {
+        return string.IsNullOrWhiteSpace(observaciones) ? null : observaciones.Trim();
     }
 
     private static void ValidarUnidad(UnidadFisica unidad)
