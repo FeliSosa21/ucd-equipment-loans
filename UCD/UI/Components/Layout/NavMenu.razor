@@ -3,7 +3,7 @@
 
 @* Cada item se muestra solo si el tipo del usuario logueado tiene el permiso (letra, req. 1) *@
 <nav class="nav">
-    @if (PuedeAlguno(Permisos.ConsultarMisSolicitudes, Permisos.ConsultarCatalogo))
+    @if (PuedeAlguno(Permisos.ConsultarMisSolicitudes, Permisos.ConsultarCatalogo, Permisos.SolicitarPrestamo))
     {
         <div class="nav-section">General</div>
         @if (Puede(Permisos.ConsultarMisSolicitudes))
@@ -13,6 +13,10 @@
         @if (Puede(Permisos.ConsultarCatalogo))
         {
             <NavLink class="nav-item" href="catalogo">Catálogo</NavLink>
+        }
+        @if (Puede(Permisos.SolicitarPrestamo))
+        {
+            <NavLink class="nav-item" href="solicitar-prestamo">Solicitar préstamo</NavLink>
         }
     }
 

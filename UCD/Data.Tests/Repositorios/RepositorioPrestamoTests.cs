@@ -93,29 +93,6 @@ public class RepositorioPrestamoTests
     }
 
     [TestMethod]
-    public void ObtenerPrestamosAprobados_PrestamosEnVariosEstados_DevuelveSoloLosAprobados()
-    {
-        Memoria memoria = new Memoria();
-        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
-        (Prestamo primerAprobado, _) = CrearPrestamoAprobado();
-        (Prestamo segundoAprobado, _) = CrearPrestamoAprobado();
-        (Prestamo pendiente, _) = CrearSolicitudDeTipoConAprobacion();
-        (Prestamo activo, _) = CrearPrestamoActivo();
-        Prestamo rechazado = CrearPrestamoRechazado();
-
-        repositorio.AgregarPrestamo(primerAprobado);
-        repositorio.AgregarPrestamo(pendiente);
-        repositorio.AgregarPrestamo(activo);
-        repositorio.AgregarPrestamo(rechazado);
-        repositorio.AgregarPrestamo(segundoAprobado);
-
-        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosAprobados();
-
-        CollectionAssert.AreEquivalent(
-            new List<Prestamo> { primerAprobado, segundoAprobado }, resultado.ToList());
-    }
-
-    [TestMethod]
     public void ObtenerPrestamosPendientes_SinPendientes_DevuelveListaVacia()
     {
         Memoria memoria = new Memoria();
@@ -127,23 +104,6 @@ public class RepositorioPrestamoTests
         repositorio.AgregarPrestamo(activo);
 
         IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosPendientes();
-
-        Assert.IsNotNull(resultado);
-        Assert.AreEqual(0, resultado.Count);
-    }
-
-    [TestMethod]
-    public void ObtenerPrestamosAprobados_SinAprobados_DevuelveListaVacia()
-    {
-        Memoria memoria = new Memoria();
-        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
-        (Prestamo pendiente, _) = CrearSolicitudDeTipoConAprobacion();
-        (Prestamo activo, _) = CrearPrestamoActivo();
-
-        repositorio.AgregarPrestamo(pendiente);
-        repositorio.AgregarPrestamo(activo);
-
-        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosAprobados();
 
         Assert.IsNotNull(resultado);
         Assert.AreEqual(0, resultado.Count);

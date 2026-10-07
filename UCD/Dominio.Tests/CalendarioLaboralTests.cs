@@ -29,9 +29,11 @@ public sealed class CalendarioLaboralTests
     }
 
     [TestMethod]
-    [DataRow(2026, 10, 10, 1, 2026, 10, 12)]
-    [DataRow(2026, 10, 11, 1, 2026, 10, 12)]
-    public void SumarDiasHabiles_EmpiezaEnFinDeSemana_CuentaDesdeElLunes(
+    [DataRow(2026, 10, 10, 1, 2026, 10, 13)]
+    [DataRow(2026, 10, 11, 1, 2026, 10, 13)]
+    [DataRow(2026, 10, 10, 2, 2026, 10, 14)]
+    [DataRow(2026, 12, 25, 1, 2026, 12, 29)]
+    public void SumarDiasHabiles_EmpiezaEnDiaNoHabil_CuentaDesdeElSiguienteDiaHabil(
         int anio, int mes, int dia, int diasHabiles, int anioEsperado, int mesEsperado, int diaEsperado)
     {
         DateTime desde = new DateTime(anio, mes, dia);
