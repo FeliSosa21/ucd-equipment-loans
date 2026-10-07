@@ -84,20 +84,8 @@ public class Prestamo
 
     public void RegistrarEntrega(Usuario responsable, DateTime fechaHoraEntrega)
     {
-        if (Estado != EstadoPrestamo.Activo)
-        {
-            throw new DominioException("Solo se puede registrar la entrega de un prestamo activo");
-        }
-
-        if (FechaHoraEntrega is not null)
-        {
-            throw new DominioException("La entrega del prestamo ya fue registrada");
-        }
-
-        if (responsable is null)
-        {
-            throw new DominioException("La entrega debe tener un responsable");
-        }
+        ValidarQueSePuedaEntregar();
+        ValidarResponsable(responsable);
 
         ResponsableEntrega = responsable;
         FechaHoraEntrega = fechaHoraEntrega;
@@ -265,6 +253,27 @@ public class Prestamo
         }
 
         _unidadesAsignadas.Clear();
+    }
+
+    private void ValidarQueSePuedaEntregar()
+    {
+        if (Estado != EstadoPrestamo.Activo)
+        {
+            throw new DominioException("Solo se puede registrar la entrega de un prestamo activo");
+        }
+
+        if (FechaHoraEntrega is not null)
+        {
+            throw new DominioException("La entrega del prestamo ya fue registrada");
+        }
+    }
+
+    private static void ValidarResponsable(Usuario responsable)
+    {
+        if (responsable is null)
+        {
+            throw new DominioException("La entrega debe tener un responsable");
+        }
     }
 
     private void ValidarQueEsteActivo()
