@@ -24,10 +24,10 @@
         <option>Con unidades disponibles</option>
         <option>Sin unidades disponibles</option>
     </select>
-    <select class="field" aria-label="Estado">
+    <select class="field" aria-label="Estado" @bind="_estado" @bind:after="Consultar">
         <option value="">Activos y discontinuados</option>
-        <option>Solo activos</option>
-        <option>Solo discontinuados</option>
+        <option value="Activo">Solo activos</option>
+        <option value="Discontinuado">Solo discontinuados</option>
     </select>
 </div>
 
