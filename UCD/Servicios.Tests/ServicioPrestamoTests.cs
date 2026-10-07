@@ -730,7 +730,7 @@ public sealed class ServicioPrestamoTests
 
         Assert.AreEqual(FechaDeEntrega, resultado.FechaHoraEntrega);
     }
-    
+
     [TestMethod]
     public void RegistrarEntrega_PrestamoActivo_NoRegistraMovimientos()
     {
@@ -743,6 +743,22 @@ public sealed class ServicioPrestamoTests
 
         Assert.AreEqual(movimientosAntes, new RepositorioMovimiento(memoria).ObtenerTodos().Count,
             "La entrega no deberia registrar ningun movimiento");
+    }
+
+    [TestMethod]
+    public void RegistrarEntrega_SolicitanteDesactivadoDespuesDeSolicitar_RegistraLaEntrega()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = servicio.Solicitar(CrearSolicitud(), DniDocente).Id;
+        Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
+        docente.Desactivar();
+
+        servicio.RegistrarEntrega(idPrestamo, DniFuncionario);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        Usuario funcionario = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniFuncionario)!;
+        Assert.AreSame(funcionario, guardado.ResponsableEntrega);
     }
 
     [TestMethod]
