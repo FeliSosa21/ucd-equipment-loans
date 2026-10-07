@@ -101,6 +101,15 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Constructor_DatosValidos_CalculaLaFechaEsperadaDeDevolucion()
+    {
+        DateTime fechaEsperada = new DateTime(2026, 10, 12);
+        Prestamo prestamo = CrearPrestamo();
+
+        Assert.AreEqual(fechaEsperada, prestamo.FechaEsperadaDevolucion);
+    }
+
+    [TestMethod]
     public void Activar_CantidadSolicitadaDeUnidadesDisponibles_QuedaActivo()
     {
         Prestamo prestamo = CrearPrestamo();

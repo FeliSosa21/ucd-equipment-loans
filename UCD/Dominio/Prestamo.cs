@@ -11,6 +11,7 @@ public class Prestamo
     public TipoEquipamiento TipoEquipamiento { get; }
     public int CantidadSolicitada { get; }
     public DateTime FechaHoraPrestamo { get; }
+    public DateTime FechaEsperadaDevolucion { get; }
     public Usuario? Evaluador { get; private set; }
     public string? MotivoRechazo { get; private set; }
     public IReadOnlyList<UnidadFisica> UnidadesAsignadas => _unidadesAsignadas.AsReadOnly();
