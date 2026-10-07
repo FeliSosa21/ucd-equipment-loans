@@ -407,7 +407,7 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void Aprobar_SolicitudPendienteConUnidades_QuedaAprobado()
+    public void Aprobar_SolicitudPendienteConUnidades_QuedaActivo()
     {
         Memoria memoria = new Memoria();
         ServicioPrestamo servicio = CrearServicio(memoria);
@@ -415,7 +415,7 @@ public sealed class ServicioPrestamoTests
 
         PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
 
-        Assert.AreEqual("Aprobado", resultado.Estado);
+        Assert.AreEqual("Activo", resultado.Estado);
     }
 
     [TestMethod]
@@ -521,7 +521,7 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void Aprobar_AdministradorApruebaSuPropiaSolicitud_QuedaAprobado()
+    public void Aprobar_AdministradorApruebaSuPropiaSolicitud_QuedaActivo()
     {
         Memoria memoria = new Memoria();
         ServicioPrestamo servicio = CrearServicio(memoria);
@@ -531,7 +531,7 @@ public sealed class ServicioPrestamoTests
 
         Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
 
-        Assert.AreEqual("Aprobado", resultado.Estado);
+        Assert.AreEqual("Activo", resultado.Estado);
         Assert.AreSame(guardado.Solicitante, guardado.Evaluador);
     }
 
@@ -550,8 +550,8 @@ public sealed class ServicioPrestamoTests
 
         Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
 
-        Assert.AreEqual(EstadoPrestamo.Aprobado, guardado.Estado,
-            "El prestamo deberia seguir aprobado");
+        Assert.AreEqual(EstadoPrestamo.Activo, guardado.Estado,
+            "El prestamo deberia seguir activo");
         Assert.AreEqual(CantidadSolicitadaPorDefecto, guardado.UnidadesAsignadas.Count,
             "Deberia conservar sus unidades");
     }
