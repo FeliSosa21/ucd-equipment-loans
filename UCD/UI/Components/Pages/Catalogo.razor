@@ -12,13 +12,12 @@
 </div>
 
 <div class="toolbar">
-    <select class="field" aria-label="Categoría">
-                <option value="">Todas las categorías</option>
-                <option>Computación</option>
-                <option>Audiovisual</option>
-                <option>Laboratorio</option>
-                <option>Electrónica</option>
-                <option>Accesorios</option>
+    <select class="field" aria-label="Categoría" @bind="_categoria" @bind:after="Consultar">
+        <option value="">Todas las categorías</option>
+        @foreach (KeyValuePair<string, string> categoria in Categorias)
+        {
+            <option value="@categoria.Key">@categoria.Value</option>
+        }
     </select>
     <select class="field" aria-label="Disponibilidad">
         <option value="">Cualquier disponibilidad</option>
@@ -63,7 +62,7 @@ else
             {
                 <tr>
                     <td><strong>@tipo.Nombre</strong></td>
-                    <td>@tipo.Categoria</td>
+                    <td>@TextoDeCategoria(tipo.Categoria)</td>
                     <td><span class="badge @ClaseDeEstado(tipo.Estado)">@tipo.Estado</span></td>
                     <td>@tipo.CantidadDisponibles</td>
                 </tr>
