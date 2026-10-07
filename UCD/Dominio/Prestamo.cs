@@ -84,6 +84,8 @@ public class Prestamo
 
     public void RegistrarEntrega(Usuario responsable, DateTime fechaHoraEntrega)
     {
+        ResponsableEntrega = responsable;
+        FechaHoraEntrega = fechaHoraEntrega;
     }
 
     public void MarcarDevuelto()
