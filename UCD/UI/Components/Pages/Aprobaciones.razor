@@ -1,13 +1,125 @@
 @page "/aprobaciones"
+@using DTOs
+@using Servicios
+@inherits PaginaConSesion
+@inject ServicioPrestamo ServicioPrestamo
 
 <PageTitle>UCD · Aprobaciones</PageTitle>
 
 <div class="page-header">
     <h1>Aprobaciones</h1>
-    <p>Solicitudes de equipamiento que requieren aprobación previa.</p>
+    <p>Aprobá o rechazá las solicitudes de equipamiento que requieren aprobación previa.</p>
 </div>
 
-<div class="card">
-    <EstadoVacio Titulo="No hay solicitudes pendientes"
-                 Mensaje="Las solicitudes de equipos que requieren aprobación van a aparecer acá." />
+@if (_rechazando is not null)
+{
+    <div class="card rechazo">
+        <form class="form-grid" @onsubmit="ConfirmarRechazo" novalidate>
+            <div class="lbl">
+                Rechazo de <strong>@_rechazando.TipoEquipamiento</strong> solicitado por
+                <strong>@_rechazando.Solicitante</strong>
+            </div>
+
+            <div>
+                <label class="lbl" for="motivo">Motivo del rechazo</label>
+                <input id="motivo" class="field" maxlength="@LargoMaximoMotivo"
+                       @bind="_motivo" @bind:event="oninput" />
+            </div>
+
+            @if (_error is not null)
+            {
+                <div class="alert alert-error" role="alert">@_error</div>
+            }
+
+            <div class="acciones">
+                <button type="submit" class="btn btn-primary" disabled="@(!MotivoCompleto)">Confirmar rechazo</button>
+                <button type="button" class="btn btn-ghost" @onclick="CancelarRechazo">Cancelar</button>
+            </div>
+        </form>
+    </div>
+}
+
+@if (_exito is not null)
+{
+    <div class="alert alert-success mensaje" role="status">@_exito</div>
+}
+
+@if (_avisoLista is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_avisoLista</div>
+}
+
+<h2 class="seccion">Solicitudes pendientes</h2>
+<div class="card table-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Solicitante</th>
+                <th>Equipo</th>
+                <th>Cantidad</th>
+                <th>Inicio</th>
+                <th>Devolución esperada</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (PrestamoDto prestamo in _pendientes)
+            {
+                <tr>
+                    <td>@prestamo.Solicitante</td>
+                    <td>@prestamo.TipoEquipamiento</td>
+                    <td>@prestamo.CantidadSolicitada</td>
+                    <td>@prestamo.FechaHoraPrestamo.ToString(FormatoFecha)</td>
+                    <td>@prestamo.FechaEsperadaDevolucion.ToString(FormatoFechaEsperada)</td>
+                    <td>
+                        <button class="btn btn-ghost btn-sm" @onclick="() => Aprobar(prestamo)">Aprobar</button>
+                        <button class="btn btn-ghost btn-sm" @onclick="() => AbrirRechazo(prestamo)">Rechazar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!_pendientes.Any())
+    {
+        <EstadoVacio Titulo="No hay solicitudes pendientes"
+                     Mensaje="Las solicitudes de equipos que requieren aprobación van a aparecer acá." />
+    }
+</div>
+
+<h2 class="seccion">Aprobadas sin retirar</h2>
+<div class="card table-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Solicitante</th>
+                <th>Equipo</th>
+                <th>Cantidad</th>
+                <th>Inicio</th>
+                <th>Unidades</th>
+                <th>Devolución esperada</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (PrestamoDto prestamo in _aprobados)
+            {
+                <tr>
+                    <td>@prestamo.Solicitante</td>
+                    <td>@prestamo.TipoEquipamiento</td>
+                    <td>@prestamo.CantidadSolicitada</td>
+                    <td>@prestamo.FechaHoraPrestamo.ToString(FormatoFecha)</td>
+                    <td class="mono">@string.Join(", ", prestamo.Unidades)</td>
+                    <td>@prestamo.FechaEsperadaDevolucion.ToString(FormatoFechaEsperada)</td>
+                    <td>
+                        <button class="btn btn-ghost btn-sm" @onclick="() => AbrirRechazo(prestamo)">Rechazar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!_aprobados.Any())
+    {
+        <EstadoVacio Titulo="No hay préstamos aprobados sin retirar"
+                     Mensaje="Los préstamos aprobados que todavía no se entregaron van a aparecer acá." />
+    }
 </div>
