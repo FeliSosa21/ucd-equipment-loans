@@ -6,6 +6,9 @@ namespace Servicios;
 
 public class ServicioPrestamo
 {
+    private const string MensajeSinPermisoParaEvaluar = "El usuario no tiene permiso para evaluar solicitudes";
+    private const string MensajeSinPermisoParaRealizar = "El usuario no tiene permiso para realizar prestamos";
+
     private readonly RepositorioPrestamo _prestamos;
     private readonly RepositorioUsuario _usuarios;
     private readonly RepositorioCatalogo _catalogo;
@@ -64,20 +67,9 @@ public class ServicioPrestamo
 
     public PrestamoDto Aprobar(Guid idPrestamo, string dniEvaluador)
     {
-        Prestamo? prestamo = _prestamos.ObtenerPrestamoPorId(idPrestamo);
-        Usuario? evaluador = _usuarios.ObtenerUsuarioPorDni(dniEvaluador);
-
-        if (evaluador is null
-            || evaluador.Estado == EstadoUsuario.Desactivado
-            || !evaluador.Tipo.TienePermiso(Permiso.EvaluarSolicitud))
-        {
-            throw new ServicioException("El usuario no tiene permiso para evaluar solicitudes");
-        }
-
-        if (prestamo is null)
-        {
-            throw new ServicioException("El prestamo no existe");
-        }
+        Usuario evaluador = ObtenerUsuarioHabilitado(
+                    dniEvaluador, Permiso.EvaluarSolicitud, MensajeSinPermisoParaEvaluar);
+        Prestamo prestamo = ObtenerPrestamo(idPrestamo);
 
         ObtenerSolicitante(prestamo.Solicitante.Dni);
 
@@ -104,20 +96,9 @@ public class ServicioPrestamo
 
     public PrestamoDto Rechazar(Guid idPrestamo, string motivo, string dniEvaluador)
     {
-        Prestamo? prestamo = _prestamos.ObtenerPrestamoPorId(idPrestamo);
-        Usuario? evaluador = _usuarios.ObtenerUsuarioPorDni(dniEvaluador);
-
-        if (evaluador is null
-            || evaluador.Estado == EstadoUsuario.Desactivado
-            || !evaluador.Tipo.TienePermiso(Permiso.EvaluarSolicitud))
-        {
-            throw new ServicioException("El usuario no tiene permiso para evaluar solicitudes");
-        }
-
-        if (prestamo is null)
-        {
-            throw new ServicioException("El prestamo no existe");
-        }
+        Usuario evaluador = ObtenerUsuarioHabilitado(
+                    dniEvaluador, Permiso.EvaluarSolicitud, MensajeSinPermisoParaEvaluar);
+        Prestamo prestamo = ObtenerPrestamo(idPrestamo);
 
         try
         {
@@ -133,20 +114,8 @@ public class ServicioPrestamo
 
     public PrestamoDto Realizar(Guid idPrestamo, string dniResponsable)
     {
-        Prestamo? prestamo = _prestamos.ObtenerPrestamoPorId(idPrestamo);
-        Usuario? responsable = _usuarios.ObtenerUsuarioPorDni(dniResponsable);
-
-        if (responsable is null
-            || responsable.Estado == EstadoUsuario.Desactivado
-            || !responsable.Tipo.TienePermiso(Permiso.RealizarPrestamo))
-        {
-            throw new ServicioException("El usuario no tiene permiso para realizar prestamos");
-        }
-
-        if (prestamo is null)
-        {
-            throw new ServicioException("El prestamo no existe");
-        }
+        ObtenerUsuarioHabilitado(dniResponsable, Permiso.RealizarPrestamo, MensajeSinPermisoParaRealizar);
+        Prestamo prestamo = ObtenerPrestamo(idPrestamo);
 
         try
         {
@@ -191,6 +160,32 @@ public class ServicioPrestamo
         }
 
         return solicitante;
+    }
+
+    private Usuario ObtenerUsuarioHabilitado(string dni, Permiso permiso, string mensaje)
+    {
+        Usuario? usuario = _usuarios.ObtenerUsuarioPorDni(dni);
+
+        if (usuario is null
+            || usuario.Estado == EstadoUsuario.Desactivado
+            || !usuario.Tipo.TienePermiso(permiso))
+        {
+            throw new ServicioException(mensaje);
+        }
+
+        return usuario;
+    }
+
+    private Prestamo ObtenerPrestamo(Guid idPrestamo)
+    {
+        Prestamo? prestamo = _prestamos.ObtenerPrestamoPorId(idPrestamo);
+
+        if (prestamo is null)
+        {
+            throw new ServicioException("El prestamo no existe");
+        }
+
+        return prestamo;
     }
 
     private TipoEquipamiento ObtenerTipoEquipamiento(string nombreTipo)
