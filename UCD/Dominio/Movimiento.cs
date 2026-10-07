@@ -7,10 +7,10 @@ public class Movimiento
     public TipoMovimiento Tipo { get; }
     public Usuario Solicitante { get; }
     public Usuario? Evaluador { get; }
-    public UnidadFisica Unidad { get; }
+    public UnidadFisica? Unidad { get; }
 
     public Movimiento(DateTime fechaHora, TipoMovimiento tipo, Usuario solicitante, Usuario? evaluador,
-        UnidadFisica unidad)
+        UnidadFisica? unidad)
     {
         ValidarTipo(tipo);
         ValidarSolicitante(solicitante);
@@ -39,7 +39,7 @@ public class Movimiento
         }
     }
 
-    private static void ValidarUnidad(UnidadFisica unidad)
+    private static void ValidarUnidad(UnidadFisica? unidad)
     {
         if (unidad is null)
         {
