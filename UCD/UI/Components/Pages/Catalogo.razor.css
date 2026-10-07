@@ -63,3 +63,12 @@ td.accion-fila {
     clip: rect(0 0 0 0);
     white-space: nowrap;
 }
+/* Filtros con su etiqueta arriba; el boton queda alineado con los campos */
+.toolbar {
+    align-items: flex-end;
+}
+
+.filtro {
+    display: flex;
+    flex-direction: column;
+}

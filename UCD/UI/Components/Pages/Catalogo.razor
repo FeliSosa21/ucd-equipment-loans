@@ -12,21 +12,29 @@
 </div>
 
 <div class="toolbar">
-    <select class="field" aria-label="Categoría" @bind="_categoria" @bind:after="Consultar">
-        <option value="">Todas las categorías</option>
-        @foreach (KeyValuePair<string, string> categoria in Categorias)
-        {
-            <option value="@categoria.Key">@categoria.Value</option>
-        }
-    </select>
-    <input class="field" type="number" min="0"
-           placeholder="Al menos N disponibles" aria-label="Mínimo de unidades disponibles"
-           @bind="_minimoDisponibles" @bind:event="oninput" @bind:after="Consultar" />
-    <select class="field" aria-label="Estado" @bind="_estado" @bind:after="Consultar">
-        <option value="">Activos y discontinuados</option>
-        <option value="Activo">Solo activos</option>
-        <option value="Discontinuado">Solo discontinuados</option>
-    </select>
+    <label class="filtro">
+        <span class="lbl">Categoría</span>
+        <select class="field" @bind="_categoria" @bind:after="Consultar">
+            <option value="">Todas las categorías</option>
+            @foreach (KeyValuePair<string, string> categoria in Categorias)
+            {
+                <option value="@categoria.Key">@categoria.Value</option>
+            }
+        </select>
+    </label>
+    <label class="filtro">
+        <span class="lbl">Al menos N disponibles</span>
+        <input class="field" type="number" min="0" placeholder="Cualquier cantidad"
+               @bind="_minimoDisponibles" @bind:event="oninput" @bind:after="Consultar" />
+    </label>
+    <label class="filtro">
+        <span class="lbl">Estado</span>
+        <select class="field" @bind="_estado" @bind:after="Consultar">
+            <option value="">Activos y discontinuados</option>
+            <option value="Activo">Solo activos</option>
+            <option value="Discontinuado">Solo discontinuados</option>
+        </select>
+    </label>
     <span class="espacio"></span>
     <button type="button" class="btn btn-ghost btn-sm"
             @onclick="LimpiarFiltros" disabled="@(!HayFiltrosAplicados())">
