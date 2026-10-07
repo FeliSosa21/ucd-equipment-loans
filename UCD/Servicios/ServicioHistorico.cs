@@ -14,6 +14,6 @@ public class ServicioHistorico
 
     public List<MovimientoDto> ListarMovimientos()
     {
-        throw new NotImplementedException();
+        return new List<MovimientoDto>();
     }
 }
