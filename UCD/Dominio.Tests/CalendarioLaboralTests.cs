@@ -41,4 +41,21 @@ public sealed class CalendarioLaboralTests
 
         Assert.AreEqual(fechaEsperada, resultado);
     }
+
+    [TestMethod]
+    [DataRow(2029, 12, 31, 1, 2030, 1, 2)]
+    [DataRow(2029, 4, 30, 1, 2029, 5, 2)]
+    [DataRow(2029, 7, 17, 1, 2029, 7, 19)]
+    [DataRow(2026, 8, 24, 1, 2026, 8, 26)]
+    [DataRow(2029, 12, 24, 1, 2029, 12, 26)]
+    public void SumarDiasHabiles_FeriadoNoLaborable_LoSalta(
+        int anio, int mes, int dia, int diasHabiles, int anioEsperado, int mesEsperado, int diaEsperado)
+    {
+        DateTime desde = new DateTime(anio, mes, dia);
+        DateTime fechaEsperada = new DateTime(anioEsperado, mesEsperado, diaEsperado);
+
+        DateTime resultado = CalendarioLaboral.SumarDiasHabiles(desde: desde, diasHabiles: diasHabiles);
+
+        Assert.AreEqual(fechaEsperada, resultado);
+    }
 }
