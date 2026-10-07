@@ -94,6 +94,11 @@ public class Prestamo
             throw new DominioException("La entrega del prestamo ya fue registrada");
         }
 
+        if (responsable is null)
+        {
+            throw new DominioException("La entrega debe tener un responsable");
+        }
+
         ResponsableEntrega = responsable;
         FechaHoraEntrega = fechaHoraEntrega;
     }
