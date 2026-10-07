@@ -7,7 +7,6 @@ namespace Servicios;
 public class ServicioPrestamo
 {
     private const string MensajeSinPermisoParaEvaluar = "El usuario no tiene permiso para evaluar solicitudes";
-    private const string MensajeSinPermisoParaRealizar = "El usuario no tiene permiso para realizar prestamos";
 
     private readonly RepositorioPrestamo _prestamos;
     private readonly RepositorioUsuario _usuarios;
@@ -114,32 +113,9 @@ public class ServicioPrestamo
         }
     }
 
-    public PrestamoDto Realizar(Guid idPrestamo, string dniResponsable)
-    {
-        ObtenerUsuarioHabilitado(dniResponsable, Permiso.RealizarPrestamo, MensajeSinPermisoParaRealizar);
-        Prestamo prestamo = ObtenerPrestamo(idPrestamo);
-
-        try
-        {
-            prestamo.Realizar();
-            RegistrarMovimientos(prestamo, _reloj.GetLocalNow().DateTime);
-
-            return CrearPrestamoDto(prestamo);
-        }
-        catch (DominioException excepcion)
-        {
-            throw new ServicioException(excepcion.Message, excepcion);
-        }
-    }
-
     public List<PrestamoDto> ListarSolicitudesPendientes()
     {
         return _prestamos.ObtenerPrestamosPendientes().Select(CrearPrestamoDto).ToList();
-    }
-
-    public List<PrestamoDto> ListarPrestamosAprobados()
-    {
-        return _prestamos.ObtenerPrestamosAprobados().Select(CrearPrestamoDto).ToList();
     }
 
     public List<PrestamoDto> ListarPrestamosDeSolicitante(string dniSolicitante)
