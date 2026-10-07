@@ -13,4 +13,18 @@ public sealed class CalendarioLaboralTests
 
         Assert.AreEqual(fechaEsperada, resultado);
     }
+
+    [TestMethod]
+    [DataRow(2026, 10, 9, 1, 2026, 10, 12)]
+    [DataRow(2026, 10, 9, 3, 2026, 10, 14)]
+    public void SumarDiasHabiles_CruzaUnFinDeSemana_LoSalta(
+        int anio, int mes, int dia, int diasHabiles, int anioEsperado, int mesEsperado, int diaEsperado)
+    {
+        DateTime desde = new DateTime(anio, mes, dia);
+        DateTime fechaEsperada = new DateTime(anioEsperado, mesEsperado, diaEsperado);
+
+        DateTime resultado = CalendarioLaboral.SumarDiasHabiles(desde: desde, diasHabiles: diasHabiles);
+
+        Assert.AreEqual(fechaEsperada, resultado);
+    }
 }
