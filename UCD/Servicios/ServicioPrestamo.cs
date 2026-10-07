@@ -133,7 +133,7 @@ public class ServicioPrestamo
 
     public PrestamoDto Realizar(Guid idPrestamo, string dniResponsable)
     {
-        Prestamo prestamo = _prestamos.ObtenerPrestamoPorId(idPrestamo)!;
+        Prestamo? prestamo = _prestamos.ObtenerPrestamoPorId(idPrestamo);
         Usuario? responsable = _usuarios.ObtenerUsuarioPorDni(dniResponsable);
 
         if (responsable is null
@@ -141,6 +141,11 @@ public class ServicioPrestamo
             || !responsable.Tipo.TienePermiso(Permiso.RealizarPrestamo))
         {
             throw new ServicioException("El usuario no tiene permiso para realizar prestamos");
+        }
+
+        if (prestamo is null)
+        {
+            throw new ServicioException("El prestamo no existe");
         }
 
         try
