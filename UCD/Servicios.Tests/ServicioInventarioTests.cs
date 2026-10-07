@@ -31,6 +31,15 @@ public class ServicioInventarioTests
         Assert.AreEqual(5, fila.Total);
     }
 
+    [TestMethod]
+    public void ContarPorTipo_SinCatalogo_DevuelveListaVacia()
+    {
+        ServicioInventario servicio = new ServicioInventario(new RepositorioCatalogo(new Memoria()));
+        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorTipo(new FiltroInventarioDto());
+
+        Assert.AreEqual(0, resultado.Count);
+    }
+
     private static ServicioInventario CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
