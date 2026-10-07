@@ -148,6 +148,15 @@ public partial class Catalogo
         return "badge-neutro";
     }
 
+    private static string ClaseDeDisponibles(int cantidad)
+    {
+        if (cantidad > 0)
+        {
+            return "numero hay-disponibles";
+        }
+
+        return "numero sin-disponibles";
+    }
     private static string? ValorONulo(string valor)
     {
         if (string.IsNullOrEmpty(valor))

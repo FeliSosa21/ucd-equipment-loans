@@ -57,8 +57,8 @@ else
                 <th>Tipo de equipamiento</th>
                 <th>Categoría</th>
                 <th>Estado</th>
-                <th>Disponibles</th>
-                <th></th>
+                <th class="numero">Disponibles</th>
+                <th><span class ="sr-only">Acciones</span></th>
             </tr>
             </thead>
             <tbody>
@@ -68,8 +68,8 @@ else
                     <td><strong>@tipo.Nombre</strong></td>
                     <td>@TextoDeCategoria(tipo.Categoria)</td>
                     <td><span class="badge @ClaseDeEstado(tipo.Estado)">@tipo.Estado</span></td>
-                    <td>@tipo.CantidadDisponibles</td>
-                    <td>
+                    <td class="@ClaseDeDisponibles(tipo.CantidadDisponibles)">@tipo.CantidadDisponibles</td>
+                    <td class="accion-fila">
                         <button type="button" class="btn btn-ghost btn-sm"
                                 @onclick="() => VerUnidades(tipo.Nombre)">
                             Ver unidades
@@ -84,7 +84,7 @@ else
 
 @if (_tipoSeleccionado is not null)
 {
-    <section class="card table-card" aria-label="Unidades disponibles">
+    <section class="card table-card panel unidades" aria-label="Unidades disponibles">
         <div class="panel-cabecera">
             <h2>Unidades disponibles de @_tipoSeleccionado</h2>
             <button type="button" class="btn btn-ghost btn-sm" @onclick="CerrarUnidades">

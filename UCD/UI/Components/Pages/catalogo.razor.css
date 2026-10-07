@@ -1,8 +1,0 @@
-﻿/* Fila del tipo cuyas unidades se muestran en el panel */
-tr.seleccionada td {
-    background: var(--navy-soft);
-}
-
-tr.seleccionada td:first-child {
-    box-shadow: inset 3px 0 0 var(--navy);
-}
