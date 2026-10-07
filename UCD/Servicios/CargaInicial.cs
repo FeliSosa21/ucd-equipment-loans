@@ -36,6 +36,11 @@ public class CargaInicial
 
     public void CargarCatalogo()
     {
+        if (_catalogos.Obtener() != null)
+        {
+            return;
+        }
+
         _catalogos.Guardar(new Catalogo(NombreCatalogo));
     }
 }
