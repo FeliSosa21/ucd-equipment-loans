@@ -300,6 +300,20 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_SolicitudesPendientesNoCuentanParaElMaximoDeUnidades()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion), DniEstudiante);
+        SolicitudPrestamoDto segunda = CrearSolicitud();
+
+        PrestamoDto resultado = servicio.Solicitar(segunda, DniEstudiante);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+        Assert.AreEqual(CantidadSolicitadaPorDefecto, resultado.Unidades.Count);
+    }
+
+    [TestMethod]
     public void Solicitar_SuperaPrestamosConcurrentes_LanzaExcepcion()
     {
         Memoria memoria = new Memoria();
