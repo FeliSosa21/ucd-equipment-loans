@@ -109,10 +109,20 @@ public class DatosDeEjemplo
             duracionMaxPrestamo: DiasMaximosDePrestamo, requiereAprobacion: false, categoria: categoria);
         foreach (string id in idsUnidades)
         {
-            tipo.AgregarUnidad(new UnidadFisica(idInstitucional: id, ubiFisica: Deposito, numSerie: null));
+            tipo.AgregarUnidad(new UnidadFisica(idInstitucional: id, ubiFisica: Deposito, numSerie: NumeroDeSerieDeEjemplo(id, categoria)));
         }
 
         return tipo;
+    }
+
+    private static string? NumeroDeSerieDeEjemplo(string idInstitucional, Categoria categoria)
+    {
+        if (categoria == Categoria.Accesorios)
+        {
+            return null;
+        }
+
+        return "SN" + idInstitucional.Replace("-", "");
     }
 
     // El dominio solo deja pasar a mantenimiento una unidad prestada (al devolverla con fallas).
