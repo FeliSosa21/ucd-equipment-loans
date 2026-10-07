@@ -760,6 +760,19 @@ public sealed class PrestamoTests
         Assert.AreEqual(FechaDeEntrega, prestamo.FechaHoraEntrega);
     }
 
+    [TestMethod]
+    public void RegistrarEntrega_ResponsableNulo_LanzaExcepcion()
+    {
+        (Prestamo prestamo, _) = CrearPrestamoActivo();
+
+        DominioException excepcion = Assert.ThrowsException<DominioException>(
+            () => prestamo.RegistrarEntrega(null!, FechaDeEntrega));
+
+        Assert.AreEqual("La entrega debe tener un responsable", excepcion.Message);
+        Assert.IsNull(prestamo.ResponsableEntrega);
+        Assert.IsNull(prestamo.FechaHoraEntrega);
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
