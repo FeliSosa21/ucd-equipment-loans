@@ -1,5 +1,8 @@
 @page "/catalogo"
 @inherits PaginaConSesion
+@using DTOs
+@using Servicios
+@inject ServicioCatalogo ServicioCatalogo
 
 <PageTitle>UCD · Catálogo</PageTitle>
 
@@ -29,7 +32,26 @@
     </select>
 </div>
 
-<div class="card">
-    <EstadoVacio Titulo="No hay equipamiento para mostrar"
-                 Mensaje="Cuando se registren tipos de equipamiento van a aparecer acá." />
+<div class="card table-card">
+    <table>
+        <thead>
+        <tr>
+            <th>Tipo de equipamiento</th>
+            <th>Categoría</th>
+            <th>Estado</th>
+            <th>Disponibles</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (TipoEquipamientoDto tipo in _tipos)
+        {
+            <tr>
+                <td><strong>@tipo.Nombre</strong></td>
+                <td>@tipo.Categoria</td>
+                <td><span class="badge @ClaseDeEstado(tipo.Estado)">@tipo.Estado</span></td>
+                <td>@tipo.CantidadDisponibles</td>
+            </tr>
+        }
+        </tbody>
+    </table>
 </div>
