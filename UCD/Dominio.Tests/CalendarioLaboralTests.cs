@@ -72,4 +72,15 @@ public sealed class CalendarioLaboralTests
 
         Assert.AreEqual(fechaEsperada, resultado);
     }
+
+    [TestMethod]
+    public void SumarDiasHabiles_FeriadoLaborable_CuentaComoHabil()
+    {
+        DateTime desde = new DateTime(2026, 10, 8);
+        DateTime fechaEsperada = new DateTime(2026, 10, 15);
+
+        DateTime resultado = CalendarioLaboral.SumarDiasHabiles(desde: desde, diasHabiles: 5);
+
+        Assert.AreEqual(fechaEsperada, resultado);
+    }
 }
