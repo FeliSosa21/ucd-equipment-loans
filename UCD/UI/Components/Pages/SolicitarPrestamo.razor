@@ -1,0 +1,69 @@
+@page "/solicitar-prestamo"
+@using DTOs
+@using Servicios
+@inherits PaginaConSesion
+@inject ServicioPrestamo ServicioPrestamo
+@inject ServicioCatalogo ServicioCatalogo
+
+<PageTitle>UCD · Solicitar préstamo</PageTitle>
+
+<div class="page-header">
+    <h1>Solicitar préstamo</h1>
+    <p>Elegí el tipo de equipamiento y la cantidad de unidades que necesitás.</p>
+</div>
+
+<div class="card formulario">
+    <form class="form-grid" @onsubmit="Solicitar" novalidate>
+        <div>
+            <label class="lbl" for="tipo">Tipo de equipamiento</label>
+            <select id="tipo" class="field" @bind="_tipo">
+                <option value="">Elegí un tipo</option>
+                @foreach (TipoEquipamientoDto tipo in _tipos)
+                {
+                    <option value="@tipo.Nombre">@tipo.Nombre</option>
+                }
+            </select>
+            @if (TipoSeleccionado is not null)
+            {
+                <div class="hint">@TextoDisponibilidad</div>
+            }
+        </div>
+
+        <div>
+            <label class="lbl" for="cantidad">Cantidad</label>
+            <input id="cantidad" type="number" min="1" class="field" @bind="_cantidad" @bind:event="oninput" />
+        </div>
+
+        @if (_error is not null)
+        {
+            <div class="alert alert-error" role="alert">@_error</div>
+        }
+
+        <button type="submit" class="btn btn-primary" disabled="@(!FormularioCompleto)">Solicitar préstamo</button>
+    </form>
+
+    @if (_resultado is not null)
+    {
+        if (_resultado.Estado == EstadoActivo)
+        {
+            <div class="alert alert-success resultado" role="status">
+                Préstamo activo: retirá las unidades <span class="mono">@string.Join(", ", _resultado.Unidades)</span>.
+                <div>@DetalleResultado</div>
+            </div>
+        }
+        else if (_resultado.Estado == EstadoSolicitado)
+        {
+            <div class="alert alert-info resultado" role="status">
+                Tu solicitud quedó pendiente de aprobación.
+                <div>@DetalleResultado</div>
+            </div>
+        }
+        else if (_resultado.Estado == EstadoRechazado)
+        {
+            <div class="alert alert-error resultado" role="alert">
+                Tu solicitud fue rechazada: @_resultado.MotivoRechazo.
+                <div>@DetalleResultado</div>
+            </div>
+        }
+    }
+</div>
