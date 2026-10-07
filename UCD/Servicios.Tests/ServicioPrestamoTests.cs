@@ -282,6 +282,24 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_UnidadesActivasMasSolicitadasSuperanElMaximo_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        servicio.Solicitar(CrearSolicitud(), DniEstudiante);
+        SolicitudPrestamoDto segunda = CrearSolicitud(cantidadSolicitada: 1);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Solicitar(segunda, DniEstudiante));
+        Assert.AreEqual("La cantidad solicitada supera el maximo de unidades del solicitante", excepcion.Message);
+
+        Assert.AreEqual(1, new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniEstudiante).Count);
+        TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoSinAprobacion)!;
+        Assert.IsTrue(tipo.Unidades.Single(unidad => unidad.IdInstitucional == "EQP-0003").EstaDisponible(),
+            "La unidad EQP-0003 deberia seguir disponible");
+    }
+
+    [TestMethod]
     public void Solicitar_SuperaPrestamosConcurrentes_LanzaExcepcion()
     {
         Memoria memoria = new Memoria();
