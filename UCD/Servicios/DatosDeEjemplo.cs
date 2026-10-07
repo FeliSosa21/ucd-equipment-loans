@@ -16,13 +16,13 @@ public class DatosDeEjemplo
 
     private readonly RepositorioUsuario _usuarios;
     private readonly RepositorioPrestamo _prestamos;
-    private readonly RepositorioCatalogo _catalogo;
+    private readonly RepositorioCatalogo _repositorioCatalogo;
 
-    public DatosDeEjemplo(RepositorioUsuario usuarios, RepositorioPrestamo prestamos, RepositorioCatalogo catalogo)
+    public DatosDeEjemplo(RepositorioUsuario usuarios, RepositorioPrestamo prestamos, RepositorioCatalogo repositorioCatalogo)
     {
         _usuarios = usuarios;
         _prestamos = prestamos;
-        _catalogo = catalogo;
+        _repositorioCatalogo = repositorioCatalogo;
     }
 
     public void Cargar()
@@ -63,7 +63,7 @@ public class DatosDeEjemplo
 
     private Catalogo ObtenerCatalogo()
     {
-        Catalogo? catalogo = _catalogo.Obtener();
+        Catalogo? catalogo = _repositorioCatalogo.Obtener();
         if (catalogo is null)
         {
             throw new InvalidOperationException("La carga inicial debe crear el catalogo antes de cargar los datos de ejemplo");

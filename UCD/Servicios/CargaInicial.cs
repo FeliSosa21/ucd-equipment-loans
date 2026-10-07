@@ -11,18 +11,18 @@ public class CargaInicial
     public const string ContrasenaRoot = "Root2026";
     public const string NombreCatalogo = "Catalogo UCD";
 
-    private readonly RepositorioUsuario _repositorio;
-    private readonly RepositorioCatalogo _catalogos;
+    private readonly RepositorioUsuario _repositorioUsuario;
+    private readonly RepositorioCatalogo _repositorioCatalogo;
 
-    public CargaInicial(RepositorioUsuario repositorio, RepositorioCatalogo catalogos)
+    public CargaInicial(RepositorioUsuario repositorioUsuario, RepositorioCatalogo repositorioCatalogo)
     {
-        _repositorio = repositorio;
-        _catalogos = catalogos;
+        _repositorioUsuario = repositorioUsuario;
+        _repositorioCatalogo = repositorioCatalogo;
     }
 
     public void CargarRoot()
     {
-        if (_repositorio.ObtenerUsuarioPorCorreo(CorreoRoot) != null)
+        if (_repositorioUsuario.ObtenerUsuarioPorCorreo(CorreoRoot) != null)
         {
             return;
         }
@@ -31,16 +31,16 @@ public class CargaInicial
             contrasena: ContrasenaRoot);
         root.AsignarTipo(TipoUsuario.Administrador);
         root.ExigirCambioDeContrasena();
-        _repositorio.AgregarUsuario(root);
+        _repositorioUsuario.AgregarUsuario(root);
     }
 
     public void CargarCatalogo()
     {
-        if (_catalogos.Obtener() != null)
+        if (_repositorioCatalogo.Obtener() != null)
         {
             return;
         }
 
-        _catalogos.Guardar(new Catalogo(NombreCatalogo));
+        _repositorioCatalogo.Guardar(new Catalogo(NombreCatalogo));
     }
 }
