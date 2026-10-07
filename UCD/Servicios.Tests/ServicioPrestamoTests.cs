@@ -752,6 +752,19 @@ public sealed class ServicioPrestamoTests
             { activoDelDocente.Id, pendienteDelDocente.Id }, resultado.Select(prestamo => prestamo.Id).ToList());
     }
 
+    [TestMethod]
+    public void ListarPrestamosDeSolicitante_SinPrestamos_DevuelveListaVacia()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniDocente);
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamosDeSolicitante(DniAdministrador);
+
+        Assert.IsNotNull(resultado);
+        Assert.AreEqual(0, resultado.Count);
+    }
+
     private static ServicioPrestamo CrearServicio(Memoria memoria)
     {
         CargarCatalogo(memoria);
