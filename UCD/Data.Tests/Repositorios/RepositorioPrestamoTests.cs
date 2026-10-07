@@ -195,6 +195,18 @@ public class RepositorioPrestamoTests
             new List<Prestamo> { solicitado, activo, rechazado }, resultado.ToList());
     }
 
+    [TestMethod]
+    public void ObtenerTodos_SinPrestamos_DevuelveListaVacia()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+
+        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerTodos();
+
+        Assert.IsNotNull(resultado);
+        Assert.AreEqual(0, resultado.Count);
+    }
+
     private static Usuario CrearSolicitante(string dni = "12345672")
     {
         Usuario usuario = new Usuario(
