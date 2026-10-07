@@ -5,7 +5,7 @@ namespace Data.Repositorios;
 public class RepositorioPrestamo
 {
     private readonly Memoria _memoria;
-    
+
     public RepositorioPrestamo(Memoria memoria)
     {
         _memoria = memoria;
@@ -23,16 +23,31 @@ public class RepositorioPrestamo
 
     public IReadOnlyList<Prestamo> ObtenerPrestamosActivos()
     {
-        return _memoria.Prestamos
-            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Activo)
-            .ToList()
-            .AsReadOnly();
+        return ObtenerPorEstado(EstadoPrestamo.Activo);
+    }
+
+    public IReadOnlyList<Prestamo> ObtenerPrestamosPendientes()
+    {
+        return ObtenerPorEstado(EstadoPrestamo.Solicitado);
+    }
+
+    public IReadOnlyList<Prestamo> ObtenerPrestamosAprobados()
+    {
+        return ObtenerPorEstado(EstadoPrestamo.Aprobado);
     }
 
     public IReadOnlyList<Prestamo> ObtenerPrestamosDeSolicitante(string dni)
     {
         return _memoria.Prestamos
             .Where(prestamo => prestamo.Solicitante.Dni == dni)
+            .ToList()
+            .AsReadOnly();
+    }
+
+    private IReadOnlyList<Prestamo> ObtenerPorEstado(EstadoPrestamo estado)
+    {
+        return _memoria.Prestamos
+            .Where(prestamo => prestamo.Estado == estado)
             .ToList()
             .AsReadOnly();
     }

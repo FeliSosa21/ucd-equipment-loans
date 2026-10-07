@@ -17,9 +17,9 @@ public class RepositorioPrestamoTests
         RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
         Prestamo prestamo = CrearPrestamo();
         repositorio.AgregarPrestamo(prestamo);
-        
+
         Prestamo? resultado = repositorio.ObtenerPrestamoPorId(id: prestamo.Id);
-        
+
         Assert.AreSame(prestamo, resultado);
     }
 
@@ -32,7 +32,7 @@ public class RepositorioPrestamoTests
         repositorio.AgregarPrestamo(prestamo);
 
         Prestamo? resultado = repositorio.ObtenerPrestamoPorId(id: Guid.NewGuid());
-        
+
         Assert.IsNull(resultado);
     }
 
@@ -47,7 +47,7 @@ public class RepositorioPrestamoTests
         repositorio.AgregarPrestamo(activo);
 
         IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosActivos();
-        
+
         CollectionAssert.AreEquivalent(new List<Prestamo> { activo }, resultado.ToList());
     }
 
@@ -66,6 +66,86 @@ public class RepositorioPrestamoTests
 
         IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosActivos();
 
+        Assert.AreEqual(0, resultado.Count);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamosPendientes_PrestamosEnVariosEstados_DevuelveSoloLosSolicitados()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+        (Prestamo primerPendiente, _) = CrearSolicitudDeTipoConAprobacion();
+        (Prestamo segundoPendiente, _) = CrearSolicitudDeTipoConAprobacion();
+        (Prestamo aprobado, _) = CrearPrestamoAprobado();
+        (Prestamo activo, _) = CrearPrestamoActivo();
+        Prestamo rechazado = CrearPrestamoRechazado();
+
+        repositorio.AgregarPrestamo(primerPendiente);
+        repositorio.AgregarPrestamo(aprobado);
+        repositorio.AgregarPrestamo(activo);
+        repositorio.AgregarPrestamo(rechazado);
+        repositorio.AgregarPrestamo(segundoPendiente);
+
+        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosPendientes();
+
+        CollectionAssert.AreEquivalent(
+            new List<Prestamo> { primerPendiente, segundoPendiente }, resultado.ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamosAprobados_PrestamosEnVariosEstados_DevuelveSoloLosAprobados()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+        (Prestamo primerAprobado, _) = CrearPrestamoAprobado();
+        (Prestamo segundoAprobado, _) = CrearPrestamoAprobado();
+        (Prestamo pendiente, _) = CrearSolicitudDeTipoConAprobacion();
+        (Prestamo activo, _) = CrearPrestamoActivo();
+        Prestamo rechazado = CrearPrestamoRechazado();
+
+        repositorio.AgregarPrestamo(primerAprobado);
+        repositorio.AgregarPrestamo(pendiente);
+        repositorio.AgregarPrestamo(activo);
+        repositorio.AgregarPrestamo(rechazado);
+        repositorio.AgregarPrestamo(segundoAprobado);
+
+        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosAprobados();
+
+        CollectionAssert.AreEquivalent(
+            new List<Prestamo> { primerAprobado, segundoAprobado }, resultado.ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamosPendientes_SinPendientes_DevuelveListaVacia()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+        (Prestamo aprobado, _) = CrearPrestamoAprobado();
+        (Prestamo activo, _) = CrearPrestamoActivo();
+
+        repositorio.AgregarPrestamo(aprobado);
+        repositorio.AgregarPrestamo(activo);
+
+        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosPendientes();
+
+        Assert.IsNotNull(resultado);
+        Assert.AreEqual(0, resultado.Count);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamosAprobados_SinAprobados_DevuelveListaVacia()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+        (Prestamo pendiente, _) = CrearSolicitudDeTipoConAprobacion();
+        (Prestamo activo, _) = CrearPrestamoActivo();
+
+        repositorio.AgregarPrestamo(pendiente);
+        repositorio.AgregarPrestamo(activo);
+
+        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosAprobados();
+
+        Assert.IsNotNull(resultado);
         Assert.AreEqual(0, resultado.Count);
     }
 
@@ -93,14 +173,14 @@ public class RepositorioPrestamoTests
         Prestamo primeroDelSolicitante = CrearPrestamo(solicitante: solicitante);
         Prestamo segundoDelSolicitante = CrearPrestamo(solicitante: solicitante);
         Prestamo delOtroSolicitante = CrearPrestamo(solicitante: otroSolicitante);
-        
+
         repositorio.AgregarPrestamo(primeroDelSolicitante);
         repositorio.AgregarPrestamo(delOtroSolicitante);
         repositorio.AgregarPrestamo(segundoDelSolicitante);
 
         IReadOnlyList<Prestamo> resultado =
             repositorio.ObtenerPrestamosDeSolicitante(dni: solicitante.Dni);
-        
+
         CollectionAssert.AreEquivalent(
             new List<Prestamo> { primeroDelSolicitante, segundoDelSolicitante },
             resultado.ToList());
@@ -112,10 +192,10 @@ public class RepositorioPrestamoTests
         Memoria memoria = new Memoria();
         RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
         Usuario solicitante = CrearSolicitante();
-        
-        IReadOnlyList<Prestamo>  resultado =
+
+        IReadOnlyList<Prestamo> resultado =
             repositorio.ObtenerPrestamosDeSolicitante(dni: solicitante.Dni);
-        
+
         Assert.IsNotNull(resultado);
         Assert.AreEqual(0, resultado.Count);
     }
@@ -129,10 +209,10 @@ public class RepositorioPrestamoTests
         Prestamo rechazado = CrearPrestamo(solicitante: solicitante);
         rechazado.RechazarPorFaltaDeUnidades();
         repositorio.AgregarPrestamo(rechazado);
-        
+
         IReadOnlyList<Prestamo> resultado =
             repositorio.ObtenerPrestamosDeSolicitante(dni: solicitante.Dni);
-        
+
         CollectionAssert.Contains(resultado.ToList(), rechazado);
     }
 
@@ -150,13 +230,27 @@ public class RepositorioPrestamoTests
         return usuario;
     }
 
-    private static TipoEquipamiento CrearTipoEquipamiento()
+    private static Usuario CrearEvaluador()
+    {
+        Usuario usuario = new Usuario(
+            dni: "67890127",
+            nombre: "Sofia",
+            apellido: "Martinez",
+            correo: "sofia.martinez@ejemplo.com",
+            contrasena: "VivalaOrt2026");
+
+        usuario.AsignarTipo(TipoUsuario.Supervisor);
+
+        return usuario;
+    }
+
+    private static TipoEquipamiento CrearTipoEquipamiento(bool requiereAprobacion = false)
     {
         TipoEquipamiento tipo = new TipoEquipamiento(
             nombre: "Proyector Epson PowerLite",
             descripcion: "Proyector para aulas",
             duracionMaxPrestamo: 5,
-            requiereAprobacion: false,
+            requiereAprobacion: requiereAprobacion,
             categoria: Categoria.Audiovisual);
 
         return tipo;
@@ -176,7 +270,8 @@ public class RepositorioPrestamoTests
         return prestamo;
     }
 
-    private static List<UnidadFisica> CrearUnidadesFisicas(
+    private static List<UnidadFisica> CrearUnidadesDelTipo(
+        TipoEquipamiento tipo,
         int cantidad,
         int primerNumero = 1)
     {
@@ -186,22 +281,53 @@ public class RepositorioPrestamoTests
         {
             int numero = primerNumero + i;
 
-            unidades.Add(new UnidadFisica(
+            UnidadFisica unidad = new UnidadFisica(
                 idInstitucional: $"EQP-{numero:D4}",
                 ubiFisica: "Laboratorio Prueba",
-                numSerie: null));
+                numSerie: null);
+
+            tipo.AgregarUnidad(unidad);
+            unidades.Add(unidad);
         }
 
         return unidades;
     }
 
+    private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearSolicitudDeTipoConAprobacion()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento(requiereAprobacion: true);
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: tipo);
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: tipo, cantidad: CantidadSolicitadaPorDefecto);
+
+        return (prestamo, unidades);
+    }
+
+    private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoAprobado()
+    {
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearSolicitudDeTipoConAprobacion();
+
+        prestamo.Aprobar(CrearEvaluador(), unidades);
+
+        return (prestamo, unidades);
+    }
+
     private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoActivo()
     {
         Prestamo prestamo = CrearPrestamo();
-        List<UnidadFisica> unidades = CrearUnidadesFisicas(cantidad: CantidadSolicitadaPorDefecto);
+        List<UnidadFisica> unidades =
+            CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: CantidadSolicitadaPorDefecto);
 
         prestamo.Activar(unidades);
 
         return (prestamo, unidades);
+    }
+
+    private static Prestamo CrearPrestamoRechazado()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        prestamo.RechazarPorFaltaDeUnidades();
+
+        return prestamo;
     }
 }
