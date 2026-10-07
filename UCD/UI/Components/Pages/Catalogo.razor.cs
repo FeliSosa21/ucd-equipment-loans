@@ -49,6 +49,25 @@ public partial class Catalogo
             _tipos = new List<TipoEquipamientoDto>();
         }
     }
+
+    private void LimpiarFiltros()
+    {
+        _categoria = string.Empty;
+        _estado = string.Empty;
+        _minimoDisponibles = null;
+        Consultar();
+    }
+
+    private bool HayFiltrosAplicados()
+    {
+        if (_categoria != string.Empty || _estado != string.Empty)
+        {
+            return true;
+        }
+
+        return _minimoDisponibles is not null;
+    }
+
     private string TextoResultados()
     {
         if (_tipos.Count == 1)

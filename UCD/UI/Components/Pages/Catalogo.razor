@@ -27,6 +27,11 @@
         <option value="Activo">Solo activos</option>
         <option value="Discontinuado">Solo discontinuados</option>
     </select>
+    <span class="espacio"></span>
+    <button type="button" class="btn btn-ghost btn-sm"
+            @onclick="LimpiarFiltros" disabled="@(!HayFiltrosAplicados())">
+        Limpiar filtros
+    </button>
 </div>
 
 @if (_error is not null)
