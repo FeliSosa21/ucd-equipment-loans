@@ -90,9 +90,10 @@ public class ServicioPrestamo
             else
             {
                 List<UnidadFisica> unidades = prestamo.TipoEquipamiento.UnidadesDisponibles()
-                                .Take(prestamo.CantidadSolicitada).ToList();
+                    .Take(prestamo.CantidadSolicitada).ToList();
                 prestamo.Aprobar(evaluador, unidades);
             }
+
             return CrearPrestamoDto(prestamo);
         }
         catch (DominioException excepcion)

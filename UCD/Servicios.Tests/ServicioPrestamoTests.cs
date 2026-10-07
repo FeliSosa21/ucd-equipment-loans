@@ -498,8 +498,10 @@ public sealed class ServicioPrestamoTests
 
         Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
 
-        Assert.AreEqual(EstadoPrestamo.Aprobado, guardado.Estado, "El prestamo deberia seguir aprobado");
-        Assert.AreEqual(CantidadSolicitadaPorDefecto, guardado.UnidadesAsignadas.Count, "Deberia conservar sus unidades");
+        Assert.AreEqual(EstadoPrestamo.Aprobado, guardado.Estado,
+            "El prestamo deberia seguir aprobado");
+        Assert.AreEqual(CantidadSolicitadaPorDefecto, guardado.UnidadesAsignadas.Count,
+            "Deberia conservar sus unidades");
     }
 
     [TestMethod]
@@ -663,7 +665,7 @@ public sealed class ServicioPrestamoTests
 
         Assert.AreEqual(2, resultado.Count);
         CollectionAssert.AreEquivalent(
-            new List<Guid> { idPendienteDocente, idPendienteAdministrador }, 
+            new List<Guid> { idPendienteDocente, idPendienteAdministrador },
             resultado.Select(prestamo => prestamo.Id).ToList());
 
         Assert.AreEqual("Renato Alves", resultado.Single(
@@ -678,6 +680,7 @@ public sealed class ServicioPrestamoTests
         Memoria memoria = new Memoria();
         ServicioPrestamo servicio = CrearServicio(memoria);
 
+        // La camara tiene 3 unidades: la del administrador pide 1 para que no se rechace por falta de unidades
         Guid idAprobadaDocente = CrearSolicitudAprobada(servicio);
         SolicitudPrestamoDto datosAdministrador =
             CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1);
@@ -822,23 +825,24 @@ public sealed class ServicioPrestamoTests
         usuarios.AgregarUsuario(CrearUsuario(dni: DniFuncionario, tipoUsuario: TipoUsuario.FuncionarioCE));
         usuarios.AgregarUsuario(CrearUsuario(dni: DniSupervisor, tipoUsuario: TipoUsuario.Supervisor,
             nombre: "Sofia", apellido: "Martinez"));
+        usuarios.AgregarUsuario(CrearUsuario(dni: DniAdministrador, tipoUsuario: TipoUsuario.Administrador,
+            nombre: "Lucia", apellido: "Fernandez"));
 
         Usuario desactivado = CrearUsuario(dni: DniDocenteDesactivado, tipoUsuario: TipoUsuario.Docente);
+        desactivado.Desactivar();
+        usuarios.AgregarUsuario(desactivado);
+
         Usuario supervisorDesactivado = CrearUsuario(dni: DniSupervisorDesactivado, tipoUsuario: TipoUsuario.Supervisor,
             nombre: "Diego", apellido: "Rodriguez");
+        supervisorDesactivado.Desactivar();
+        usuarios.AgregarUsuario(supervisorDesactivado);
+
         Usuario funcionarioDesactivado = CrearUsuario(
             dni: DniFuncionarioDesactivado,
             tipoUsuario: TipoUsuario.FuncionarioCE,
             nombre: "Marcos",
             apellido: "Pereira");
-        usuarios.AgregarUsuario(CrearUsuario(dni: DniAdministrador, tipoUsuario: TipoUsuario.Administrador,
-            nombre: "Lucia", apellido: "Fernandez"));
-
-        desactivado.Desactivar();
-        supervisorDesactivado.Desactivar();
         funcionarioDesactivado.Desactivar();
-        usuarios.AgregarUsuario(desactivado);
-        usuarios.AgregarUsuario(supervisorDesactivado);
         usuarios.AgregarUsuario(funcionarioDesactivado);
     }
 
