@@ -41,10 +41,10 @@ public class Movimiento
 
     private static void ValidarUnidad(TipoMovimiento tipo, UnidadFisica? unidad)
     {
-        bool esDeUnidad = tipo == TipoMovimiento.Prestamo || tipo == TipoMovimiento.Devolucion
+        bool requiereUnidad = tipo == TipoMovimiento.Prestamo || tipo == TipoMovimiento.Devolucion
             || tipo == TipoMovimiento.Aprobacion;
 
-        if (esDeUnidad && unidad is null)
+        if (requiereUnidad && unidad is null)
         {
             throw new DominioException("El movimiento debe tener una unidad");
         }
