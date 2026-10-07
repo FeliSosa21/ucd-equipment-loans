@@ -547,6 +547,8 @@ public sealed class ServicioPrestamoTests
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(
             () => servicio.Rechazar(idPrestamo, MotivoDeRechazo, dniEvaluador));
 
+        Assert.AreEqual("El usuario no tiene permiso para evaluar solicitudes", excepcion.Message);
+
         VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
     }
 
