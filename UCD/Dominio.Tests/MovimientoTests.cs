@@ -26,6 +26,9 @@ public sealed class MovimientoTests
     [TestMethod]
     [DataRow(TipoMovimiento.Prestamo)]
     [DataRow(TipoMovimiento.Devolucion)]
+    [DataRow(TipoMovimiento.Solicitud)]
+    [DataRow(TipoMovimiento.Aprobacion)]
+    [DataRow(TipoMovimiento.Rechazo)]
     public void Constructor_CadaTipo_ConservaElTipo(TipoMovimiento tipo)
     {
         Movimiento movimiento = CrearMovimiento(tipo: tipo);
