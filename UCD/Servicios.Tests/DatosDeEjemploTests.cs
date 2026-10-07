@@ -10,6 +10,7 @@ public class DatosDeEjemploTests
     private Memoria _memoria = null!;
     private RepositorioUsuario _usuarios = null!;
     private RepositorioPrestamo _prestamos = null!;
+    private RepositorioCatalogo _catalogos = null!;
     private DatosDeEjemplo _datos = null!;
 
     [TestInitialize]
@@ -18,6 +19,8 @@ public class DatosDeEjemploTests
         _memoria = new Memoria();
         _usuarios = new RepositorioUsuario(_memoria);
         _prestamos = new RepositorioPrestamo(_memoria);
+        _catalogos = new RepositorioCatalogo(_memoria);
+        _catalogos.Guardar(new Catalogo(CargaInicial.NombreCatalogo));
         _datos = new DatosDeEjemplo(_usuarios, _prestamos);
     }
 
@@ -52,5 +55,36 @@ public class DatosDeEjemploTests
 
         Assert.AreEqual(3, _memoria.Usuarios.Count);
         Assert.AreEqual(2, _prestamos.ObtenerPrestamosActivos().Count);
+        Assert.AreEqual(5, _catalogos.Obtener()!.Tipos.Count);
+    }
+
+    [TestMethod]
+    public void Cargar_ConCatalogo_AgregarLosTiposDeEjemploAlCatalogo()
+    {
+        _datos.Cargar();
+
+        Catalogo catalogo = _catalogos.Obtener()!;
+        Assert.AreEqual(5, catalogo.Tipos.Count);
+        Assert.IsNotNull(catalogo.BuscarTipoPorNombre("Notebook"));
+        Assert.IsNotNull(catalogo.BuscarTipoPorNombre("Osciloscopio")!.EstaActivo);
+    }
+
+    [TestMethod]
+    public void Cargar_ConCatalogo_LasUnidadesPrestadasNoFiguranDisponibles()
+    {
+        _datos.Cargar();
+
+        TipoEquipamiento notebook = _catalogos.ObtenerTipoPorNombre("Notebook")!;
+        Assert.AreEqual(1, notebook.CantidadDisponibles());
+    }
+
+    [TestMethod]
+    public void Cargar_SinCatalogo_LanzaInvalidOperationException()
+    {
+        Memoria memoria = new Memoria();
+        DatosDeEjemplo datos = new DatosDeEjemplo(new RepositorioUsuario(memoria),
+            new RepositorioPrestamo(memoria), new RepositorioCatalogo(memoria));
+
+        Assert.ThrowsException<InvalidOperationException>(() => datos.Cargar());
     }
 }
