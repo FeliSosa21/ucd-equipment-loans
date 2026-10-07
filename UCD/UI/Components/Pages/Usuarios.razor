@@ -67,6 +67,17 @@
     </div>
 }
 
+@if (_confirmacion is not null)
+{
+    <div class="card alta" role="alertdialog" aria-labelledby="confirmacion-pregunta">
+        <p id="confirmacion-pregunta" class="pregunta">@_confirmacion.Pregunta</p>
+        <div class="acciones">
+            <button type="button" class="btn btn-primary" @onclick="Confirmar">@_confirmacion.TextoBoton</button>
+            <button type="button" class="btn btn-ghost" @onclick="CancelarConfirmacion">Cancelar</button>
+        </div>
+    </div>
+}
+
 @if (_exito is not null)
 {
     <div class="alert alert-success mensaje" role="status">@_exito</div>

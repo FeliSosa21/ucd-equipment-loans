@@ -27,6 +27,14 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void NombreTipoAdministrador_EsUnoDeLosTiposQueSePuedenAsignar()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        CollectionAssert.Contains(servicio.NombresDeTipos(), ServicioAdministracionUsuarios.NombreTipoAdministrador);
+    }
+
+    [TestMethod]
     public void NombresDeTipos_DevuelveLosSeisTipos()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
