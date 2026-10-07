@@ -4,6 +4,7 @@
 public sealed class PrestamoTests
 {
     private static readonly DateTime FechaFija = new(2026, 10, 5, 10, 0, 0);
+    private static readonly DateTime FechaDeEntrega = new(2026, 10, 6, 9, 30, 0);
     private const int CantidadSolicitadaPorDefecto = 2;
     private const string MotivoDeRechazo = "El equipo esta reservado para un examen";
 
@@ -692,6 +693,18 @@ public sealed class PrestamoTests
         Assert.IsFalse(vigente);
     }
 
+    [TestMethod]
+    public void RegistrarEntrega_PrestamoActivo_GuardaResponsableYFecha()
+    {
+        (Prestamo prestamo, _) = CrearPrestamoActivo();
+        Usuario responsable = CrearResponsableDeEntrega();
+
+        prestamo.RegistrarEntrega(responsable, FechaDeEntrega);
+
+        Assert.AreSame(responsable, prestamo.ResponsableEntrega);
+        Assert.AreEqual(FechaDeEntrega, prestamo.FechaHoraEntrega);
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
@@ -716,6 +729,20 @@ public sealed class PrestamoTests
             contrasena: "VivalaOrt2026");
 
         usuario.AsignarTipo(TipoUsuario.Supervisor);
+
+        return usuario;
+    }
+
+    private static Usuario CrearResponsableDeEntrega()
+    {
+        Usuario usuario = new Usuario(
+            dni: "23456783",
+            nombre: "Laura",
+            apellido: "Diaz",
+            correo: "laura.diaz@ejemplo.com",
+            contrasena: "VivalaOrt2026");
+
+        usuario.AsignarTipo(TipoUsuario.FuncionarioCE);
 
         return usuario;
     }
