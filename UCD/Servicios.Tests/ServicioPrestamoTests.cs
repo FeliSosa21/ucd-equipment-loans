@@ -670,6 +670,7 @@ public sealed class ServicioPrestamoTests
 
     [TestMethod]
     [DataRow(DniDocente)]
+    [DataRow(DniSupervisor)]
     [DataRow(DniFuncionarioDesactivado)]
     [DataRow(DniInexistente)]
     public void RegistrarEntrega_ResponsableNoHabilitado_LanzaExcepcion(string dniResponsable)
@@ -728,6 +729,20 @@ public sealed class ServicioPrestamoTests
         PrestamoDto resultado = servicioDeLaEntrega.RegistrarEntrega(idPrestamo, DniFuncionario);
 
         Assert.AreEqual(FechaDeEntrega, resultado.FechaHoraEntrega);
+    }
+    
+    [TestMethod]
+    public void RegistrarEntrega_PrestamoActivo_NoRegistraMovimientos()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = servicio.Solicitar(CrearSolicitud(), DniDocente).Id;
+        int movimientosAntes = new RepositorioMovimiento(memoria).ObtenerTodos().Count;
+
+        servicio.RegistrarEntrega(idPrestamo, DniFuncionario);
+
+        Assert.AreEqual(movimientosAntes, new RepositorioMovimiento(memoria).ObtenerTodos().Count,
+            "La entrega no deberia registrar ningun movimiento");
     }
 
     [TestMethod]
