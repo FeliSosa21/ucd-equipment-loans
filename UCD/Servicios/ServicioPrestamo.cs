@@ -142,7 +142,7 @@ public class ServicioPrestamo
 
     public List<PrestamoDto> ListarPrestamosDeSolicitante(string dniSolicitante)
     {
-        return new List<PrestamoDto>();
+        return _prestamos.ObtenerPrestamosDeSolicitante(dniSolicitante).Select(CrearPrestamoDto).ToList();
     }
 
     private Usuario ObtenerSolicitante(string dniSolicitante)
