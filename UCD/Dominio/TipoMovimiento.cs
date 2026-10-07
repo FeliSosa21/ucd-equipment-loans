@@ -3,5 +3,8 @@ namespace Dominio;
 public enum TipoMovimiento
 {
     Prestamo = 1,
-    Devolucion
+    Devolucion,
+    Solicitud,
+    Aprobacion,
+    Rechazo
 }
