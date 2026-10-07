@@ -45,12 +45,7 @@ public class ServicioHistoricoTests
     public void ListarMovimientos_MovimientoSinEvaluadorNiUnidad_DevuelveNulos()
     {
         Memoria memoria = new Memoria();
-        new RepositorioMovimiento(memoria).AgregarMovimiento(new Movimiento(
-            fechaHora: FechaFija,
-            tipo: TipoMovimiento.Solicitud,
-            solicitante: CrearSolicitante(),
-            evaluador: null,
-            unidad: null));
+        RegistrarSolicitud(memoria, fechaHora: FechaFija);
         ServicioHistorico servicio = CrearServicio(memoria);
 
         MovimientoDto movimiento = servicio.ListarMovimientos().Single();
