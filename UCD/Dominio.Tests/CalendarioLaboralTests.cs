@@ -83,4 +83,17 @@ public sealed class CalendarioLaboralTests
 
         Assert.AreEqual(fechaEsperada, resultado);
     }
+
+    [TestMethod]
+    [DataRow(0)]
+    [DataRow(-1)]
+    public void SumarDiasHabiles_DiasNoPositivos_LanzaExcepcion(int diasHabiles)
+    {
+        DateTime desde = new DateTime(2026, 10, 5);
+
+        DominioException excepcion = Assert.ThrowsException<DominioException>(
+            () => CalendarioLaboral.SumarDiasHabiles(desde: desde, diasHabiles: diasHabiles));
+ 
+        Assert.AreEqual("La cantidad de dias habiles debe ser mayor a cero", excepcion.Message);
+    }
 }
