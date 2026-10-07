@@ -34,4 +34,24 @@ public class CargaInicialTests
 
         Assert.AreEqual(1, memoria.Usuarios.Count);
     }
+
+    [TestMethod]
+    public void CargarCatalogo_MemoriaVacia_GuardaUnCatalogo()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioCatalogo catalogos = new RepositorioCatalogo(memoria);
+        CargaInicial carga = CrearCarga(memoria);
+
+        carga.CargarCatalogo();
+
+        Catalogo? catalogo = catalogos.Obtener();
+        Assert.IsNotNull(catalogo);
+        Assert.AreEqual(CargaInicial.NombreCatalogo, catalogo.Nombre);
+        Assert.AreEqual(0, catalogo.Tipos.Count);
+    }
+
+    private static CargaInicial CrearCarga(Memoria memoria)
+    {
+        return new CargaInicial(new RepositorioUsuario(memoria), new RepositorioCatalogo(memoria));
+    }
 }
