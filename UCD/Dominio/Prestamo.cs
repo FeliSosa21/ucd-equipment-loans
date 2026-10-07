@@ -84,6 +84,11 @@ public class Prestamo
 
     public void RegistrarEntrega(Usuario responsable, DateTime fechaHoraEntrega)
     {
+        if (Estado != EstadoPrestamo.Activo)
+        {
+            throw new DominioException("Solo se puede registrar la entrega de un prestamo activo");
+        }
+
         ResponsableEntrega = responsable;
         FechaHoraEntrega = fechaHoraEntrega;
     }
