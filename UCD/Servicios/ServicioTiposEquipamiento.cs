@@ -22,7 +22,7 @@ public class ServicioTiposEquipamiento
 
         foreach (TipoEquipamiento tipo in ObtenerCatalogo().Tipos)
         {
-            if (CoincideNombre(tipo, nombre) && CoincideCategoria(tipo, categoria))
+            if (CumpleFiltro(tipo, nombre, categoria))
             {
                 resultado.Add(CrearDetalle(tipo));
             }
@@ -40,6 +40,11 @@ public class ServicioTiposEquipamiento
         }
 
         return catalogo;
+    }
+
+    private static bool CumpleFiltro(TipoEquipamiento tipo, string? nombre, string? categoria)
+    {
+        return CoincideNombre(tipo, nombre) && CoincideCategoria(tipo, categoria);
     }
 
     private static bool CoincideNombre(TipoEquipamiento tipo, string? nombre)
