@@ -159,6 +159,27 @@ public class ServicioUnidadesTests
             servicio.Registrar(CrearDatos("Proyector Epson", idInstitucional, null), DniFuncionario));
     }
 
+    [TestMethod]
+    public void Registrar_TextosConEspacios_LosGuardaRecortados()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        ServicioUnidades servicio = CrearServicio(proyector);
+        DatosUnidadDto datos = new DatosUnidadDto
+        {
+            NombreTipo = "Proyector Epson",
+            IdInstitucional = " PRY-0001 ",
+            UbicacionFisica = "  Deposito A  ",
+            NumeroSerie = "   "
+        };
+
+        servicio.Registrar(datos, DniFuncionario);
+
+        UnidadDetalleDto unidad = servicio.Listar(null, null)[0];
+        Assert.AreEqual("PRY-0001", unidad.IdInstitucional);
+        Assert.AreEqual("Deposito A", unidad.UbicacionFisica);
+        Assert.IsNull(unidad.NumeroSerie);
+    }
+
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
