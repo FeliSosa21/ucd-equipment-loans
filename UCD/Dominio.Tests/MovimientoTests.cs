@@ -29,7 +29,7 @@ public sealed class MovimientoTests
     [DataRow(TipoMovimiento.Aprobacion)]
     public void Constructor_MovimientoDeUnidad_ConservaElTipo(TipoMovimiento tipo)
     {
-        Movimiento movimiento = CrearMovimiento(tipo: tipo);
+        Movimiento movimiento = CrearMovimiento(tipo: tipo, evaluador: CrearEvaluador());
 
         Assert.AreEqual(tipo, movimiento.Tipo);
     }
@@ -94,6 +94,15 @@ public sealed class MovimientoTests
             CrearMovimiento(tipo: tipo, unidad: CrearUnidad(idInstitucional: "EQP-0001")));
 
         Assert.AreEqual("La solicitud y el rechazo no llevan unidad", excepcion.Message);
+    }
+
+    [TestMethod]
+    public void Constructor_AprobacionSinEvaluador_LanzaExcepcion()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() =>
+            CrearMovimiento(tipo: TipoMovimiento.Aprobacion, evaluador: null));
+
+        Assert.AreEqual("La aprobacion debe tener un evaluador", excepcion.Message);
     }
 
     [TestMethod]

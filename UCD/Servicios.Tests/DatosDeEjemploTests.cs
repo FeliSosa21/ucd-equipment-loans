@@ -11,6 +11,7 @@ public class DatosDeEjemploTests
     private RepositorioUsuario _usuarios = null!;
     private RepositorioPrestamo _prestamos = null!;
     private RepositorioCatalogo _repositorioCatalogo = null!;
+    private RepositorioMovimiento _movimientos = null!;
     private DatosDeEjemplo _datos = null!;
 
     private static readonly DateTime Hoy = new DateTime(2026, 10, 7, 9, 0, 0);
@@ -23,7 +24,8 @@ public class DatosDeEjemploTests
         _prestamos = new RepositorioPrestamo(_memoria);
         _repositorioCatalogo = new RepositorioCatalogo(_memoria);
         _repositorioCatalogo.Guardar(new Catalogo(CargaInicial.NombreCatalogo));
-        _datos = new DatosDeEjemplo(_usuarios, _prestamos, _repositorioCatalogo, new RelojFijo(Hoy));
+        _movimientos = new RepositorioMovimiento(_memoria);
+        _datos = new DatosDeEjemplo(_usuarios, _prestamos, _repositorioCatalogo, _movimientos, new RelojFijo(Hoy));
     }
 
     [TestMethod]
@@ -130,7 +132,8 @@ public class DatosDeEjemploTests
     {
         Memoria memoria = new Memoria();
         DatosDeEjemplo datos = new DatosDeEjemplo(new RepositorioUsuario(memoria),
-            new RepositorioPrestamo(memoria), new RepositorioCatalogo(memoria), new RelojFijo(Hoy));
+            new RepositorioPrestamo(memoria), new RepositorioCatalogo(memoria), new RepositorioMovimiento(memoria),
+            new RelojFijo(Hoy));
 
         Assert.ThrowsException<InvalidOperationException>(() => datos.Cargar());
     }
@@ -151,5 +154,63 @@ public class DatosDeEjemploTests
 
         TipoEquipamiento cableHdmi = _repositorioCatalogo.ObtenerTipoPorNombre("Cable HDMI")!;
         Assert.IsTrue(cableHdmi.Unidades.All(unidad => unidad.NumSerie is null));
+    }
+
+    [TestMethod]
+    public void Cargar_ConCatalogo_RegistraLaSolicitudYElPrestamoDeCadaPrestamoActivo()
+    {
+        _datos.Cargar();
+
+        CollectionAssert.AreEqual(
+            new List<(TipoMovimiento Tipo, string? Unidad)>
+            {
+                (TipoMovimiento.Solicitud, null),
+                (TipoMovimiento.Prestamo, "NTB-0001"),
+                (TipoMovimiento.Prestamo, "NTB-0002")
+            },
+            MovimientosDe(ObtenerPrestamoActivoDe(DatosDeEjemplo.CorreoDocente)));
+        CollectionAssert.AreEqual(
+            new List<(TipoMovimiento Tipo, string? Unidad)>
+            {
+                (TipoMovimiento.Solicitud, null),
+                (TipoMovimiento.Prestamo, "PRY-0001")
+            },
+            MovimientosDe(ObtenerPrestamoActivoDe(DatosDeEjemplo.CorreoEstudiante)));
+        Assert.IsTrue(_movimientos.ObtenerTodos().All(movimiento => movimiento.Evaluador is null),
+            "Los movimientos de los datos de ejemplo no tienen evaluador");
+    }
+
+    [TestMethod]
+    public void Cargar_ConCatalogo_DejaUnaSolicitudPendienteConSuMovimiento()
+    {
+        _datos.Cargar();
+
+        List<Prestamo> pendientes = _prestamos.ObtenerTodos()
+            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Solicitado).ToList();
+        Assert.AreEqual(1, pendientes.Count);
+        Prestamo pendiente = pendientes[0];
+        Assert.AreEqual(EstadoPrestamo.Solicitado, pendiente.Estado);
+        Assert.AreEqual(DatosDeEjemplo.CorreoDocente, pendiente.Solicitante.Correo);
+        Assert.AreEqual(DatosDeEjemplo.TipoConAprobacion, pendiente.TipoEquipamiento.Nombre);
+        Assert.AreEqual(1, pendiente.CantidadSolicitada);
+        CollectionAssert.AreEqual(
+            new List<(TipoMovimiento Tipo, string? Unidad)> { (TipoMovimiento.Solicitud, null) },
+            MovimientosDe(pendiente));
+    }
+
+    private Prestamo ObtenerPrestamoActivoDe(string correo)
+    {
+        return _prestamos.ObtenerPrestamosActivos().Single(prestamo => prestamo.Solicitante.Correo == correo);
+    }
+
+    // Movimiento no guarda su prestamo: son los del mismo solicitante con la fecha del prestamo, en el orden
+    // en que se registraron.
+    private List<(TipoMovimiento Tipo, string? Unidad)> MovimientosDe(Prestamo prestamo)
+    {
+        return _movimientos.ObtenerTodos()
+            .Where(movimiento => movimiento.Solicitante == prestamo.Solicitante
+                                 && movimiento.FechaHora == prestamo.FechaHoraPrestamo)
+            .Select(movimiento => (Tipo: movimiento.Tipo, Unidad: movimiento.Unidad?.IdInstitucional))
+            .ToList();
     }
 }
