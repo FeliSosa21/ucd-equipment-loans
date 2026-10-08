@@ -1,4 +1,5 @@
-﻿using Data.Repositorios;
+﻿using System.Runtime.CompilerServices;
+using Data.Repositorios;
 using Dominio;
 using DTOs;
 
@@ -23,9 +24,12 @@ public class ServicioUnidades
 
         foreach (TipoEquipamiento tipo in ObtenerCatalogo().Tipos)
         {
-            foreach (UnidadFisica unidad in tipo.Unidades)
+            if (CoincideTipo(tipo, nombreTipo))
             {
-                resultado.Add(CrearDetalle(tipo, unidad));
+                foreach (UnidadFisica unidad in tipo.Unidades)
+                {
+                    resultado.Add(CrearDetalle(tipo, unidad));
+                }
             }
         }
 
@@ -41,6 +45,16 @@ public class ServicioUnidades
         }
 
         return catalogo;
+    }
+
+    private static bool CoincideTipo(TipoEquipamiento tipo, string? nombreTipo)
+    {
+        if (string.IsNullOrEmpty(nombreTipo))
+        {
+            return true;
+        }
+
+        return tipo.Nombre == nombreTipo;
     }
 
     private static UnidadDetalleDto CrearDetalle(TipoEquipamiento tipo, UnidadFisica unidad)
