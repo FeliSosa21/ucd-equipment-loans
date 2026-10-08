@@ -33,6 +33,7 @@ public class ServicioTiposEquipamiento
 
     public void Registrar(DatosTipoEquipamientoDto datos, string dniResponsable)
     {
+        ValidarResponsable(dniResponsable);
         Categoria categoria = Enum.Parse<Categoria>(datos.Categoria);
         TipoEquipamiento tipo = new TipoEquipamiento(datos.Nombre, datos.Descripcion, datos.DuracionMaxPrestamo,
             datos.RequiereAprobacion, categoria);
@@ -48,6 +49,17 @@ public class ServicioTiposEquipamiento
         }
 
         return catalogo;
+    }
+
+    private void ValidarResponsable(string dniResponsable)
+    {
+        Usuario? responsable = _repositorioUsuario.ObtenerUsuarioPorDni(dniResponsable);
+
+        if (responsable is null || responsable.Estado == EstadoUsuario.Desactivado ||
+            !responsable.Tipo.TienePermiso(Permiso.GestionarCatalogo))
+        {
+            throw new ServicioException("El usuario no tiene permiso para gestionar el catalogo");
+        }
     }
 
     private static bool CumpleFiltro(TipoEquipamiento tipo, string? nombre, string? categoria)
