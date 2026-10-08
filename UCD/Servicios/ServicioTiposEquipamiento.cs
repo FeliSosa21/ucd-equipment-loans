@@ -33,6 +33,10 @@ public class ServicioTiposEquipamiento
 
     public void Registrar(DatosTipoEquipamientoDto datos, string dniResponsable)
     {
+        Categoria categoria = Enum.Parse<Categoria>(datos.Categoria);
+        TipoEquipamiento tipo = new TipoEquipamiento(datos.Nombre, datos.Descripcion, datos.DuracionMaxPrestamo,
+            datos.RequiereAprobacion, categoria);
+        ObtenerCatalogo().AgregarTipo(tipo);
     }
 
     private Catalogo ObtenerCatalogo()
