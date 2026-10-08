@@ -72,10 +72,15 @@
 <section class="card table-card" aria-label="Inventario por tipo de equipamiento">
     <h2 class="titulo-seccion">Por tipo de equipamiento</h2>
 
-    @if (_porTipo.Count == 0)
+    @if (_porTipo.Count == 0 && HayFiltrosAplicados())
     {
         <EstadoVacio Titulo="No hay tipos que coincidan con los filtros"
                      Mensaje="Probá con otra categoría u otro estado, o limpiá los filtros." />
+    }
+    else if (_porTipo.Count == 0)
+    {
+        <EstadoVacio Titulo="Todavía no hay tipos de equipamiento"
+                     Mensaje="Cuando se registren tipos con unidades, su inventario va a aparecer acá." />
     }
     else
     {

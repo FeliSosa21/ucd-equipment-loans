@@ -44,7 +44,6 @@ public partial class Inventario
         return _categoria != string.Empty || _estado != string.Empty;
     }
 
-
     // Los ceros se atenuan para que resalten las cantidades que importan.
     private static string ClaseDeCantidad(int cantidad)
     {

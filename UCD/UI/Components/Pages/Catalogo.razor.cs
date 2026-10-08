@@ -16,8 +16,6 @@ public partial class Catalogo
     private string? _tipoSeleccionado;
     private List<UnidadFisicaDto> _unidades = new List<UnidadFisicaDto>();
 
-
-
     protected override void OnInitialized()
     {
         if (RedirigirSiNoTienePermiso(Permisos.ConsultarCatalogo))
