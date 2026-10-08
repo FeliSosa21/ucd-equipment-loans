@@ -108,7 +108,16 @@ public class ServicioUnidades
     public void DarDeBaja(string idInstitucional, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        ObtenerUnidad(idInstitucional).DarDeBaja();
+        UnidadFisica unidad = ObtenerUnidad(idInstitucional);
+
+        try
+        {
+            unidad.DarDeBaja();
+        }
+        catch (DominioException ex)
+        {
+            throw new ServicioException(ex.Message, ex);
+        }
     }
 
     private static string Normalizar(string? texto)
