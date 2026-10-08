@@ -91,6 +91,14 @@ public class ServicioUnidadesTests
             servicio.Registrar(CrearDatos("Proyector Epson", "PRY-0001", null), DniDocente));
     }
 
+    [TestMethod]
+    public void Registrar_TipoInexistente_LanzaServicioException()
+    {
+        ServicioUnidades servicio = CrearServicio();
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Registrar(CrearDatos("Proyector Epson", "PRY-0001", null), DniFuncionario));
+    }
+
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
