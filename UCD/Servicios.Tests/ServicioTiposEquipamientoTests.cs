@@ -44,7 +44,7 @@ public class ServicioTiposEquipamientoTests
     }
 
     [TestMethod]
-    public void Listar_FiltroPorNombre_DevuelvelosQueContienenElTexto()
+    public void Listar_FiltroPorNombre_DevuelveLosQueContienenElTexto()
     {
         TipoEquipamiento proyector = CrearTipo("Proyector Epson", Categoria.Audiovisual);
         TipoEquipamiento notebook = CrearTipo("Notebook Lenovo", Categoria.Computacion);
@@ -88,7 +88,7 @@ public class ServicioTiposEquipamientoTests
     }
 
     [TestMethod]
-    public void Registrar_ResponsablesSinPermiso_LanzaServicioException()
+    public void Registrar_ResponsableSinPermiso_LanzaServicioException()
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
         DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", "Audiovisual");
@@ -97,7 +97,7 @@ public class ServicioTiposEquipamientoTests
     }
 
     [TestMethod]
-    public void Registrar_ResponsablesInexistente_LanzaServicioException()
+    public void Registrar_ResponsableInexistente_LanzaServicioException()
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
         DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", "Audiovisual");
@@ -145,7 +145,7 @@ public class ServicioTiposEquipamientoTests
     }
 
     [TestMethod]
-    public void Modificar_ResponsablesSinPermiso_LanzaServicioException()
+    public void Modificar_ResponsableSinPermiso_LanzaServicioException()
     {
         TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
