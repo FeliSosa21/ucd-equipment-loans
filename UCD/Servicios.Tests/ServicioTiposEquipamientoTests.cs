@@ -222,6 +222,17 @@ public class ServicioTiposEquipamientoTests
             servicio.Discontinuar("Camara Canon EOS", DniFuncionario));
     }
 
+    [TestMethod]
+    public void Discontinuar_YaDiscontinuado_LanzaServicioException()
+    {
+        TipoEquipamiento camara =  CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        camara.Discontinuar();
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Discontinuar("Camara Canon EOS", DniSupervisor));
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
