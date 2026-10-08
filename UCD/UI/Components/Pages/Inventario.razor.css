@@ -17,3 +17,8 @@
 td.cero {
     color: var(--ink-faint);
 }
+
+/* Boton de limpiar: centrado verticalmente en la barra de filtros */
+.filtros-detalle .btn {
+    align-self: center;
+}

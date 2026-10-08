@@ -58,7 +58,7 @@
                     </div>
                     <div>
                         <label class="lbl" for="unidad-id">Identificación institucional</label>
-                        <input id="unidad-id" class="field mono" maxlength="8" placeholder="EQP-0001"
+                        <input id="unidad-id" class="field mono" spellcheck="false" maxlength="8" placeholder="EQP-0001"
                                @bind="_datos.IdInstitucional" @bind:event="oninput" />
                         <div class="hint">Tres letras mayúsculas, un guion y cuatro dígitos. No puede repetirse.</div>
                     </div>
@@ -79,7 +79,7 @@
                 </div>
                 <div>
                     <label class="lbl" for="unidad-serie">Número de serie (opcional)</label>
-                    <input id="unidad-serie" class="field mono" maxlength="50"
+                    <input id="unidad-serie" class="field mono" spellcheck="false" maxlength="50"
                            @bind="_datos.NumeroSerie" @bind:event="oninput" />
                     <div class="hint">Si el fabricante lo proporciona. No puede repetirse.</div>
                 </div>
