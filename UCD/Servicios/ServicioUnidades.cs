@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using Data.Repositorios;
+﻿using Data.Repositorios;
 using Dominio;
 using DTOs;
 
@@ -66,6 +65,7 @@ public class ServicioUnidades
         UnidadFisica unidad = ObtenerUnidad(datos.IdInstitucional);
         string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
         ValidarSerieDisponible(numeroSerie, unidad);
+
         try
         {
             unidad.ModificarInfo(Normalizar(datos.UbicacionFisica), numeroSerie,
@@ -209,7 +209,8 @@ public class ServicioUnidades
         {
             foreach (UnidadFisica unidad in tipo.Unidades)
             {
-                if (unidad != unidadEditada && string.Equals(unidad.NumSerie, numeroSerie, StringComparison.OrdinalIgnoreCase))
+                if (unidad != unidadEditada &&
+                    string.Equals(unidad.NumSerie, numeroSerie, StringComparison.OrdinalIgnoreCase))
                 {
                     throw new ServicioException("Ya existe una unidad con ese numero de serie");
                 }
