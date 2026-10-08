@@ -45,8 +45,15 @@ public class ServicioUnidades
         TipoEquipamiento tipo = ObtenerTipo(datos.NombreTipo);
         ValidarIdDisponible(datos.IdInstitucional);
         ValidarSerieDisponible(datos.NumeroSerie);
-        UnidadFisica unidad = new UnidadFisica(datos.IdInstitucional, datos.UbicacionFisica, datos.NumeroSerie);
-        tipo.AgregarUnidad(unidad);
+        try
+        {
+            UnidadFisica unidad = new UnidadFisica(datos.IdInstitucional, datos.UbicacionFisica, datos.NumeroSerie);
+            tipo.AgregarUnidad(unidad);
+        }
+        catch (DominioException ex)
+        {
+            throw new ServicioException(ex.Message, ex);
+        }
     }
 
     private Catalogo ObtenerCatalogo()
