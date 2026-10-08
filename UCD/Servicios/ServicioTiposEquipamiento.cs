@@ -67,6 +67,7 @@ public class ServicioTiposEquipamiento
 
     public void Discontinuar(string nombre, string dniResponsable)
     {
+        ValidarResponsable(dniResponsable);
         ObtenerTipo(ObtenerCatalogo(), nombre).Discontinuar();
     }
 
