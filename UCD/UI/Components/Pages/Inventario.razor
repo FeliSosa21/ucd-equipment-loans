@@ -40,3 +40,43 @@
         </tbody>
     </table>
 </section>
+
+<section class="card table-card seccion-detalle" aria-label="Inventario por tipo de equipamiento">
+    <h2 class="titulo-seccion">Por tipo de equipamiento</h2>
+
+    @if (_porTipo.Count == 0)
+    {
+        <EstadoVacio Titulo="No hay tipos de equipamiento para mostrar"
+                     Mensaje="Cuando se registren tipos con unidades van a aparecer acá." />
+    }
+    else
+    {
+        <table>
+            <thead>
+            <tr>
+                <th>Tipo de equipamiento</th>
+                <th>Categoría</th>
+                <th class="numero">Disponibles</th>
+                <th class="numero">Prestadas</th>
+                <th class="numero">En mantenimiento</th>
+                <th class="numero">Dadas de baja</th>
+                <th class="numero">Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (CantidadesPorEstadoDto fila in _porTipo)
+            {
+                <tr>
+                    <td><strong>@fila.Nombre</strong></td>
+                    <td>@TextosVisibles.Categoria(fila.Categoria)</td>
+                    <td class="numero">@fila.Disponibles</td>
+                    <td class="numero">@fila.Prestadas</td>
+                    <td class="numero">@fila.EnMantenimiento</td>
+                    <td class="numero">@fila.DadasDeBaja</td>
+                    <td class="numero"><strong>@fila.Total</strong></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</section>
