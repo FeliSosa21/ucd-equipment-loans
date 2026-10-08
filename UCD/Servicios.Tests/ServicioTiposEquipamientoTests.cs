@@ -165,6 +165,30 @@ public class ServicioTiposEquipamientoTests
             servicio.Modificar("Camara Canon EOS", datos, DniSupervisor));
     }
 
+    [TestMethod]
+    public void Modificar_NombreDeOtroTipo_LanzaServicioException()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson", Categoria.Audiovisual);
+        TipoEquipamiento notebook = CrearTipo("Notebook Lenovo", Categoria.Computacion);
+        ServicioTiposEquipamiento servicio = CrearServicio(proyector, notebook);
+        DatosTipoEquipamientoDto datos = CrearDatos("notebook lenovo", "Audiovisual");
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Modificar("Proyector Epson", datos, DniSupervisor))
+    }
+
+    [TestMethod]
+    public void Modificar_MismoNombre_ActualizaLosDemasDatos()
+    {
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", "Audiovisual");
+
+        servicio.Modificar("Camara Canon EOS", datos, DniSupervisor);
+
+        Assert.AreEqual("Descripcion de prueba", servicio.Listar(null, null)[0].Descripcion);
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
