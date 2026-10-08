@@ -44,7 +44,7 @@
     <button type="button" class="btn btn-primary btn-sm" @onclick="AbrirAlta" disabled="@_mostrarFormulario">
         Nuevo tipo
     </button>
-    <input class="field busqueda" type="search" placeholder="Buscar por nombre" aria-label="Buscar por nombre"
+    <input class="field busqueda" type="search" placeholder="Buscar por nombre…" aria-label="Buscar por nombre"
            @bind="_busqueda" @bind:event="oninput" @bind:after="Filtrar" />
     <select class="field" aria-label="Categoría" @bind="_categoria" @bind:after="Filtrar">
         <option value="">Todas las categorías</option>

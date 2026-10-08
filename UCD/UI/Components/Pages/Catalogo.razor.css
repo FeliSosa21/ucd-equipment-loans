@@ -52,3 +52,7 @@ td.accion-fila {
 .toolbar {
     align-items: flex-end;
 }
+
+.toolbar .btn {
+    align-self: center;
+}

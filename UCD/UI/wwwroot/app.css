@@ -13,6 +13,7 @@
     --shadow-md: 0 6px 16px rgba(15, 23, 42, .08);
     --radius: 16px;
     --radius-sm: 12px;
+    color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,6 +29,7 @@
         --on-red: #0B1220;
         --shadow-sm: 0 1px 2px rgba(0, 0, 0, .4);
         --shadow-md: 0 6px 16px rgba(0, 0, 0, .45);
+        color-scheme: dark;
     }
 }
 
@@ -53,7 +55,7 @@ h1:focus { outline: none; }
     box-shadow: var(--shadow-sm);
 }
 
-.page-header { margin-bottom: 1.75rem; }
+.page-header { margin-bottom: 1.75rem; text-align: center; }
 .page-header h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -.02em; margin: 0 0 .3rem; }
 .page-header p { color: var(--ink-soft); font-size: .9rem; margin: 0; }
 @media (max-width: 640px) { .page-header h1 { font-size: 1.45rem; } }
@@ -162,3 +164,32 @@ th.numero,
 td.numero {
     text-align: right;
 }
+
+/* --- Ajustes de prolijidad (Web Interface Guidelines de Vercel) --- */
+
+/* La barra superior fija no tapa el elemento enfocado o el destino de un ancla */
+html { scroll-padding-top: 80px; }
+
+/* Titulos sin palabras sueltas en la ultima linea */
+h1, h2, h3 { text-wrap: balance; }
+
+/* Numeros alineados en columnas (cantidades, fechas, IDs) */
+table, .numero { font-variant-numeric: tabular-nums; }
+
+/* Sin demora de doble toque en pantallas tactiles ni resaltado gris al tocar */
+a, button, select, label, input[type="checkbox"] { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+/* Los desplegables nativos usan los colores del tema (sobre todo en modo oscuro) */
+select.field option { background: var(--surface); color: var(--ink); }
+
+/* Estado presionado y foco de teclado de los botones, con mas contraste que el reposo */
+.btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--navy-ring); border-color: var(--focus); }
+.btn-primary:active:not(:disabled) { background: var(--navy-ink); transform: translateY(1px); }
+.btn-ghost:active:not(:disabled) { background: var(--border-soft); transform: translateY(1px); }
+.btn { transition: background .15s ease, border-color .15s ease, box-shadow .15s ease, color .15s ease, transform .05s ease; }
+
+/* Los campos deshabilitados se distinguen de los editables */
+.field:disabled { background: var(--surface-2); color: var(--ink-soft); cursor: not-allowed; }
+
+/* Las casillas toman el color de la marca */
+input[type="checkbox"] { accent-color: var(--navy); width: 1rem; height: 1rem; }

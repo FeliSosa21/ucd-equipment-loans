@@ -1,0 +1,72 @@
+@implements IDisposable
+@inject SesionActual SesionActual
+
+@* Usuario logueado arriba a la derecha: nombre, tipo y circulo con iniciales.
+   Al hacer clic se abre un menu con las paginas de su cuenta y la opcion de salir. *@
+<div class="menu-usuario" @onkeydown="AlPresionarTecla">
+    <button type="button" class="disparador" @onclick="Alternar"
+            aria-haspopup="menu" aria-expanded="@(_abierto ? "true" : "false")">
+        <span class="usuario">
+            <strong>@SesionActual.Usuario!.Nombre</strong>
+            <small>@SesionActual.Usuario.Tipo</small>
+        </span>
+        <span class="avatar" aria-hidden="true">@Iniciales()</span>
+    </button>
+
+    @if (_abierto)
+    {
+        <div class="fondo" aria-hidden="true" @onclick="Cerrar"></div>
+        <div class="desplegable" role="menu">
+            @* Mientras deba cambiar la contrasena, solo se ofrece "Cambiar contraseña" (igual que el menu lateral). *@
+            @if (!SesionActual.Usuario.DebeCambiarContrasena)
+            {
+                <a class="opcion" role="menuitem" href="mis-datos" @onclick="Cerrar">Mis datos</a>
+            }
+            <a class="opcion" role="menuitem" href="cambiar-contrasena" @onclick="Cerrar">Cambiar contraseña</a>
+            <div class="separador" role="separator"></div>
+            <button type="button" class="opcion salir" role="menuitem" @onclick="Salir">Salir</button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public EventCallback OnSalir { get; set; }
+
+    private bool _abierto;
+
+    protected override void OnInitialized()
+    {
+        SesionActual.Cambio += StateHasChanged;
+    }
+
+    private void Alternar() => _abierto = !_abierto;
+
+    private void Cerrar() => _abierto = false;
+
+    private void AlPresionarTecla(KeyboardEventArgs tecla)
+    {
+        if (tecla.Key == "Escape")
+        {
+            Cerrar();
+        }
+    }
+
+    private async Task Salir()
+    {
+        Cerrar();
+        await OnSalir.InvokeAsync();
+    }
+
+    // Una letra por palabra del nombre, como maximo dos (por ejemplo "Sofia Silva" -> "SS").
+    private string Iniciales()
+    {
+        string[] palabras = SesionActual.Usuario!.Nombre.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        string iniciales = string.Concat(palabras.Take(2).Select(palabra => palabra[0]));
+        return iniciales.Length == 0 ? "?" : iniciales.ToUpperInvariant();
+    }
+
+    public void Dispose()
+    {
+        SesionActual.Cambio -= StateHasChanged;
+    }
+}

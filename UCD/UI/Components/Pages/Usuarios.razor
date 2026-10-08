@@ -13,7 +13,7 @@
 
 <div class="toolbar">
     <button class="btn btn-primary btn-sm" @onclick="AbrirAlta" disabled="@_mostrarAlta">Nuevo usuario</button>
-    <input class="field busqueda" type="search" placeholder="Buscar por nombre, CI o correo"
+    <input class="field busqueda" type="search" placeholder="Buscar por nombre, CI o correo…"
            aria-label="Buscar usuario"
            @bind="_busqueda" @bind:event="oninput" />
 </div>
@@ -25,7 +25,7 @@
             <div class="form-row">
                 <div>
                     <label class="lbl" for="alta-ci">Cédula de identidad</label>
-                    <input id="alta-ci" class="field mono" inputmode="numeric"
+                    <input id="alta-ci" class="field mono" inputmode="numeric" spellcheck="false"
                            @bind="_nuevo.Dni" @bind:event="oninput" />
                 </div>
                 <div>

@@ -11,11 +11,7 @@
     <div class="sesion">
         @if (SesionActual.EstaIniciada)
         {
-            <span class="usuario">
-                <strong>@SesionActual.Usuario!.Nombre</strong>
-                <small>@SesionActual.Usuario.Tipo</small>
-            </span>
-            <button class="btn btn-ghost btn-sm" @onclick="CerrarSesion">Salir</button>
+            <MenuUsuario OnSalir="CerrarSesion" />
         }
         else
         {

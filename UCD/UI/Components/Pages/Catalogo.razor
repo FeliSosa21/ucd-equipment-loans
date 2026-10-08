@@ -25,7 +25,7 @@
     </label>
     <label class="filtro">
         <span class="lbl">Al menos N disponibles</span>
-        <input class="field" type="number" min="0" placeholder="Cualquier cantidad"
+        <input class="field" type="number" min="0" placeholder="Cualquier cantidad…"
                @bind="_minimoDisponibles" @bind:event="oninput" @bind:after="Consultar" />
     </label>
     @if (_puedeFiltrarPorEstado)

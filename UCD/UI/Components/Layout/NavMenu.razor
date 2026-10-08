@@ -61,16 +61,6 @@
         <div class="nav-section">Administración</div>
         <NavLink class="nav-item" href="usuarios">Usuarios</NavLink>
     }
-
-    @if (SesionActual.EstaIniciada)
-    {
-        <div class="nav-section">Mi cuenta</div>
-        @if (!SesionActual.Usuario!.DebeCambiarContrasena)
-        {
-            <NavLink class="nav-item" href="mis-datos">Mis datos</NavLink>
-        }
-        <NavLink class="nav-item" href="cambiar-contrasena">Cambiar contraseña</NavLink>
-    }
 </nav>
 
 @code {
