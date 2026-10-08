@@ -12,12 +12,6 @@ tr.seleccionada td:first-child {
     margin: 0 0 .6rem;
 }
 
-/* Columnas numericas alineadas a la derecha para comparar cantidades */
-th.numero,
-td.numero {
-    text-align: right;
-}
-
 /* El color refuerza el numero: verde si se puede pedir, rojo si no */
 td.hay-disponibles {
     color: var(--green);

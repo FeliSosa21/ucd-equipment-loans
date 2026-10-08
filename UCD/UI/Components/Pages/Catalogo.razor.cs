@@ -15,15 +15,7 @@ public partial class Catalogo
     private string? _tipoSeleccionado;
     private List<UnidadFisicaDto> _unidades = new List<UnidadFisicaDto>();
 
-    // Clave: nombre del enum que espera el servicio. Valor: texto que ve el usuario.
-    private static readonly Dictionary<string, string> Categorias = new Dictionary<string, string>
-    {
-        { "Computacion", "Computación" },
-        { "Audiovisual", "Audiovisual" },
-        { "Laboratorio", "Laboratorio" },
-        { "Electronica", "Electrónica" },
-        { "Accesorios", "Accesorios" }
-    };
+
 
     protected override void OnInitialized()
     {
@@ -172,13 +164,4 @@ public partial class Catalogo
         return valor;
     }
 
-    private static string TextoDeCategoria(string categoria)
-    {
-        if (Categorias.ContainsKey(categoria))
-        {
-            return Categorias[categoria];
-        }
-
-        return categoria;
-    }
 }
