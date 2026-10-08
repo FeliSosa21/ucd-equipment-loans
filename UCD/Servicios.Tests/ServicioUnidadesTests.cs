@@ -262,6 +262,20 @@ public class ServicioUnidadesTests
 
         Assert.AreEqual("EnMantenimiento", servicio.Listar(null, null)[0].Estado);
     }
+
+    [TestMethod]
+    public void EnviarAMantenimiento_UnidadDadaDeBaja_LanzaServicioException()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        UnidadFisica unidad = CrearUnidad("PRY-0001");
+        unidad.DarDeBaja();
+        proyector.AgregarUnidad(unidad);
+        ServicioUnidades servicio = CrearServicio(proyector);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.EnviarAMantenimiento("PRY-0001", DniFuncionario));
+    }
+
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
