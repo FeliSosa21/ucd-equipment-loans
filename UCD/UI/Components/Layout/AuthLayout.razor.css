@@ -3,7 +3,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 2.5rem 1rem;
-    gap: 1.5rem;
+    padding: 3rem 1rem;
+    gap: 1.75rem;
+    background: radial-gradient(circle at top, var(--navy-soft), var(--bg) 55%);
 }
 .auth-body { width: 100%; max-width: 480px; }

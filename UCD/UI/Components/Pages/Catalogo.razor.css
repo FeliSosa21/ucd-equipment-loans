@@ -39,7 +39,7 @@ td.accion-fila {
     align-items: center;
     justify-content: space-between;
     gap: .75rem;
-    padding: .85rem .75rem .35rem;
+    padding: 1rem 1.25rem .5rem;
 }
 
 .panel-cabecera h2 {

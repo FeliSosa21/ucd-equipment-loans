@@ -1,7 +1,7 @@
 ﻿/* Titulo dentro de cada tarjeta: mas chico que el de la pagina y separado del borde */
 .titulo-seccion {
     margin: 0;
-    padding: .9rem .75rem .4rem;
+    padding: 1rem 1.25rem .5rem;
     font-size: 1rem;
     font-weight: 700;
 }
