@@ -152,6 +152,23 @@ public class DatosDeEjemplo
         Prestamo prestamo = new Prestamo(solicitante: solicitante, tipoEquipamiento: tipo,
             cantidadSolicitada: cantidad, fechaHoraPrestamo: _reloj.GetLocalNow().DateTime.AddDays(-haceDias));
         prestamo.Activar(tipo.UnidadesDisponibles().Take(cantidad).ToList());
+        GuardarConSusMovimientos(prestamo);
+    }
+
+    // Los mismos movimientos que deja ServicioPrestamo.Solicitar: la solicitud y un prestamo por unidad asignada.
+    private void GuardarConSusMovimientos(Prestamo prestamo)
+    {
         _prestamos.AgregarPrestamo(prestamo);
+        RegistrarMovimiento(prestamo, TipoMovimiento.Solicitud, unidad: null);
+        foreach (UnidadFisica unidad in prestamo.UnidadesAsignadas)
+        {
+            RegistrarMovimiento(prestamo, TipoMovimiento.Prestamo, unidad);
+        }
+    }
+
+    private void RegistrarMovimiento(Prestamo prestamo, TipoMovimiento tipo, UnidadFisica? unidad)
+    {
+        _movimientos.AgregarMovimiento(new Movimiento(fechaHora: prestamo.FechaHoraPrestamo, tipo: tipo,
+            solicitante: prestamo.Solicitante, evaluador: null, unidad: unidad));
     }
 }
