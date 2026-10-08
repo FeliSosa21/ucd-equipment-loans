@@ -87,6 +87,7 @@ public class ServicioTiposEquipamiento
 
     public void ModificarNombreCatalogo(string nombre, string dniResponsable)
     {
+        ValidarResponsable(dniResponsable);
         ObtenerCatalogo().ModificarNombre(nombre);
     }
 
