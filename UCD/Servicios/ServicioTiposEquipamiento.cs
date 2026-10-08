@@ -80,6 +80,11 @@ public class ServicioTiposEquipamiento
         }
     }
 
+    public string ObtenerNombreCatalogo()
+    {
+        return ObtenerCatalogo().Nombre;
+    }
+
     private Catalogo ObtenerCatalogo()
     {
         Catalogo? catalogo = _repositorioCatalogo.Obtener();
