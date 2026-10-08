@@ -180,6 +180,24 @@ public class DatosDeEjemploTests
             "Los movimientos de los datos de ejemplo no tienen evaluador");
     }
 
+    [TestMethod]
+    public void Cargar_ConCatalogo_DejaUnaSolicitudPendienteConSuMovimiento()
+    {
+        _datos.Cargar();
+
+        List<Prestamo> pendientes = _prestamos.ObtenerTodos()
+            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Solicitado).ToList();
+        Assert.AreEqual(1, pendientes.Count);
+        Prestamo pendiente = pendientes[0];
+        Assert.AreEqual(EstadoPrestamo.Solicitado, pendiente.Estado);
+        Assert.AreEqual(DatosDeEjemplo.CorreoDocente, pendiente.Solicitante.Correo);
+        Assert.AreEqual(DatosDeEjemplo.TipoConAprobacion, pendiente.TipoEquipamiento.Nombre);
+        Assert.AreEqual(1, pendiente.CantidadSolicitada);
+        CollectionAssert.AreEqual(
+            new List<(TipoMovimiento Tipo, string? Unidad)> { (TipoMovimiento.Solicitud, null) },
+            MovimientosDe(pendiente));
+    }
+
     private Prestamo ObtenerPrestamoActivoDe(string correo)
     {
         return _prestamos.ObtenerPrestamosActivos().Single(prestamo => prestamo.Solicitante.Correo == correo);
