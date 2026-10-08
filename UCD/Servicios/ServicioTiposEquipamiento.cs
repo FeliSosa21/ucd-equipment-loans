@@ -50,6 +50,7 @@ public class ServicioTiposEquipamiento
 
     public void Modificar(string nombreActual, DatosTipoEquipamientoDto datos, string dniResponsable)
     {
+        ValidarResponsable(dniResponsable);
         TipoEquipamiento tipo = ObtenerTipo(ObtenerCatalogo(), nombreActual);
         Categoria categoria = ObtenerCategoria(datos.Categoria);
         tipo.Modificar(datos.Nombre, datos.Descripcion, datos.DuracionMaxPrestamo, datos.RequiereAprobacion, categoria);
