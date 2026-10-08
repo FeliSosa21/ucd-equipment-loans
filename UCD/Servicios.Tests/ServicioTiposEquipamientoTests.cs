@@ -87,6 +87,15 @@ public class ServicioTiposEquipamientoTests
         Assert.AreEqual("Activo", tipos[0].Estado);
     }
 
+    [TestMethod]
+    public void Registrar_ResponsablesSinPermiso_LanzaServicioException()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", "Audiovisual");
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniSupervisor);
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
