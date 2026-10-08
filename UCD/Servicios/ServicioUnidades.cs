@@ -59,6 +59,12 @@ public class ServicioUnidades
         }
     }
 
+    public void Modificar(DatosUnidadDto datos, string dniResponsable)
+    {
+        UnidadFisica unidad = ObtenerUnidad(datos.IdInstitucional);
+        unidad.ModificarInfo(datos.UbicacionFisica, datos.NumeroSerie, datos.Observaciones);
+    }
+
     private static string Normalizar(string? texto)
     {
         if (texto is null)
@@ -116,6 +122,17 @@ public class ServicioUnidades
         }
 
         return null;
+    }
+
+    private UnidadFisica ObtenerUnidad(string idInstitucional)
+    {
+        UnidadFisica? unidad = BuscarUnidad(Normalizar(idInstitucional));
+        if (unidad is null)
+        {
+            throw new ServicioException("La unidad no existe");
+        }
+
+        return unidad;
     }
 
     private void ValidarIdDisponible(string idInstitucional)
