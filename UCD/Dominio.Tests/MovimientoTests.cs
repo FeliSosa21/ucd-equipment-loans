@@ -97,6 +97,15 @@ public sealed class MovimientoTests
     }
 
     [TestMethod]
+    public void Constructor_AprobacionSinEvaluador_LanzaExcepcion()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() =>
+            CrearMovimiento(tipo: TipoMovimiento.Aprobacion, evaluador: null));
+
+        Assert.AreEqual("La aprobacion debe tener un evaluador", excepcion.Message);
+    }
+
+    [TestMethod]
     [DataRow(0)]
     [DataRow(99)]
     public void Constructor_TipoInexistente_LanzaExcepcion(int valorInvalido)
