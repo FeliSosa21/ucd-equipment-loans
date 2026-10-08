@@ -115,6 +115,16 @@ public class ServicioTiposEquipamientoTests
         Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniSupervisor));
     }
 
+    [DataTestMethod]
+    [DataRow("Muebles")]
+    [DataRow("9")]
+    public void Registrar_CategoriaInexistente_LanzaServicioException(string categoria)
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", categoria);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniSupervisor));
+    }
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
