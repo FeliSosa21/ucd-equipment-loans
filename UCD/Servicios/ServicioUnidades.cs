@@ -61,11 +61,20 @@ public class ServicioUnidades
 
     public void Modificar(DatosUnidadDto datos, string dniResponsable)
     {
+        ArgumentNullException.ThrowIfNull(datos);
         ValidarResponsable(dniResponsable);
         UnidadFisica unidad = ObtenerUnidad(datos.IdInstitucional);
         string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
         ValidarSerieDisponible(numeroSerie, unidad);
-        unidad.ModificarInfo(datos.UbicacionFisica, numeroSerie, datos.Observaciones);
+        try
+        {
+            unidad.ModificarInfo(Normalizar(datos.UbicacionFisica), numeroSerie,
+                NormalizarOpcional(datos.Observaciones));
+        }
+        catch (DominioException ex)
+        {
+            throw new ServicioException(ex.Message, ex);
+        }
     }
 
     private static string Normalizar(string? texto)
