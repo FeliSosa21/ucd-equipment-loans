@@ -85,6 +85,11 @@ public class ServicioTiposEquipamiento
         return ObtenerCatalogo().Nombre;
     }
 
+    public void ModificarNombreCatalogo(string nombre, string dniResponsable)
+    {
+        ObtenerCatalogo().ModificarNombre(nombre);
+    }
+
     private Catalogo ObtenerCatalogo()
     {
         Catalogo? catalogo = _repositorioCatalogo.Obtener();
