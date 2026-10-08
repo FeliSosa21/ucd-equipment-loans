@@ -206,6 +206,15 @@ public class ServicioUnidadesTests
             servicio.Modificar(CrearEdicion("PRY-0001", null), DniDocente));
     }
 
+    [TestMethod]
+    public void Modificar_UnidadInexistente_LanzaServicioException()
+    {
+        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Modificar(CrearEdicion("PRY-0001", null), DniFuncionario));
+    }
+
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
