@@ -40,6 +40,20 @@ public class ServicioInventarioTests
         Assert.AreEqual(0, resultado.Count);
     }
 
+    [TestMethod]
+    public void ContarPorTipo_FiltroPorCategoria_DevuelveSoloEsaCategoria()
+    {
+        TipoEquipamiento proyector = CrearTipo(nombre: "Proyector", categoria: Categoria.Audiovisual);
+        TipoEquipamiento notebook = CrearTipo(nombre: "Notebook", categoria: Categoria.Computacion);
+        ServicioInventario servicio = CrearServicio(proyector, notebook);
+        FiltroInventarioDto filtro = new FiltroInventarioDto { Categoria = "Computacion" };
+
+        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorTipo(filtro);
+
+        Assert.AreEqual(1, resultado.Count);
+        Assert.AreEqual("Notebook", resultado[0].Nombre);
+    }
+
     private static ServicioInventario CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
