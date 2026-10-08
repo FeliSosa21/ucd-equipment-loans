@@ -33,6 +33,21 @@ public class ServicioUnidadesTests
         Assert.AreEqual("Pantalla rayada", unidades[1].Observaciones);
     }
 
+    [TestMethod]
+    public void Listar_FiltroPorTiempo_DevuelveSoloLasDeEseTipo()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        proyector.AgregarUnidad(CrearUnidad("PRY-0001"));
+        TipoEquipamiento notebook = CrearTipo("Notebook Lenovo");
+        notebook.AgregarUnidad(CrearUnidad("NTB-0001"));
+        ServicioUnidades servicio = CrearServicio(proyector, notebook);
+
+        List<UnidadDetalleDto> unidades = servicio.Listar("Notebook Lenovo", null);
+
+        Assert.AreEqual(1, unidades.Count);
+        Assert.AreEqual("NTB-0001", unidades[0].IdInstitucional);
+    }
+
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
@@ -62,5 +77,10 @@ public class ServicioUnidadesTests
     private static TipoEquipamiento CrearTipo(string nombre)
     {
         return new TipoEquipamiento(nombre, "Descripcion", 3, false, Categoria.Audiovisual);
+    }
+
+    private static UnidadFisica CrearUnidad(string idInstitucional)
+    {
+        return new UnidadFisica(idInstitucional, "Deposito A", null);
     }
 }
