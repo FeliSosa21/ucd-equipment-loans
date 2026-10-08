@@ -99,6 +99,18 @@ public class ServicioUnidadesTests
             servicio.Registrar(CrearDatos("Proyector Epson", "PRY-0001", null), DniFuncionario));
     }
 
+    [TestMethod]
+    public void Registrar_IdRepetidosEnOtroTipo_LanzaServicioException()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        proyector.AgregarUnidad(CrearUnidad("EQP-0001"));
+        TipoEquipamiento notebook = CrearTipo("Notebook Lenovo");
+        ServicioUnidades servicio = CrearServicio(proyector, notebook);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Registrar(CrearDatos("Notebook Lenovo", "EQP-0001", null), DniFuncionario));
+    }
+
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
