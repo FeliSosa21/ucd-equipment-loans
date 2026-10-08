@@ -327,6 +327,18 @@ public class ServicioUnidadesTests
         Assert.ThrowsException<ServicioException>(() => servicio.DarDeBaja("PRY-0001", DniFuncionario));
     }
 
+    [TestMethod]
+    public void CambiosDeEstado_ResponsableSinPermiso_LanzanServicioException()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        proyector.AgregarUnidad(CrearUnidad("PRY-0001"));
+        ServicioUnidades servicio = CrearServicio(proyector);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.EnviarAMantenimiento("PRY-0001", DniDocente));
+        Assert.ThrowsException<ServicioException>(() => servicio.VolverADisponible("PRY-0001", DniDocente));
+        Assert.ThrowsException<ServicioException>(() => servicio.DarDeBaja("PRY-0001", DniDocente));
+    }
+
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
