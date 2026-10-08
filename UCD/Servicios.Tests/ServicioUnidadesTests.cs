@@ -308,11 +308,11 @@ public class ServicioUnidadesTests
     {
         TipoEquipamiento proyector = CrearTipo("Proyector Epson");
         proyector.AgregarUnidad(CrearUnidad("PRY-0001"));
-        ServicioUnidades servicio  = CrearServicio(proyector);
+        ServicioUnidades servicio = CrearServicio(proyector);
 
         servicio.DarDeBaja("PRY-0001", DniFuncionario);
 
-        Assert.AreEqual("DarDeBaja", servicio.Listar(null, null)[0].Estado);
+        Assert.AreEqual("DadaDeBaja", servicio.Listar(null, null)[0].Estado);
     }
 
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)

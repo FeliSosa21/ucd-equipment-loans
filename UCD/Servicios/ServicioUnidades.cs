@@ -105,6 +105,12 @@ public class ServicioUnidades
         unidad.Disponible();
     }
 
+    public void DarDeBaja(string idInstitucional, string dniResponsable)
+    {
+        ValidarResponsable(dniResponsable);
+        ObtenerUnidad(idInstitucional).DarDeBaja();
+    }
+
     private static string Normalizar(string? texto)
     {
         if (texto is null)
