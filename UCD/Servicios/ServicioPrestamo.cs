@@ -61,6 +61,17 @@ public class ServicioPrestamo
                 solicitante: prestamo.Solicitante,
                 evaluador: null,
                 unidad: null));
+
+            if (prestamo.Estado == EstadoPrestamo.Rechazado)
+            {
+                _movimientos.AgregarMovimiento(new Movimiento(
+                    fechaHora: prestamo.FechaHoraPrestamo,
+                    tipo: TipoMovimiento.Rechazo,
+                    solicitante: prestamo.Solicitante,
+                    evaluador: null,
+                    unidad: null));
+            }
+
             RegistrarMovimientos(prestamo, prestamo.FechaHoraPrestamo);
 
             return CrearPrestamoDto(prestamo);
