@@ -268,6 +268,42 @@ public class ServicioTiposEquipamientoTests
         Assert.ThrowsException<ServicioException>(() => servicio.ModificarNombreCatalogo("AB", DniSupervisor));
     }
 
+    [TestMethod]
+    public void Registrar_TextosConEspacios_LosGuardaRecortados()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+        DatosTipoEquipamientoDto datos = CrearDatos("  Camara Canon EOS  ", "Audiovisual");
+        datos.Descripcion = "  Camara reflex  ";
+
+        servicio.Registrar(datos, DniSupervisor);
+
+        TipoEquipamientoDetalleDto tipo = servicio.Listar(null, null)[0];
+        Assert.AreEqual("Camara Canon EOS", tipo.Nombre);
+        Assert.AreEqual("Camara reflex", tipo.Descripcion);
+    }
+
+    [TestMethod]
+    public void Modificar_NombreConEspacios_LoGuardaRecortado()
+    {
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+        DatosTipoEquipamientoDto datos = CrearDatos("  Camara Canon EOS R  ", "Audiovisual");
+
+        servicio.Modificar("Camara Canon EOS", datos, DniSupervisor);
+
+        Assert.AreEqual("Camara Canon EOS R", servicio.Listar(null, null)[0].Nombre);
+    }
+
+    [TestMethod]
+    public void ModificarNombreCatalogo_NombreConEspacios_LoGuardaRecortado()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+
+        servicio.ModificarNombreCatalogo("  Centro ORT  ", DniSupervisor);
+
+        Assert.AreEqual("Centro ORT", servicio.ObtenerNombreCatalogo());
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
