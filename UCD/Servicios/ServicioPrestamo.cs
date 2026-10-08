@@ -121,6 +121,7 @@ public class ServicioPrestamo
 
         try
         {
+            prestamo.Rechazar(evaluador, motivo);
             RegistrarMovimiento(prestamo, TipoMovimiento.Rechazo, _reloj.GetLocalNow().DateTime, unidad: null);
 
             return CrearPrestamoDto(prestamo);
