@@ -29,7 +29,7 @@ public sealed class MovimientoTests
     [DataRow(TipoMovimiento.Aprobacion)]
     public void Constructor_MovimientoDeUnidad_ConservaElTipo(TipoMovimiento tipo)
     {
-        Movimiento movimiento = CrearMovimiento(tipo: tipo);
+        Movimiento movimiento = CrearMovimiento(tipo: tipo, evaluador: CrearEvaluador());
 
         Assert.AreEqual(tipo, movimiento.Tipo);
     }

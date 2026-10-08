@@ -1,6 +1,6 @@
 namespace Dominio;
 
-// Registro historico del req. 10: un movimiento por unidad para prestamo, aprobacion y devolucion; solicitud y rechazo, sin unidad. No se modifica ni se elimina.
+// Registro historico del req. 10: un movimiento por unidad para prestamo, aprobacion y devolucion; solicitud y rechazo, sin unidad. La aprobacion lleva evaluador. No se modifica ni se elimina.
 public class Movimiento
 {
     public DateTime FechaHora { get; }
@@ -15,6 +15,7 @@ public class Movimiento
         ValidarTipo(tipo);
         ValidarSolicitante(solicitante);
         ValidarUnidad(tipo, unidad);
+        ValidarEvaluador(tipo, evaluador);
 
         FechaHora = fechaHora;
         Tipo = tipo;
@@ -52,6 +53,14 @@ public class Movimiento
         if (!requiereUnidad && unidad is not null)
         {
             throw new DominioException("La solicitud y el rechazo no llevan unidad");
+        }
+    }
+
+    private static void ValidarEvaluador(TipoMovimiento tipo, Usuario? evaluador)
+    {
+        if (tipo == TipoMovimiento.Aprobacion && evaluador is null)
+        {
+            throw new DominioException("La aprobacion debe tener un evaluador");
         }
     }
 }
