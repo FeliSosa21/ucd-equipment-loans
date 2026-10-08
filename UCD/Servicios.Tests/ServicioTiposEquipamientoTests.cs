@@ -212,6 +212,16 @@ public class ServicioTiposEquipamientoTests
         Assert.AreEqual("Discontinuado", servicio.Listar(null, null)[0].Estado);
     }
 
+    [TestMethod]
+    public void Discontinuar_ResponsableSinPermiso_LanzaServicioException()
+    {
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Discontinuar("Camara Canon EOS", DniFuncionario));
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
