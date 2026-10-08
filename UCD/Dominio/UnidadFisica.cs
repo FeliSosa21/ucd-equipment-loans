@@ -64,9 +64,9 @@ public class UnidadFisica
 
     public void AMantenimiento()
     {
-        if (Estado != EstadoUnidadFisica.Prestada)
+        if (Estado != EstadoUnidadFisica.Disponible && Estado != EstadoUnidadFisica.Prestada)
         {
-            throw new DominioException("La unidad debe estar prestada para pasar a mantenimiento");
+            throw new DominioException("La unidad debe estar disponible o prestada para pasar a mantenimiento");
         }
 
         Estado = EstadoUnidadFisica.EnMantenimiento;
@@ -136,6 +136,6 @@ public class UnidadFisica
             throw new DominioException($"Las observaciones no pueden tener mas de {LargoMaxObservaciones} caracteres");
         }
     }
-    
+
 }
 

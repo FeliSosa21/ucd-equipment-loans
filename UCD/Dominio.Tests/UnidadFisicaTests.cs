@@ -142,14 +142,6 @@ public sealed class UnidadFisicaTests
     }
 
     [TestMethod]
-    public void AMantenimiento_UnidadNoPrestada_LanzaDominioException()
-    {
-        var unidad = CrearUnidad();
-
-        Assert.ThrowsException<DominioException>(() => unidad.AMantenimiento());
-    }
-
-    [TestMethod]
     public void DarDeBaja_UnidadDisponible_CambiaEstadoADadaDeBaja()
     {
         var unidad = CrearUnidad();
@@ -188,7 +180,7 @@ public sealed class UnidadFisicaTests
     public void Constructor_NumSerieMuyLargo_LanzaDominioException()
     {
         var numSerie = new string('A', 51);
-        
+
         Assert.ThrowsException<DominioException>(() => CrearUnidad(numSerie: numSerie));
     }
 
@@ -198,7 +190,7 @@ public sealed class UnidadFisicaTests
         var unidad = CrearUnidad();
         var ubiFisica = "Laboratorio Prueba";
         var observaciones = new string('B', 301);
-        
+
         Assert.ThrowsException<DominioException>(() => unidad.ModificarInfo(ubiFisica, "PF3A7X21", observaciones));
     }
 
@@ -208,9 +200,9 @@ public sealed class UnidadFisicaTests
         var unidad = CrearUnidad();
         var ubiFisica = "Laboratorio Prueba";
         unidad.ModificarInfo(ubiFisica, "PF3A7X21", "Pantalla rayada");
-        
+
         unidad.ModificarInfo(ubiFisica, "PF3A7X21", null);
-        
+
         Assert.IsNull(unidad.Observaciones);
     }
 
@@ -220,7 +212,7 @@ public sealed class UnidadFisicaTests
         var unidad = CrearUnidad();
         var numSerieNuevo = "PF5A7J22";
         unidad.ModificarInfo("Laboratorio Prueba", numSerieNuevo, null);
-        
+
         Assert.AreEqual(numSerieNuevo, unidad.NumSerie);
     }
 
@@ -244,7 +236,36 @@ public sealed class UnidadFisicaTests
 
         Assert.AreEqual("Laboratorio Viejo", unidad.UbiFisica);
     }
-    
+
+    [TestMethod]
+    public void AMantenimiento_UnidadDisponible_CambiaEstadoAEnMantenimiento()
+    {
+        var unidad = CrearUnidad();
+
+        unidad.AMantenimiento();
+
+        Assert.AreEqual(EstadoUnidadFisica.EnMantenimiento, unidad.Estado);
+    }
+
+    [TestMethod]
+    public void AMantenimiento_UnidadYaEnMantenimiento_LanzaDominioException()
+    {
+        var unidad = CrearUnidad();
+        unidad.Prestada();
+        unidad.AMantenimiento();
+
+        Assert.ThrowsException<DominioException>(() => unidad.AMantenimiento());
+    }
+
+    [TestMethod]
+    public void AMantenimiento_UnidadDadaDeBaja_LanzaDominioException()
+    {
+        var unidad = CrearUnidad();
+        unidad.DarDeBaja();
+
+        Assert.ThrowsException<DominioException>(() => unidad.AMantenimiento());
+    }
+
     private static UnidadFisica CrearUnidad(
         string idInstitucional = "EQP-0042",
         string ubiFisica = "Laboratorio Prueba",
