@@ -589,6 +589,34 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_SinUnidadesSuficientes_RegistraUnMovimientoDeRechazo()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos =
+            CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacionSinUnidades, cantidadSolicitada: 1);
+        Guid idPrestamo = servicio.Solicitar(datos, DniDocente).Id;
+        ServicioPrestamo servicioDeLaEvaluacion =
+            CrearServicioConReloj(memoria, new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
+        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
+            movimientos.Select(movimiento => movimiento.Tipo).ToList(),
+            "Deberia registrarse la solicitud y despues el rechazo del sistema");
+        Movimiento rechazo =
+            movimientos.Single(movimiento => movimiento.Tipo == TipoMovimiento.Rechazo);
+        Assert.AreEqual(FechaDeEvaluacion, rechazo.FechaHora);
+        Assert.AreSame(docente, rechazo.Solicitante);
+        Assert.IsNull(rechazo.Evaluador, "El rechazo por falta de unidades lo decide el sistema, sin evaluador");
+        Assert.IsNull(rechazo.Unidad);
+    }
+
+    [TestMethod]
     public void Aprobar_UnidadesInsuficientesPeroNoCero_QuedaRechazadoSinEvaluador()
     {
         Memoria memoria = new Memoria();
