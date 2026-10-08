@@ -18,6 +18,7 @@ public class ServicioInventario
 
     public List<CantidadesPorEstadoDto> ContarPorTipo(FiltroInventarioDto filtro)
     {
+        ArgumentNullException.ThrowIfNull(filtro);
         List<CantidadesPorEstadoDto> filas = new List<CantidadesPorEstadoDto>();
         foreach (TipoEquipamiento tipo in ObtenerTipos())
         {
