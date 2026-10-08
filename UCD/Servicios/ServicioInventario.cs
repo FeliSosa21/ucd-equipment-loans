@@ -36,6 +36,11 @@ public class ServicioInventario
         return filas;
     }
 
+    public List<CantidadesPorEstadoDto> ContarPorCategoria()
+    {
+        return new List<CantidadesPorEstadoDto>();
+    }
+
     private static CantidadesPorEstadoDto CrearFilaDeTipo(TipoEquipamiento tipo)
     {
         return new CantidadesPorEstadoDto

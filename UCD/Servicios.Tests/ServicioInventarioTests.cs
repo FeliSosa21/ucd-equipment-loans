@@ -72,6 +72,30 @@ public class ServicioInventarioTests
         Assert.AreEqual(1, resultado[0].Disponibles);
     }
 
+    [TestMethod]
+    public void ContarPorCategoria_VariosTiposDeLaMismaCategoria_SumaSusUnidades()
+    {
+        TipoEquipamiento notebook = CrearTipo(nombre: "Notebook", categoria: Categoria.Computacion);
+        notebook.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0001"));
+        notebook.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0002", estado: EstadoUnidadFisica.Prestada));
+        TipoEquipamiento tablet = CrearTipo(nombre: "Tablet", categoria: Categoria.Computacion);
+        tablet.AgregarUnidad(CrearUnidad(idInstitucional: "TAB-0001", estado: EstadoUnidadFisica.DadaDeBaja));
+        TipoEquipamiento proyector = CrearTipo(nombre: "Proyector", categoria: Categoria.Audiovisual);
+        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
+        ServicioInventario servicio = CrearServicio(notebook, proyector, tablet);
+
+        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorCategoria();
+
+        Assert.AreEqual(5, resultado.Count);
+        CantidadesPorEstadoDto computacion = resultado[0];
+        Assert.AreEqual("Computacion", computacion.Nombre);
+        Assert.AreEqual(1, computacion.Disponibles);
+        Assert.AreEqual(1,computacion.Prestadas);
+        Assert.AreEqual(1, computacion.DadasDeBaja);
+        Assert.AreEqual(3, computacion.Total);
+        Assert.AreEqual(1, resultado[1].Total);
+    }
+
     private static ServicioInventario CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
