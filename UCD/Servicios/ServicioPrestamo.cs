@@ -97,6 +97,13 @@ public class ServicioPrestamo
             if (prestamo.TipoEquipamiento.CantidadDisponibles() < prestamo.CantidadSolicitada)
             {
                 prestamo.RechazarPorFaltaDeUnidades();
+
+                _movimientos.AgregarMovimiento(new Movimiento(
+                    fechaHora: fechaHoraEvaluacion,
+                    tipo: TipoMovimiento.Rechazo,
+                    solicitante: prestamo.Solicitante,
+                    evaluador: null,
+                    unidad: null));
             }
             else
             {
