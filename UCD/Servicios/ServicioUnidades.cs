@@ -80,7 +80,16 @@ public class ServicioUnidades
     public void EnviarAMantenimiento(string idInstitucional, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        ObtenerUnidad(idInstitucional).AMantenimiento();
+        UnidadFisica unidad = ObtenerUnidad(idInstitucional);
+
+        try
+        {
+            unidad.AMantenimiento();
+        }
+        catch (DominioException ex)
+        {
+            throw new ServicioException(ex.Message, ex);
+        }
     }
 
     private static string Normalizar(string? texto)
