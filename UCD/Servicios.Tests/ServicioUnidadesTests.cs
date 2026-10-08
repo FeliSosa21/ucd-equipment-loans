@@ -81,6 +81,16 @@ public class ServicioUnidadesTests
         Assert.AreEqual("Disponible", unidades[0].Estado);
     }
 
+    [TestMethod]
+    public void Registrar_ResponsablesSinPermiso_LanzaServicioException()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        ServicioUnidades servicio = CrearServicio(proyector);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Registrar(CrearDatos("Proyector Epson", "PRY-0001", null), DniDocente));
+    }
+
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
@@ -117,20 +127,14 @@ public class ServicioUnidadesTests
         return new UnidadFisica(idInstitucional, "Deposito A", null);
     }
 
-    [TestMethod]
-    public void Registrar_DatosValidos_LaAgregaDisponible()
+    private static DatosUnidadDto CrearDatos(string nombreTipo, string idInstitucional, string? numeroSerie)
     {
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
-        ServicioUnidades servicio = CrearServicio(proyector);
-
-        servicio.Registrar(CrearDatos("Proyector Epson", "PRY-0001", "SN123"), DniFuncionario);
-
-        List<UnidadDetalleDto> unidades = servicio.Listar(null, null);
-        Assert.AreEqual(1, unidades.Count);
-        Assert.AreEqual("PRY-0001", unidades[0].IdInstitucional);
-        Assert.AreEqual("Proyector Epson", unidades[0].Tipo);
-        Assert.AreEqual("Deposito A", unidades[0].UbicacionFisica);
-        Assert.AreEqual("SN123", unidades[0].NumeroSerie);
-        Assert.AreEqual("Disponible", unidades[0].Estado);
+        return new DatosUnidadDto
+        {
+            NombreTipo = nombreTipo,
+            IdInstitucional = idInstitucional,
+            UbicacionFisica = "Deposito A",
+            NumeroSerie = numeroSerie
+        };
     }
 }
