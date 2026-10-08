@@ -142,6 +142,12 @@ public class ServicioPrestamo
         try
         {
             prestamo.Rechazar(evaluador, motivo);
+            _movimientos.AgregarMovimiento(new Movimiento(
+                fechaHora: _reloj.GetLocalNow().DateTime,
+                tipo: TipoMovimiento.Rechazo,
+                solicitante: prestamo.Solicitante,
+                evaluador: evaluador,
+                unidad: null));
 
             return CrearPrestamoDto(prestamo);
         }
