@@ -92,6 +92,12 @@ public class ServicioUnidades
         }
     }
 
+    public void VolverADisponible(string idInstitucional, string dniResponsable)
+    {
+        ValidarResponsable(dniResponsable);
+        ObtenerUnidad(idInstitucional).Disponible();
+    }
+
     private static string Normalizar(string? texto)
     {
         if (texto is null)
