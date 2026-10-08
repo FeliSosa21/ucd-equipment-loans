@@ -44,6 +44,7 @@ public class ServicioUnidades
         ValidarResponsable(dniResponsable);
         TipoEquipamiento tipo = ObtenerTipo(datos.NombreTipo);
         ValidarIdDisponible(datos.IdInstitucional);
+        ValidarSerieDisponible(datos.NumeroSerie);
         UnidadFisica unidad = new UnidadFisica(datos.IdInstitucional, datos.UbicacionFisica, datos.NumeroSerie);
         tipo.AgregarUnidad(unidad);
     }
@@ -91,6 +92,25 @@ public class ServicioUnidades
         if (BuscarUnidad(idInstitucional) is not null)
         {
             throw new ServicioException("Ya existe una unidad con ese id institucional");
+        }
+    }
+
+    private void ValidarSerieDisponible(string? numeroSerie)
+    {
+        if (string.IsNullOrWhiteSpace(numeroSerie))
+        {
+            return;
+        }
+
+        foreach (TipoEquipamiento tipo in ObtenerCatalogo().Tipos)
+        {
+            foreach (UnidadFisica unidad in tipo.Unidades)
+            {
+                if (string.Equals(unidad.NumSerie, numeroSerie, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new ServicioException("Ya existe una unidad con ese numero de serie");
+                }
+            }
         }
     }
 
