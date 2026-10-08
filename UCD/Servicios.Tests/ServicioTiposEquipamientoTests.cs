@@ -260,6 +260,14 @@ public class ServicioTiposEquipamientoTests
             servicio.ModificarNombreCatalogo("Centro de Equipamiento ORT", DniFuncionario));
     }
 
+    [TestMethod]
+    public void ModificarNombreCatalogo_NombreMuyCorto_LanzaServicioException()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ModificarNombreCatalogo("AB", DniSupervisor));
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
