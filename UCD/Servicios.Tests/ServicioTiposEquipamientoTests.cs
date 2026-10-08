@@ -8,6 +8,9 @@ namespace Servicios.Tests;
 [TestClass]
 public class ServicioTiposEquipamientoTests
 {
+    private const string DniSupervisor = "12345672";
+    private const string DniFuncionario = "45678905";
+
     [TestMethod]
     public void Listar_SinFiltros_DevuelveTodosConSusDatos()
     {
@@ -66,6 +69,24 @@ public class ServicioTiposEquipamientoTests
         Assert.AreEqual("Notebook Lenovo", tipos[0].Nombre);
     }
 
+    [TestMethod]
+    public void Registrar_DatosValidos_LoAgregaActivo()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", "Audiovisual");
+
+        servicio.Registrar(datos, DniSupervisor);
+
+        List<TipoEquipamientoDetalleDto> tipos = servicio.Listar(null, null);
+        Assert.AreEqual(1, tipos.Count);
+        Assert.AreEqual("Camara Canon EOS", tipos[0].Nombre);
+        Assert.AreEqual("Descripcion de prueba", tipos[0].Descripcion);
+        Assert.AreEqual(4, tipos[0].DuracionMaxPrestamo);
+        Assert.IsTrue(tipos[0].RequiereAprobacion);
+        Assert.AreEqual("Audiovisual", tipos[0].Categoria);
+        Assert.AreEqual("Activo", tipos[0].Estado);
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
@@ -77,7 +98,31 @@ public class ServicioTiposEquipamientoTests
         }
 
         repositorioCatalogo.Guardar(catalogo);
-        return new ServicioTiposEquipamiento(repositorioCatalogo, new RepositorioUsuario(memoria));
+
+        RepositorioUsuario repositorioUsuario = new RepositorioUsuario(memoria);
+        repositorioUsuario.AgregarUsuario(CrearUsuario(DniSupervisor, "supervisor@ucd.edu.uy", TipoUsuario.Supervisor));
+        repositorioUsuario.AgregarUsuario(CrearUsuario(DniFuncionario, "funcionario@ucd.edu.uy",
+            TipoUsuario.FuncionarioCE));
+        return new ServicioTiposEquipamiento(repositorioCatalogo, repositorioUsuario);
+    }
+
+    private static Usuario CrearUsuario(string dni, string correo, TipoUsuario tipo)
+    {
+        Usuario usuario = new Usuario(dni, "Nombre", "Apellido", correo, "VivaLaOrt2026");
+        usuario.AsignarTipo(tipo);
+        return usuario;
+    }
+
+    private static DatosTipoEquipamientoDto CrearDatos(string nombre, string categoria)
+    {
+        return new DatosTipoEquipamientoDto
+        {
+            Nombre = nombre,
+            Descripcion = "Descripcion de prueba",
+            DuracionMaxPrestamo = 4,
+            RequiereAprobacion = true,
+            Categoria = categoria
+        };
     }
 
     private static TipoEquipamiento CrearTipo(string nombre, Categoria categoria)
