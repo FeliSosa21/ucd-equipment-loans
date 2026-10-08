@@ -92,6 +92,8 @@ public class ServicioPrestamo
 
         try
         {
+            DateTime fechaHoraEvaluacion = _reloj.GetLocalNow().DateTime;
+
             if (prestamo.TipoEquipamiento.CantidadDisponibles() < prestamo.CantidadSolicitada)
             {
                 prestamo.RechazarPorFaltaDeUnidades();
@@ -101,8 +103,19 @@ public class ServicioPrestamo
                 List<UnidadFisica> unidades = prestamo.TipoEquipamiento.UnidadesDisponibles()
                     .Take(prestamo.CantidadSolicitada).ToList();
                 prestamo.Aprobar(evaluador, unidades);
+
+                foreach (UnidadFisica unidad in prestamo.UnidadesAsignadas)
+                {
+                    _movimientos.AgregarMovimiento(new Movimiento(
+                        fechaHora: fechaHoraEvaluacion,
+                        tipo: TipoMovimiento.Aprobacion,
+                        solicitante: prestamo.Solicitante,
+                        evaluador: evaluador,
+                        unidad: unidad));
+                }
+
                 prestamo.Realizar();
-                RegistrarMovimientos(prestamo, _reloj.GetLocalNow().DateTime);
+                RegistrarMovimientos(prestamo, fechaHoraEvaluacion);
             }
 
             return CrearPrestamoDto(prestamo);
