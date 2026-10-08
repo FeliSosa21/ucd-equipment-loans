@@ -188,6 +188,29 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_TipoSinAprobacionConUnidades_RegistraUnaSolicitudYUnPrestamoPorUnidad()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud();
+
+        servicio.Solicitar(datos, DniDocente);
+
+        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Prestamo, TipoMovimiento.Prestamo },
+            movimientos.Select(movimiento => movimiento.Tipo).ToList(),
+            "La solicitud deberia registrarse antes que los prestamos");
+        Assert.AreEqual(FechaFija, movimientos[0].FechaHora);
+        Assert.IsNull(movimientos[0].Evaluador);
+        Assert.IsNull(movimientos[0].Unidad);
+        CollectionAssert.AreEqual(
+            new List<string> { "EQP-0001", "EQP-0002" },
+            movimientos.Skip(1).Select(movimiento => movimiento.Unidad!.IdInstitucional).ToList());
+    }
+
+    [TestMethod]
     public void Solicitar_TipoSinAprobacionSinUnidadesSuficientes_QuedaRechazadoConMotivo()
     {
         Memoria memoria = new Memoria();
