@@ -18,8 +18,13 @@ public class ServicioInventario
 
     public List<CantidadesPorEstadoDto> ContarPorTipo(FiltroInventarioDto filtro)
     {
-        Catalogo catalogo = _repositorioCatalogo.Obtener();
         List<CantidadesPorEstadoDto> filas = new List<CantidadesPorEstadoDto>();
+        Catalogo? catalogo = _repositorioCatalogo.Obtener();
+        if (catalogo is null)
+        {
+            return filas;
+        }
+
         foreach (TipoEquipamiento tipo in catalogo.Tipos)
         {
             filas.Add(CrearFilaDeTipo(tipo));
