@@ -4,7 +4,8 @@ using Dominio;
 namespace Servicios;
 
 // Datos de ejemplo para probar la aplicacion y para la demo: un usuario de cada tipo, tipos con y sin
-// aprobacion, unidades en distintos estados y dos prestamos activos para probar las devoluciones.
+// aprobacion, unidades en distintos estados, dos prestamos activos para probar las devoluciones y una
+// solicitud pendiente para probar las aprobaciones. Cada prestamo deja los movimientos de ServicioPrestamo.Solicitar.
 public class DatosDeEjemplo
 {
     public const string ContrasenaEjemplo = ServicioAdministracionUsuarios.ContrasenaPredeterminada;
@@ -86,10 +87,12 @@ public class DatosDeEjemplo
 
     private void CargarPrestamos(Catalogo catalogo)
     {
-        CrearPrestamoActivo(_usuarios.ObtenerUsuarioPorCorreo(CorreoDocente)!,
-            catalogo.BuscarTipoPorNombre("Notebook")!, cantidad: 2, haceDias: 2);
+        Usuario docente = _usuarios.ObtenerUsuarioPorCorreo(CorreoDocente)!;
+        CrearPrestamoActivo(docente, catalogo.BuscarTipoPorNombre("Notebook")!, cantidad: 2, haceDias: 2);
         CrearPrestamoActivo(_usuarios.ObtenerUsuarioPorCorreo(CorreoEstudiante)!,
             catalogo.BuscarTipoPorNombre("Proyector")!, cantidad: 1, haceDias: 1);
+        CrearSolicitudPendiente(docente, catalogo.BuscarTipoPorNombre(TipoConAprobacion)!, cantidad: 1,
+            haceDias: 0);
     }
 
     private Catalogo ObtenerCatalogo()
@@ -149,13 +152,25 @@ public class DatosDeEjemplo
 
     private void CrearPrestamoActivo(Usuario solicitante, TipoEquipamiento tipo, int cantidad, int haceDias)
     {
-        Prestamo prestamo = new Prestamo(solicitante: solicitante, tipoEquipamiento: tipo,
-            cantidadSolicitada: cantidad, fechaHoraPrestamo: _reloj.GetLocalNow().DateTime.AddDays(-haceDias));
+        Prestamo prestamo = CrearPrestamo(solicitante, tipo, cantidad, haceDias);
         prestamo.Activar(tipo.UnidadesDisponibles().Take(cantidad).ToList());
         GuardarConSusMovimientos(prestamo);
     }
 
-    // Los mismos movimientos que deja ServicioPrestamo.Solicitar: la solicitud y un prestamo por unidad asignada.
+    // De un tipo con aprobacion: queda Solicitado, sin unidades, hasta que lo evalue un supervisor.
+    private void CrearSolicitudPendiente(Usuario solicitante, TipoEquipamiento tipo, int cantidad, int haceDias)
+    {
+        GuardarConSusMovimientos(CrearPrestamo(solicitante, tipo, cantidad, haceDias));
+    }
+
+    private Prestamo CrearPrestamo(Usuario solicitante, TipoEquipamiento tipo, int cantidad, int haceDias)
+    {
+        return new Prestamo(solicitante: solicitante, tipoEquipamiento: tipo, cantidadSolicitada: cantidad,
+            fechaHoraPrestamo: _reloj.GetLocalNow().DateTime.AddDays(-haceDias));
+    }
+
+    // Los mismos movimientos que deja ServicioPrestamo.Solicitar: la solicitud y, si quedo activo, un prestamo
+    // por unidad asignada.
     private void GuardarConSusMovimientos(Prestamo prestamo)
     {
         _prestamos.AgregarPrestamo(prestamo);
