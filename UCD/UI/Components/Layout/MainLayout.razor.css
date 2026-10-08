@@ -18,7 +18,7 @@
     height: calc(100vh - 64px); overflow-y: auto;
     background: var(--surface); border-right: 1px solid var(--border);
 }
-.content { flex: 1; min-width: 0; padding: 2rem; max-width: 1500px; }
+.content { flex: 1; min-width: 0; padding: 2rem; }
 
 @media (max-width: 1024px) {
     .sidebar { width: 240px; }
@@ -31,7 +31,3 @@
     .sidebar { position: static; width: auto; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
     .content { padding: 1.25rem 1rem; }
 }
-
-.usuario { display: flex; flex-direction: column; line-height: 1.25; text-align: right; }
-.usuario strong { font-size: .875rem; font-weight: 600; }
-.usuario small { font-size: .75rem; color: var(--ink-soft); }
