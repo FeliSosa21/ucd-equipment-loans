@@ -251,6 +251,15 @@ public class ServicioTiposEquipamientoTests
         Assert.AreEqual("Centro de equipamiento ORT", servicio.ObtenerNombreCatalogo());
     }
 
+    [TestMethod]
+    public void ModificarNombreCatalogo_ResponsableSinPermiso_LanzaServicioException()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ModificarNombreCatalogo("Centro de Equipamiento ORT", DniFuncionario));
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
