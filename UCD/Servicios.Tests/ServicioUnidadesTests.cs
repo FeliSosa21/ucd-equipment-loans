@@ -48,6 +48,22 @@ public class ServicioUnidadesTests
         Assert.AreEqual("NTB-0001", unidades[0].IdInstitucional);
     }
 
+    [TestMethod]
+    public void Listar_FiltroPorEstado_DevuelveSoloLasDeEseEstado()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        UnidadFisica enMantenimiento = CrearUnidad("PRY-0002");
+        enMantenimiento.AMantenimiento();
+        proyector.AgregarUnidad(CrearUnidad("PRY-0001"));
+        proyector.AgregarUnidad(enMantenimiento);
+        ServicioUnidades servicio = CrearServicio(proyector);
+
+        List<UnidadDetalleDto> unidades = servicio.Listar(null, "EnMantenimiento");
+
+        Assert.AreEqual(1, unidades.Count);
+        Assert.AreEqual("PRY-0002", unidades[0].IdInstitucional);
+    }
+
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
