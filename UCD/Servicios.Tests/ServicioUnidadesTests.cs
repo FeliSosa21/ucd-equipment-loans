@@ -195,6 +195,17 @@ public class ServicioUnidadesTests
         Assert.AreEqual("Lampara nueva", unidad.Observaciones);
     }
 
+    [TestMethod]
+    public void Modificar_ResponsableSinPermiso_LanzaServicioException()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        proyector.AgregarUnidad(CrearUnidad("PRY-0001"));
+        ServicioUnidades servicio = CrearServicio(proyector);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Modificar(CrearEdicion("PRY-0001", null), DniDocente));
+    }
+
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
