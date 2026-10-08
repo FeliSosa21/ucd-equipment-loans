@@ -135,6 +135,17 @@ public class ServicioUnidadesTests
         Assert.AreEqual(2, servicio.Listar(null, null).Count);
     }
 
+    [TestMethod]
+    public void Registrar_TipoDiscontinuado_LanzaServicioException()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        proyector.Discontinuar();
+        ServicioUnidades servicio = CrearServicio(proyector);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Registrar(CrearDatos("Proyector Epson", "PRY-0001", null), DniFuncionario));
+    }
+
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
