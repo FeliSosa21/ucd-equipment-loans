@@ -90,7 +90,7 @@
     private async Task CerrarSesion()
     {
         await SesionActual.CerrarAsync();
-        Navigation.NavigateTo("/");
+        Navigation.NavigateTo("/", forceLoad: true);
     }
 
     public void Dispose()
