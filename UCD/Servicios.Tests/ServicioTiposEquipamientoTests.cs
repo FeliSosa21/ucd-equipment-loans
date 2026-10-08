@@ -174,7 +174,7 @@ public class ServicioTiposEquipamientoTests
         DatosTipoEquipamientoDto datos = CrearDatos("notebook lenovo", "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.Modificar("Proyector Epson", datos, DniSupervisor))
+            servicio.Modificar("Proyector Epson", datos, DniSupervisor));
     }
 
     [TestMethod]

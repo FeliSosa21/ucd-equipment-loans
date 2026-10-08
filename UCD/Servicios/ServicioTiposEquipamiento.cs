@@ -51,8 +51,10 @@ public class ServicioTiposEquipamiento
     public void Modificar(string nombreActual, DatosTipoEquipamientoDto datos, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        TipoEquipamiento tipo = ObtenerTipo(ObtenerCatalogo(), nombreActual);
+        Catalogo catalogo = ObtenerCatalogo();
+        TipoEquipamiento tipo = ObtenerTipo(catalogo, nombreActual);
         Categoria categoria = ObtenerCategoria(datos.Categoria);
+        ValidarNombreDisponible(catalogo, tipo, datos.Nombre);
         tipo.Modificar(datos.Nombre, datos.Descripcion, datos.DuracionMaxPrestamo, datos.RequiereAprobacion, categoria);
     }
 
@@ -76,6 +78,15 @@ public class ServicioTiposEquipamiento
         }
 
         return tipo;
+    }
+
+    private static void ValidarNombreDisponible(Catalogo catalogo, TipoEquipamiento tipo, string nombreNuevo)
+    {
+        TipoEquipamiento? existente = catalogo.BuscarTipoPorNombre(nombreNuevo);
+        if (existente is not null && existente != tipo)
+        {
+            throw new ServicioException("Ya existe un tipo de equipamiento con ese nombre");
+        }
     }
 
     private void ValidarResponsable(string dniResponsable)
