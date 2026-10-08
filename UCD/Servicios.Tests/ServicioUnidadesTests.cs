@@ -276,6 +276,20 @@ public class ServicioUnidadesTests
             servicio.EnviarAMantenimiento("PRY-0001", DniFuncionario));
     }
 
+    [TestMethod]
+    public void VolverADisponible_UnidadEnMantenimiento_QuedaDisponible()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        UnidadFisica unidad = CrearUnidad("PRY-0001");
+        unidad.AMantenimiento();
+        proyector.AgregarUnidad(unidad);
+        ServicioUnidades servicio = CrearServicio(proyector);
+
+        servicio.VolverADisponible("PRY-0001", DniFuncionario);
+
+        Assert.AreEqual("Disponible", servicio.Listar(null, null)[0].Estado);
+    }
+
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
