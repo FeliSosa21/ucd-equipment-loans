@@ -33,13 +33,14 @@ public class ServicioTiposEquipamiento
 
     public void Registrar(DatosTipoEquipamientoDto datos, string dniResponsable)
     {
+        ArgumentNullException.ThrowIfNull(datos);
         ValidarResponsable(dniResponsable);
         Categoria categoria = ObtenerCategoria(datos.Categoria);
 
         try
         {
-            TipoEquipamiento tipo = new TipoEquipamiento(datos.Nombre, datos.Descripcion, datos.DuracionMaxPrestamo,
-                datos.RequiereAprobacion, categoria);
+            TipoEquipamiento tipo = new TipoEquipamiento(Normalizar(datos.Nombre), Normalizar(datos.Descripcion),
+                datos.DuracionMaxPrestamo, datos.RequiereAprobacion, categoria);
             ObtenerCatalogo().AgregarTipo(tipo);
         }
         catch (DominioException ex)
@@ -50,14 +51,16 @@ public class ServicioTiposEquipamiento
 
     public void Modificar(string nombreActual, DatosTipoEquipamientoDto datos, string dniResponsable)
     {
+        ArgumentNullException.ThrowIfNull(datos);
         ValidarResponsable(dniResponsable);
         Catalogo catalogo = ObtenerCatalogo();
         TipoEquipamiento tipo = ObtenerTipo(catalogo, nombreActual);
         Categoria categoria = ObtenerCategoria(datos.Categoria);
-        ValidarNombreDisponible(catalogo, tipo, datos.Nombre);
+        string nombreNuevo = Normalizar(datos.Nombre);
+        ValidarNombreDisponible(catalogo, tipo, nombreNuevo);
         try
         {
-            tipo.Modificar(datos.Nombre, datos.Descripcion, datos.DuracionMaxPrestamo, datos.RequiereAprobacion, categoria);
+            tipo.Modificar(nombreNuevo, Normalizar(datos.Descripcion), datos.DuracionMaxPrestamo, datos.RequiereAprobacion, categoria);
         }
         catch (DominioException ex)
         {
@@ -91,7 +94,7 @@ public class ServicioTiposEquipamiento
         Catalogo catalogo = ObtenerCatalogo();
         try
         {
-            catalogo.ModificarNombre(nombre);
+            catalogo.ModificarNombre(Normalizar(nombre));
         }
         catch (DominioException ex)
         {
@@ -149,6 +152,16 @@ public class ServicioTiposEquipamiento
         }
 
         return resultado;
+    }
+
+    private static string Normalizar(string? texto)
+    {
+        if (texto is null)
+        {
+            return string.Empty;
+        }
+
+        return texto.Trim();
     }
 
     private static bool CumpleFiltro(TipoEquipamiento tipo, string? nombre, string? categoria)
