@@ -52,7 +52,16 @@ public class ServicioInventario
 
     private static int ContarEnEstado(IEnumerable<UnidadFisica> unidades, EstadoUnidadFisica estado)
     {
-        return unidades.Count(unidad => unidad.Estado == estado);
+        int cantidad = 0;
+        foreach (UnidadFisica unidad in unidades)
+        {
+            if (unidad.Estado == estado)
+            {
+                cantidad++;
+            }
+        }
+
+        return cantidad;
     }
 
     private static bool CumpleFiltro(TipoEquipamiento tipo, FiltroInventarioDto filtro)
@@ -62,6 +71,24 @@ public class ServicioInventario
             return false;
         }
 
+        if (filtro.Estado is not null && !TieneUnidadesEnEstado(tipo, filtro.Estado))
+        {
+            return false;
+        }
+
         return true;
+    }
+
+    private static bool TieneUnidadesEnEstado(TipoEquipamiento tipo, string estado)
+    {
+        foreach (UnidadFisica unidad in tipo.Unidades)
+        {
+            if (unidad.Estado.ToString() == estado)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
