@@ -77,6 +77,12 @@ public class ServicioUnidades
         }
     }
 
+    public void EnviarAMantenimiento(string idInstitucional, string dniResponsable)
+    {
+        ValidarResponsable(dniResponsable);
+        ObtenerUnidad(idInstitucional).AMantenimiento();
+    }
+
     private static string Normalizar(string? texto)
     {
         if (texto is null)
