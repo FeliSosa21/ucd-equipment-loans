@@ -41,7 +41,6 @@
     </table>
 </section>
 
-
 <div class="toolbar filtros-detalle">
     <label class="filtro">
         <span class="lbl">Categoría</span>
@@ -70,7 +69,7 @@
     </button>
 </div>
 
-<section class="card table-card seccion-detalle" aria-label="Inventario por tipo de equipamiento">
+<section class="card table-card" aria-label="Inventario por tipo de equipamiento">
     <h2 class="titulo-seccion">Por tipo de equipamiento</h2>
 
     @if (_porTipo.Count == 0)
@@ -98,10 +97,10 @@
                 <tr>
                     <td><strong>@fila.Nombre</strong></td>
                     <td>@TextosVisibles.Categoria(fila.Categoria)</td>
-                    <td class="numero">@fila.Disponibles</td>
-                    <td class="numero">@fila.Prestadas</td>
-                    <td class="numero">@fila.EnMantenimiento</td>
-                    <td class="numero">@fila.DadasDeBaja</td>
+                    <td class="@ClaseDeCantidad(fila.Disponibles)">@fila.Disponibles</td>
+                    <td class="@ClaseDeCantidad(fila.Prestadas)">@fila.Prestadas</td>
+                    <td class="@ClaseDeCantidad(fila.EnMantenimiento)">@fila.EnMantenimiento</td>
+                    <td class="@ClaseDeCantidad(fila.DadasDeBaja)">@fila.DadasDeBaja</td>
                     <td class="numero"><strong>@fila.Total</strong></td>
                 </tr>
             }
