@@ -30,10 +30,10 @@
         {
             <tr>
                 <td><strong>@TextosVisibles.Categoria(fila.Nombre)</strong></td>
-                <td class="numero">@fila.Disponibles</td>
-                <td class="numero">@fila.Prestadas</td>
-                <td class="numero">@fila.EnMantenimiento</td>
-                <td class="numero">@fila.DadasDeBaja</td>
+                <td class="@ClaseDeCantidad(fila.Disponibles)">@fila.Disponibles</td>
+                <td class="@ClaseDeCantidad(fila.Prestadas)">@fila.Prestadas</td>
+                <td class="@ClaseDeCantidad(fila.EnMantenimiento)">@fila.EnMantenimiento</td>
+                <td class="@ClaseDeCantidad(fila.DadasDeBaja)">@fila.DadasDeBaja</td>
                 <td class="numero"><strong>@fila.Total</strong></td>
             </tr>
         }

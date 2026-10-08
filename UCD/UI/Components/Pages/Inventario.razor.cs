@@ -53,4 +53,15 @@ public partial class Inventario
 
         return valor;
     }
+
+    // Los ceros se atenuan para que resalten las cantidades que importan.
+    private static string ClaseDeCantidad(int cantidad)
+    {
+        if (cantidad == 0)
+        {
+            return "numero cero";
+        }
+
+        return "numero";
+    }
 }
