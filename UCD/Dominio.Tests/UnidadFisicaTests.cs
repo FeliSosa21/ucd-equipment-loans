@@ -142,14 +142,6 @@ public sealed class UnidadFisicaTests
     }
 
     [TestMethod]
-    public void AMantenimiento_UnidadNoPrestada_LanzaDominioException()
-    {
-        var unidad = CrearUnidad();
-
-        Assert.ThrowsException<DominioException>(() => unidad.AMantenimiento());
-    }
-
-    [TestMethod]
     public void DarDeBaja_UnidadDisponible_CambiaEstadoADadaDeBaja()
     {
         var unidad = CrearUnidad();

@@ -128,7 +128,6 @@ public class DatosDeEjemplo
     // El dominio solo deja pasar a mantenimiento una unidad prestada (al devolverla con fallas).
     private static void EnviarAMantenimiento(UnidadFisica unidad)
     {
-        unidad.Prestada();
         unidad.AMantenimiento();
     }
 
