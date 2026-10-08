@@ -2,46 +2,41 @@
 @inherits PaginaConSesion
 @using DTOs
 @using Servicios
+@using UI.Presentacion
 @inject ServicioInventario ServicioInventario
 
 <PageTitle>UCD · Inventario</PageTitle>
 
 <div class="page-header">
     <h1>Inventario</h1>
-    <p>Un tipo de equipamiento es el modelo general; cada unidad física es el ejemplar concreto que se presta.</p>
+    <p>Cantidad de unidades físicas en cada estado, por categoría y por tipo de equipamiento.</p>
 </div>
 
-<div class="toolbar">
-    <select class="field" aria-label="Categoría">
-                <option value="">Todas las categorías</option>
-                <option>Computación</option>
-                <option>Audiovisual</option>
-                <option>Laboratorio</option>
-                <option>Electrónica</option>
-                <option>Accesorios</option>
-    </select>
-    <select class="field" aria-label="Estado de la unidad">
-        <option value="">Todos los estados</option>
-        <option>Disponible</option>
-        <option>Prestada</option>
-        <option>En mantenimiento</option>
-        <option>Dada de baja</option>
-    </select>
-    <span class="espacio"></span>
-    <button class="btn btn-primary" disabled title="Disponible cuando esté el servicio">Nueva unidad</button>
-</div>
-
-<div class="card table-card">
+<section class="card table-card" aria-label="Inventario por categoría">
+    <h2 class="titulo-seccion">Por categoría</h2>
     <table>
         <thead>
-            <tr>
-                <th>ID institucional</th>
-                <th>N° de serie</th>
-                <th>Tipo</th>
-                <th>Ubicación</th>
-                <th>Estado</th>
-            </tr>
+        <tr>
+            <th>Categoría</th>
+            <th class="numero">Disponibles</th>
+            <th class="numero">Prestadas</th>
+            <th class="numero">En mantenimiento</th>
+            <th class="numero">Dadas de baja</th>
+            <th class="numero">Total</th>
+        </tr>
         </thead>
+        <tbody>
+        @foreach (CantidadesPorEstadoDto fila in _porCategoria)
+        {
+            <tr>
+                <td><strong>@TextosVisibles.Categoria(fila.Nombre)</strong></td>
+                <td class="numero">@fila.Disponibles</td>
+                <td class="numero">@fila.Prestadas</td>
+                <td class="numero">@fila.EnMantenimiento</td>
+                <td class="numero">@fila.DadasDeBaja</td>
+                <td class="numero"><strong>@fila.Total</strong></td>
+            </tr>
+        }
+        </tbody>
     </table>
-    <EstadoVacio Titulo="No hay unidades físicas registradas" />
-</div>
+</section>
