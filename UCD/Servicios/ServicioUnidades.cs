@@ -46,8 +46,8 @@ public class ServicioUnidades
         TipoEquipamiento tipo = ObtenerTipo(datos.NombreTipo);
         string idInstitucional = Normalizar(datos.IdInstitucional);
         string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
-        ValidarIdDisponible(datos.IdInstitucional);
-        ValidarSerieDisponible(datos.NumeroSerie, null);
+        ValidarIdDisponible(idInstitucional);
+        ValidarSerieDisponible(numeroSerie, null);
         try
         {
             UnidadFisica unidad = new UnidadFisica(idInstitucional, Normalizar(datos.UbicacionFisica), numeroSerie);
