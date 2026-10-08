@@ -146,6 +146,19 @@ public class ServicioUnidadesTests
             servicio.Registrar(CrearDatos("Proyector Epson", "PRY-0001", null), DniFuncionario));
     }
 
+    [DataTestMethod]
+    [DataRow("pry-0001")]
+    [DataRow("PRY0001")]
+    [DataRow("PR-00001")]
+    public void Registrar_IdConFormatoInvalido_LanzaServicioException(string idInstitucional)
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        ServicioUnidades servicio = CrearServicio(proyector);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Registrar(CrearDatos("Proyector Epson", idInstitucional, null), DniFuncionario));
+    }
+
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
