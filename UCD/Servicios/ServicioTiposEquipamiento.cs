@@ -34,7 +34,7 @@ public class ServicioTiposEquipamiento
     public void Registrar(DatosTipoEquipamientoDto datos, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        Categoria categoria = Enum.Parse<Categoria>(datos.Categoria);
+        Categoria categoria = ObtenerCategoria(datos.Categoria);
 
         try
         {
@@ -68,6 +68,16 @@ public class ServicioTiposEquipamiento
         {
             throw new ServicioException("El usuario no tiene permiso para gestionar el catalogo");
         }
+    }
+
+    private static Categoria ObtenerCategoria(string categoria)
+    {
+        if (!Enum.TryParse(categoria, out Categoria resultado) || !Enum.IsDefined(resultado))
+        {
+            throw new ServicioException("La categoria seleccionada no existe");
+        }
+
+        return resultado;
     }
 
     private static bool CumpleFiltro(TipoEquipamiento tipo, string? nombre, string? categoria)
