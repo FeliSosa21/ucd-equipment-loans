@@ -40,6 +40,19 @@ public class ServicioTiposEquipamientoTests
         Assert.ThrowsException<ServicioException>(() => servicio.Listar(null, null));
     }
 
+    [TestMethod]
+    public void Listar_FiltroPorNombre_DevuelvelosQueContienenElTexto()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson", Categoria.Audiovisual);
+        TipoEquipamiento notebook = CrearTipo("Notebook Lenovo", Categoria.Computacion);
+        ServicioTiposEquipamiento servicio = CrearServicio(proyector, notebook);
+
+        List<TipoEquipamientoDetalleDto> tipos = servicio.Listar("epson", null);
+
+        Assert.AreEqual(1, tipos.Count);
+        Assert.AreEqual("Proyector Epson", tipos[0].Nombre);
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
@@ -52,5 +65,10 @@ public class ServicioTiposEquipamientoTests
 
         repositorioCatalogo.Guardar(catalogo);
         return new ServicioTiposEquipamiento(repositorioCatalogo, new RepositorioUsuario(memoria));
+    }
+
+    private static TipoEquipamiento CrearTipo(string nombre, Categoria categoria)
+    {
+        return new TipoEquipamiento(nombre, "Descripcion", 3, false, categoria);
     }
 }
