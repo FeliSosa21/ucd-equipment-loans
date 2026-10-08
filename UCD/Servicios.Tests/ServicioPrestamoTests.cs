@@ -142,6 +142,26 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_DatosValidos_RegistraUnMovimientoDeSolicitud()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1);
+
+        servicio.Solicitar(datos, DniDocente);
+
+        Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
+        List<Movimiento> solicitudes = new RepositorioMovimiento(memoria).ObtenerTodos()
+            .Where(movimiento => movimiento.Tipo == TipoMovimiento.Solicitud).ToList();
+
+        Assert.AreEqual(1, solicitudes.Count);
+        Assert.AreEqual(FechaFija, solicitudes[0].FechaHora);
+        Assert.AreSame(docente, solicitudes[0].Solicitante);
+        Assert.IsNull(solicitudes[0].Evaluador);
+        Assert.IsNull(solicitudes[0].Unidad);
+    }
+
+    [TestMethod]
     public void Solicitar_TipoSinAprobacionConUnidades_RegistraUnMovimientoDePrestamoPorUnidad()
     {
         Memoria memoria = new Memoria();
@@ -152,12 +172,12 @@ public sealed class ServicioPrestamoTests
 
         Prestamo guardado =
             new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniDocente).Single();
-        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+        List<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos()
+            .Where(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo).ToList();
 
         Assert.AreEqual(CantidadSolicitadaPorDefecto, movimientos.Count);
         foreach (Movimiento movimiento in movimientos)
         {
-            Assert.AreEqual(TipoMovimiento.Prestamo, movimiento.Tipo);
             Assert.AreEqual(FechaFija, movimiento.FechaHora);
             Assert.AreSame(guardado.Solicitante, movimiento.Solicitante);
             Assert.IsNull(movimiento.Evaluador);
@@ -182,7 +202,7 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void Solicitar_TipoSinAprobacionSinUnidadesSuficientes_LoGuardaSinPrestarNiRegistrarMovimientos()
+    public void Solicitar_TipoSinAprobacionSinUnidadesSuficientes_LoGuardaSinPrestarNiRegistrarMovimientosDePrestamo()
     {
         Memoria memoria = new Memoria();
         ServicioPrestamo servicio = CrearServicio(memoria);
@@ -200,7 +220,8 @@ public sealed class ServicioPrestamoTests
         TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoSinAprobacion)!;
         Assert.AreEqual(3, tipo.CantidadDisponibles());
 
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count);
+        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos()
+            .Count(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo));
     }
 
     [TestMethod]
@@ -219,7 +240,7 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void Solicitar_TipoConAprobacion_LoGuardaSinRegistrarMovimientos()
+    public void Solicitar_TipoConAprobacion_LoGuardaSinRegistrarMovimientosDePrestamo()
     {
         Memoria memoria = new Memoria();
         ServicioPrestamo servicio = CrearServicio(memoria);
@@ -231,7 +252,8 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(1, guardados.Count);
         Assert.AreEqual(EstadoPrestamo.Solicitado, guardados[0].Estado);
 
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count);
+        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos()
+            .Count(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo));
     }
 
     [TestMethod]
@@ -328,7 +350,8 @@ public sealed class ServicioPrestamoTests
         Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(tercera, DniEstudiante));
 
         Assert.AreEqual(2, new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniEstudiante).Count);
-        Assert.AreEqual(1, new RepositorioMovimiento(memoria).ObtenerTodos().Count);
+        Assert.AreEqual(1, new RepositorioMovimiento(memoria).ObtenerTodos()
+            .Count(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo));
         TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoSinAprobacion)!;
         Assert.AreEqual(2, tipo.CantidadDisponibles());
     }
@@ -1037,7 +1060,8 @@ public sealed class ServicioPrestamoTests
             "El prestamo deberia seguir solicitado");
         Assert.AreEqual(0, guardado.UnidadesAsignadas.Count,
             "No deberia haberse asignado ninguna unidad");
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count,
-            "No deberia haberse registrado ningun movimiento");
+        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos()
+                .Count(movimiento => movimiento.Tipo != TipoMovimiento.Solicitud),
+            "No deberia haberse registrado ningun movimiento ademas de la solicitud");
     }
 }
