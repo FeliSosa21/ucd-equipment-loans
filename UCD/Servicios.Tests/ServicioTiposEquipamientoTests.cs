@@ -97,12 +97,22 @@ public class ServicioTiposEquipamientoTests
     }
 
     [TestMethod]
-    public void Registrar_ResponsableInexistente_LanzaServicioException()
+    public void Registrar_ResponsablesInexistente_LanzaServicioException()
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
         DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, "11111111"));
+    }
+
+    [TestMethod]
+    public void Registrar_NombreRepetido_LanzaServicioException()
+    {
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+        DatosTipoEquipamientoDto datos = CrearDatos("camara canon eos", "Audiovisual");
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniSupervisor));
     }
 
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
