@@ -11,6 +11,14 @@ public static class TextosVisibles
         { "Accesorios", "Accesorios" }
     };
 
+    public static readonly IReadOnlyDictionary<string, string> EstadosDeUnidad = new Dictionary<string, string>
+    {
+        { "Disponible", "Disponible" },
+        { "Prestada", "Prestada" },
+        { "EnMantenimiento", "En mantenimiento" },
+        { "DadaDeBaja", "Dada de baja" }
+    };
+
     public static string Categoria(string valor)
     {
         if (Categorias.ContainsKey(valor))

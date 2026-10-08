@@ -41,13 +41,42 @@
     </table>
 </section>
 
+
+<div class="toolbar filtros-detalle">
+    <label class="filtro">
+        <span class="lbl">Categoría</span>
+        <select class="field" @bind="_categoria" @bind:after="Consultar">
+            <option value="">Todas las categorías</option>
+            @foreach (KeyValuePair<string, string> categoria in TextosVisibles.Categorias)
+            {
+                <option value="@categoria.Key">@categoria.Value</option>
+            }
+        </select>
+    </label>
+    <label class="filtro">
+        <span class="lbl">Con unidades en estado</span>
+        <select class="field" @bind="_estado" @bind:after="Consultar">
+            <option value="">Cualquier estado</option>
+            @foreach (KeyValuePair<string, string> estado in TextosVisibles.EstadosDeUnidad)
+            {
+                <option value="@estado.Key">@estado.Value</option>
+            }
+        </select>
+    </label>
+    <span class="espacio"></span>
+    <button type="button" class="btn btn-ghost btn-sm"
+            @onclick="LimpiarFiltros" disabled="@(!HayFiltrosAplicados())">
+        Limpiar filtros
+    </button>
+</div>
+
 <section class="card table-card seccion-detalle" aria-label="Inventario por tipo de equipamiento">
     <h2 class="titulo-seccion">Por tipo de equipamiento</h2>
 
     @if (_porTipo.Count == 0)
     {
-        <EstadoVacio Titulo="No hay tipos de equipamiento para mostrar"
-                     Mensaje="Cuando se registren tipos con unidades van a aparecer acá." />
+        <EstadoVacio Titulo="No hay tipos que coincidan con los filtros"
+                     Mensaje="Probá con otra categoría u otro estado, o limpiá los filtros." />
     }
     else
     {
