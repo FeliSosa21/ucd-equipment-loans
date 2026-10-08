@@ -155,6 +155,16 @@ public class ServicioTiposEquipamientoTests
             servicio.Modificar("Camara Canon EOS", datos, DniFuncionario));
     }
 
+    [TestMethod]
+    public void Modificar_TipoInexistente_LanzaServicioException()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", "Audiovisual");
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Modificar("Camara Canon EOS", datos, DniSupervisor));
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
