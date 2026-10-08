@@ -2,6 +2,7 @@
 @inherits PaginaConSesion
 @using DTOs
 @using Servicios
+@using UI.Presentacion
 @inject ServicioCatalogo ServicioCatalogo
 
 <PageTitle>UCD · Catálogo</PageTitle>
@@ -16,7 +17,7 @@
         <span class="lbl">Categoría</span>
         <select class="field" @bind="_categoria" @bind:after="Consultar">
             <option value="">Todas las categorías</option>
-            @foreach (KeyValuePair<string, string> categoria in Categorias)
+            @foreach (KeyValuePair<string, string> categoria in TextosVisibles.Categorias)
             {
                 <option value="@categoria.Key">@categoria.Value</option>
             }
@@ -74,7 +75,7 @@ else
             {
                 <tr class="@ClaseDeFila(tipo.Nombre)">
                     <td><strong>@tipo.Nombre</strong></td>
-                    <td>@TextoDeCategoria(tipo.Categoria)</td>
+                    <td>@TextosVisibles.Categoria(tipo.Categoria)</td>
                     <td><span class="badge @ClaseDeEstado(tipo.Estado)">@tipo.Estado</span></td>
                     <td class="@ClaseDeDisponibles(tipo.CantidadDisponibles)">@tipo.CantidadDisponibles</td>
                     <td class="accion-fila">

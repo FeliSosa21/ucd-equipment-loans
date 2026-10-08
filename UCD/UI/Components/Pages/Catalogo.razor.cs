@@ -1,6 +1,7 @@
 ﻿using DTOs;
 using UI.Sesion;
 using Servicios;
+using UI.Presentacion;
 
 namespace UI.Components.Pages;
 
@@ -14,16 +15,6 @@ public partial class Catalogo
     private int? _minimoDisponibles;
     private string? _tipoSeleccionado;
     private List<UnidadFisicaDto> _unidades = new List<UnidadFisicaDto>();
-
-    // Clave: nombre del enum que espera el servicio. Valor: texto que ve el usuario.
-    private static readonly Dictionary<string, string> Categorias = new Dictionary<string, string>
-    {
-        { "Computacion", "Computación" },
-        { "Audiovisual", "Audiovisual" },
-        { "Laboratorio", "Laboratorio" },
-        { "Electronica", "Electrónica" },
-        { "Accesorios", "Accesorios" }
-    };
 
     protected override void OnInitialized()
     {
@@ -41,8 +32,8 @@ public partial class Catalogo
         // Un filtro vacio (todo en null) trae todos los tipos: el servicio no acepta un filtro null.
         FiltroCatalogoDto filtro = new FiltroCatalogoDto
         {
-            Categoria = ValorONulo(_categoria),
-            Estado = ValorONulo(_estado),
+            Categoria = ValoresDeFiltro.ValorONulo(_categoria),
+            Estado = ValoresDeFiltro.ValorONulo(_estado),
             MinimoDisponibles = _minimoDisponibles
         };
 
@@ -160,25 +151,5 @@ public partial class Catalogo
         }
 
         return "numero sin-disponibles";
-    }
-
-    private static string? ValorONulo(string valor)
-    {
-        if (string.IsNullOrEmpty(valor))
-        {
-            return null;
-        }
-
-        return valor;
-    }
-
-    private static string TextoDeCategoria(string categoria)
-    {
-        if (Categorias.ContainsKey(categoria))
-        {
-            return Categorias[categoria];
-        }
-
-        return categoria;
     }
 }

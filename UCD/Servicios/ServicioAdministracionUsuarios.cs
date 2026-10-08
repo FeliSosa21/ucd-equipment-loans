@@ -40,12 +40,8 @@ public class ServicioAdministracionUsuarios
         });
 
         // Se busca por correo porque el registro puede normalizar el DNI (cedulas de 7 digitos).
-        Usuario? creado = _repositorio.ObtenerUsuarioPorCorreo(dto.Correo);
-
-        if (creado is null)
-        {
-            throw new ServicioException("No se pudo crear el usuario");
-        }
+        // Registrar acaba de guardarlo con ese mismo correo, asi que la busqueda no puede devolver null.
+        Usuario creado = _repositorio.ObtenerUsuarioPorCorreo(dto.Correo)!;
 
         creado.AsignarTipo(tipo);
         creado.ExigirCambioDeContrasena();
