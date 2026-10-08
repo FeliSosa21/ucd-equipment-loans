@@ -41,19 +41,43 @@ public class ServicioUnidades
 
     public void Registrar(DatosUnidadDto datos, string dniResponsable)
     {
+        ArgumentNullException.ThrowIfNull(datos);
         ValidarResponsable(dniResponsable);
         TipoEquipamiento tipo = ObtenerTipo(datos.NombreTipo);
+        string idInstitucional = Normalizar(datos.IdInstitucional);
+        string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
         ValidarIdDisponible(datos.IdInstitucional);
         ValidarSerieDisponible(datos.NumeroSerie);
         try
         {
-            UnidadFisica unidad = new UnidadFisica(datos.IdInstitucional, datos.UbicacionFisica, datos.NumeroSerie);
+            UnidadFisica unidad = new UnidadFisica(idInstitucional, Normalizar(datos.UbicacionFisica), numeroSerie);
             tipo.AgregarUnidad(unidad);
         }
         catch (DominioException ex)
         {
             throw new ServicioException(ex.Message, ex);
         }
+    }
+
+    private static string Normalizar(string? texto)
+    {
+        if (texto is null)
+        {
+            return string.Empty;
+        }
+
+        return texto.Trim();
+    }
+
+    // Los campos opcionales en blanco se guardan como null: "sin numero de serie" no es lo mismo que "   ".
+    private static string? NormalizarOpcional(string? texto)
+    {
+        if (string.IsNullOrWhiteSpace(texto))
+        {
+            return null;
+        }
+
+        return texto.Trim();
     }
 
     private Catalogo ObtenerCatalogo()
