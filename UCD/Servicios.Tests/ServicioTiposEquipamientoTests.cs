@@ -189,6 +189,18 @@ public class ServicioTiposEquipamientoTests
         Assert.AreEqual("Descripcion de prueba", servicio.Listar(null, null)[0].Descripcion);
     }
 
+    [TestMethod]
+    public void Modificar_DuracionCero_LanzaServicioException()
+    {
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", "Audiovisual");
+        datos.DuracionMaxPrestamo = 0;
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Modificar("Camara Canon EOS", datos, DniSupervisor));
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
