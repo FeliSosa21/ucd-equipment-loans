@@ -95,7 +95,14 @@ public class ServicioUnidades
     public void VolverADisponible(string idInstitucional, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        ObtenerUnidad(idInstitucional).Disponible();
+        UnidadFisica unidad = ObtenerUnidad(idInstitucional);
+        if (unidad.Estado != EstadoUnidadFisica.EnMantenimiento)
+        {
+            throw new ServicioException(
+                "Solo una unidad en mantenimiento puede volver a disponible; las prestadas vuelven con la devolucion");
+        }
+
+        unidad.Disponible();
     }
 
     private static string Normalizar(string? texto)
