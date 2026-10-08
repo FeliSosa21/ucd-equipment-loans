@@ -739,6 +739,34 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Rechazar_SolicitudPendiente_RegistraUnMovimientoDeRechazoConElEvaluador()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos =
+            CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1);
+        Guid idPrestamo = servicio.Solicitar(datos, DniDocente).Id;
+        ServicioPrestamo servicioDeLaEvaluacion =
+            CrearServicioConReloj(memoria, new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor);
+        Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
+        Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
+        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
+            movimientos.Select(movimiento => movimiento.Tipo).ToList(),
+            "Deberia registrarse la solicitud y despues el rechazo del supervisor");
+        Movimiento rechazo =
+            movimientos.Single(movimiento => movimiento.Tipo == TipoMovimiento.Rechazo);
+        Assert.AreEqual(FechaDeEvaluacion, rechazo.FechaHora);
+        Assert.AreSame(docente, rechazo.Solicitante);
+        Assert.AreSame(supervisor, rechazo.Evaluador, "El rechazo del supervisor deberia registrarlo como evaluador");
+        Assert.IsNull(rechazo.Unidad);
+    }
+
+    [TestMethod]
     public void Rechazar_MotivoVacio_LanzaExcepcionConCausaDeDominio()
     {
         Memoria memoria = new Memoria();
