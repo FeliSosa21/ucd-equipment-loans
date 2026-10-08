@@ -68,7 +68,16 @@ public class ServicioTiposEquipamiento
     public void Discontinuar(string nombre, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        ObtenerTipo(ObtenerCatalogo(), nombre).Discontinuar();
+        TipoEquipamiento tipo = ObtenerTipo(ObtenerCatalogo(), nombre);
+
+        try
+        {
+            tipo.Discontinuar();
+        }
+        catch (DominioException ex)
+        {
+            throw new ServicioException(ex.Message, ex);
+        }
     }
 
     private Catalogo ObtenerCatalogo()
