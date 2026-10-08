@@ -215,6 +215,29 @@ public class ServicioUnidadesTests
             servicio.Modificar(CrearEdicion("PRY-0001", null), DniFuncionario));
     }
 
+    [TestMethod]
+    public void Modificar_SerieDeOtraUnidad_LanzaServicioException()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        proyector.AgregarUnidad(new UnidadFisica("PRY-0001", "Deposito A", "SN123"));
+        proyector.AgregarUnidad(new UnidadFisica("PRY-0002", "Deposito A", "SN456"));
+        ServicioUnidades servicio = CrearServicio(proyector);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Modificar(CrearEdicion("PRY-0002", "SN123"), DniFuncionario));
+    }
+
+    [TestMethod]
+    public void Modificar_MismaSerie_ActualizaLosDemasDatos()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        proyector.AgregarUnidad(new UnidadFisica("PRY-0001", "Deposito A", "SN123"));
+        ServicioUnidades servicio = CrearServicio(proyector);
+
+        servicio.Modificar(CrearEdicion("PRY-0001", "SN123"), DniFuncionario);
+
+        Assert.AreEqual("Laboratorio 3", servicio.Listar(null, null)[0].UbicacionFisica);
+    }
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
