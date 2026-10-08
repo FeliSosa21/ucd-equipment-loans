@@ -122,7 +122,8 @@ public class DatosDeEjemplo
             duracionMaxPrestamo: DiasMaximosDePrestamo, requiereAprobacion: requiereAprobacion, categoria: categoria);
         foreach (string id in idsUnidades)
         {
-            tipo.AgregarUnidad(new UnidadFisica(idInstitucional: id, ubiFisica: Deposito, numSerie: NumeroDeSerieDeEjemplo(id, categoria)));
+            tipo.AgregarUnidad(new UnidadFisica(idInstitucional: id, ubiFisica: Deposito,
+                numSerie: NumeroDeSerieDeEjemplo(id, categoria)));
         }
 
         return tipo;

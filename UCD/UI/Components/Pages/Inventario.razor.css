@@ -13,11 +13,6 @@
     align-items: flex-end;
 }
 
-.filtro {
-    display: flex;
-    flex-direction: column;
-}
-
 /* Cantidades en cero: atenuadas, para que resalten las que no lo son */
 td.cero {
     color: var(--ink-faint);

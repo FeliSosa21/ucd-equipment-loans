@@ -6,7 +6,7 @@ public sealed class TipoEquipamientoTests
     [TestMethod]
     public void Constructor_DatosValidos_QuedaActivo()
     {
-        var tipo = CrearTipo();
+        TipoEquipamiento tipo = CrearTipo();
 
         Assert.AreEqual(EstadoTipoEquipamiento.Activo, tipo.Estado);
     }
@@ -14,7 +14,7 @@ public sealed class TipoEquipamientoTests
     [TestMethod]
     public void Constructor_DatosValidos_GuardaElNombre()
     {
-        var tipo = CrearTipo(nombre: "Proyector Epson PowerLite");
+        TipoEquipamiento tipo = CrearTipo(nombre: "Proyector Epson PowerLite");
 
         Assert.AreEqual("Proyector Epson PowerLite", tipo.Nombre);
     }
@@ -22,7 +22,7 @@ public sealed class TipoEquipamientoTests
     [TestMethod]
     public void Constructor_DatosValidos_GuardaLaDescripcion()
     {
-        var tipo = CrearTipo(descripcion: "Proyector para aulas");
+        TipoEquipamiento tipo = CrearTipo(descripcion: "Proyector para aulas");
 
         Assert.AreEqual("Proyector para aulas", tipo.Descripcion);
     }
@@ -30,7 +30,7 @@ public sealed class TipoEquipamientoTests
     [TestMethod]
     public void Constructor_DatosValidos_GuardaLaDuracionMaxima()
     {
-        var tipo = CrearTipo(duracionMaxPrestamo: 5);
+        TipoEquipamiento tipo = CrearTipo(duracionMaxPrestamo: 5);
 
         Assert.AreEqual(5, tipo.DuracionMaxPrestamo);
     }
@@ -38,7 +38,7 @@ public sealed class TipoEquipamientoTests
     [TestMethod]
     public void Constructor_ConAprobacionPrevia_GuardaQueRequiereAprobacion()
     {
-        var tipo = CrearTipo(requiereAprobacion: true);
+        TipoEquipamiento tipo = CrearTipo(requiereAprobacion: true);
 
         Assert.IsTrue(tipo.RequiereAprobacion);
     }
@@ -46,19 +46,21 @@ public sealed class TipoEquipamientoTests
     [TestMethod]
     public void Constructor_DatosValidos_GuardaLaCategoria()
     {
-        var tipo = CrearTipo(categoria: Categoria.Audiovisual);
+        TipoEquipamiento tipo = CrearTipo(categoria: Categoria.Audiovisual);
 
         Assert.AreEqual(Categoria.Audiovisual, tipo.Categoria);
     }
+
     [TestMethod]
     public void Constructor_NombreDe2Caracteres_LanzaDominioException()
     {
         Assert.ThrowsException<DominioException>(() => CrearTipo(nombre: "TV"));
     }
+
     [TestMethod]
     public void Constructor_NombreDe81Caracteres_LanzaDominioException()
     {
-        var nombre = new string('a', 81);
+        string nombre = new string('a', 81);
 
         Assert.ThrowsException<DominioException>(() => CrearTipo(nombre: nombre));
     }
@@ -72,9 +74,9 @@ public sealed class TipoEquipamientoTests
     [TestMethod]
     public void Constructor_NombreDe3Caracteres_GuardaElNombre()
     {
-        var nombre = new string('a', 3);
+        string nombre = new string('a', 3);
 
-        var tipo = CrearTipo(nombre: nombre);
+        TipoEquipamiento tipo = CrearTipo(nombre: nombre);
 
         Assert.AreEqual(nombre, tipo.Nombre);
     }
@@ -82,36 +84,41 @@ public sealed class TipoEquipamientoTests
     [TestMethod]
     public void Constructor_NombreDe80Caracteres_GuardaElNombre()
     {
-        var nombre = new string('a', 80);
+        string nombre = new string('a', 80);
 
-        var tipo = CrearTipo(nombre: nombre);
+        TipoEquipamiento tipo = CrearTipo(nombre: nombre);
 
         Assert.AreEqual(nombre, tipo.Nombre);
     }
+
     [TestMethod]
     public void Constructor_DescripcionDe301Caracteres_LanzaDominioException()
     {
-        var descripcion = new string('a', 301);
+        string descripcion = new string('a', 301);
 
         Assert.ThrowsException<DominioException>(() => CrearTipo(descripcion: descripcion));
     }
-    [TestMethod]
-    public void Constructor_DuracionCero_LanzaDominioException()
+
+    [DataTestMethod]
+    [DataRow(0)]
+    [DataRow(-1)]
+    public void Constructor_DuracionNoPositiva_LanzaDominioException(int duracionMaxPrestamo)
     {
-        Assert.ThrowsException<DominioException>(() => CrearTipo(duracionMaxPrestamo: 0));
+        Assert.ThrowsException<DominioException>(() => CrearTipo(duracionMaxPrestamo: duracionMaxPrestamo));
     }
 
     [TestMethod]
-    public void Constructor_DuracionNegativa_LanzaDominioException()
+    public void Constructor_DescripcionNula_LanzaDominioException()
     {
-        Assert.ThrowsException<DominioException>(() => CrearTipo(duracionMaxPrestamo: -1));
+        Assert.ThrowsException<DominioException>(() => CrearTipo(descripcion: null!));
     }
+
     [TestMethod]
     public void Constructor_DescripcionDe300Caracteres_GuardaLaDescripcion()
     {
-        var descripcion = new string('a', 300);
+        string descripcion = new string('a', 300);
 
-        var tipo = CrearTipo(descripcion: descripcion);
+        TipoEquipamiento tipo = CrearTipo(descripcion: descripcion);
 
         Assert.AreEqual(descripcion, tipo.Descripcion);
     }
@@ -119,23 +126,55 @@ public sealed class TipoEquipamientoTests
     [TestMethod]
     public void Constructor_DuracionDe1Dia_GuardaLaDuracion()
     {
-        var tipo = CrearTipo(duracionMaxPrestamo: 1);
+        TipoEquipamiento tipo = CrearTipo(duracionMaxPrestamo: 1);
 
         Assert.AreEqual(1, tipo.DuracionMaxPrestamo);
     }
+
     [TestMethod]
     public void Discontinuar_TipoActivo_QuedaDiscontinuado()
     {
-        var tipo = CrearTipo();
+        TipoEquipamiento tipo = CrearTipo();
 
         tipo.Discontinuar();
 
         Assert.AreEqual(EstadoTipoEquipamiento.Discontinuado, tipo.Estado);
     }
+
+    [TestMethod]
+    public void Reactivar_TipoDiscontinuado_QuedaActivo()
+    {
+        TipoEquipamiento tipo = CrearTipo();
+        tipo.Discontinuar();
+
+        tipo.Reactivar();
+
+        Assert.AreEqual(EstadoTipoEquipamiento.Activo, tipo.Estado);
+    }
+
+    [TestMethod]
+    public void Reactivar_TipoActivo_LanzaDominioException()
+    {
+        TipoEquipamiento tipo = CrearTipo();
+
+        Assert.ThrowsException<DominioException>(() => tipo.Reactivar());
+    }
+
+    [TestMethod]
+    public void EstaActivo_TipoReactivado_DevuelveTrue()
+    {
+        TipoEquipamiento tipo = CrearTipo();
+        tipo.Discontinuar();
+
+        tipo.Reactivar();
+
+        Assert.IsTrue(tipo.EstaActivo);
+    }
+
     [TestMethod]
     public void EstaActivo_TipoNuevo_DevuelveTrue()
     {
-        var tipo = CrearTipo();
+        TipoEquipamiento tipo = CrearTipo();
 
         Assert.IsTrue(tipo.EstaActivo);
     }
@@ -143,15 +182,16 @@ public sealed class TipoEquipamientoTests
     [TestMethod]
     public void EstaActivo_TipoDiscontinuado_DevuelveFalse()
     {
-        var tipo = CrearTipo();
+        TipoEquipamiento tipo = CrearTipo();
         tipo.Discontinuar();
 
         Assert.IsFalse(tipo.EstaActivo);
     }
+
     [TestMethod]
     public void Modificar_DatosValidos_ActualizaLosDatos()
     {
-        var tipo = CrearTipo();
+        TipoEquipamiento tipo = CrearTipo();
 
         tipo.Modificar("Notebook Lenovo", "Notebook para préstamo en aula",
             10, true, Categoria.Computacion);
@@ -162,10 +202,11 @@ public sealed class TipoEquipamientoTests
         Assert.IsTrue(tipo.RequiereAprobacion);
         Assert.AreEqual(Categoria.Computacion, tipo.Categoria);
     }
+
     [TestMethod]
     public void Modificar_NombreInvalido_LanzaDominioException()
     {
-        var tipo = CrearTipo();
+        TipoEquipamiento tipo = CrearTipo();
 
         Assert.ThrowsException<DominioException>(() => ModificarTipo(tipo, nombre: "TV"));
     }
@@ -173,8 +214,8 @@ public sealed class TipoEquipamientoTests
     [TestMethod]
     public void Modificar_DescripcionInvalida_LanzaDominioException()
     {
-        var tipo = CrearTipo();
-        var descripcion = new string('a', 301);
+        TipoEquipamiento tipo = CrearTipo();
+        string descripcion = new string('a', 301);
 
         Assert.ThrowsException<DominioException>(() => ModificarTipo(tipo, descripcion: descripcion));
     }
@@ -182,14 +223,15 @@ public sealed class TipoEquipamientoTests
     [TestMethod]
     public void Modificar_DuracionInvalida_LanzaDominioException()
     {
-        var tipo = CrearTipo();
+        TipoEquipamiento tipo = CrearTipo();
 
         Assert.ThrowsException<DominioException>(() => ModificarTipo(tipo, duracionMaxPrestamo: 0));
     }
+
     [TestMethod]
     public void Modificar_DatosInvalidos_ConservaLosDatosAnteriores()
     {
-        var tipo = CrearTipo(nombre: "Proyector Epson PowerLite");
+        TipoEquipamiento tipo = CrearTipo(nombre: "Proyector Epson PowerLite");
 
         Assert.ThrowsException<DominioException>(
             () => ModificarTipo(tipo, nombre: "Notebook Lenovo ThinkPad T14", duracionMaxPrestamo: 0));
@@ -306,7 +348,7 @@ public sealed class TipoEquipamientoTests
     [TestMethod]
     public void Discontinuar_TipoYaDiscontinuado_LanzaDominioException()
     {
-        var tipo = CrearTipo();
+        TipoEquipamiento tipo = CrearTipo();
         tipo.Discontinuar();
 
         Assert.ThrowsException<DominioException>(() => tipo.Discontinuar());

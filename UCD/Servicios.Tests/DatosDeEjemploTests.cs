@@ -74,7 +74,7 @@ public class DatosDeEjemploTests
         _datos.Cargar();
         _datos.Cargar();
 
-        Assert.AreEqual(4, _memoria.Usuarios.Count);
+        Assert.AreEqual(4, _usuarios.ObtenerTodos().Count);
         Assert.AreEqual(2, _prestamos.ObtenerPrestamosActivos().Count);
         Assert.AreEqual(6, _repositorioCatalogo.Obtener()!.Tipos.Count);
     }

@@ -12,13 +12,16 @@
 </div>
 
 <div class="toolbar">
-    <select class="field" aria-label="Estado" @bind="_estado">
-        <option value="@TodosLosEstados">Todos</option>
-        @foreach (string estado in Estados)
-        {
-            <option value="@estado">@estado</option>
-        }
-    </select>
+    <div>
+        <label class="lbl" for="filtro-estado">Estado</label>
+        <select id="filtro-estado" class="field" @bind="_estado">
+            <option value="@TodosLosEstados">Todos</option>
+            @foreach (string estado in Estados)
+            {
+                <option value="@estado">@estado</option>
+            }
+        </select>
+    </div>
 </div>
 
 <div class="card table-card">
@@ -44,10 +47,10 @@
                     <td>@prestamo.TipoEquipamiento</td>
                     <td>@prestamo.CantidadSolicitada</td>
                     <td>@prestamo.Estado</td>
-                    <td>@prestamo.FechaHoraPrestamo.ToString(FormatoFecha)</td>
-                    <td>@(prestamo.Estado == EstadoRechazado ? SinDato : prestamo.FechaEsperadaDevolucion.ToString(FormatoFechaEsperada))</td>
+                    <td>@prestamo.FechaHoraPrestamo.ToString(Formatos.FechaHora)</td>
+                    <td>@(prestamo.Estado == EstadosPrestamo.Rechazado ? SinDato : prestamo.FechaEsperadaDevolucion.ToString(Formatos.Fecha))</td>
                     <td class="mono">@(prestamo.Unidades.Any() ? string.Join(", ", prestamo.Unidades) : SinDato)</td>
-                    <td>@(prestamo.FechaHoraEntrega?.ToString(FormatoFecha) ?? SinDato)</td>
+                    <td>@(prestamo.FechaHoraEntrega?.ToString(Formatos.FechaHora) ?? SinDato)</td>
                     <td>@(prestamo.MotivoRechazo ?? SinDato)</td>
                 </tr>
             }

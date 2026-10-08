@@ -44,21 +44,21 @@
 
     @if (_resultado is not null)
     {
-        if (_resultado.Estado == EstadoActivo)
+        if (_resultado.Estado == EstadosPrestamo.Activo)
         {
             <div class="alert alert-success resultado" role="status">
                 Préstamo activo: retirá las unidades <span class="mono">@string.Join(", ", _resultado.Unidades)</span>.
                 <div>@DetalleResultado</div>
             </div>
         }
-        else if (_resultado.Estado == EstadoSolicitado)
+        else if (_resultado.Estado == EstadosPrestamo.Solicitado)
         {
             <div class="alert alert-info resultado" role="status">
                 Tu solicitud quedó pendiente de aprobación.
                 <div>@DetalleResultado</div>
             </div>
         }
-        else if (_resultado.Estado == EstadoRechazado)
+        else if (_resultado.Estado == EstadosPrestamo.Rechazado)
         {
             <div class="alert alert-error resultado" role="alert">
                 Tu solicitud fue rechazada: @_resultado.MotivoRechazo.

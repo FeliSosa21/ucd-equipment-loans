@@ -5,7 +5,6 @@ namespace UI.Components.Pages;
 
 public partial class Auditoria
 {
-    private const string FormatoFecha = "dd/MM/yyyy HH:mm";
     private const string SinDato = "—";
     private const string TodosLosTipos = "";
 

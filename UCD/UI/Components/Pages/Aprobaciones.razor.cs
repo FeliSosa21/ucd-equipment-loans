@@ -1,18 +1,12 @@
 using DTOs;
 using Servicios;
+using UI.Presentacion;
 using UI.Sesion;
 
 namespace UI.Components.Pages;
 
 public partial class Aprobaciones
 {
-    private const string FormatoFecha = "dd/MM/yyyy HH:mm";
-    private const string FormatoFechaEsperada = "dd/MM/yyyy";
-    private const int LargoMaximoMotivo = 300;
-
-    // Estado del prestamo que devuelve el servicio cuando lo pudo aprobar: aprobar lo deja activo.
-    private const string EstadoActivo = "Activo";
-
     private List<PrestamoDto> _pendientes = new List<PrestamoDto>();
     private PrestamoDto? _rechazando;
     private string _motivo = string.Empty;
@@ -50,15 +44,29 @@ public partial class Aprobaciones
         catch (ServicioException ex)
         {
             _avisoLista = ex.Message;
+            Recargar();
+            AvisarSiYaNoEstaPendiente(prestamo);
+            return;
         }
 
         Recargar();
     }
 
+    // Si otro evaluador la resolvio mientras tanto, el aviso dice por que desaparecio de la lista.
+    private void AvisarSiYaNoEstaPendiente(PrestamoDto prestamo)
+    {
+        if (EstaPendiente(prestamo))
+        {
+            return;
+        }
+
+        _avisoLista = AvisoYaNoPendiente(prestamo);
+    }
+
     // Si ya no hay unidades suficientes, el servicio no aprueba: deja el prestamo rechazado con el motivo.
     private void InformarAprobacion(PrestamoDto resultado)
     {
-        if (resultado.Estado == EstadoActivo)
+        if (resultado.Estado == EstadosPrestamo.Activo)
         {
             _exito = $"Se aprobó el préstamo de {resultado.TipoEquipamiento} de {resultado.Solicitante} y quedó activo. " +
                      $"Unidades asignadas: {string.Join(", ", resultado.Unidades)}.";
@@ -117,9 +125,12 @@ public partial class Aprobaciones
 
         _rechazando = null;
         _error = null;
-        _avisoLista = $"El préstamo de {prestamo.TipoEquipamiento} de {prestamo.Solicitante} ya no está pendiente; " +
-                      "la lista se actualizó.";
+        _avisoLista = AvisoYaNoPendiente(prestamo);
     }
+
+    private static string AvisoYaNoPendiente(PrestamoDto prestamo) =>
+        $"El préstamo de {prestamo.TipoEquipamiento} de {prestamo.Solicitante} ya no está pendiente; " +
+        "la lista se actualizó.";
 
     private bool EstaPendiente(PrestamoDto prestamo) =>
         _pendientes.Any(pendiente => pendiente.Id == prestamo.Id);

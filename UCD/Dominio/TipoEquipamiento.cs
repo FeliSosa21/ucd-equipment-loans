@@ -14,6 +14,7 @@ public class TipoEquipamiento
     public bool RequiereAprobacion { get; private set; }
     public Categoria Categoria { get; private set; }
     public EstadoTipoEquipamiento Estado { get; private set; } = EstadoTipoEquipamiento.Activo;
+    public bool EstaActivo => Estado == EstadoTipoEquipamiento.Activo;
 
     private readonly List<UnidadFisica> _unidades = new();
 
@@ -50,7 +51,15 @@ public class TipoEquipamiento
         Estado = EstadoTipoEquipamiento.Discontinuado;
     }
 
-    public bool EstaActivo => Estado == EstadoTipoEquipamiento.Activo;
+    public void Reactivar()
+    {
+        if (EstaActivo)
+        {
+            throw new DominioException("El tipo de equipamiento ya esta activo");
+        }
+
+        Estado = EstadoTipoEquipamiento.Activo;
+    }
 
     public void AgregarUnidad(UnidadFisica unidad)
     {
@@ -100,6 +109,11 @@ public class TipoEquipamiento
 
     private static void ValidarDescripcion(string descripcion)
     {
+        if (descripcion is null)
+        {
+            throw new DominioException("La descripcion del tipo de equipamiento no puede ser nula");
+        }
+
         if (descripcion.Length > LargoMaximoDescripcion)
         {
             throw new DominioException(

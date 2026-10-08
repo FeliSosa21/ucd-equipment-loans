@@ -11,8 +11,13 @@ namespace UI.Sesion;
 public class SesionActual
 {
     public const string AvisoCuentaInactiva = "Tu sesión se cerró porque tu cuenta ya no está activa.";
+    public const string PaginaPendienteDeActivacion = "/pendiente-activacion";
 
     private const string ClaveDni = "dni_sesion";
+
+    // Mientras espera la activacion puede gestionar su propia cuenta: la letra (pag. 5) dice que cualquier
+    // usuario puede cambiar su contrasena en cualquier momento, y el foro (24/09) que puede modificar sus datos.
+    private static readonly string[] PaginasDeSuCuenta = { "/mis-datos", "/cambiar-contrasena" };
 
     private readonly ProtectedLocalStorage _almacenamiento;
     private readonly ServicioSesion _servicioSesion;
@@ -62,12 +67,6 @@ public class SesionActual
         Cargada = true;
         Cambio?.Invoke();
     }
-
-    public const string PaginaPendienteDeActivacion = "/pendiente-activacion";
-
-    // Mientras espera la activacion puede gestionar su propia cuenta: la letra (pag. 5) dice que cualquier
-    // usuario puede cambiar su contrasena en cualquier momento, y el foro (24/09) que puede modificar sus datos.
-    private static readonly string[] PaginasDeSuCuenta = { "/mis-datos", "/cambiar-contrasena" };
 
     // Pagina a la que el usuario tiene que ir antes que a cualquier otra, o null si puede navegar libremente.
     public string? PaginaObligatoria()

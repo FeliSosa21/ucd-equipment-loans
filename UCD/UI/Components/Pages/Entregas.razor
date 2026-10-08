@@ -42,8 +42,8 @@
                     <td>@prestamo.TipoEquipamiento</td>
                     <td>@prestamo.CantidadSolicitada</td>
                     <td class="mono">@string.Join(", ", prestamo.Unidades)</td>
-                    <td>@prestamo.FechaHoraPrestamo.ToString(FormatoFecha)</td>
-                    <td>@prestamo.FechaEsperadaDevolucion.ToString(FormatoFechaEsperada)</td>
+                    <td>@prestamo.FechaHoraPrestamo.ToString(Formatos.FechaHora)</td>
+                    <td>@prestamo.FechaEsperadaDevolucion.ToString(Formatos.Fecha)</td>
                     <td>
                         <button class="btn btn-ghost btn-sm" @onclick="() => RegistrarEntrega(prestamo)">
                             Registrar entrega

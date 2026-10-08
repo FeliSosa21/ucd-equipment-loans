@@ -1,12 +1,15 @@
 ﻿using Data.Repositorios;
-using DTOs;
 using Dominio;
+using DTOs;
+
 namespace Servicios;
 
 // Gestion de tipos de equipamiento y del nombre del catalogo (req. 4).
-// Registrar, modificar y discontinuar requieren el permiso GestionarCatalogo (Supervisor y Administrador).
+// Registrar, modificar, discontinuar y reactivar requieren el permiso GestionarCatalogo (Supervisor y Administrador).
 public class ServicioTiposEquipamiento
 {
+    private const string MensajeSinPermiso = "El usuario no tiene permiso para gestionar el catalogo";
+
     private readonly RepositorioCatalogo _repositorioCatalogo;
     private readonly RepositorioUsuario _repositorioUsuario;
 
@@ -20,7 +23,7 @@ public class ServicioTiposEquipamiento
     {
         List<TipoEquipamientoDetalleDto> resultado = new List<TipoEquipamientoDetalleDto>();
 
-        foreach (TipoEquipamiento tipo in ObtenerCatalogo().Tipos)
+        foreach (TipoEquipamiento tipo in OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo).Tipos)
         {
             if (CumpleFiltro(tipo, nombre, categoria))
             {
@@ -36,81 +39,61 @@ public class ServicioTiposEquipamiento
         ArgumentNullException.ThrowIfNull(datos);
         ValidarResponsable(dniResponsable);
         Categoria categoria = ObtenerCategoria(datos.Categoria);
+        Catalogo catalogo = OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo);
+        string nombre = OperacionesComunes.Normalizar(datos.Nombre);
+        string descripcion = OperacionesComunes.Normalizar(datos.Descripcion);
 
-        try
+        TraduccionDeErrores.Ejecutar(() =>
         {
-            TipoEquipamiento tipo = new TipoEquipamiento(Normalizar(datos.Nombre), Normalizar(datos.Descripcion),
-                datos.DuracionMaxPrestamo, datos.RequiereAprobacion, categoria);
-            ObtenerCatalogo().AgregarTipo(tipo);
-        }
-        catch (DominioException ex)
-        {
-            throw new ServicioException(ex.Message, ex);
-        }
+            TipoEquipamiento tipo = new TipoEquipamiento(nombre, descripcion, datos.DuracionMaxPrestamo,
+                datos.RequiereAprobacion, categoria);
+            catalogo.AgregarTipo(tipo);
+        });
     }
 
     public void Modificar(string nombreActual, DatosTipoEquipamientoDto datos, string dniResponsable)
     {
         ArgumentNullException.ThrowIfNull(datos);
         ValidarResponsable(dniResponsable);
-        Catalogo catalogo = ObtenerCatalogo();
+        Catalogo catalogo = OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo);
         TipoEquipamiento tipo = ObtenerTipo(catalogo, nombreActual);
         Categoria categoria = ObtenerCategoria(datos.Categoria);
-        string nombreNuevo = Normalizar(datos.Nombre);
+        string nombreNuevo = OperacionesComunes.Normalizar(datos.Nombre);
         ValidarNombreDisponible(catalogo, tipo, nombreNuevo);
-        try
-        {
-            tipo.Modificar(nombreNuevo, Normalizar(datos.Descripcion), datos.DuracionMaxPrestamo, datos.RequiereAprobacion, categoria);
-        }
-        catch (DominioException ex)
-        {
-            throw new ServicioException(ex.Message, ex);
-        }
+
+        TraduccionDeErrores.Ejecutar(() =>
+            tipo.Modificar(nombreNuevo, OperacionesComunes.Normalizar(datos.Descripcion), datos.DuracionMaxPrestamo,
+                datos.RequiereAprobacion, categoria));
     }
 
     public void Discontinuar(string nombre, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        TipoEquipamiento tipo = ObtenerTipo(ObtenerCatalogo(), nombre);
+        TipoEquipamiento tipo = ObtenerTipo(OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo), nombre);
 
-        try
-        {
-            tipo.Discontinuar();
-        }
-        catch (DominioException ex)
-        {
-            throw new ServicioException(ex.Message, ex);
-        }
+        TraduccionDeErrores.Ejecutar(tipo.Discontinuar);
+    }
+
+    // Foro del curso: un tipo discontinuado puede volver a activarse.
+    public void Reactivar(string nombre, string dniResponsable)
+    {
+        ValidarResponsable(dniResponsable);
+        TipoEquipamiento tipo = ObtenerTipo(OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo), nombre);
+
+        TraduccionDeErrores.Ejecutar(tipo.Reactivar);
     }
 
     public string ObtenerNombreCatalogo()
     {
-        return ObtenerCatalogo().Nombre;
+        return OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo).Nombre;
     }
 
     public void ModificarNombreCatalogo(string nombre, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        Catalogo catalogo = ObtenerCatalogo();
-        try
-        {
-            catalogo.ModificarNombre(Normalizar(nombre));
-        }
-        catch (DominioException ex)
-        {
-            throw new ServicioException(ex.Message, ex);
-        }
-    }
+        Catalogo catalogo = OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo);
 
-    private Catalogo ObtenerCatalogo()
-    {
-        Catalogo? catalogo = _repositorioCatalogo.Obtener();
-        if (catalogo is null)
-        {
-            throw new ServicioException("El catalogo no esta cargado");
-        }
-
-        return catalogo;
+        TraduccionDeErrores.Ejecutar(() => catalogo.ModificarNombre(OperacionesComunes.Normalizar(nombre)));
     }
 
     private static TipoEquipamiento ObtenerTipo(Catalogo catalogo, string nombre)
@@ -135,33 +118,22 @@ public class ServicioTiposEquipamiento
 
     private void ValidarResponsable(string dniResponsable)
     {
-        Usuario? responsable = _repositorioUsuario.ObtenerUsuarioPorDni(dniResponsable);
-
-        if (responsable is null || responsable.Estado == EstadoUsuario.Desactivado ||
-            !responsable.Tipo.TienePermiso(Permiso.GestionarCatalogo))
-        {
-            throw new ServicioException("El usuario no tiene permiso para gestionar el catalogo");
-        }
+        OperacionesComunes.ValidarResponsable(_repositorioUsuario, dniResponsable, Permiso.GestionarCatalogo,
+            MensajeSinPermiso);
     }
 
+    // Solo nombres de la enumeracion: Enum.TryParse tambien aceptaria numeros como "1".
     private static Categoria ObtenerCategoria(string categoria)
     {
-        if (!Enum.TryParse(categoria, out Categoria resultado) || !Enum.IsDefined(resultado))
+        foreach (string nombre in Enum.GetNames<Categoria>())
         {
-            throw new ServicioException("La categoria seleccionada no existe");
+            if (string.Equals(nombre, categoria, StringComparison.OrdinalIgnoreCase))
+            {
+                return Enum.Parse<Categoria>(nombre);
+            }
         }
 
-        return resultado;
-    }
-
-    private static string Normalizar(string? texto)
-    {
-        if (texto is null)
-        {
-            return string.Empty;
-        }
-
-        return texto.Trim();
+        throw new ServicioException("La categoria seleccionada no existe");
     }
 
     private static bool CumpleFiltro(TipoEquipamiento tipo, string? nombre, string? categoria)

@@ -9,10 +9,6 @@ namespace UI.Components.Pages;
 // cambia su estado y registra su baja. Las reglas las controla ServicioUnidades; la pagina solo muestra.
 public partial class Unidades
 {
-    private const string EstadoDisponible = "Disponible";
-    private const string EstadoPrestada = "Prestada";
-    private const string EstadoEnMantenimiento = "EnMantenimiento";
-
     private List<UnidadDetalleDto> _unidades = new List<UnidadDetalleDto>();
     private List<TipoEquipamientoDetalleDto> _tipos = new List<TipoEquipamientoDetalleDto>();
     private string _tipoFiltro = string.Empty;
@@ -52,11 +48,18 @@ public partial class Unidades
         }
     }
 
+    // Al cambiar un filtro no queda en pantalla el mensaje de la accion anterior.
+    private void Filtrar()
+    {
+        LimpiarMensajes();
+        Recargar();
+    }
+
     private void LimpiarFiltros()
     {
         _tipoFiltro = string.Empty;
         _estadoFiltro = string.Empty;
-        Recargar();
+        Filtrar();
     }
 
     private bool HayFiltrosAplicados()
@@ -70,7 +73,7 @@ public partial class Unidades
         List<TipoEquipamientoDetalleDto> activos = new List<TipoEquipamientoDetalleDto>();
         foreach (TipoEquipamientoDetalleDto tipo in _tipos)
         {
-            if (tipo.Estado == "Activo")
+            if (tipo.Estado == EstadosCatalogo.TipoActivo)
             {
                 activos.Add(tipo);
             }
@@ -168,6 +171,12 @@ public partial class Unidades
 
     private void EnviarAMantenimiento(UnidadDetalleDto unidad)
     {
+        // Un doble clic manda dos envios: el segundo llega con la unidad ya en mantenimiento.
+        if (!SigueEnEstado(unidad, EstadosCatalogo.UnidadDisponible))
+        {
+            return;
+        }
+
         CerrarTodo();
         try
         {
@@ -184,6 +193,12 @@ public partial class Unidades
 
     private void VolverADisponible(UnidadDetalleDto unidad)
     {
+        // Un doble clic manda dos envios: el segundo llega con la unidad ya disponible.
+        if (!SigueEnEstado(unidad, EstadosCatalogo.UnidadEnMantenimiento))
+        {
+            return;
+        }
+
         CerrarTodo();
         try
         {
@@ -250,45 +265,60 @@ public partial class Unidades
         _exito = null;
     }
 
+    // La fila del clic puede ser de un listado viejo: se compara con el estado del listado actual.
+    private bool SigueEnEstado(UnidadDetalleDto unidad, string estado)
+    {
+        foreach (UnidadDetalleDto actual in _unidades)
+        {
+            if (actual.IdInstitucional == unidad.IdInstitucional)
+            {
+                return actual.Estado == estado;
+            }
+        }
+
+        return false;
+    }
+
     private static bool PuedeEditarse(UnidadDetalleDto unidad)
     {
-        return unidad.Estado != "DadaDeBaja";
+        return unidad.Estado != EstadosCatalogo.UnidadDadaDeBaja;
     }
 
     private static bool PuedeIrAMantenimiento(UnidadDetalleDto unidad)
     {
-        return unidad.Estado == EstadoDisponible;
+        return unidad.Estado == EstadosCatalogo.UnidadDisponible;
     }
 
     private static bool PuedeVolverADisponible(UnidadDetalleDto unidad)
     {
-        return unidad.Estado == EstadoEnMantenimiento;
+        return unidad.Estado == EstadosCatalogo.UnidadEnMantenimiento;
     }
 
     // Una unidad prestada no se da de baja directamente (letra); una dada de baja ya no cambia.
     private static bool PuedeDarseDeBaja(UnidadDetalleDto unidad)
     {
-        return unidad.Estado == EstadoDisponible || unidad.Estado == EstadoEnMantenimiento;
+        return unidad.Estado == EstadosCatalogo.UnidadDisponible ||
+               unidad.Estado == EstadosCatalogo.UnidadEnMantenimiento;
     }
 
     private static bool EstaPrestada(UnidadDetalleDto unidad)
     {
-        return unidad.Estado == EstadoPrestada;
+        return unidad.Estado == EstadosCatalogo.UnidadPrestada;
     }
 
     private static string ClaseDeEstado(UnidadDetalleDto unidad)
     {
-        if (unidad.Estado == EstadoDisponible)
+        if (unidad.Estado == EstadosCatalogo.UnidadDisponible)
         {
             return "badge badge-ok";
         }
 
-        if (unidad.Estado == EstadoEnMantenimiento)
+        if (unidad.Estado == EstadosCatalogo.UnidadEnMantenimiento)
         {
             return "badge badge-alerta";
         }
 
-        if (unidad.Estado == EstadoPrestada)
+        if (unidad.Estado == EstadosCatalogo.UnidadPrestada)
         {
             return "badge badge-neutro";
         }

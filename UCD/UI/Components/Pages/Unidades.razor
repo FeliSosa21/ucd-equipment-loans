@@ -17,14 +17,14 @@
     <button type="button" class="btn btn-primary btn-sm" @onclick="AbrirAlta" disabled="@_mostrarFormulario">
         Nueva unidad
     </button>
-    <select class="field" aria-label="Tipo de equipamiento" @bind="_tipoFiltro" @bind:after="Recargar">
+    <select class="field" aria-label="Tipo de equipamiento" @bind="_tipoFiltro" @bind:after="Filtrar">
         <option value="">Todos los tipos</option>
         @foreach (TipoEquipamientoDetalleDto tipo in _tipos)
         {
             <option value="@tipo.Nombre">@tipo.Nombre</option>
         }
     </select>
-    <select class="field" aria-label="Estado" @bind="_estadoFiltro" @bind:after="Recargar">
+    <select class="field" aria-label="Estado" @bind="_estadoFiltro" @bind:after="Filtrar">
         <option value="">Todos los estados</option>
         @foreach (KeyValuePair<string, string> estado in TextosVisibles.EstadosDeUnidad)
         {

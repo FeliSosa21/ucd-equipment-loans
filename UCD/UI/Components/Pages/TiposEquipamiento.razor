@@ -9,7 +9,7 @@
 
 <div class="page-header">
     <h1>Tipos de equipamiento</h1>
-    <p>Registrá, modificá o discontinuá los modelos de equipamiento del catálogo.</p>
+    <p>Registrá, modificá, discontinuá o reactivá los modelos de equipamiento del catálogo.</p>
 </div>
 
 <section class="card catalogo" aria-label="Nombre del catálogo">
@@ -45,8 +45,8 @@
         Nuevo tipo
     </button>
     <input class="field busqueda" type="search" placeholder="Buscar por nombre" aria-label="Buscar por nombre"
-           @bind="_busqueda" @bind:event="oninput" @bind:after="Recargar" />
-    <select class="field" aria-label="Categoría" @bind="_categoria" @bind:after="Recargar">
+           @bind="_busqueda" @bind:event="oninput" @bind:after="Filtrar" />
+    <select class="field" aria-label="Categoría" @bind="_categoria" @bind:after="Filtrar">
         <option value="">Todas las categorías</option>
         @foreach (KeyValuePair<string, string> categoria in TextosVisibles.Categorias)
         {
@@ -112,8 +112,8 @@
     <div class="card alta" role="alertdialog" aria-labelledby="confirmacion-pregunta">
         <p id="confirmacion-pregunta" class="pregunta">
             ¿Querés discontinuar <strong>@_aDiscontinuar.Nombre</strong>? No se van a poder registrar unidades
-            nuevas ni solicitar préstamos de este tipo. Los préstamos en curso no cambian y la acción no se puede
-            deshacer.
+            nuevas ni solicitar préstamos de este tipo. Los préstamos en curso no cambian. Más adelante lo podés
+            volver a activar con «Reactivar».
         </p>
         <div class="acciones">
             <button type="button" class="btn btn-primary" @onclick="ConfirmarDiscontinuar">Sí, discontinuar</button>
@@ -167,6 +167,12 @@
                     {
                         <button type="button" class="btn btn-ghost btn-sm" @onclick="() => PedirDiscontinuar(tipo)">
                             Discontinuar
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-ghost btn-sm" @onclick="() => Reactivar(tipo)">
+                            Reactivar
                         </button>
                     }
                 </td>

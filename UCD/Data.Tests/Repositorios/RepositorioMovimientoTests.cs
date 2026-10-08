@@ -5,7 +5,7 @@ using Dominio;
 namespace Data.Tests.Repositorios;
 
 [TestClass]
-public class RepositorioMovimientoTests
+public sealed class RepositorioMovimientoTests
 {
     private static readonly DateTime FechaFija = new(2026, 10, 5, 10, 0, 0);
 

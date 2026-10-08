@@ -1,23 +1,17 @@
 using DTOs;
 using Microsoft.AspNetCore.Components;
 using Servicios;
+using UI.Presentacion;
 using UI.Sesion;
 
 namespace UI.Components.Pages;
 
 public partial class SolicitarPrestamo
 {
-    private const string FormatoFecha = "dd/MM/yyyy HH:mm";
-    private const string FormatoFechaEsperada = "dd/MM/yyyy";
     private const int CantidadPorDefecto = 1;
 
     // Estado de un tipo de equipamiento: solo se pueden solicitar los activos.
     private const string EstadoTipoActivo = "Activo";
-
-    // Estados del prestamo que devuelve el servicio al solicitar.
-    private const string EstadoActivo = "Activo";
-    private const string EstadoSolicitado = "Solicitado";
-    private const string EstadoRechazado = "Rechazado";
 
     private List<TipoEquipamientoDto> _tipos = new List<TipoEquipamientoDto>();
     private string _tipo = string.Empty;
@@ -66,14 +60,14 @@ public partial class SolicitarPrestamo
 
             string pedido = $"{_resultado.TipoEquipamiento} × {_resultado.CantidadSolicitada}";
 
-            if (_resultado.Estado == EstadoRechazado)
+            if (_resultado.Estado == EstadosPrestamo.Rechazado)
             {
-                return $"{pedido} · solicitado el {_resultado.FechaHoraPrestamo.ToString(FormatoFecha)}";
+                return $"{pedido} · solicitado el {_resultado.FechaHoraPrestamo.ToString(Formatos.FechaHora)}";
             }
 
             return $"{pedido} · " +
-                   $"inicio {_resultado.FechaHoraPrestamo.ToString(FormatoFecha)} · " +
-                   $"devolución esperada {_resultado.FechaEsperadaDevolucion.ToString(FormatoFechaEsperada)}";
+                   $"inicio {_resultado.FechaHoraPrestamo.ToString(Formatos.FechaHora)} · " +
+                   $"devolución esperada {_resultado.FechaEsperadaDevolucion.ToString(Formatos.Fecha)}";
         }
     }
 

@@ -45,13 +45,7 @@ public class ServicioInventario
 
     private IReadOnlyCollection<TipoEquipamiento> ObtenerTipos()
     {
-        Catalogo? catalogo = _repositorioCatalogo.Obtener();
-        if (catalogo is null)
-        {
-            return new List<TipoEquipamiento>();
-        }
-
-        return catalogo.Tipos;
+        return OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo).Tipos;
     }
 
     private static bool CumpleFiltro(TipoEquipamiento tipo, FiltroInventarioDto filtro)
@@ -97,12 +91,12 @@ public class ServicioInventario
         return unidades;
     }
 
-    private static CantidadesPorEstadoDto CrearFila(string nombre, Categoria categoria,
+    private static CantidadesPorEstadoDto CrearFila(string agrupador, Categoria categoria,
         IReadOnlyCollection<UnidadFisica> unidades)
     {
         return new CantidadesPorEstadoDto
         {
-            Nombre = nombre,
+            Agrupador = agrupador,
             Categoria = categoria.ToString(),
             Disponibles = ContarEnEstado(unidades, EstadoUnidadFisica.Disponible),
             Prestadas = ContarEnEstado(unidades, EstadoUnidadFisica.Prestada),
