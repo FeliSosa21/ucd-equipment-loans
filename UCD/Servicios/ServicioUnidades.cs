@@ -61,6 +61,7 @@ public class ServicioUnidades
 
     public void Modificar(DatosUnidadDto datos, string dniResponsable)
     {
+        ValidarResponsable(dniResponsable);
         UnidadFisica unidad = ObtenerUnidad(datos.IdInstitucional);
         unidad.ModificarInfo(datos.UbicacionFisica, datos.NumeroSerie, datos.Observaciones);
     }
