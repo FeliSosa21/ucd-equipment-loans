@@ -30,6 +30,16 @@ public class ServicioTiposEquipamientoTests
         Assert.AreEqual("Discontinuado", tipos[1].Estado);
     }
 
+    [TestMethod]
+    public void Listar_SinCatalogo_LanzaServicioException()
+    {
+        Memoria memoria = new Memoria();
+        ServicioTiposEquipamiento servicio = new ServicioTiposEquipamiento(new RepositorioCatalogo(memoria),
+            new RepositorioUsuario(memoria));
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Listar(null, null));
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
