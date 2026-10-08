@@ -70,6 +70,19 @@ public sealed class ServicioHistoricoTests
             movimientos.Select(movimiento => movimiento.FechaHora).ToList());
     }
 
+    [TestMethod]
+    public void ListarMovimientos_MovimientosConLaMismaFechaHora_DevuelvePrimeroElUltimoRegistrado()
+    {
+        Memoria memoria = new Memoria();
+        RegistrarSolicitud(memoria, fechaHora: FechaFija);
+        RegistrarPrestamo(memoria, fechaHora: FechaFija);
+        ServicioHistorico servicio = CrearServicio(memoria);
+
+        List<MovimientoDto> movimientos = servicio.ListarMovimientos();
+
+        Assert.AreEqual("Prestamo", movimientos[0].Tipo);
+    }
+
     private static ServicioHistorico CrearServicio(Memoria memoria)
     {
         return new ServicioHistorico(new RepositorioMovimiento(memoria));
@@ -83,6 +96,16 @@ public sealed class ServicioHistoricoTests
             solicitante: CrearSolicitante(),
             evaluador: null,
             unidad: null));
+    }
+
+    private static void RegistrarPrestamo(Memoria memoria, DateTime fechaHora)
+    {
+        new RepositorioMovimiento(memoria).AgregarMovimiento(new Movimiento(
+            fechaHora: fechaHora,
+            tipo: TipoMovimiento.Prestamo,
+            solicitante: CrearSolicitante(),
+            evaluador: null,
+            unidad: CrearUnidad(idInstitucional: "EQP-0001")));
     }
 
     private static Usuario CrearSolicitante()
