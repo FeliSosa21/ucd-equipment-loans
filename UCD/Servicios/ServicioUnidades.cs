@@ -47,7 +47,7 @@ public class ServicioUnidades
         string idInstitucional = Normalizar(datos.IdInstitucional);
         string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
         ValidarIdDisponible(datos.IdInstitucional);
-        ValidarSerieDisponible(datos.NumeroSerie);
+        ValidarSerieDisponible(datos.NumeroSerie, null);
         try
         {
             UnidadFisica unidad = new UnidadFisica(idInstitucional, Normalizar(datos.UbicacionFisica), numeroSerie);
@@ -63,7 +63,9 @@ public class ServicioUnidades
     {
         ValidarResponsable(dniResponsable);
         UnidadFisica unidad = ObtenerUnidad(datos.IdInstitucional);
-        unidad.ModificarInfo(datos.UbicacionFisica, datos.NumeroSerie, datos.Observaciones);
+        string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
+        ValidarSerieDisponible(numeroSerie, unidad);
+        unidad.ModificarInfo(datos.UbicacionFisica, numeroSerie, datos.Observaciones);
     }
 
     private static string Normalizar(string? texto)
@@ -144,7 +146,7 @@ public class ServicioUnidades
         }
     }
 
-    private void ValidarSerieDisponible(string? numeroSerie)
+    private void ValidarSerieDisponible(string? numeroSerie, UnidadFisica? unidadEditada)
     {
         if (string.IsNullOrWhiteSpace(numeroSerie))
         {
@@ -155,7 +157,7 @@ public class ServicioUnidades
         {
             foreach (UnidadFisica unidad in tipo.Unidades)
             {
-                if (string.Equals(unidad.NumSerie, numeroSerie, StringComparison.OrdinalIgnoreCase))
+                if (unidad != unidadEditada && string.Equals(unidad.NumSerie, numeroSerie, StringComparison.OrdinalIgnoreCase))
                 {
                     throw new ServicioException("Ya existe una unidad con ese numero de serie");
                 }
