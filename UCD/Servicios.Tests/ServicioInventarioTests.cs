@@ -96,6 +96,14 @@ public class ServicioInventarioTests
         Assert.AreEqual(1, resultado[1].Total);
     }
 
+    [TestMethod]
+    public void ContarPorTipo_FiltroNull_LanzaArgumentNullException()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+
+        Assert.ThrowsException<ArgumentNullException>(() => servicio.ContarPorTipo(null!));
+    }
+
     private static ServicioInventario CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
