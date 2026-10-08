@@ -538,6 +538,42 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_SolicitudPendienteConUnidades_RegistraUnMovimientoDeAprobacionPorUnidadConElEvaluador()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        ServicioPrestamo servicioDeLaEvaluacion =
+            CrearServicioConReloj(memoria, new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
+        Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
+        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+        List<Movimiento> aprobaciones = movimientos
+            .Where(movimiento => movimiento.Tipo == TipoMovimiento.Aprobacion).ToList();
+
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento>
+            {
+                TipoMovimiento.Solicitud, TipoMovimiento.Aprobacion, TipoMovimiento.Aprobacion,
+                TipoMovimiento.Prestamo, TipoMovimiento.Prestamo
+            },
+            movimientos.Select(movimiento => movimiento.Tipo).ToList(),
+            "Las aprobaciones deberian registrarse despues de la solicitud y antes de los prestamos");
+        foreach (Movimiento aprobacion in aprobaciones)
+        {
+            Assert.AreEqual(FechaDeEvaluacion, aprobacion.FechaHora);
+            Assert.AreSame(docente, aprobacion.Solicitante);
+            Assert.AreSame(supervisor, aprobacion.Evaluador);
+        }
+        CollectionAssert.AreEqual(
+            new List<string> { "EQP-0101", "EQP-0102" },
+            aprobaciones.Select(aprobacion => aprobacion.Unidad!.IdInstitucional).ToList());
+    }
+
+    [TestMethod]
     public void Aprobar_SinUnidadesSuficientes_QuedaRechazadoSinEvaluador()
     {
         Memoria memoria = new Memoria();
