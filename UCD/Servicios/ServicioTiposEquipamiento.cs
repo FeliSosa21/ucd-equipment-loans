@@ -21,7 +21,10 @@ public class ServicioTiposEquipamiento
         List<TipoEquipamientoDetalleDto> resultado = new List<TipoEquipamientoDetalleDto>();
         foreach (TipoEquipamiento tipo in ObtenerCatalogo().Tipos)
         {
-            resultado.Add(CrearDetalle(tipo));
+            if (CoincideNombre(tipo, nombre))
+            {
+                resultado.Add(CrearDetalle(tipo));
+            }
         }
 
         return resultado;
@@ -36,6 +39,16 @@ public class ServicioTiposEquipamiento
         }
 
         return catalogo;
+    }
+
+    private static bool CoincideNombre(TipoEquipamiento tipo, string? nombre)
+    {
+        if (string.IsNullOrWhiteSpace(nombre))
+        {
+            return true;
+        }
+
+        return tipo.Nombre.Contains(nombre.Trim(), StringComparison.OrdinalIgnoreCase);
     }
 
     private static TipoEquipamientoDetalleDto CrearDetalle(TipoEquipamiento tipo)
