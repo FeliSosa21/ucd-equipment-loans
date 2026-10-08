@@ -1,0 +1,11 @@
+.catalogo { padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+.nombre-catalogo { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.nombre-catalogo .lbl { margin-bottom: 0; }
+.nombre-catalogo .field { width: auto; min-width: 320px; }
+.nombre-catalogo .hint { margin-top: 0; }
+.alta { padding: 1.25rem; margin-bottom: 1rem; }
+.pregunta { margin: 0 0 1rem; }
+.check { display: flex; align-items: center; gap: .5rem; align-self: end; font-size: .85rem; padding-bottom: .55rem; }
+.descripcion { font-size: .78rem; color: var(--ink-soft); margin-top: .15rem; max-width: 420px; }
+.celda-acciones { white-space: nowrap; text-align: right; }
+.celda-acciones .btn + .btn { margin-left: .4rem; }
