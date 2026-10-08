@@ -1,6 +1,7 @@
 ﻿using DTOs;
 using UI.Sesion;
 using Servicios;
+using UI.Presentacion;
 
 namespace UI.Components.Pages;
 
@@ -33,8 +34,8 @@ public partial class Catalogo
         // Un filtro vacio (todo en null) trae todos los tipos: el servicio no acepta un filtro null.
         FiltroCatalogoDto filtro = new FiltroCatalogoDto
         {
-            Categoria = ValorONulo(_categoria),
-            Estado = ValorONulo(_estado),
+            Categoria = ValoresDeFiltro.ValorONulo(_categoria),
+            Estado = ValoresDeFiltro.ValorONulo(_estado),
             MinimoDisponibles = _minimoDisponibles
         };
 
@@ -153,15 +154,4 @@ public partial class Catalogo
 
         return "numero sin-disponibles";
     }
-
-    private static string? ValorONulo(string valor)
-    {
-        if (string.IsNullOrEmpty(valor))
-        {
-            return null;
-        }
-
-        return valor;
-    }
-
 }

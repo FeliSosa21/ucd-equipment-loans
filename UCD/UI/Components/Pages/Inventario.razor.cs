@@ -1,5 +1,6 @@
 ﻿using DTOs;
 using UI.Sesion;
+using UI.Presentacion;
 
 namespace UI.Components.Pages;
 
@@ -25,8 +26,8 @@ public partial class Inventario
         _porCategoria = ServicioInventario.ContarPorCategoria();
         FiltroInventarioDto filtro = new FiltroInventarioDto
         {
-            Categoria = ValorONulo(_categoria),
-            Estado = ValorONulo(_estado)
+            Categoria = ValoresDeFiltro.ValorONulo(_categoria),
+            Estado = ValoresDeFiltro.ValorONulo(_estado)
         };
         _porTipo = ServicioInventario.ContarPorTipo(filtro);
     }
@@ -43,16 +44,6 @@ public partial class Inventario
         return _categoria != string.Empty || _estado != string.Empty;
     }
 
-    // "Todas" se representa con texto vacio y para el servicio significa no filtrar.
-    private static string? ValorONulo(string valor)
-    {
-        if (string.IsNullOrEmpty(valor))
-        {
-            return null;
-        }
-
-        return valor;
-    }
 
     // Los ceros se atenuan para que resalten las cantidades que importan.
     private static string ClaseDeCantidad(int cantidad)
