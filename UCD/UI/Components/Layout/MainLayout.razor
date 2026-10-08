@@ -69,14 +69,22 @@
     }
 
     // Si debe cambiar la contrasena o espera la activacion, no puede ir a otra pantalla hasta resolverlo.
+    // Mientras espera la activacion, igual puede usar las paginas de su cuenta (Mis datos y Cambiar contraseña).
     private void ExigirPaginaObligatoria()
     {
         string? pagina = SesionActual.PaginaObligatoria();
 
-        if (pagina is not null && !Navigation.Uri.EndsWith(pagina, StringComparison.OrdinalIgnoreCase))
+        if (pagina is null || Navigation.Uri.EndsWith(pagina, StringComparison.OrdinalIgnoreCase))
         {
-            Navigation.NavigateTo(pagina);
+            return;
         }
+
+        if (pagina == SesionActual.PaginaPendienteDeActivacion && SesionActual.EsPaginaDeSuCuenta(Navigation.Uri))
+        {
+            return;
+        }
+
+        Navigation.NavigateTo(pagina);
     }
 
     private async Task CerrarSesion()

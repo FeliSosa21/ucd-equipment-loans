@@ -19,6 +19,16 @@
         <a class="btn btn-ghost btn-sm" href="registro">Crear cuenta</a>
     </EstadoVacio>
 }
+else if (!PuedeConsultarSusSolicitudes)
+{
+    @* Funcionario y Supervisor no solicitan prestamos: en el inicio solo ven la bienvenida y usan el menu. *@
+    <PageTitle>UCD · Inicio</PageTitle>
+
+    <div class="page-header">
+        <h1>Hola, @SesionActual.Usuario!.Nombre</h1>
+        <p>Elegí en el menú lo que querés hacer.</p>
+    </div>
+}
 else
 {
     <PageTitle>UCD · Mis solicitudes</PageTitle>
@@ -76,10 +86,13 @@ else
 
     private List<PrestamoDto> _prestamos = new List<PrestamoDto>();
 
+    private bool PuedeConsultarSusSolicitudes =>
+        SesionActual.Usuario!.Permisos.Contains(Permisos.ConsultarMisSolicitudes);
+
     // Requerimiento 7: las solicitudes y préstamos del usuario logueado, los más recientes primero.
     protected override void OnInitialized()
     {
-        if (!SesionActual.EstaIniciada)
+        if (!SesionActual.EstaIniciada || !PuedeConsultarSusSolicitudes)
         {
             return;
         }

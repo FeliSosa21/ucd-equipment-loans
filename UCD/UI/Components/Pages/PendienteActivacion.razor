@@ -20,6 +20,9 @@
     <a class="btn btn-ghost" href="">Volver al inicio</a>
     @if (SesionActual.EstaIniciada)
     {
+        @* Mientras tanto puede gestionar su cuenta: cambiar la contraseña y modificar sus datos. *@
+        <a class="btn btn-ghost" href="mis-datos">Mis datos</a>
+        <a class="btn btn-ghost" href="cambiar-contrasena">Cambiar contraseña</a>
         <button class="btn btn-ghost" @onclick="Salir">Salir</button>
     }
 </div>
