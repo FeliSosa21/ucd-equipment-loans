@@ -241,6 +241,16 @@ public class ServicioTiposEquipamientoTests
         Assert.AreEqual("Catalogo UCD", servicio.ObtenerNombreCatalogo());
     }
 
+    [TestMethod]
+    public void ModificarNombreCatalogo_NombreValido_LoCambia()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+
+        servicio.ModificarNombreCatalogo("Centro de equipamiento ORT", DniSupervisor);
+
+        Assert.AreEqual("Centro de equipamiento ORT", servicio.ObtenerNombreCatalogo());
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
