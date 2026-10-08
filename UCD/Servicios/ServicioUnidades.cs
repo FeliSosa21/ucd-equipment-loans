@@ -41,6 +41,7 @@ public class ServicioUnidades
 
     public void Registrar(DatosUnidadDto datos, string dniResponsable)
     {
+        ValidarResponsable(dniResponsable);
         TipoEquipamiento tipo = ObtenerTipo(datos.NombreTipo);
         UnidadFisica unidad = new UnidadFisica(datos.IdInstitucional, datos.UbicacionFisica, datos.NumeroSerie);
         tipo.AgregarUnidad(unidad);
@@ -66,6 +67,16 @@ public class ServicioUnidades
         }
 
         return tipo;
+    }
+
+    private void ValidarResponsable(string dniResponsable)
+    {
+        Usuario? responsable = _repositorioUsuario.ObtenerUsuarioPorDni(dniResponsable);
+        if (responsable is null || responsable.Estado == EstadoUsuario.Desactivado ||
+            !responsable.Tipo.TienePermiso(Permiso.GestionarUnidades))
+        {
+            throw new ServicioException("El usuario no tiene permiso para gestionar unidades");
+        }
     }
 
     private static bool CoincideTipo(TipoEquipamiento tipo, string? nombreTipo)
