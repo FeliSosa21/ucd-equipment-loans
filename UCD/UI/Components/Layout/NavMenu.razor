@@ -21,7 +21,7 @@
     }
 
     @if (PuedeAlguno(Permisos.GestionarCatalogo, Permisos.GestionarUnidades, Permisos.EvaluarSolicitud,
-             Permisos.RegistrarDevolucion, Permisos.ConsultarHistorico))
+             Permisos.RealizarPrestamo, Permisos.RegistrarDevolucion, Permisos.ConsultarHistorico))
     {
         <div class="nav-section">Gestión</div>
         @if (Puede(Permisos.GestionarCatalogo))
@@ -35,6 +35,10 @@
         @if (Puede(Permisos.EvaluarSolicitud))
         {
             <NavLink class="nav-item" href="aprobaciones">Aprobaciones</NavLink>
+        }
+        @if (Puede(Permisos.RealizarPrestamo))
+        {
+            <NavLink class="nav-item" href="entregas">Entregas</NavLink>
         }
         @if (Puede(Permisos.RegistrarDevolucion))
         {
