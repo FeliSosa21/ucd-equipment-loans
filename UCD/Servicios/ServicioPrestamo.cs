@@ -55,6 +55,13 @@ public class ServicioPrestamo
             }
 
             _prestamos.AgregarPrestamo(prestamo);
+            RegistrarMovimiento(prestamo, TipoMovimiento.Solicitud, prestamo.FechaHoraPrestamo, unidad: null);
+
+            if (prestamo.Estado == EstadoPrestamo.Rechazado)
+            {
+                RegistrarMovimiento(prestamo, TipoMovimiento.Rechazo, prestamo.FechaHoraPrestamo, unidad: null);
+            }
+
             RegistrarMovimientos(prestamo, prestamo.FechaHoraPrestamo);
 
             return CrearPrestamoDto(prestamo);
@@ -75,17 +82,27 @@ public class ServicioPrestamo
 
         try
         {
+            DateTime fechaHoraEvaluacion = _reloj.GetLocalNow().DateTime;
+
             if (prestamo.TipoEquipamiento.CantidadDisponibles() < prestamo.CantidadSolicitada)
             {
                 prestamo.RechazarPorFaltaDeUnidades();
+
+                RegistrarMovimiento(prestamo, TipoMovimiento.Rechazo, fechaHoraEvaluacion, unidad: null);
             }
             else
             {
                 List<UnidadFisica> unidades = prestamo.TipoEquipamiento.UnidadesDisponibles()
                     .Take(prestamo.CantidadSolicitada).ToList();
                 prestamo.Aprobar(evaluador, unidades);
+
+                foreach (UnidadFisica unidad in prestamo.UnidadesAsignadas)
+                {
+                    RegistrarMovimiento(prestamo, TipoMovimiento.Aprobacion, fechaHoraEvaluacion, unidad);
+                }
+
                 prestamo.Realizar();
-                RegistrarMovimientos(prestamo, _reloj.GetLocalNow().DateTime);
+                RegistrarMovimientos(prestamo, fechaHoraEvaluacion);
             }
 
             return CrearPrestamoDto(prestamo);
@@ -105,6 +122,7 @@ public class ServicioPrestamo
         try
         {
             prestamo.Rechazar(evaluador, motivo);
+            RegistrarMovimiento(prestamo, TipoMovimiento.Rechazo, _reloj.GetLocalNow().DateTime, unidad: null);
 
             return CrearPrestamoDto(prestamo);
         }
@@ -246,16 +264,21 @@ public class ServicioPrestamo
         }
     }
 
+    private void RegistrarMovimiento(Prestamo prestamo, TipoMovimiento tipo, DateTime fechaHora, UnidadFisica? unidad)
+    {
+        _movimientos.AgregarMovimiento(new Movimiento(
+            fechaHora: fechaHora,
+            tipo: tipo,
+            solicitante: prestamo.Solicitante,
+            evaluador: prestamo.Evaluador,
+            unidad: unidad));
+    }
+
     private void RegistrarMovimientos(Prestamo prestamo, DateTime fechaHora)
     {
         foreach (UnidadFisica unidad in prestamo.UnidadesAsignadas)
         {
-            _movimientos.AgregarMovimiento(new Movimiento(
-                fechaHora: fechaHora,
-                tipo: TipoMovimiento.Prestamo,
-                solicitante: prestamo.Solicitante,
-                evaluador: prestamo.Evaluador,
-                unidad: unidad));
+            RegistrarMovimiento(prestamo, TipoMovimiento.Prestamo, fechaHora, unidad);
         }
     }
 
