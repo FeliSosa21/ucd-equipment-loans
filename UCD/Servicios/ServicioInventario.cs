@@ -27,7 +27,10 @@ public class ServicioInventario
 
         foreach (TipoEquipamiento tipo in catalogo.Tipos)
         {
-            filas.Add(CrearFilaDeTipo(tipo));
+            if (CumpleFiltro(tipo, filtro))
+            {
+                filas.Add(CrearFilaDeTipo(tipo));
+            }
         }
 
         return filas;
@@ -50,5 +53,15 @@ public class ServicioInventario
     private static int ContarEnEstado(IEnumerable<UnidadFisica> unidades, EstadoUnidadFisica estado)
     {
         return unidades.Count(unidad => unidad.Estado == estado);
+    }
+
+    private static bool CumpleFiltro(TipoEquipamiento tipo, FiltroInventarioDto filtro)
+    {
+        if (filtro.Categoria is not null && tipo.Categoria.ToString() != filtro.Categoria)
+        {
+            return false;
+        }
+
+        return true;
     }
 }
