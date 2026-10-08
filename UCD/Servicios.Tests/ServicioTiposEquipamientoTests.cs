@@ -53,6 +53,19 @@ public class ServicioTiposEquipamientoTests
         Assert.AreEqual("Proyector Epson", tipos[0].Nombre);
     }
 
+    [TestMethod]
+    public void Listar_FiltroPorCategoria_DevuelveSoloEsaCategoria()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson", Categoria.Audiovisual);
+        TipoEquipamiento notebook = CrearTipo("Notebook Lenovo", Categoria.Computacion);
+        ServicioTiposEquipamiento servicio = CrearServicio(proyector, notebook);
+
+        List<TipoEquipamientoDetalleDto> tipos = servicio.Listar(null, "Computacion");
+
+        Assert.AreEqual(1, tipos.Count);
+        Assert.AreEqual("Notebook Lenovo", tipos[0].Nombre);
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
