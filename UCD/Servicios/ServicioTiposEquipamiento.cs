@@ -88,7 +88,15 @@ public class ServicioTiposEquipamiento
     public void ModificarNombreCatalogo(string nombre, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        ObtenerCatalogo().ModificarNombre(nombre);
+        Catalogo catalogo = ObtenerCatalogo();
+        try
+        {
+            catalogo.ModificarNombre(nombre);
+        }
+        catch (DominioException ex)
+        {
+            throw new ServicioException(ex.Message, ex);
+        }
     }
 
     private Catalogo ObtenerCatalogo()
