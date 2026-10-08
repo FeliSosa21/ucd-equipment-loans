@@ -55,7 +55,14 @@ public class ServicioTiposEquipamiento
         TipoEquipamiento tipo = ObtenerTipo(catalogo, nombreActual);
         Categoria categoria = ObtenerCategoria(datos.Categoria);
         ValidarNombreDisponible(catalogo, tipo, datos.Nombre);
-        tipo.Modificar(datos.Nombre, datos.Descripcion, datos.DuracionMaxPrestamo, datos.RequiereAprobacion, categoria);
+        try
+        {
+            tipo.Modificar(datos.Nombre, datos.Descripcion, datos.DuracionMaxPrestamo, datos.RequiereAprobacion, categoria);
+        }
+        catch (DominioException ex)
+        {
+            throw new ServicioException(ex.Message, ex);
+        }
     }
 
     private Catalogo ObtenerCatalogo()
