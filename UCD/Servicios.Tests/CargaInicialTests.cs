@@ -26,12 +26,13 @@ public class CargaInicialTests
     public void CargarRoot_DosVeces_NoLoDuplica()
     {
         Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
         CargaInicial carga = CrearCarga(memoria);
 
         carga.CargarRoot();
         carga.CargarRoot();
 
-        Assert.AreEqual(1, memoria.Usuarios.Count);
+        Assert.AreEqual(1, repositorio.ObtenerTodos().Count);
     }
 
     [TestMethod]

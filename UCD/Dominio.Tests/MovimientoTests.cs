@@ -26,12 +26,20 @@ public sealed class MovimientoTests
     [TestMethod]
     [DataRow(TipoMovimiento.Prestamo)]
     [DataRow(TipoMovimiento.Devolucion)]
-    [DataRow(TipoMovimiento.Solicitud)]
     [DataRow(TipoMovimiento.Aprobacion)]
-    [DataRow(TipoMovimiento.Rechazo)]
-    public void Constructor_CadaTipo_ConservaElTipo(TipoMovimiento tipo)
+    public void Constructor_MovimientoDeUnidad_ConservaElTipo(TipoMovimiento tipo)
     {
         Movimiento movimiento = CrearMovimiento(tipo: tipo);
+
+        Assert.AreEqual(tipo, movimiento.Tipo);
+    }
+
+    [TestMethod]
+    [DataRow(TipoMovimiento.Solicitud)]
+    [DataRow(TipoMovimiento.Rechazo)]
+    public void Constructor_SolicitudORechazo_ConservaElTipo(TipoMovimiento tipo)
+    {
+        Movimiento movimiento = CrearMovimientoSinUnidad(tipo: tipo);
 
         Assert.AreEqual(tipo, movimiento.Tipo);
     }
@@ -64,15 +72,7 @@ public sealed class MovimientoTests
     [DataRow(TipoMovimiento.Aprobacion)]
     public void Constructor_MovimientoDeUnidadSinUnidad_LanzaExcepcion(TipoMovimiento tipo)
     {
-        Usuario solicitante = CrearSolicitante();
-        Usuario evaluador = CrearEvaluador();
-
-        Assert.ThrowsException<DominioException>(() => new Movimiento(
-            fechaHora: FechaFija,
-            tipo: tipo,
-            solicitante: solicitante,
-            evaluador: evaluador,
-            unidad: null));
+        Assert.ThrowsException<DominioException>(() => CrearMovimientoSinUnidad(tipo: tipo));
     }
 
     [TestMethod]
@@ -80,21 +80,20 @@ public sealed class MovimientoTests
     [DataRow(TipoMovimiento.Rechazo)]
     public void Constructor_SolicitudORechazoSinUnidad_LoCrea(TipoMovimiento tipo)
     {
-        Usuario solicitante = CrearSolicitante();
-        Usuario evaluador = CrearEvaluador();
-
-        Movimiento movimiento = new Movimiento(
-            fechaHora: FechaFija,
-            tipo: tipo,
-            solicitante: solicitante,
-            evaluador: evaluador,
-            unidad: null);
+        Movimiento movimiento = CrearMovimientoSinUnidad(tipo: tipo);
 
         Assert.IsNull(movimiento.Unidad);
-        Assert.AreEqual(FechaFija, movimiento.FechaHora);
-        Assert.AreEqual(tipo, movimiento.Tipo);
-        Assert.AreSame(solicitante, movimiento.Solicitante);
-        Assert.AreSame(evaluador, movimiento.Evaluador);
+    }
+
+    [TestMethod]
+    [DataRow(TipoMovimiento.Solicitud)]
+    [DataRow(TipoMovimiento.Rechazo)]
+    public void Constructor_SolicitudORechazoConUnidad_LanzaExcepcion(TipoMovimiento tipo)
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() =>
+            CrearMovimiento(tipo: tipo, unidad: CrearUnidad(idInstitucional: "EQP-0001")));
+
+        Assert.AreEqual("La solicitud y el rechazo no llevan unidad", excepcion.Message);
     }
 
     [TestMethod]
@@ -157,6 +156,18 @@ public sealed class MovimientoTests
             solicitante: solicitante ?? CrearSolicitante(),
             evaluador: evaluador,
             unidad: unidad ?? CrearUnidad(idInstitucional: "EQP-0001"));
+
+        return movimiento;
+    }
+
+    private static Movimiento CrearMovimientoSinUnidad(TipoMovimiento tipo)
+    {
+        Movimiento movimiento = new Movimiento(
+            fechaHora: FechaFija,
+            tipo: tipo,
+            solicitante: CrearSolicitante(),
+            evaluador: CrearEvaluador(),
+            unidad: null);
 
         return movimiento;
     }

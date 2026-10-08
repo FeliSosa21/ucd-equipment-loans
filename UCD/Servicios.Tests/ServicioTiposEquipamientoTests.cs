@@ -10,14 +10,15 @@ public class ServicioTiposEquipamientoTests
 {
     private const string DniSupervisor = "12345672";
     private const string DniFuncionario = "45678905";
+    private const string DniSupervisorDesactivado = "23456783";
 
     [TestMethod]
     public void Listar_SinFiltros_DevuelveTodosConSusDatos()
     {
-        TipoEquipamiento proyector = new TipoEquipamiento("Proyector Epson", "Para aulas", 3, true,
-            Categoria.Audiovisual);
-        TipoEquipamiento notebook = new TipoEquipamiento("Notebook Lenovo", "ThinkPad T14", 5, false,
-            Categoria.Computacion);
+        TipoEquipamiento proyector = CrearTipo(nombre: "Proyector Epson", categoria: Categoria.Audiovisual,
+            descripcion: "Para aulas", requiereAprobacion: true);
+        TipoEquipamiento notebook = CrearTipo(nombre: "Notebook Lenovo", categoria: Categoria.Computacion,
+            descripcion: "ThinkPad T14");
         notebook.Discontinuar();
         ServicioTiposEquipamiento servicio = CrearServicio(proyector, notebook);
 
@@ -73,7 +74,7 @@ public class ServicioTiposEquipamientoTests
     public void Registrar_DatosValidos_LoAgregaActivo()
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
-        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", "Audiovisual");
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
 
         servicio.Registrar(datos, DniSupervisor);
 
@@ -91,16 +92,25 @@ public class ServicioTiposEquipamientoTests
     public void Registrar_ResponsableSinPermiso_LanzaServicioException()
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
-        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", "Audiovisual");
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniFuncionario));
+    }
+
+    [TestMethod]
+    public void Registrar_ResponsableDesactivado_LanzaServicioException()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniSupervisorDesactivado));
     }
 
     [TestMethod]
     public void Registrar_ResponsableInexistente_LanzaServicioException()
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
-        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", "Audiovisual");
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, "11111111"));
     }
@@ -110,7 +120,7 @@ public class ServicioTiposEquipamientoTests
     {
         TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
-        DatosTipoEquipamientoDto datos = CrearDatos("camara canon eos", "Audiovisual");
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "camara canon eos", categoria: "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniSupervisor));
     }
@@ -118,12 +128,25 @@ public class ServicioTiposEquipamientoTests
     [DataTestMethod]
     [DataRow("Muebles")]
     [DataRow("9")]
+    [DataRow("1")]
+    [DataRow("0")]
     public void Registrar_CategoriaInexistente_LanzaServicioException(string categoria)
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
-        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", categoria);
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: categoria);
 
         Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniSupervisor));
+    }
+
+    [TestMethod]
+    public void Registrar_CategoriaEnMinusculas_LaGuarda()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "audiovisual");
+
+        servicio.Registrar(datos, DniSupervisor);
+
+        Assert.AreEqual("Audiovisual", servicio.Listar(null, null)[0].Categoria);
     }
 
     [TestMethod]
@@ -131,7 +154,7 @@ public class ServicioTiposEquipamientoTests
     {
         TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
-        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS R", "Electronica");
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS R", categoria: "Electronica");
 
         servicio.Modificar("Camara Canon EOS", datos, DniSupervisor);
 
@@ -149,17 +172,28 @@ public class ServicioTiposEquipamientoTests
     {
         TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
-        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS R", "Audiovisual");
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS R", categoria: "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.Modificar("Camara Canon EOS", datos, DniFuncionario));
     }
 
     [TestMethod]
+    public void Modificar_ResponsableDesactivado_LanzaServicioException()
+    {
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS R", categoria: "Audiovisual");
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Modificar("Camara Canon EOS", datos, DniSupervisorDesactivado));
+    }
+
+    [TestMethod]
     public void Modificar_TipoInexistente_LanzaServicioException()
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
-        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", "Audiovisual");
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.Modificar("Camara Canon EOS", datos, DniSupervisor));
@@ -171,7 +205,7 @@ public class ServicioTiposEquipamientoTests
         TipoEquipamiento proyector = CrearTipo("Proyector Epson", Categoria.Audiovisual);
         TipoEquipamiento notebook = CrearTipo("Notebook Lenovo", Categoria.Computacion);
         ServicioTiposEquipamiento servicio = CrearServicio(proyector, notebook);
-        DatosTipoEquipamientoDto datos = CrearDatos("notebook lenovo", "Audiovisual");
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "notebook lenovo", categoria: "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.Modificar("Proyector Epson", datos, DniSupervisor));
@@ -182,7 +216,7 @@ public class ServicioTiposEquipamientoTests
     {
         TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
-        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", "Audiovisual");
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
 
         servicio.Modificar("Camara Canon EOS", datos, DniSupervisor);
 
@@ -194,7 +228,7 @@ public class ServicioTiposEquipamientoTests
     {
         TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
-        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS", "Audiovisual");
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
         datos.DuracionMaxPrestamo = 0;
 
         Assert.ThrowsException<ServicioException>(() =>
@@ -223,14 +257,74 @@ public class ServicioTiposEquipamientoTests
     }
 
     [TestMethod]
+    public void Discontinuar_ResponsableDesactivado_LanzaServicioException()
+    {
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Discontinuar("Camara Canon EOS", DniSupervisorDesactivado));
+    }
+
+    [TestMethod]
     public void Discontinuar_YaDiscontinuado_LanzaServicioException()
     {
-        TipoEquipamiento camara =  CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
         camara.Discontinuar();
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.Discontinuar("Camara Canon EOS", DniSupervisor));
+    }
+
+    [TestMethod]
+    public void Reactivar_TipoDiscontinuado_QuedaActivo()
+    {
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        camara.Discontinuar();
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+
+        servicio.Reactivar("Camara Canon EOS", DniSupervisor);
+
+        Assert.AreEqual("Activo", servicio.Listar(null, null)[0].Estado);
+    }
+
+    [TestMethod]
+    public void Reactivar_TipoActivo_LanzaServicioException()
+    {
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Reactivar("Camara Canon EOS", DniSupervisor));
+    }
+
+    [TestMethod]
+    public void Reactivar_TipoInexistente_LanzaServicioException()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Reactivar("Camara Canon EOS", DniSupervisor));
+    }
+
+    [TestMethod]
+    public void Reactivar_ResponsableSinPermiso_LanzaServicioException()
+    {
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        camara.Discontinuar();
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Reactivar("Camara Canon EOS", DniFuncionario));
+    }
+
+    [TestMethod]
+    public void Reactivar_ResponsableDesactivado_LanzaServicioException()
+    {
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        camara.Discontinuar();
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Reactivar("Camara Canon EOS", DniSupervisorDesactivado));
     }
 
     [TestMethod]
@@ -261,6 +355,15 @@ public class ServicioTiposEquipamientoTests
     }
 
     [TestMethod]
+    public void ModificarNombreCatalogo_ResponsableDesactivado_LanzaServicioException()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ModificarNombreCatalogo("Centro de Equipamiento ORT", DniSupervisorDesactivado));
+    }
+
+    [TestMethod]
     public void ModificarNombreCatalogo_NombreMuyCorto_LanzaServicioException()
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
@@ -272,7 +375,7 @@ public class ServicioTiposEquipamientoTests
     public void Registrar_TextosConEspacios_LosGuardaRecortados()
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
-        DatosTipoEquipamientoDto datos = CrearDatos("  Camara Canon EOS  ", "Audiovisual");
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "  Camara Canon EOS  ", categoria: "Audiovisual");
         datos.Descripcion = "  Camara reflex  ";
 
         servicio.Registrar(datos, DniSupervisor);
@@ -287,7 +390,7 @@ public class ServicioTiposEquipamientoTests
     {
         TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
-        DatosTipoEquipamientoDto datos = CrearDatos("  Camara Canon EOS R  ", "Audiovisual");
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "  Camara Canon EOS R  ", categoria: "Audiovisual");
 
         servicio.Modificar("Camara Canon EOS", datos, DniSupervisor);
 
@@ -320,6 +423,10 @@ public class ServicioTiposEquipamientoTests
         repositorioUsuario.AgregarUsuario(CrearUsuario(DniSupervisor, "supervisor@ucd.edu.uy", TipoUsuario.Supervisor));
         repositorioUsuario.AgregarUsuario(CrearUsuario(DniFuncionario, "funcionario@ucd.edu.uy",
             TipoUsuario.FuncionarioCE));
+        Usuario desactivado = CrearUsuario(DniSupervisorDesactivado, "desactivado@ucd.edu.uy",
+            TipoUsuario.Supervisor);
+        desactivado.Desactivar();
+        repositorioUsuario.AgregarUsuario(desactivado);
         return new ServicioTiposEquipamiento(repositorioCatalogo, repositorioUsuario);
     }
 
@@ -342,8 +449,9 @@ public class ServicioTiposEquipamientoTests
         };
     }
 
-    private static TipoEquipamiento CrearTipo(string nombre, Categoria categoria)
+    private static TipoEquipamiento CrearTipo(string nombre, Categoria categoria, string descripcion = "Descripcion",
+        bool requiereAprobacion = false)
     {
-        return new TipoEquipamiento(nombre, "Descripcion", 3, false, categoria);
+        return new TipoEquipamiento(nombre, descripcion, 3, requiereAprobacion, categoria);
     }
 }

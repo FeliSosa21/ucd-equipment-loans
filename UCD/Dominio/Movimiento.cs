@@ -48,5 +48,10 @@ public class Movimiento
         {
             throw new DominioException("El movimiento debe tener una unidad");
         }
+
+        if (!requiereUnidad && unidad is not null)
+        {
+            throw new DominioException("La solicitud y el rechazo no llevan unidad");
+        }
     }
 }

@@ -22,8 +22,7 @@
 
             <div>
                 <label class="lbl" for="motivo">Motivo del rechazo</label>
-                <input id="motivo" class="field" maxlength="@LargoMaximoMotivo"
-                       @bind="_motivo" @bind:event="oninput" />
+                <input id="motivo" class="field" @bind="_motivo" @bind:event="oninput" />
             </div>
 
             @if (_error is not null)
@@ -69,8 +68,8 @@
                     <td>@prestamo.Solicitante</td>
                     <td>@prestamo.TipoEquipamiento</td>
                     <td>@prestamo.CantidadSolicitada</td>
-                    <td>@prestamo.FechaHoraPrestamo.ToString(FormatoFecha)</td>
-                    <td>@prestamo.FechaEsperadaDevolucion.ToString(FormatoFechaEsperada)</td>
+                    <td>@prestamo.FechaHoraPrestamo.ToString(Formatos.FechaHora)</td>
+                    <td>@prestamo.FechaEsperadaDevolucion.ToString(Formatos.Fecha)</td>
                     <td>
                         <button class="btn btn-ghost btn-sm" @onclick="() => Aprobar(prestamo)">Aprobar</button>
                         <button class="btn btn-ghost btn-sm" @onclick="() => AbrirRechazo(prestamo)">Rechazar</button>

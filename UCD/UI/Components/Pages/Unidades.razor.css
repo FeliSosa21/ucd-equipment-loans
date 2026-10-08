@@ -1,6 +1,12 @@
-.alta { padding: 1.25rem; margin-bottom: 1rem; }
-.pregunta { margin: 0 0 1rem; }
-.observaciones { font-size: .78rem; color: var(--ink-soft); margin-top: .15rem; max-width: 360px; }
-.celda-acciones { white-space: nowrap; text-align: right; }
-.celda-acciones .btn + .btn { margin-left: .4rem; }
-.celda-acciones .hint { margin-top: 0; }
+/* Observaciones debajo de la ubicacion, mas chicas y atenuadas */
+.observaciones {
+    font-size: .78rem;
+    color: var(--ink-soft);
+    margin-top: .15rem;
+    max-width: 360px;
+}
+
+/* Aviso de las unidades prestadas, alineado con los botones de la fila */
+.celda-acciones .hint {
+    margin-top: 0;
+}

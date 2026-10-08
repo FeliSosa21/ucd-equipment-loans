@@ -23,7 +23,7 @@ public class ServicioInventarioTests
 
         Assert.AreEqual(1, resultado.Count);
         CantidadesPorEstadoDto fila = resultado[0];
-        Assert.AreEqual("Notebook", fila.Nombre);
+        Assert.AreEqual("Notebook", fila.Agrupador);
         Assert.AreEqual("Computacion", fila.Categoria);
         Assert.AreEqual(2, fila.Disponibles);
         Assert.AreEqual(1, fila.Prestadas);
@@ -33,13 +33,19 @@ public class ServicioInventarioTests
     }
 
     [TestMethod]
-    public void ContarPorTipo_SinCatalogo_DevuelveListaVacia()
+    public void ContarPorTipo_SinCatalogo_LanzaServicioException()
     {
         ServicioInventario servicio = new ServicioInventario(new RepositorioCatalogo(new Memoria()));
 
-        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorTipo(new FiltroInventarioDto());
+        Assert.ThrowsException<ServicioException>(() => servicio.ContarPorTipo(new FiltroInventarioDto()));
+    }
 
-        Assert.AreEqual(0, resultado.Count);
+    [TestMethod]
+    public void ContarPorCategoria_SinCatalogo_LanzaServicioException()
+    {
+        ServicioInventario servicio = new ServicioInventario(new RepositorioCatalogo(new Memoria()));
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ContarPorCategoria());
     }
 
     [TestMethod]
@@ -53,7 +59,7 @@ public class ServicioInventarioTests
         List<CantidadesPorEstadoDto> resultado = servicio.ContarPorTipo(filtro);
 
         Assert.AreEqual(1, resultado.Count);
-        Assert.AreEqual("Notebook", resultado[0].Nombre);
+        Assert.AreEqual("Notebook", resultado[0].Agrupador);
     }
 
     [TestMethod]
@@ -70,7 +76,7 @@ public class ServicioInventarioTests
         List<CantidadesPorEstadoDto> resultado = servicio.ContarPorTipo(filtro);
 
         Assert.AreEqual(1, resultado.Count);
-        Assert.AreEqual("Kit Arduino", resultado[0].Nombre);
+        Assert.AreEqual("Kit Arduino", resultado[0].Agrupador);
         Assert.AreEqual(1, resultado[0].Disponibles);
     }
 
@@ -89,13 +95,23 @@ public class ServicioInventarioTests
         List<CantidadesPorEstadoDto> resultado = servicio.ContarPorCategoria();
 
         Assert.AreEqual(5, resultado.Count);
-        CantidadesPorEstadoDto computacion = resultado[0];
-        Assert.AreEqual("Computacion", computacion.Nombre);
+        CantidadesPorEstadoDto computacion = BuscarFila(resultado, "Computacion");
         Assert.AreEqual(1, computacion.Disponibles);
         Assert.AreEqual(1, computacion.Prestadas);
         Assert.AreEqual(1, computacion.DadasDeBaja);
         Assert.AreEqual(3, computacion.Total);
-        Assert.AreEqual(1, resultado[1].Total);
+        Assert.AreEqual(1, BuscarFila(resultado, "Audiovisual").Total);
+    }
+
+    [TestMethod]
+    public void ContarPorCategoria_FilaDeCategoria_ElAgrupadorEsLaCategoria()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo(nombre: "Notebook", categoria: Categoria.Computacion));
+
+        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorCategoria();
+
+        CantidadesPorEstadoDto computacion = BuscarFila(resultado, "Computacion");
+        Assert.AreEqual("Computacion", computacion.Agrupador);
     }
 
     [TestMethod]
@@ -126,24 +142,29 @@ public class ServicioInventarioTests
             requiereAprobacion: false, categoria: categoria);
     }
 
-    // Lleva la unidad al estado pedido con las transiciones del dominio
-    // (a mantenimiento solo se llega desde prestada).
+    // Busca la fila por la categoria y no por su posicion, que depende del orden del enum.
+    private static CantidadesPorEstadoDto BuscarFila(List<CantidadesPorEstadoDto> filas, string categoria)
+    {
+        CantidadesPorEstadoDto? fila = filas.Find(f => f.Categoria == categoria);
+        Assert.IsNotNull(fila);
+        return fila;
+    }
+
+    // Lleva la unidad recien creada (disponible) al estado pedido con una transicion directa del dominio.
     private static UnidadFisica CrearUnidad(string idInstitucional,
         EstadoUnidadFisica estado = EstadoUnidadFisica.Disponible)
     {
         UnidadFisica unidad = new UnidadFisica(idInstitucional: idInstitucional, ubiFisica: "Deposito central",
             numSerie: null);
-        if (estado == EstadoUnidadFisica.Prestada || estado == EstadoUnidadFisica.EnMantenimiento)
+        if (estado == EstadoUnidadFisica.Prestada)
         {
             unidad.Prestada();
         }
-
-        if (estado == EstadoUnidadFisica.EnMantenimiento)
+        else if (estado == EstadoUnidadFisica.EnMantenimiento)
         {
             unidad.AMantenimiento();
         }
-
-        if (estado == EstadoUnidadFisica.DadaDeBaja)
+        else if (estado == EstadoUnidadFisica.DadaDeBaja)
         {
             unidad.DarDeBaja();
         }

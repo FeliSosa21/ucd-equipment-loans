@@ -6,9 +6,6 @@ namespace UI.Components.Pages;
 
 public partial class Entregas
 {
-    private const string FormatoFecha = "dd/MM/yyyy HH:mm";
-    private const string FormatoFechaEsperada = "dd/MM/yyyy";
-
     private List<PrestamoDto> _prestamos = new List<PrestamoDto>();
     private string? _exito;
     private string? _avisoLista;

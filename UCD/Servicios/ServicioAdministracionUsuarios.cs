@@ -29,19 +29,20 @@ public class ServicioAdministracionUsuarios
         ArgumentNullException.ThrowIfNull(dto);
         ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         TipoUsuario tipo = ObtenerTipo(nombreTipo);
+        string correo = Recortar(dto.Correo);
 
         _servicioUsuario.Registrar(new UsuarioDto
         {
             Dni = dto.Dni,
-            Nombre = dto.Nombre,
-            Apellido = dto.Apellido,
-            Correo = dto.Correo,
+            Nombre = Recortar(dto.Nombre),
+            Apellido = Recortar(dto.Apellido),
+            Correo = correo,
             Contrasena = ContrasenaPredeterminada
         });
 
         // Se busca por correo porque el registro puede normalizar el DNI (cedulas de 7 digitos).
         // Registrar acaba de guardarlo con ese mismo correo, asi que la busqueda no puede devolver null.
-        Usuario creado = _repositorio.ObtenerUsuarioPorCorreo(dto.Correo)!;
+        Usuario creado = _repositorio.ObtenerUsuarioPorCorreo(correo)!;
 
         creado.AsignarTipo(tipo);
         creado.ExigirCambioDeContrasena();

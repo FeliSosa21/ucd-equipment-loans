@@ -61,8 +61,8 @@ else
                                 <div class="hint">Motivo: @prestamo.MotivoRechazo</div>
                             }
                         </td>
-                        <td>@(EsRechazado(prestamo) ? SinDato : prestamo.FechaHoraPrestamo.ToString(FormatoFecha))</td>
-                        <td>@(EsRechazado(prestamo) ? SinDato : prestamo.FechaEsperadaDevolucion.ToString(FormatoFechaEsperada))</td>
+                        <td>@(EsRechazado(prestamo) ? SinDato : prestamo.FechaHoraPrestamo.ToString(Formatos.FechaHora))</td>
+                        <td>@(EsRechazado(prestamo) ? SinDato : prestamo.FechaEsperadaDevolucion.ToString(Formatos.Fecha))</td>
                         <td class="mono">@(prestamo.Unidades.Any() ? string.Join(", ", prestamo.Unidades) : SinDato)</td>
                     </tr>
                 }
@@ -79,9 +79,6 @@ else
 }
 
 @code {
-    private const string FormatoFecha = "dd/MM/yyyy HH:mm";
-    private const string FormatoFechaEsperada = "dd/MM/yyyy";
-    private const string EstadoRechazado = "Rechazado";
     private const string SinDato = "—";
 
     private List<PrestamoDto> _prestamos = new List<PrestamoDto>();
@@ -103,5 +100,5 @@ else
     }
 
     // Una solicitud rechazada nunca empezó: no tiene inicio ni devolución esperada que mostrar.
-    private static bool EsRechazado(PrestamoDto prestamo) => prestamo.Estado == EstadoRechazado;
+    private static bool EsRechazado(PrestamoDto prestamo) => prestamo.Estado == EstadosPrestamo.Rechazado;
 }

@@ -5,7 +5,7 @@ using UI.Sesion;
 
 namespace UI.Components.Pages;
 
-// Req. 4: el supervisor (o el administrador) registra, modifica, discontinua y busca tipos de equipamiento,
+// Req. 4: el supervisor (o el administrador) registra, modifica, discontinua, reactiva y busca tipos de equipamiento,
 // y cambia el nombre del catalogo. Las reglas las controla ServicioTiposEquipamiento; la pagina solo muestra.
 public partial class TiposEquipamiento
 {
@@ -51,11 +51,18 @@ public partial class TiposEquipamiento
         }
     }
 
+    // Al cambiar un filtro no queda en pantalla el mensaje de la accion anterior.
+    private void Filtrar()
+    {
+        LimpiarMensajes();
+        Recargar();
+    }
+
     private void LimpiarFiltros()
     {
         _busqueda = string.Empty;
         _categoria = string.Empty;
-        Recargar();
+        Filtrar();
     }
 
     private bool HayFiltrosAplicados()
@@ -180,6 +187,44 @@ public partial class TiposEquipamiento
         _aDiscontinuar = null;
     }
 
+    // ---------- Reactivar (foro: un tipo discontinuado puede volver a activarse) ----------
+
+    private void Reactivar(TipoEquipamientoDetalleDto tipo)
+    {
+        // Un doble clic manda dos envios: el segundo llega con el tipo ya activo.
+        if (!SigueDiscontinuado(tipo))
+        {
+            return;
+        }
+
+        CerrarTodo();
+        try
+        {
+            ServicioTipos.Reactivar(tipo.Nombre, DniUsuario);
+            _exito = $"Se reactivó el tipo «{tipo.Nombre}».";
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+        }
+
+        Recargar();
+    }
+
+    // La fila del clic puede ser de un listado viejo: se compara con el estado del listado actual.
+    private bool SigueDiscontinuado(TipoEquipamientoDetalleDto tipo)
+    {
+        foreach (TipoEquipamientoDetalleDto actual in _tipos)
+        {
+            if (actual.Nombre == tipo.Nombre)
+            {
+                return actual.Estado == EstadosCatalogo.TipoDiscontinuado;
+            }
+        }
+
+        return false;
+    }
+
     // ---------- Nombre del catalogo ----------
 
     private void AbrirEdicionNombreCatalogo()
@@ -242,7 +287,7 @@ public partial class TiposEquipamiento
 
     private static bool EstaActivo(TipoEquipamientoDetalleDto tipo)
     {
-        return tipo.Estado == "Activo";
+        return tipo.Estado == EstadosCatalogo.TipoActivo;
     }
 
     private static string ClaseDeEstado(TipoEquipamientoDetalleDto tipo)

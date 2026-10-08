@@ -74,6 +74,17 @@ public sealed class UnidadDevueltaTests
     }
 
     [TestMethod]
+    public void Constructor_300CaracteresConEspaciosAlBorde_SeCreaRecortado()
+    {
+        string texto = new string('a', 300);
+
+        UnidadDevuelta devuelta = new UnidadDevuelta(CrearUnidadPrestada(), CondicionDevolucion.ConFallas,
+            "  " + texto + "  ");
+
+        Assert.AreEqual(texto, devuelta.Observaciones);
+    }
+
+    [TestMethod]
     public void ActualizarEstadoDeLaUnidad_SinObservaciones_QuedaDisponible()
     {
         UnidadFisica unidad = CrearUnidadPrestada();

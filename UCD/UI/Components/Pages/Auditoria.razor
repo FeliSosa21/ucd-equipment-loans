@@ -12,13 +12,16 @@
 </div>
 
 <div class="toolbar">
-    <select class="field" aria-label="Tipo de movimiento" @bind="_tipo">
-        <option value="@TodosLosTipos">Todos</option>
-        @foreach (KeyValuePair<string, string> tipo in NombresDeTipo)
-        {
-            <option value="@tipo.Key">@tipo.Value</option>
-        }
-    </select>
+    <div>
+        <label class="lbl" for="filtro-tipo">Tipo de movimiento</label>
+        <select id="filtro-tipo" class="field" @bind="_tipo">
+            <option value="@TodosLosTipos">Todos</option>
+            @foreach (KeyValuePair<string, string> tipo in NombresDeTipo)
+            {
+                <option value="@tipo.Key">@tipo.Value</option>
+            }
+        </select>
+    </div>
 </div>
 
 <div class="card table-card">
@@ -36,7 +39,7 @@
             @foreach (MovimientoDto movimiento in MovimientosFiltrados)
             {
                 <tr>
-                    <td>@movimiento.FechaHora.ToString(FormatoFecha)</td>
+                    <td>@movimiento.FechaHora.ToString(Formatos.FechaHora)</td>
                     <td>@TraducirTipo(movimiento.Tipo)</td>
                     <td>@movimiento.Solicitante</td>
                     <td>@(movimiento.Evaluador ?? SinDato)</td>

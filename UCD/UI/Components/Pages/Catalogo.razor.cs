@@ -7,12 +7,12 @@ namespace UI.Components.Pages;
 
 public partial class Catalogo
 {
-    private const string EstadoActivo = "Activo";
     private List<TipoEquipamientoDto> _tipos = new List<TipoEquipamientoDto>();
     private string? _error;
     private string _categoria = string.Empty;
     private string _estado = string.Empty;
     private int? _minimoDisponibles;
+    private bool _puedeFiltrarPorEstado;
     private string? _tipoSeleccionado;
     private List<UnidadFisicaDto> _unidades = new List<UnidadFisicaDto>();
 
@@ -23,6 +23,8 @@ public partial class Catalogo
             return;
         }
 
+        // Foro: Docente y Estudiante solo ven los tipos activos; filtrar por estado es de quien gestiona el catalogo.
+        _puedeFiltrarPorEstado = SesionActual.Usuario!.Permisos.Contains(Permisos.GestionarCatalogo);
         Consultar();
     }
 
@@ -33,7 +35,7 @@ public partial class Catalogo
         FiltroCatalogoDto filtro = new FiltroCatalogoDto
         {
             Categoria = ValoresDeFiltro.ValorONulo(_categoria),
-            Estado = ValoresDeFiltro.ValorONulo(_estado),
+            Estado = EstadoAFiltrar(),
             MinimoDisponibles = _minimoDisponibles
         };
 
@@ -48,6 +50,16 @@ public partial class Catalogo
             _tipos = new List<TipoEquipamientoDto>();
             CerrarUnidades();
         }
+    }
+
+    private string? EstadoAFiltrar()
+    {
+        if (_puedeFiltrarPorEstado)
+        {
+            return ValoresDeFiltro.ValorONulo(_estado);
+        }
+
+        return EstadosCatalogo.TipoActivo;
     }
 
     private void LimpiarFiltros()
@@ -75,7 +87,6 @@ public partial class Catalogo
         {
             _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(nombreTipo);
             _tipoSeleccionado = nombreTipo;
-
         }
         catch (ServicioException ex)
         {
@@ -135,7 +146,7 @@ public partial class Catalogo
 
     private static string ClaseDeEstado(string estado)
     {
-        if (estado == EstadoActivo)
+        if (estado == EstadosCatalogo.TipoActivo)
         {
             return "badge-ok";
         }

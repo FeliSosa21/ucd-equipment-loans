@@ -4,6 +4,8 @@ public class UnidadFisica
 {
     private const int LargoIdInstitucional = 8;
     private const int PosicionGuion = 3;
+    private const int LargoMinimoUbicacion = 3;
+    private const int LargoMaximoUbicacion = 80;
     private const int LargoMaxNumSerie = 50;
     private const int LargoMaxObservaciones = 300;
 
@@ -79,28 +81,35 @@ public class UnidadFisica
             throw new DominioException("La unidad prestada no puede darse de baja directamente");
         }
 
+        if (Estado == EstadoUnidadFisica.DadaDeBaja)
+        {
+            throw new DominioException("La unidad ya esta dada de baja");
+        }
+
         Estado = EstadoUnidadFisica.DadaDeBaja;
     }
 
-    private void ValidarUbiFisica(string ubiFisica)
+    private static void ValidarUbiFisica(string ubiFisica)
     {
         if (string.IsNullOrWhiteSpace(ubiFisica))
         {
             throw new DominioException("La ubicacion fisica no puede estar vacia");
         }
 
-        if (ubiFisica.Length < 3)
+        if (ubiFisica.Length < LargoMinimoUbicacion)
         {
-            throw new DominioException("La ubicacion fisica no puede tener menos de 3 caracteres");
+            throw new DominioException(
+                $"La ubicacion fisica no puede tener menos de {LargoMinimoUbicacion} caracteres");
         }
 
-        if (ubiFisica.Length > 80)
+        if (ubiFisica.Length > LargoMaximoUbicacion)
         {
-            throw new DominioException("La ubicacion fisica no puede tener mas de 80 caracteres");
+            throw new DominioException(
+                $"La ubicacion fisica no puede tener mas de {LargoMaximoUbicacion} caracteres");
         }
     }
 
-    private void ValidarIdInstitucional(string idInstitucional)
+    private static void ValidarIdInstitucional(string idInstitucional)
     {
         if (string.IsNullOrWhiteSpace(idInstitucional) || !TieneFormatoValido(idInstitucional))
         {
@@ -118,7 +127,8 @@ public class UnidadFisica
         string letras = idInstitucional[..PosicionGuion];
         string numeros = idInstitucional[(PosicionGuion + 1)..];
 
-        return letras.All(char.IsUpper) && numeros.All(char.IsDigit);
+        // Solo ASCII: char.IsUpper y char.IsDigit aceptarian letras con tilde o digitos de otros alfabetos.
+        return letras.All(char.IsAsciiLetterUpper) && numeros.All(char.IsAsciiDigit);
     }
 
     private static void ValidarLargoNumSerie(string? numSerie)
@@ -136,6 +146,5 @@ public class UnidadFisica
             throw new DominioException($"Las observaciones no pueden tener mas de {LargoMaxObservaciones} caracteres");
         }
     }
-
 }
 

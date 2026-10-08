@@ -23,7 +23,7 @@
             <div class="lbl">
                 Devolución de <strong>@_seleccionado.TipoEquipamiento</strong> prestado a
                 <strong>@_seleccionado.Solicitante</strong>
-                (desde @_seleccionado.FechaHoraPrestamo.ToString(FormatoFecha))
+                (desde @_seleccionado.FechaHoraPrestamo.ToString(Formatos.FechaHora))
             </div>
 
             @foreach (UnidadDevueltaDto unidad in _unidades)
@@ -89,7 +89,7 @@
                 <tr>
                     <td>@prestamo.Solicitante</td>
                     <td>@prestamo.TipoEquipamiento</td>
-                    <td>@prestamo.FechaHoraPrestamo.ToString(FormatoFecha)</td>
+                    <td>@prestamo.FechaHoraPrestamo.ToString(Formatos.FechaHora)</td>
                     <td class="mono">@string.Join(", ", prestamo.Unidades)</td>
                     <td>
                         <button class="btn btn-ghost btn-sm" @onclick="() => Seleccionar(prestamo)">

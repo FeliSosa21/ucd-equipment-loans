@@ -6,7 +6,7 @@ using DTOs;
 namespace Servicios.Tests;
 
 [TestClass]
-public class ServicioHistoricoTests
+public sealed class ServicioHistoricoTests
 {
     private static readonly DateTime FechaFija = new DateTime(2026, 9, 22, 10, 30, 0);
 

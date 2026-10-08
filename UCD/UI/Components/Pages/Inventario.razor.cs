@@ -1,4 +1,5 @@
 ﻿using DTOs;
+using Servicios;
 using UI.Sesion;
 using UI.Presentacion;
 
@@ -10,6 +11,7 @@ public partial class Inventario
     private List<CantidadesPorEstadoDto> _porTipo = new List<CantidadesPorEstadoDto>();
     private string _categoria = string.Empty;
     private string _estado = string.Empty;
+    private string? _error;
 
     protected override void OnInitialized()
     {
@@ -23,13 +25,24 @@ public partial class Inventario
 
     private void Consultar()
     {
-        _porCategoria = ServicioInventario.ContarPorCategoria();
+        _error = null;
         FiltroInventarioDto filtro = new FiltroInventarioDto
         {
             Categoria = ValoresDeFiltro.ValorONulo(_categoria),
             Estado = ValoresDeFiltro.ValorONulo(_estado)
         };
-        _porTipo = ServicioInventario.ContarPorTipo(filtro);
+
+        try
+        {
+            _porCategoria = ServicioInventario.ContarPorCategoria();
+            _porTipo = ServicioInventario.ContarPorTipo(filtro);
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+            _porCategoria = new List<CantidadesPorEstadoDto>();
+            _porTipo = new List<CantidadesPorEstadoDto>();
+        }
     }
 
     private void LimpiarFiltros()

@@ -27,15 +27,17 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
-    public void NombreTipoAdministrador_EsUnoDeLosTiposQueSePuedenAsignar()
+    public void NombresDeTipos_ConNombreTipoAdministrador_LoIncluyeEntreLosAsignables()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
-        CollectionAssert.Contains(servicio.NombresDeTipos(), ServicioAdministracionUsuarios.NombreTipoAdministrador);
+        List<string> nombres = servicio.NombresDeTipos();
+
+        CollectionAssert.Contains(nombres, ServicioAdministracionUsuarios.NombreTipoAdministrador);
     }
 
     [TestMethod]
-    public void NombresDeTipos_DevuelveLosSeisTipos()
+    public void NombresDeTipos_SinFiltro_DevuelveLosSeisTipos()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
@@ -108,6 +110,38 @@ public class ServicioAdministracionUsuariosTests
         Assert.AreEqual(TipoUsuario.Estudiante, creado.Tipo);
         Assert.IsTrue(creado.ContrasenaEsCorrecta(ServicioAdministracionUsuarios.ContrasenaPredeterminada));
         Assert.IsTrue(creado.DebeCambiarContrasena);
+    }
+
+    [TestMethod]
+    public void CrearUsuario_CedulaDe7Digitos_LeAsignaElTipo()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
+        UsuarioDto dto = CrearDtoNuevo();
+        dto.Dni = "1234561";
+
+        servicio.CrearUsuario(dto, TipoUsuario.Docente.Nombre, DniResponsable);
+
+        Usuario creado = repositorio.ObtenerUsuarioPorDni("01234561")!;
+        Assert.AreEqual(TipoUsuario.Docente, creado.Tipo);
+        Assert.IsTrue(creado.DebeCambiarContrasena);
+    }
+
+    [TestMethod]
+    public void CrearUsuario_ConEspaciosAlrededor_LosGuardaRecortados()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
+        UsuarioDto dto = CrearDtoNuevo();
+        dto.Nombre = " Pedro ";
+        dto.Apellido = "  Suarez ";
+        dto.Correo = " " + CorreoNuevo + "  ";
+
+        servicio.CrearUsuario(dto, TipoUsuario.Estudiante.Nombre, DniResponsable);
+
+        Usuario creado = repositorio.ObtenerUsuarioPorDni(DniNuevo)!;
+        Assert.AreEqual("Pedro", creado.Nombre);
+        Assert.AreEqual("Suarez", creado.Apellido);
+        Assert.AreEqual(CorreoNuevo, creado.Correo);
+        Assert.AreEqual(TipoUsuario.Estudiante, creado.Tipo);
     }
 
     [TestMethod]

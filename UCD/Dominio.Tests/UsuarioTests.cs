@@ -474,6 +474,7 @@ public sealed class UsuarioTests
 
         Assert.ThrowsException<DominioException>(() => usuario.ModificarDatos("Pedro", "Suarez", "pedro@hotmail"));
         Assert.AreEqual(NombreValido, usuario.Nombre);
+        Assert.AreEqual(ApellidoValido, usuario.Apellido);
         Assert.AreEqual(CorreoValido, usuario.Correo);
     }
 
@@ -484,6 +485,7 @@ public sealed class UsuarioTests
 
         Assert.ThrowsException<DominioException>(() => usuario.ModificarDatos("P", "Suarez", "pedro@hotmail.com"));
         Assert.AreEqual(NombreValido, usuario.Nombre);
+        Assert.AreEqual(ApellidoValido, usuario.Apellido);
         Assert.AreEqual(CorreoValido, usuario.Correo);
     }
 
@@ -494,6 +496,7 @@ public sealed class UsuarioTests
 
         Assert.ThrowsException<DominioException>(() => usuario.ModificarDatos("Pedro", "S", "pedro@hotmail.com"));
         Assert.AreEqual(NombreValido, usuario.Nombre);
+        Assert.AreEqual(ApellidoValido, usuario.Apellido);
         Assert.AreEqual(CorreoValido, usuario.Correo);
     }
 

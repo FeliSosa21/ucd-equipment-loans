@@ -12,6 +12,11 @@
     <p>Cantidad de unidades físicas en cada estado, por categoría y por tipo de equipamiento.</p>
 </div>
 
+@if (_error is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_error</div>
+}
+
 <section class="card table-card" aria-label="Inventario por categoría">
     <h2 class="titulo-seccion">Por categoría</h2>
     <table>
@@ -29,7 +34,7 @@
         @foreach (CantidadesPorEstadoDto fila in _porCategoria)
         {
             <tr>
-                <td><strong>@TextosVisibles.Categoria(fila.Nombre)</strong></td>
+                <td><strong>@TextosVisibles.Categoria(fila.Categoria)</strong></td>
                 <td class="@ClaseDeCantidad(fila.Disponibles)">@fila.Disponibles</td>
                 <td class="@ClaseDeCantidad(fila.Prestadas)">@fila.Prestadas</td>
                 <td class="@ClaseDeCantidad(fila.EnMantenimiento)">@fila.EnMantenimiento</td>
@@ -100,7 +105,7 @@
             @foreach (CantidadesPorEstadoDto fila in _porTipo)
             {
                 <tr>
-                    <td><strong>@fila.Nombre</strong></td>
+                    <td><strong>@fila.Agrupador</strong></td>
                     <td>@TextosVisibles.Categoria(fila.Categoria)</td>
                     <td class="@ClaseDeCantidad(fila.Disponibles)">@fila.Disponibles</td>
                     <td class="@ClaseDeCantidad(fila.Prestadas)">@fila.Prestadas</td>
