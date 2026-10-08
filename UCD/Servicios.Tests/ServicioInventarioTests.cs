@@ -4,6 +4,7 @@ using Dominio;
 using DTOs;
 
 namespace Servicios.Tests;
+
 [TestClass]
 public class ServicioInventarioTests
 {
@@ -35,6 +36,7 @@ public class ServicioInventarioTests
     public void ContarPorTipo_SinCatalogo_DevuelveListaVacia()
     {
         ServicioInventario servicio = new ServicioInventario(new RepositorioCatalogo(new Memoria()));
+
         List<CantidadesPorEstadoDto> resultado = servicio.ContarPorTipo(new FiltroInventarioDto());
 
         Assert.AreEqual(0, resultado.Count);
@@ -55,7 +57,7 @@ public class ServicioInventarioTests
     }
 
     [TestMethod]
-    public void ContarPorTipo_FiltroPorEstado_DeuvelveSoloLosTiposConUnidadesEnEseEstado()
+    public void ContarPorTipo_FiltroPorEstado_DevuelveSoloLosTiposConUnidadesEnEseEstado()
     {
         TipoEquipamiento proyector = CrearTipo(nombre: "Proyector");
         proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
@@ -90,7 +92,7 @@ public class ServicioInventarioTests
         CantidadesPorEstadoDto computacion = resultado[0];
         Assert.AreEqual("Computacion", computacion.Nombre);
         Assert.AreEqual(1, computacion.Disponibles);
-        Assert.AreEqual(1,computacion.Prestadas);
+        Assert.AreEqual(1, computacion.Prestadas);
         Assert.AreEqual(1, computacion.DadasDeBaja);
         Assert.AreEqual(3, computacion.Total);
         Assert.AreEqual(1, resultado[1].Total);
