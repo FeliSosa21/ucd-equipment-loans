@@ -248,6 +248,31 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_TipoSinAprobacionSinUnidadesSuficientes_RegistraUnMovimientoDeRechazo()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades, cantidadSolicitada: 1);
+
+        servicio.Solicitar(datos, DniDocente);
+
+        Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
+        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
+            movimientos.Select(movimiento => movimiento.Tipo).ToList(),
+            "Deberia registrarse la solicitud y despues el rechazo");
+        foreach (Movimiento movimiento in movimientos)
+        {
+            Assert.AreEqual(FechaFija, movimiento.FechaHora);
+            Assert.AreSame(docente, movimiento.Solicitante);
+            Assert.IsNull(movimiento.Evaluador);
+            Assert.IsNull(movimiento.Unidad);
+        }
+    }
+
+    [TestMethod]
     public void Solicitar_TipoConAprobacion_QuedaSolicitadoSinUnidades()
     {
         Memoria memoria = new Memoria();
