@@ -14,10 +14,11 @@ public class ServicioHistorico
     }
 
     // No recibe quien consulta: el permiso lo controla la pagina, como en ListarSolicitudesPendientes.
-    // OrderByDescending es estable: los movimientos con la misma fecha quedan en el orden en que se registraron.
+    // Del mas reciente al mas viejo; con la misma fecha va primero el ultimo registrado: se invierte el orden
+    // del repositorio y OrderByDescending, que es estable, lo respeta en los empates.
     public List<MovimientoDto> ListarMovimientos()
     {
-        return _movimientos.ObtenerTodos()
+        return Enumerable.Reverse(_movimientos.ObtenerTodos())
             .OrderByDescending(movimiento => movimiento.FechaHora)
             .Select(CrearMovimientoDto)
             .ToList();
