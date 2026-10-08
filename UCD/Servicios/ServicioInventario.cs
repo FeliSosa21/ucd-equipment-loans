@@ -38,7 +38,35 @@ public class ServicioInventario
 
     public List<CantidadesPorEstadoDto> ContarPorCategoria()
     {
-        return new List<CantidadesPorEstadoDto>();
+        List<CantidadesPorEstadoDto> filas = new List<CantidadesPorEstadoDto>();
+        Catalogo? catalogo = _repositorioCatalogo.Obtener();
+        foreach (Categoria categoria in Enum.GetValues<Categoria>())
+        {
+            List<UnidadFisica> unidades = new List<UnidadFisica>();
+            if (catalogo is not null)
+            {
+                foreach (TipoEquipamiento tipo in catalogo.Tipos)
+                {
+                    if (tipo.Categoria == categoria)
+                    {
+                        unidades.AddRange(tipo.Unidades);
+                    }
+                }
+            }
+
+            filas.Add(new CantidadesPorEstadoDto
+            {
+                Nombre = categoria.ToString(),
+                Categoria = categoria.ToString(),
+                Disponibles = ContarEnEstado(unidades, EstadoUnidadFisica.Disponible),
+                Prestadas = ContarEnEstado(unidades, EstadoUnidadFisica.Prestada),
+                EnMantenimiento = ContarEnEstado(unidades, EstadoUnidadFisica.EnMantenimiento),
+                DadasDeBaja = ContarEnEstado(unidades, EstadoUnidadFisica.DadaDeBaja),
+                Total = unidades.Count
+            });
+        }
+
+        return filas;
     }
 
     private static CantidadesPorEstadoDto CrearFilaDeTipo(TipoEquipamiento tipo)
