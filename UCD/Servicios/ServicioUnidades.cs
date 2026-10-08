@@ -28,7 +28,10 @@ public class ServicioUnidades
             {
                 foreach (UnidadFisica unidad in tipo.Unidades)
                 {
-                    resultado.Add(CrearDetalle(tipo, unidad));
+                    if (CoincideEstado(unidad, estado))
+                    {
+                        resultado.Add(CrearDetalle(tipo, unidad));
+                    }
                 }
             }
         }
@@ -55,6 +58,16 @@ public class ServicioUnidades
         }
 
         return tipo.Nombre == nombreTipo;
+    }
+
+    private static bool CoincideEstado(UnidadFisica unidad, string? estado)
+    {
+        if (string.IsNullOrEmpty(estado))
+        {
+            return true;
+        }
+
+        return unidad.Estado.ToString() == estado;
     }
 
     private static UnidadDetalleDto CrearDetalle(TipoEquipamiento tipo, UnidadFisica unidad)
