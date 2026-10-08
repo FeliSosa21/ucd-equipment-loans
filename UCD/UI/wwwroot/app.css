@@ -110,3 +110,8 @@ tr:last-child td { border-bottom: none; }
 /* Compartidos entre paginas: fila de botones de un formulario y mensaje sobre una tabla */
 .acciones { display: flex; gap: .5rem; }
 .mensaje { margin-bottom: 1rem; }
+
+th.numero,
+td.numero {
+    text-align: right;
+}
