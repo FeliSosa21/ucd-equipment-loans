@@ -39,6 +39,25 @@ public class DatosDeEjemploTests
     }
 
     [TestMethod]
+    public void Cargar_MemoriaVacia_GuardaUnSupervisor()
+    {
+        _datos.Cargar();
+
+        Assert.AreEqual(TipoUsuario.Supervisor,
+            _usuarios.ObtenerUsuarioPorCorreo(DatosDeEjemplo.CorreoSupervisor)!.Tipo);
+    }
+
+    [TestMethod]
+    public void Cargar_ConCatalogo_IncluyeUnTipoQueRequiereAprobacionConUnidadesDisponibles()
+    {
+        _datos.Cargar();
+
+        TipoEquipamiento camara = _repositorioCatalogo.ObtenerTipoPorNombre(DatosDeEjemplo.TipoConAprobacion)!;
+        Assert.IsTrue(camara.RequiereAprobacion);
+        Assert.AreEqual(2, camara.CantidadDisponibles());
+    }
+
+    [TestMethod]
     public void Cargar_MemoriaVacia_GuardaPrestamosActivosConSusUnidadesPrestadas()
     {
         _datos.Cargar();
@@ -55,9 +74,9 @@ public class DatosDeEjemploTests
         _datos.Cargar();
         _datos.Cargar();
 
-        Assert.AreEqual(3, _memoria.Usuarios.Count);
+        Assert.AreEqual(4, _memoria.Usuarios.Count);
         Assert.AreEqual(2, _prestamos.ObtenerPrestamosActivos().Count);
-        Assert.AreEqual(5, _repositorioCatalogo.Obtener()!.Tipos.Count);
+        Assert.AreEqual(6, _repositorioCatalogo.Obtener()!.Tipos.Count);
     }
 
     [TestMethod]
@@ -66,7 +85,7 @@ public class DatosDeEjemploTests
         _datos.Cargar();
 
         Catalogo catalogo = _repositorioCatalogo.Obtener()!;
-        Assert.AreEqual(5, catalogo.Tipos.Count);
+        Assert.AreEqual(6, catalogo.Tipos.Count);
         Assert.IsNotNull(catalogo.BuscarTipoPorNombre("Notebook"));
     }
 

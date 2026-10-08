@@ -3,14 +3,16 @@ using Dominio;
 
 namespace Servicios;
 
-// Datos de ejemplo para probar la aplicacion y para la demo: usuarios, unidades y prestamos activos.
-// Los prestamos se crean ya activos porque todavia no hay pantalla para solicitarlos y aprobarlos.
+// Datos de ejemplo para probar la aplicacion y para la demo: un usuario de cada tipo, tipos con y sin
+// aprobacion, unidades en distintos estados y dos prestamos activos para probar las devoluciones.
 public class DatosDeEjemplo
 {
     public const string ContrasenaEjemplo = ServicioAdministracionUsuarios.ContrasenaPredeterminada;
     public const string CorreoDocente = "ana.perez@ucd.edu.uy";
     public const string CorreoEstudiante = "juan.gomez@ucd.edu.uy";
     public const string CorreoFuncionario = "laura.diaz@ucd.edu.uy";
+    public const string CorreoSupervisor = "sofia.martinez@ucd.edu.uy";
+    public const string TipoConAprobacion = "Camara de fotos";
 
     private const string Deposito = "Deposito central";
     private const int DiasMaximosDePrestamo = 7;
@@ -50,6 +52,8 @@ public class DatosDeEjemplo
             tipo: TipoUsuario.Estudiante);
         CrearUsuario(dni: "34567894", nombre: "Laura", apellido: "Diaz", correo: CorreoFuncionario,
             tipo: TipoUsuario.FuncionarioCE);
+        CrearUsuario(dni: "61234569", nombre: "Sofia", apellido: "Martinez", correo: CorreoSupervisor,
+            tipo: TipoUsuario.Supervisor);
     }
 
     private static void CargarCatalogo(Catalogo catalogo)
@@ -64,6 +68,8 @@ public class DatosDeEjemplo
             "HDM-0001", "HDM-0002", "HDM-0003");
         TipoEquipamiento osciloscopio = CrearTipo("Osciloscopio", "Osciloscopio digital de dos canales",
             Categoria.Electronica, "OSC-0001");
+        TipoEquipamiento camara = CrearTipo(TipoConAprobacion, "Camara reflex con lente 18-55 mm",
+            Categoria.Audiovisual, requiereAprobacion: true, "CAM-0001", "CAM-0002");
 
         EnviarAMantenimiento(kitArduino.Unidades.Last());
         osciloscopio.Discontinuar();
@@ -73,6 +79,7 @@ public class DatosDeEjemplo
         catalogo.AgregarTipo(kitArduino);
         catalogo.AgregarTipo(cableHdmi);
         catalogo.AgregarTipo(osciloscopio);
+        catalogo.AgregarTipo(camara);
     }
 
     private void CargarPrestamos(Catalogo catalogo)
@@ -105,8 +112,14 @@ public class DatosDeEjemplo
     private static TipoEquipamiento CrearTipo(string nombre, string descripcion, Categoria categoria,
         params string[] idsUnidades)
     {
+        return CrearTipo(nombre, descripcion, categoria, requiereAprobacion: false, idsUnidades);
+    }
+
+    private static TipoEquipamiento CrearTipo(string nombre, string descripcion, Categoria categoria,
+        bool requiereAprobacion, params string[] idsUnidades)
+    {
         TipoEquipamiento tipo = new TipoEquipamiento(nombre: nombre, descripcion: descripcion,
-            duracionMaxPrestamo: DiasMaximosDePrestamo, requiereAprobacion: false, categoria: categoria);
+            duracionMaxPrestamo: DiasMaximosDePrestamo, requiereAprobacion: requiereAprobacion, categoria: categoria);
         foreach (string id in idsUnidades)
         {
             tipo.AgregarUnidad(new UnidadFisica(idInstitucional: id, ubiFisica: Deposito, numSerie: NumeroDeSerieDeEjemplo(id, categoria)));
