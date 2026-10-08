@@ -35,9 +35,17 @@ public class ServicioTiposEquipamiento
     {
         ValidarResponsable(dniResponsable);
         Categoria categoria = Enum.Parse<Categoria>(datos.Categoria);
-        TipoEquipamiento tipo = new TipoEquipamiento(datos.Nombre, datos.Descripcion, datos.DuracionMaxPrestamo,
-            datos.RequiereAprobacion, categoria);
-        ObtenerCatalogo().AgregarTipo(tipo);
+
+        try
+        {
+            TipoEquipamiento tipo = new TipoEquipamiento(datos.Nombre, datos.Descripcion, datos.DuracionMaxPrestamo,
+                datos.RequiereAprobacion, categoria);
+            ObtenerCatalogo().AgregarTipo(tipo);
+        }
+        catch (DominioException ex)
+        {
+            throw new ServicioException(ex.Message, ex);
+        }
     }
 
     private Catalogo ObtenerCatalogo()
