@@ -50,6 +50,9 @@ public class ServicioTiposEquipamiento
 
     public void Modificar(string nombreActual, DatosTipoEquipamientoDto datos, string dniResponsable)
     {
+        TipoEquipamiento tipo = ObtenerTipo(ObtenerCatalogo(), nombreActual);
+        Categoria categoria = ObtenerCategoria(datos.Categoria);
+        tipo.Modificar(datos.Nombre, datos.Descripcion, datos.DuracionMaxPrestamo, datos.RequiereAprobacion, categoria);
     }
 
     private Catalogo ObtenerCatalogo()
@@ -61,6 +64,17 @@ public class ServicioTiposEquipamiento
         }
 
         return catalogo;
+    }
+
+    private static TipoEquipamiento ObtenerTipo(Catalogo catalogo, string nombre)
+    {
+        TipoEquipamiento? tipo = catalogo.BuscarTipoPorNombre(nombre);
+        if (tipo is null)
+        {
+            throw new ServicioException("El tipo de equipamiento no existe");
+        }
+
+        return tipo;
     }
 
     private void ValidarResponsable(string dniResponsable)
