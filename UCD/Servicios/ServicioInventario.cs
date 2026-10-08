@@ -19,17 +19,11 @@ public class ServicioInventario
     public List<CantidadesPorEstadoDto> ContarPorTipo(FiltroInventarioDto filtro)
     {
         List<CantidadesPorEstadoDto> filas = new List<CantidadesPorEstadoDto>();
-        Catalogo? catalogo = _repositorioCatalogo.Obtener();
-        if (catalogo is null)
-        {
-            return filas;
-        }
-
-        foreach (TipoEquipamiento tipo in catalogo.Tipos)
+        foreach (TipoEquipamiento tipo in ObtenerTipos())
         {
             if (CumpleFiltro(tipo, filtro))
             {
-                filas.Add(CrearFilaDeTipo(tipo));
+                filas.Add(CrearFila(tipo.Nombre, tipo.Categoria, tipo.Unidades));
             }
         }
 
@@ -38,63 +32,25 @@ public class ServicioInventario
 
     public List<CantidadesPorEstadoDto> ContarPorCategoria()
     {
+        IReadOnlyCollection<TipoEquipamiento> tipos = ObtenerTipos();
         List<CantidadesPorEstadoDto> filas = new List<CantidadesPorEstadoDto>();
-        Catalogo? catalogo = _repositorioCatalogo.Obtener();
         foreach (Categoria categoria in Enum.GetValues<Categoria>())
         {
-            List<UnidadFisica> unidades = new List<UnidadFisica>();
-            if (catalogo is not null)
-            {
-                foreach (TipoEquipamiento tipo in catalogo.Tipos)
-                {
-                    if (tipo.Categoria == categoria)
-                    {
-                        unidades.AddRange(tipo.Unidades);
-                    }
-                }
-            }
-
-            filas.Add(new CantidadesPorEstadoDto
-            {
-                Nombre = categoria.ToString(),
-                Categoria = categoria.ToString(),
-                Disponibles = ContarEnEstado(unidades, EstadoUnidadFisica.Disponible),
-                Prestadas = ContarEnEstado(unidades, EstadoUnidadFisica.Prestada),
-                EnMantenimiento = ContarEnEstado(unidades, EstadoUnidadFisica.EnMantenimiento),
-                DadasDeBaja = ContarEnEstado(unidades, EstadoUnidadFisica.DadaDeBaja),
-                Total = unidades.Count
-            });
+            filas.Add(CrearFila(categoria.ToString(), categoria, UnidadesDeCategoria(tipos, categoria)));
         }
 
         return filas;
     }
 
-    private static CantidadesPorEstadoDto CrearFilaDeTipo(TipoEquipamiento tipo)
+    private IReadOnlyCollection<TipoEquipamiento> ObtenerTipos()
     {
-        return new CantidadesPorEstadoDto
+        Catalogo? catalogo = _repositorioCatalogo.Obtener();
+        if (catalogo is null)
         {
-            Nombre = tipo.Nombre,
-            Categoria = tipo.Categoria.ToString(),
-            Disponibles = ContarEnEstado(tipo.Unidades, EstadoUnidadFisica.Disponible),
-            Prestadas = ContarEnEstado(tipo.Unidades, EstadoUnidadFisica.Prestada),
-            EnMantenimiento = ContarEnEstado(tipo.Unidades, EstadoUnidadFisica.EnMantenimiento),
-            DadasDeBaja = ContarEnEstado(tipo.Unidades, EstadoUnidadFisica.DadaDeBaja),
-            Total = tipo.Unidades.Count
-        };
-    }
-
-    private static int ContarEnEstado(IEnumerable<UnidadFisica> unidades, EstadoUnidadFisica estado)
-    {
-        int cantidad = 0;
-        foreach (UnidadFisica unidad in unidades)
-        {
-            if (unidad.Estado == estado)
-            {
-                cantidad++;
-            }
+            return new List<TipoEquipamiento>();
         }
 
-        return cantidad;
+        return catalogo.Tipos;
     }
 
     private static bool CumpleFiltro(TipoEquipamiento tipo, FiltroInventarioDto filtro)
@@ -123,5 +79,49 @@ public class ServicioInventario
         }
 
         return false;
+    }
+
+    private static List<UnidadFisica> UnidadesDeCategoria(IReadOnlyCollection<TipoEquipamiento> tipos,
+        Categoria categoria)
+    {
+        List<UnidadFisica> unidades = new List<UnidadFisica>();
+        foreach (TipoEquipamiento tipo in tipos)
+        {
+            if (tipo.Categoria == categoria)
+            {
+                unidades.AddRange(tipo.Unidades);
+            }
+        }
+
+        return unidades;
+    }
+
+    private static CantidadesPorEstadoDto CrearFila(string nombre, Categoria categoria,
+        IReadOnlyCollection<UnidadFisica> unidades)
+    {
+        return new CantidadesPorEstadoDto
+        {
+            Nombre = nombre,
+            Categoria = categoria.ToString(),
+            Disponibles = ContarEnEstado(unidades, EstadoUnidadFisica.Disponible),
+            Prestadas = ContarEnEstado(unidades, EstadoUnidadFisica.Prestada),
+            EnMantenimiento = ContarEnEstado(unidades, EstadoUnidadFisica.EnMantenimiento),
+            DadasDeBaja = ContarEnEstado(unidades, EstadoUnidadFisica.DadaDeBaja),
+            Total = unidades.Count
+        };
+    }
+
+    private static int ContarEnEstado(IEnumerable<UnidadFisica> unidades, EstadoUnidadFisica estado)
+    {
+        int cantidad = 0;
+        foreach (UnidadFisica unidad in unidades)
+        {
+            if (unidad.Estado == estado)
+            {
+                cantidad++;
+            }
+        }
+
+        return cantidad;
     }
 }
