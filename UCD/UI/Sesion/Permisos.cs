@@ -9,7 +9,9 @@ public static class Permisos
     public const string GestionarCatalogo = "GestionarCatalogo";
     public const string GestionarUnidades = "GestionarUnidades";
     public const string EvaluarSolicitud = "EvaluarSolicitud";
+    public const string RealizarPrestamo = "RealizarPrestamo";
     public const string RegistrarDevolucion = "RegistrarDevolucion";
+    public const string ConsultarPrestamos = "ConsultarPrestamos";
     public const string ConsultarHistorico = "ConsultarHistorico";
     public const string GestionarUsuarios = "GestionarUsuarios";
 }

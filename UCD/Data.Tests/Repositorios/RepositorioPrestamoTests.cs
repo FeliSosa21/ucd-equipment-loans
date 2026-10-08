@@ -176,6 +176,37 @@ public class RepositorioPrestamoTests
         CollectionAssert.Contains(resultado.ToList(), rechazado);
     }
 
+    [TestMethod]
+    public void ObtenerTodos_PrestamosEnVariosEstados_DevuelveTodos()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+        Prestamo solicitado = CrearPrestamo();
+        (Prestamo activo, _) = CrearPrestamoActivo();
+        Prestamo rechazado = CrearPrestamoRechazado();
+
+        repositorio.AgregarPrestamo(solicitado);
+        repositorio.AgregarPrestamo(activo);
+        repositorio.AgregarPrestamo(rechazado);
+
+        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerTodos();
+
+        CollectionAssert.AreEquivalent(
+            new List<Prestamo> { solicitado, activo, rechazado }, resultado.ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerTodos_SinPrestamos_DevuelveListaVacia()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
+
+        IReadOnlyList<Prestamo> resultado = repositorio.ObtenerTodos();
+
+        Assert.IsNotNull(resultado);
+        Assert.AreEqual(0, resultado.Count);
+    }
+
     private static Usuario CrearSolicitante(string dni = "12345672")
     {
         Usuario usuario = new Usuario(

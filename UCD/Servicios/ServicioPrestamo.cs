@@ -7,6 +7,7 @@ namespace Servicios;
 public class ServicioPrestamo
 {
     private const string MensajeSinPermisoParaEvaluar = "El usuario no tiene permiso para evaluar solicitudes";
+    private const string MensajeSinPermisoParaRealizar = "El usuario no tiene permiso para realizar prestamos";
 
     private readonly RepositorioPrestamo _prestamos;
     private readonly RepositorioUsuario _usuarios;
@@ -113,6 +114,24 @@ public class ServicioPrestamo
         }
     }
 
+    public PrestamoDto RegistrarEntrega(Guid idPrestamo, string dniResponsable)
+    {
+        Usuario responsable = ObtenerUsuarioHabilitado(
+            dniResponsable, Permiso.RealizarPrestamo, MensajeSinPermisoParaRealizar);
+        Prestamo prestamo = ObtenerPrestamo(idPrestamo);
+
+        try
+        {
+            prestamo.RegistrarEntrega(responsable, _reloj.GetLocalNow().DateTime);
+
+            return CrearPrestamoDto(prestamo);
+        }
+        catch (DominioException excepcion)
+        {
+            throw new ServicioException(excepcion.Message, excepcion);
+        }
+    }
+
     public List<PrestamoDto> ListarSolicitudesPendientes()
     {
         return _prestamos.ObtenerPrestamosPendientes().Select(CrearPrestamoDto).ToList();
@@ -121,6 +140,19 @@ public class ServicioPrestamo
     public List<PrestamoDto> ListarPrestamosDeSolicitante(string dniSolicitante)
     {
         return _prestamos.ObtenerPrestamosDeSolicitante(dniSolicitante).Select(CrearPrestamoDto).ToList();
+    }
+
+    public List<PrestamoDto> ListarPrestamosPorEntregar()
+    {
+        return _prestamos.ObtenerPrestamosActivos()
+            .Where(prestamo => prestamo.FechaHoraEntrega is null)
+            .Select(CrearPrestamoDto)
+            .ToList();
+    }
+
+    public List<PrestamoDto> ListarPrestamos()
+    {
+        return _prestamos.ObtenerTodos().Select(CrearPrestamoDto).ToList();
     }
 
     private Usuario ObtenerSolicitante(string dniSolicitante)
@@ -239,7 +271,8 @@ public class ServicioPrestamo
             FechaEsperadaDevolucion = prestamo.FechaEsperadaDevolucion,
             Estado = prestamo.Estado.ToString(),
             MotivoRechazo = prestamo.MotivoRechazo,
-            Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList()
+            Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList(),
+            FechaHoraEntrega = prestamo.FechaHoraEntrega
         };
     }
 }
