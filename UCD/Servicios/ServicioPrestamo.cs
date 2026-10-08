@@ -55,6 +55,12 @@ public class ServicioPrestamo
             }
 
             _prestamos.AgregarPrestamo(prestamo);
+            _movimientos.AgregarMovimiento(new Movimiento(
+                fechaHora: prestamo.FechaHoraPrestamo,
+                tipo: TipoMovimiento.Solicitud,
+                solicitante: prestamo.Solicitante,
+                evaluador: null,
+                unidad: null));
             RegistrarMovimientos(prestamo, prestamo.FechaHoraPrestamo);
 
             return CrearPrestamoDto(prestamo);
