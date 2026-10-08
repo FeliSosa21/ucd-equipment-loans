@@ -65,6 +65,11 @@ public class ServicioTiposEquipamiento
         }
     }
 
+    public void Discontinuar(string nombre, string dniResponsable)
+    {
+        ObtenerTipo(ObtenerCatalogo(), nombre).Discontinuar();
+    }
+
     private Catalogo ObtenerCatalogo()
     {
         Catalogo? catalogo = _repositorioCatalogo.Obtener();
