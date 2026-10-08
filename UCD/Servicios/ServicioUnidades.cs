@@ -39,6 +39,13 @@ public class ServicioUnidades
         return resultado;
     }
 
+    public void Registrar(DatosUnidadDto datos, string dniResponsable)
+    {
+        TipoEquipamiento tipo = ObtenerTipo(datos.NombreTipo);
+        UnidadFisica unidad = new UnidadFisica(datos.IdInstitucional, datos.UbicacionFisica, datos.NumeroSerie);
+        tipo.AgregarUnidad(unidad);
+    }
+
     private Catalogo ObtenerCatalogo()
     {
         Catalogo? catalogo = _repositorioCatalogo.Obtener();
@@ -48,6 +55,17 @@ public class ServicioUnidades
         }
 
         return catalogo;
+    }
+
+    private TipoEquipamiento ObtenerTipo(string nombreTipo)
+    {
+        TipoEquipamiento? tipo = ObtenerCatalogo().BuscarTipoPorNombre(nombreTipo);
+        if (tipo is null)
+        {
+            throw new ServicioException("El tipo de equipamiento no existe");
+        }
+
+        return tipo;
     }
 
     private static bool CoincideTipo(TipoEquipamiento tipo, string? nombreTipo)
