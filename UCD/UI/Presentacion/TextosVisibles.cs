@@ -28,4 +28,14 @@ public static class TextosVisibles
 
         return valor;
     }
+
+    public static string EstadoDeUnidad(string valor)
+    {
+        if (EstadosDeUnidad.ContainsKey(valor))
+        {
+            return EstadosDeUnidad[valor];
+        }
+
+        return valor;
+    }
 }

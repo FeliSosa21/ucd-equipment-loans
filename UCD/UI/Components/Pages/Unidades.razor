@@ -1,0 +1,202 @@
+@page "/unidades"
+@inherits PaginaConSesion
+@using DTOs
+@using Servicios
+@using UI.Presentacion
+@inject ServicioUnidades ServicioUnidades
+@inject ServicioTiposEquipamiento ServicioTipos
+
+<PageTitle>UCD · Unidades físicas</PageTitle>
+
+<div class="page-header">
+    <h1>Unidades físicas</h1>
+    <p>Registrá unidades, modificá su información, cambiá su estado o dalas de baja.</p>
+</div>
+
+<div class="toolbar">
+    <button type="button" class="btn btn-primary btn-sm" @onclick="AbrirAlta" disabled="@_mostrarFormulario">
+        Nueva unidad
+    </button>
+    <select class="field" aria-label="Tipo de equipamiento" @bind="_tipoFiltro" @bind:after="Recargar">
+        <option value="">Todos los tipos</option>
+        @foreach (TipoEquipamientoDetalleDto tipo in _tipos)
+        {
+            <option value="@tipo.Nombre">@tipo.Nombre</option>
+        }
+    </select>
+    <select class="field" aria-label="Estado" @bind="_estadoFiltro" @bind:after="Recargar">
+        <option value="">Todos los estados</option>
+        @foreach (KeyValuePair<string, string> estado in TextosVisibles.EstadosDeUnidad)
+        {
+            <option value="@estado.Key">@estado.Value</option>
+        }
+    </select>
+    <span class="espacio"></span>
+    <button type="button" class="btn btn-ghost btn-sm" @onclick="LimpiarFiltros" disabled="@(!HayFiltrosAplicados())">
+        Limpiar filtros
+    </button>
+</div>
+
+@if (_mostrarFormulario)
+{
+    <div class="card alta">
+        <form class="form-grid" @onsubmit="Guardar" novalidate>
+            @if (EsAlta())
+            {
+                <div class="lbl">Nueva unidad física</div>
+                <div class="form-row">
+                    <div>
+                        <label class="lbl" for="unidad-tipo">Tipo de equipamiento</label>
+                        <select id="unidad-tipo" class="field" @bind="_datos.NombreTipo">
+                            <option value="">Elegí un tipo</option>
+                            @foreach (TipoEquipamientoDetalleDto tipo in TiposActivos())
+                            {
+                                <option value="@tipo.Nombre">@tipo.Nombre</option>
+                            }
+                        </select>
+                        <div class="hint">Solo aparecen los tipos activos.</div>
+                    </div>
+                    <div>
+                        <label class="lbl" for="unidad-id">Identificación institucional</label>
+                        <input id="unidad-id" class="field mono" maxlength="8" placeholder="EQP-0001"
+                               @bind="_datos.IdInstitucional" @bind:event="oninput" />
+                        <div class="hint">Tres letras mayúsculas, un guion y cuatro dígitos. No puede repetirse.</div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="lbl">
+                    Editar la unidad <span class="mono">@_idEditando</span> · @_tipoEditando
+                </div>
+            }
+            <div class="form-row">
+                <div>
+                    <label class="lbl" for="unidad-ubicacion">Ubicación física</label>
+                    <input id="unidad-ubicacion" class="field" maxlength="80"
+                           @bind="_datos.UbicacionFisica" @bind:event="oninput" />
+                    <div class="hint">Entre 3 y 80 caracteres.</div>
+                </div>
+                <div>
+                    <label class="lbl" for="unidad-serie">Número de serie (opcional)</label>
+                    <input id="unidad-serie" class="field mono" maxlength="50"
+                           @bind="_datos.NumeroSerie" @bind:event="oninput" />
+                    <div class="hint">Si el fabricante lo proporciona. No puede repetirse.</div>
+                </div>
+            </div>
+            @if (!EsAlta())
+            {
+                <div>
+                    <label class="lbl" for="unidad-observaciones">Observaciones (opcional)</label>
+                    <textarea id="unidad-observaciones" class="field" rows="3" maxlength="300"
+                              @bind="_datos.Observaciones" @bind:event="oninput"></textarea>
+                    <div class="hint">Hasta 300 caracteres.</div>
+                </div>
+            }
+            <div class="acciones">
+                <button type="submit" class="btn btn-primary" disabled="@(!FormularioCompleto())">Guardar</button>
+                <button type="button" class="btn btn-ghost" @onclick="CancelarFormulario">Cancelar</button>
+            </div>
+        </form>
+    </div>
+}
+
+@if (_aDarDeBaja is not null)
+{
+    <div class="card alta" role="alertdialog" aria-labelledby="confirmacion-pregunta">
+        <p id="confirmacion-pregunta" class="pregunta">
+            ¿Querés dar de baja la unidad <strong class="mono">@_aDarDeBaja.IdInstitucional</strong>
+            (@_aDarDeBaja.Tipo)? No se va a poder prestar ni volver a estar disponible, y la acción no se puede
+            deshacer.
+        </p>
+        <div class="acciones">
+            <button type="button" class="btn btn-primary" @onclick="ConfirmarBaja">Sí, dar de baja</button>
+            <button type="button" class="btn btn-ghost" @onclick="CancelarBaja">Cancelar</button>
+        </div>
+    </div>
+}
+
+@if (_exito is not null)
+{
+    <div class="alert alert-success mensaje" role="status">@_exito</div>
+}
+
+@if (_error is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_error</div>
+}
+
+<div class="card table-card">
+    <table>
+        <thead>
+        <tr>
+            <th>Identificación</th>
+            <th>Tipo</th>
+            <th>Ubicación</th>
+            <th>Número de serie</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (UnidadDetalleDto unidad in _unidades)
+        {
+            <tr>
+                <td class="mono"><strong>@unidad.IdInstitucional</strong></td>
+                <td>@unidad.Tipo</td>
+                <td>
+                    @unidad.UbicacionFisica
+                    @if (!string.IsNullOrEmpty(unidad.Observaciones))
+                    {
+                        <div class="observaciones">@unidad.Observaciones</div>
+                    }
+                </td>
+                <td class="mono">@TextoOpcional(unidad.NumeroSerie)</td>
+                <td><span class="@ClaseDeEstado(unidad)">@TextosVisibles.EstadoDeUnidad(unidad.Estado)</span></td>
+                <td class="celda-acciones">
+                    @if (PuedeEditarse(unidad))
+                    {
+                        <button type="button" class="btn btn-ghost btn-sm" @onclick="() => AbrirEdicion(unidad)">
+                            Editar
+                        </button>
+                    }
+                    @if (PuedeIrAMantenimiento(unidad))
+                    {
+                        <button type="button" class="btn btn-ghost btn-sm"
+                                @onclick="() => EnviarAMantenimiento(unidad)">
+                            A mantenimiento
+                        </button>
+                    }
+                    @if (PuedeVolverADisponible(unidad))
+                    {
+                        <button type="button" class="btn btn-ghost btn-sm" @onclick="() => VolverADisponible(unidad)">
+                            Volver a disponible
+                        </button>
+                    }
+                    @if (PuedeDarseDeBaja(unidad))
+                    {
+                        <button type="button" class="btn btn-ghost btn-sm" @onclick="() => PedirBaja(unidad)">
+                            Dar de baja
+                        </button>
+                    }
+                    @if (EstaPrestada(unidad))
+                    {
+                        <span class="hint">Vuelve con la devolución</span>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    @if (_unidades.Count == 0 && HayFiltrosAplicados())
+    {
+        <EstadoVacio Titulo="No hay unidades que coincidan con los filtros"
+                     Mensaje="Probá con otro tipo u otro estado, o limpiá los filtros." />
+    }
+    else if (_unidades.Count == 0)
+    {
+        <EstadoVacio Titulo="Todavía no hay unidades físicas"
+                     Mensaje="Registrá la primera con «Nueva unidad»." />
+    }
+</div>

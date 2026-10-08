@@ -29,6 +29,7 @@ builder.Services.AddScoped<ServicioCatalogo>();
 builder.Services.AddScoped<ServicioHistorico>();
 builder.Services.AddScoped<ServicioInventario>();
 builder.Services.AddScoped<ServicioTiposEquipamiento>();
+builder.Services.AddScoped<ServicioUnidades>();
 
 // Reloj del sistema: los servicios piden la hora a TimeProvider (en los tests se usa uno fijo).
 builder.Services.AddSingleton(TimeProvider.System);
