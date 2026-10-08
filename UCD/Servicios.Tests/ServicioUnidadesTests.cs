@@ -180,6 +180,21 @@ public class ServicioUnidadesTests
         Assert.IsNull(unidad.NumeroSerie);
     }
 
+    [TestMethod]
+    public void Modificar_DatosValidos_ActualizaLaUnion()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        proyector.AgregarUnidad(new UnidadFisica("PRY-0001", "Deposito A", "SN123"));
+        ServicioUnidades servicio = CrearServicio(proyector);
+
+        servicio.Modificar(CrearEdicion("PRY-0001", "SN999"), DniFuncionario);
+
+        UnidadDetalleDto unidad = servicio.Listar(null, null)[0];
+        Assert.AreEqual("Laboratorio 3", unidad.UbicacionFisica);
+        Assert.AreEqual("SN999", unidad.NumeroSerie);
+        Assert.AreEqual("Lampara nueva", unidad.Observaciones);
+    }
+
     private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
@@ -224,6 +239,17 @@ public class ServicioUnidadesTests
             IdInstitucional = idInstitucional,
             UbicacionFisica = "Deposito A",
             NumeroSerie = numeroSerie
+        };
+    }
+
+    private static DatosUnidadDto CrearEdicion(string idInstitucional, string? numeroSerie)
+    {
+        return new DatosUnidadDto
+        {
+            IdInstitucional = idInstitucional,
+            UbicacionFisica = "Laboratorio 3",
+            NumeroSerie = numeroSerie,
+            Observaciones = "Lampara nueva"
         };
     }
 }
