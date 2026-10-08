@@ -45,7 +45,7 @@
                     <td>@prestamo.CantidadSolicitada</td>
                     <td>@prestamo.Estado</td>
                     <td>@prestamo.FechaHoraPrestamo.ToString(FormatoFecha)</td>
-                    <td>@prestamo.FechaEsperadaDevolucion.ToString(FormatoFechaEsperada)</td>
+                    <td>@(prestamo.Estado == EstadoRechazado ? SinDato : prestamo.FechaEsperadaDevolucion.ToString(FormatoFechaEsperada))</td>
                     <td class="mono">@(prestamo.Unidades.Any() ? string.Join(", ", prestamo.Unidades) : SinDato)</td>
                     <td>@(prestamo.FechaHoraEntrega?.ToString(FormatoFecha) ?? SinDato)</td>
                     <td>@(prestamo.MotivoRechazo ?? SinDato)</td>
