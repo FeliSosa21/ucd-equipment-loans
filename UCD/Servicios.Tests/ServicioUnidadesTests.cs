@@ -34,7 +34,7 @@ public class ServicioUnidadesTests
     }
 
     [TestMethod]
-    public void Listar_FiltroPorTiempo_DevuelveSoloLasDeEseTipo()
+    public void Listar_FiltroPorTipo_DevuelveSoloLasDeEseTipo()
     {
         TipoEquipamiento proyector = CrearTipo("Proyector Epson");
         proyector.AgregarUnidad(CrearUnidad("PRY-0001"));
@@ -82,7 +82,7 @@ public class ServicioUnidadesTests
     }
 
     [TestMethod]
-    public void Registrar_ResponsablesSinPermiso_LanzaServicioException()
+    public void Registrar_ResponsableSinPermiso_LanzaServicioException()
     {
         TipoEquipamiento proyector = CrearTipo("Proyector Epson");
         ServicioUnidades servicio = CrearServicio(proyector);
@@ -100,7 +100,7 @@ public class ServicioUnidadesTests
     }
 
     [TestMethod]
-    public void Registrar_IdRepetidosEnOtroTipo_LanzaServicioException()
+    public void Registrar_IdRepetidoEnOtroTipo_LanzaServicioException()
     {
         TipoEquipamiento proyector = CrearTipo("Proyector Epson");
         proyector.AgregarUnidad(CrearUnidad("EQP-0001"));
@@ -124,7 +124,7 @@ public class ServicioUnidadesTests
     }
 
     [TestMethod]
-    private void Registrar_DosUnidadesSinSerie_RegistraAmbas()
+    public void Registrar_DosUnidadesSinSerie_RegistraAmbas()
     {
         TipoEquipamiento proyector = CrearTipo("Proyector Epson");
         proyector.AgregarUnidad(CrearUnidad("PRY-0001"));
