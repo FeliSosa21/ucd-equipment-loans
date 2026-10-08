@@ -10,6 +10,7 @@ public sealed class ServicioPrestamoTests
 {
     private static readonly DateTime FechaFija = new DateTime(2026, 10, 5, 10, 0, 0);
     private static readonly DateTime FechaDeEvaluacion = new DateTime(2026, 10, 6, 9, 30, 0);
+    private static readonly DateTime FechaDeEntrega = new DateTime(2026, 10, 6, 9, 30, 0);
 
     private const string DniDocente = "12345672";
     private const string DniEstudiante = "45678905";
@@ -647,6 +648,158 @@ public sealed class ServicioPrestamoTests
 
         Assert.AreEqual("El prestamo no existe", excepcion.Message);
         VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
+    }
+
+    [TestMethod]
+    public void RegistrarEntrega_PrestamoActivo_GuardaResponsableYFechaDelReloj()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = servicio.Solicitar(CrearSolicitud(), DniDocente).Id;
+        ServicioPrestamo servicioDeLaEntrega =
+            CrearServicioConReloj(memoria, new RelojFijo(FechaDeEntrega));
+
+        servicioDeLaEntrega.RegistrarEntrega(idPrestamo, DniFuncionario);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        Usuario funcionario = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniFuncionario)!;
+
+        Assert.AreSame(funcionario, guardado.ResponsableEntrega);
+        Assert.AreEqual(FechaDeEntrega, guardado.FechaHoraEntrega);
+    }
+
+    [TestMethod]
+    [DataRow(DniDocente)]
+    [DataRow(DniSupervisor)]
+    [DataRow(DniFuncionarioDesactivado)]
+    [DataRow(DniInexistente)]
+    public void RegistrarEntrega_ResponsableNoHabilitado_LanzaExcepcion(string dniResponsable)
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = servicio.Solicitar(CrearSolicitud(), DniDocente).Id;
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.RegistrarEntrega(idPrestamo, dniResponsable));
+        Assert.AreEqual("El usuario no tiene permiso para realizar prestamos", excepcion.Message);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        Assert.IsNull(guardado.ResponsableEntrega);
+        Assert.IsNull(guardado.FechaHoraEntrega);
+    }
+
+    [TestMethod]
+    public void RegistrarEntrega_PrestamoInexistente_LanzaExcepcion()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idInexistente = Guid.NewGuid();
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.RegistrarEntrega(idInexistente, DniFuncionario));
+
+        Assert.AreEqual("El prestamo no existe", excepcion.Message);
+        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
+    }
+
+    [TestMethod]
+    public void RegistrarEntrega_PrestamoYaEntregado_LanzaExcepcionConCausaDeDominio()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = servicio.Solicitar(CrearSolicitud(), DniDocente).Id;
+        servicio.RegistrarEntrega(idPrestamo, DniFuncionario);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.RegistrarEntrega(idPrestamo, DniFuncionario));
+
+        Assert.AreEqual("La entrega del prestamo ya fue registrada", excepcion.Message);
+        Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
+    }
+
+    [TestMethod]
+    public void RegistrarEntrega_PrestamoActivo_DevuelveLaFechaDeEntrega()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = servicio.Solicitar(CrearSolicitud(), DniDocente).Id;
+        ServicioPrestamo servicioDeLaEntrega =
+            CrearServicioConReloj(memoria, new RelojFijo(FechaDeEntrega));
+
+        PrestamoDto resultado = servicioDeLaEntrega.RegistrarEntrega(idPrestamo, DniFuncionario);
+
+        Assert.AreEqual(FechaDeEntrega, resultado.FechaHoraEntrega);
+    }
+
+    [TestMethod]
+    public void RegistrarEntrega_PrestamoActivo_NoRegistraMovimientos()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = servicio.Solicitar(CrearSolicitud(), DniDocente).Id;
+        int movimientosAntes = new RepositorioMovimiento(memoria).ObtenerTodos().Count;
+
+        servicio.RegistrarEntrega(idPrestamo, DniFuncionario);
+
+        Assert.AreEqual(movimientosAntes, new RepositorioMovimiento(memoria).ObtenerTodos().Count,
+            "La entrega no deberia registrar ningun movimiento");
+    }
+
+    [TestMethod]
+    public void RegistrarEntrega_SolicitanteDesactivadoDespuesDeSolicitar_RegistraLaEntrega()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idPrestamo = servicio.Solicitar(CrearSolicitud(), DniDocente).Id;
+        Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
+        docente.Desactivar();
+
+        servicio.RegistrarEntrega(idPrestamo, DniFuncionario);
+
+        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        Usuario funcionario = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniFuncionario)!;
+        Assert.AreSame(funcionario, guardado.ResponsableEntrega);
+    }
+
+    [TestMethod]
+    public void ListarPrestamosPorEntregar_VariosEstados_DevuelveSoloLosActivosSinEntrega()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion), DniAdministrador);
+        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades), DniAdministrador);
+        Guid idActivoSinEntrega =
+            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+        Guid idEntregado =
+            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+        servicio.RegistrarEntrega(idEntregado, DniFuncionario);
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamosPorEntregar();
+
+        CollectionAssert.AreEquivalent(
+            new List<Guid> { idActivoSinEntrega }, resultado.Select(prestamo => prestamo.Id).ToList());
+    }
+
+    [TestMethod]
+    public void ListarPrestamos_VariosEstados_DevuelveTodos()
+    {
+        Memoria memoria = new Memoria();
+        ServicioPrestamo servicio = CrearServicio(memoria);
+        Guid idSolicitado =
+            servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion), DniAdministrador).Id;
+        Guid idRechazado =
+            servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades), DniAdministrador).Id;
+        Guid idActivoSinEntrega =
+            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+        Guid idEntregado =
+            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+        servicio.RegistrarEntrega(idEntregado, DniFuncionario);
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamos();
+
+        CollectionAssert.AreEquivalent(
+            new List<Guid> { idSolicitado, idRechazado, idActivoSinEntrega, idEntregado },
+            resultado.Select(prestamo => prestamo.Id).ToList());
     }
 
     [TestMethod]

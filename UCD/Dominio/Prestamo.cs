@@ -4,6 +4,8 @@ public class Prestamo
 {
     private const string MotivoFaltaDeUnidades = "No hay unidades suficientes para el tipo de equipamiento";
     private readonly List<UnidadFisica> _unidadesAsignadas = new List<UnidadFisica>();
+    public Usuario? ResponsableEntrega { get; private set; }
+    public DateTime? FechaHoraEntrega { get; private set; }
 
     public Guid Id { get; } = Guid.NewGuid();
     public EstadoPrestamo Estado { get; private set; } = EstadoPrestamo.Solicitado;
@@ -78,6 +80,15 @@ public class Prestamo
 
         Estado = EstadoPrestamo.Rechazado;
         MotivoRechazo = MotivoFaltaDeUnidades;
+    }
+
+    public void RegistrarEntrega(Usuario responsable, DateTime fechaHoraEntrega)
+    {
+        ValidarQueSePuedaEntregar();
+        ValidarResponsable(responsable);
+
+        ResponsableEntrega = responsable;
+        FechaHoraEntrega = fechaHoraEntrega;
     }
 
     public void MarcarDevuelto()
@@ -242,6 +253,27 @@ public class Prestamo
         }
 
         _unidadesAsignadas.Clear();
+    }
+
+    private void ValidarQueSePuedaEntregar()
+    {
+        if (Estado != EstadoPrestamo.Activo)
+        {
+            throw new DominioException("Solo se puede registrar la entrega de un prestamo activo");
+        }
+
+        if (FechaHoraEntrega is not null)
+        {
+            throw new DominioException("La entrega del prestamo ya fue registrada");
+        }
+    }
+
+    private static void ValidarResponsable(Usuario responsable)
+    {
+        if (responsable is null)
+        {
+            throw new DominioException("La entrega debe tener un responsable");
+        }
     }
 
     private void ValidarQueEsteActivo()
