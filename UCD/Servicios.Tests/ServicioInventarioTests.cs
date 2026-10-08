@@ -54,6 +54,24 @@ public class ServicioInventarioTests
         Assert.AreEqual("Notebook", resultado[0].Nombre);
     }
 
+    [TestMethod]
+    public void ContarPorTipo_FiltroPorEstado_DeuvelveSoloLosTiposConUnidadesEnEseEstado()
+    {
+        TipoEquipamiento proyector = CrearTipo(nombre: "Proyector");
+        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
+        TipoEquipamiento kitArduino = CrearTipo(nombre: "Kit Arduino", categoria: Categoria.Laboratorio);
+        kitArduino.AgregarUnidad(CrearUnidad(idInstitucional: "KIT-0001"));
+        kitArduino.AgregarUnidad(CrearUnidad(idInstitucional: "KIT-0002", estado: EstadoUnidadFisica.EnMantenimiento));
+        ServicioInventario servicio = CrearServicio(proyector, kitArduino);
+        FiltroInventarioDto filtro = new FiltroInventarioDto { Estado = "EnMantenimiento" };
+
+        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorTipo(filtro);
+
+        Assert.AreEqual(1, resultado.Count);
+        Assert.AreEqual("Kit Arduino", resultado[0].Nombre);
+        Assert.AreEqual(1, resultado[0].Disponibles);
+    }
+
     private static ServicioInventario CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
