@@ -233,6 +233,14 @@ public class ServicioTiposEquipamientoTests
             servicio.Discontinuar("Camara Canon EOS", DniSupervisor));
     }
 
+    [TestMethod]
+    public void ObtenerNombreCatalogo_DevuelveElNombre()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+
+        Assert.AreEqual("Catalogo UCD", servicio.ObtenerNombreCatalogo());
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();
