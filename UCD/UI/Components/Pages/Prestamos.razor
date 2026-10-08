@@ -1,0 +1,69 @@
+@page "/prestamos"
+@using DTOs
+@using Servicios
+@inherits PaginaConSesion
+@inject ServicioPrestamo ServicioPrestamo
+
+<PageTitle>UCD · Préstamos</PageTitle>
+
+<div class="page-header">
+    <h1>Préstamos</h1>
+    <p>Todas las solicitudes y préstamos con su estado, del más reciente al más viejo.</p>
+</div>
+
+<div class="toolbar">
+    <div>
+        <label class="lbl" for="filtro-estado">Estado</label>
+        <select id="filtro-estado" class="field" @bind="_estado">
+            <option value="@TodosLosEstados">Todos</option>
+            @foreach (string estado in Estados)
+            {
+                <option value="@estado">@estado</option>
+            }
+        </select>
+    </div>
+</div>
+
+<div class="card table-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Solicitante</th>
+                <th>Equipo</th>
+                <th>Cantidad</th>
+                <th>Estado</th>
+                <th>Fecha del préstamo</th>
+                <th>Devolución esperada</th>
+                <th>Unidades</th>
+                <th>Entrega</th>
+                <th>Motivo de rechazo</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (PrestamoDto prestamo in PrestamosFiltrados)
+            {
+                <tr>
+                    <td>@prestamo.Solicitante</td>
+                    <td>@prestamo.TipoEquipamiento</td>
+                    <td>@prestamo.CantidadSolicitada</td>
+                    <td>@prestamo.Estado</td>
+                    <td>@prestamo.FechaHoraPrestamo.ToString(Formatos.FechaHora)</td>
+                    <td>@(prestamo.Estado == EstadosPrestamo.Rechazado ? SinDato : prestamo.FechaEsperadaDevolucion.ToString(Formatos.Fecha))</td>
+                    <td class="mono">@(prestamo.Unidades.Any() ? string.Join(", ", prestamo.Unidades) : SinDato)</td>
+                    <td>@(prestamo.FechaHoraEntrega?.ToString(Formatos.FechaHora) ?? SinDato)</td>
+                    <td>@(prestamo.MotivoRechazo ?? SinDato)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!_prestamos.Any())
+    {
+        <EstadoVacio Titulo="Todavía no hay préstamos"
+                     Mensaje="Las solicitudes y préstamos van a aparecer acá a medida que se registren." />
+    }
+    else if (!PrestamosFiltrados.Any())
+    {
+        <EstadoVacio Titulo="No hay préstamos en este estado"
+                     Mensaje="Probá eligiendo otro estado o «Todos»." />
+    }
+</div>

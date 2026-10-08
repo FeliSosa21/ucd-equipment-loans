@@ -1,0 +1,96 @@
+@inherits LayoutComponentBase
+@using Servicios
+@implements IDisposable
+@inject SesionActual SesionActual
+@inject NavigationManager Navigation
+@inject ServicioSesion ServicioSesion
+
+<header class="topbar">
+    <Marca />
+
+    <div class="sesion">
+        @if (SesionActual.EstaIniciada)
+        {
+            <MenuUsuario OnSalir="CerrarSesion" />
+        }
+        else
+        {
+            <a class="btn btn-ghost btn-sm" href="ingresar">Ingresar</a>
+            <a class="btn btn-primary btn-sm" href="registro">Crear cuenta</a>
+        }
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar">
+        <NavMenu />
+    </aside>
+    <main class="content">
+        @Body
+    </main>
+</div>
+
+<ErrorInesperado />
+
+@code {
+    protected override void OnInitialized()
+    {
+        SesionActual.Cambio += StateHasChanged;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await RenovarSesionAsync();
+        ExigirPaginaObligatoria();
+    }
+
+    // En cada navegacion se traen los datos actuales: si el usuario fue desactivado, se cierra la sesion,
+    // y si le cambiaron el tipo, el menu refleja los permisos nuevos.
+    private async Task RenovarSesionAsync()
+    {
+        if (!SesionActual.EstaIniciada)
+        {
+            return;
+        }
+
+        try
+        {
+            SesionActual.Renovar(ServicioSesion.RenovarSesion(SesionActual.Usuario!.Dni));
+        }
+        catch (ServicioException)
+        {
+            await SesionActual.ExpirarAsync(SesionActual.AvisoCuentaInactiva);
+            Navigation.NavigateTo("/ingresar");
+        }
+    }
+
+    // Si debe cambiar la contrasena o espera la activacion, no puede ir a otra pantalla hasta resolverlo.
+    // Mientras espera la activacion, igual puede usar las paginas de su cuenta (Mis datos y Cambiar contraseña).
+    private void ExigirPaginaObligatoria()
+    {
+        string? pagina = SesionActual.PaginaObligatoria();
+
+        if (pagina is null || Navigation.Uri.EndsWith(pagina, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        if (pagina == SesionActual.PaginaPendienteDeActivacion && SesionActual.EsPaginaDeSuCuenta(Navigation.Uri))
+        {
+            return;
+        }
+
+        Navigation.NavigateTo(pagina);
+    }
+
+    private async Task CerrarSesion()
+    {
+        await SesionActual.CerrarAsync();
+        Navigation.NavigateTo("/", forceLoad: true);
+    }
+
+    public void Dispose()
+    {
+        SesionActual.Cambio -= StateHasChanged;
+    }
+}

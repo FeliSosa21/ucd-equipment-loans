@@ -1,0 +1,24 @@
+﻿/* Titulo dentro de cada tarjeta: mas chico que el de la pagina y separado del borde */
+.titulo-seccion {
+    margin: 0;
+    padding: 1rem 1.25rem .5rem;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+/* Filtros entre las dos tablas: separados del resumen y pegados al detalle que filtran */
+.filtros-detalle {
+    margin-top: 1.5rem;
+    margin-bottom: .75rem;
+    align-items: flex-end;
+}
+
+/* Cantidades en cero: atenuadas, para que resalten las que no lo son */
+td.cero {
+    color: var(--ink-faint);
+}
+
+/* Boton de limpiar: centrado verticalmente en la barra de filtros */
+.filtros-detalle .btn {
+    align-self: center;
+}

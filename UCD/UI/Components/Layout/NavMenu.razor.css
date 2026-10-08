@@ -1,0 +1,35 @@
+.nav { display: flex; flex-direction: column; gap: 2px; padding: .75rem; }
+.nav-section {
+    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-faint); padding: 1.25rem .75rem .5rem;
+}
+.nav-section:first-child { padding-top: .75rem; }
+.nav ::deep .nav-item {
+    display: flex; align-items: center; gap: .75rem;
+    padding: .625rem .75rem; border-radius: 12px;
+    font-size: .875rem; font-weight: 500; color: var(--ink-soft); text-decoration: none;
+    transition: background .12s ease, color .12s ease;
+}
+.nav ::deep .nav-item:hover { background: var(--surface-2); color: var(--ink); }
+.nav ::deep .nav-item.active { background: var(--navy-soft); color: var(--navy); font-weight: 600; }
+
+/* Iconos de cada opcion, como en el prototipo (solo decorativos: van por CSS segun el destino) */
+.nav ::deep .nav-item::before {
+    content: "•"; width: 1.1rem; flex-shrink: 0; text-align: center;
+    font-size: 1rem; line-height: 1; color: var(--ink-faint);
+}
+.nav ::deep .nav-item.active::before { color: var(--navy); }
+.nav ::deep .nav-item[href=""]::before { content: "▦"; }
+.nav ::deep .nav-item[href="catalogo"]::before { content: "⌕"; }
+.nav ::deep .nav-item[href="solicitar-prestamo"]::before { content: "+"; }
+.nav ::deep .nav-item[href="tipos-equipamiento"]::before { content: "◫"; }
+.nav ::deep .nav-item[href="unidades"]::before { content: "▤"; }
+.nav ::deep .nav-item[href="inventario"]::before { content: "▥"; }
+.nav ::deep .nav-item[href="aprobaciones"]::before { content: "✓"; }
+.nav ::deep .nav-item[href="entregas"]::before { content: "→"; }
+.nav ::deep .nav-item[href="devoluciones"]::before { content: "↩"; }
+.nav ::deep .nav-item[href="prestamos"]::before { content: "≡"; }
+.nav ::deep .nav-item[href="auditoria"]::before { content: "◷"; }
+.nav ::deep .nav-item[href="usuarios"]::before { content: "◍"; }
+.nav ::deep .nav-item[href="mis-datos"]::before { content: "◉"; }
+.nav ::deep .nav-item[href="cambiar-contrasena"]::before { content: "⚿"; }

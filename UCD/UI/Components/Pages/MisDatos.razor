@@ -1,0 +1,92 @@
+@page "/mis-datos"
+@using DTOs
+@using Servicios
+@inherits PaginaConSesion
+@inject ServicioAdministracionUsuarios ServicioAdministracion
+
+<PageTitle>UCD · Mis datos</PageTitle>
+
+<div class="page-header">
+    <h1>Mis datos</h1>
+    <p>Modificá tu nombre, apellido o correo.</p>
+</div>
+
+<div class="card formulario">
+    <form class="form-grid" @onsubmit="Guardar" novalidate>
+        <div>
+            <label class="lbl" for="ci">Cédula de identidad</label>
+            <input id="ci" class="field mono" value="@_dni" disabled />
+        </div>
+        <CamposDatosPersonales @bind-Nombre="_nombre" @bind-Apellido="_apellido" @bind-Correo="_correo" />
+
+        @if (_error is not null)
+        {
+            <div class="alert alert-error" role="alert">@_error</div>
+        }
+        @if (_exito)
+        {
+            <div class="alert alert-success" role="status">Tus datos se guardaron correctamente.</div>
+        }
+
+        <button type="submit" class="btn btn-primary" disabled="@(!FormularioCompleto)">Guardar cambios</button>
+    </form>
+</div>
+
+@code {
+    private string _dni = string.Empty;
+    private string _nombre = string.Empty;
+    private string _apellido = string.Empty;
+    private string _correo = string.Empty;
+    private string? _error;
+    private bool _exito;
+
+    private bool FormularioCompleto => CamposDatosPersonales.EstanCompletos(_nombre, _apellido, _correo);
+
+    protected override void OnInitialized()
+    {
+        if (RedirigirSiNoHaySesion())
+        {
+            return;
+        }
+
+        try
+        {
+            UsuarioResumenDto datos = ServicioAdministracion.ObtenerResumen(DniUsuario, DniUsuario);
+            _dni = datos.Dni;
+            _nombre = datos.Nombre;
+            _apellido = datos.Apellido;
+            _correo = datos.Correo;
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private void Guardar()
+    {
+        // Un doble clic con los campos vacios (o la carga fallida) no llega al servicio.
+        if (!FormularioCompleto)
+        {
+            return;
+        }
+
+        _error = null;
+        _exito = false;
+
+        try
+        {
+            DatosPersonalesDto datos = new DatosPersonalesDto
+            {
+                Dni = _dni, Nombre = _nombre.Trim(), Apellido = _apellido.Trim(), Correo = _correo.Trim()
+            };
+            ServicioAdministracion.ModificarDatos(datos, DniUsuario);
+            SesionActual.ActualizarDatos(datos.Nombre, datos.Correo);
+            _exito = true;
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+        }
+    }
+}

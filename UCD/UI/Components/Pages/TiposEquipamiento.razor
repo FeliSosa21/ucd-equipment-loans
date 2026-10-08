@@ -1,0 +1,194 @@
+@page "/tipos-equipamiento"
+@inherits PaginaConSesion
+@using DTOs
+@using Servicios
+@using UI.Presentacion
+@inject ServicioTiposEquipamiento ServicioTipos
+
+<PageTitle>UCD · Tipos de equipamiento</PageTitle>
+
+<div class="page-header">
+    <h1>Tipos de equipamiento</h1>
+    <p>Registrá, modificá, discontinuá o reactivá los modelos de equipamiento del catálogo.</p>
+</div>
+
+<section class="card catalogo" aria-label="Nombre del catálogo">
+    @if (_editandoNombreCatalogo)
+    {
+        <form class="nombre-catalogo" @onsubmit="GuardarNombreCatalogo" novalidate>
+            <label class="lbl" for="nombre-catalogo">Nombre del catálogo</label>
+            <input id="nombre-catalogo" class="field" maxlength="80"
+                   @bind="_nombreCatalogoEditado" @bind:event="oninput" />
+            <span class="hint">Entre 3 y 80 caracteres.</span>
+            <div class="acciones">
+                <button type="submit" class="btn btn-primary btn-sm" disabled="@(!NombreCatalogoCompleto())">
+                    Guardar
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm" @onclick="CancelarNombreCatalogo">Cancelar</button>
+            </div>
+        </form>
+    }
+    else
+    {
+        <div class="nombre-catalogo">
+            <span class="lbl">Nombre del catálogo</span>
+            <strong>@_nombreCatalogo</strong>
+            <button type="button" class="btn btn-ghost btn-sm" @onclick="AbrirEdicionNombreCatalogo">
+                Cambiar nombre
+            </button>
+        </div>
+    }
+</section>
+
+<div class="toolbar">
+    <button type="button" class="btn btn-primary btn-sm" @onclick="AbrirAlta" disabled="@_mostrarFormulario">
+        Nuevo tipo
+    </button>
+    <input class="field busqueda" type="search" placeholder="Buscar por nombre…" aria-label="Buscar por nombre"
+           @bind="_busqueda" @bind:event="oninput" @bind:after="Filtrar" />
+    <select class="field" aria-label="Categoría" @bind="_categoria" @bind:after="Filtrar">
+        <option value="">Todas las categorías</option>
+        @foreach (KeyValuePair<string, string> categoria in TextosVisibles.Categorias)
+        {
+            <option value="@categoria.Key">@categoria.Value</option>
+        }
+    </select>
+    <span class="espacio"></span>
+    <button type="button" class="btn btn-ghost btn-sm" @onclick="LimpiarFiltros" disabled="@(!HayFiltrosAplicados())">
+        Limpiar filtros
+    </button>
+</div>
+
+@if (_mostrarFormulario)
+{
+    <div class="card alta">
+        <form class="form-grid" @onsubmit="Guardar" novalidate>
+            <div class="lbl">@TituloFormulario()</div>
+            <div class="form-row">
+                <div>
+                    <label class="lbl" for="tipo-nombre">Nombre</label>
+                    <input id="tipo-nombre" class="field" maxlength="80"
+                           @bind="_datos.Nombre" @bind:event="oninput" />
+                    <div class="hint">Entre 3 y 80 caracteres. No puede repetirse en el catálogo.</div>
+                </div>
+                <div>
+                    <label class="lbl" for="tipo-categoria">Categoría</label>
+                    <select id="tipo-categoria" class="field" @bind="_datos.Categoria">
+                        <option value="">Elegí una categoría</option>
+                        @foreach (KeyValuePair<string, string> categoria in TextosVisibles.Categorias)
+                        {
+                            <option value="@categoria.Key">@categoria.Value</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="lbl" for="tipo-descripcion">Descripción (opcional)</label>
+                <textarea id="tipo-descripcion" class="field" rows="3" maxlength="300"
+                          @bind="_datos.Descripcion" @bind:event="oninput"></textarea>
+                <div class="hint">Hasta 300 caracteres.</div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label class="lbl" for="tipo-duracion">Duración máxima del préstamo (días hábiles)</label>
+                    <input id="tipo-duracion" class="field" type="number" min="1"
+                           @bind="_datos.DuracionMaxPrestamo" @bind:event="oninput" />
+                </div>
+                <label class="check">
+                    <input type="checkbox" @bind="_datos.RequiereAprobacion" />
+                    Requiere aprobación de un supervisor
+                </label>
+            </div>
+            <div class="acciones">
+                <button type="submit" class="btn btn-primary" disabled="@(!FormularioCompleto())">Guardar</button>
+                <button type="button" class="btn btn-ghost" @onclick="CancelarFormulario">Cancelar</button>
+            </div>
+        </form>
+    </div>
+}
+
+@if (_aDiscontinuar is not null)
+{
+    <div class="card alta" role="alertdialog" aria-labelledby="confirmacion-pregunta">
+        <p id="confirmacion-pregunta" class="pregunta">
+            ¿Querés discontinuar <strong>@_aDiscontinuar.Nombre</strong>? No se van a poder registrar unidades
+            nuevas ni solicitar préstamos de este tipo. Los préstamos en curso no cambian. Más adelante lo podés
+            volver a activar con «Reactivar».
+        </p>
+        <div class="acciones">
+            <button type="button" class="btn btn-primary" @onclick="ConfirmarDiscontinuar">Sí, discontinuar</button>
+            <button type="button" class="btn btn-ghost" @onclick="CancelarDiscontinuar">Cancelar</button>
+        </div>
+    </div>
+}
+
+@if (_exito is not null)
+{
+    <div class="alert alert-success mensaje" role="status">@_exito</div>
+}
+
+@if (_error is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_error</div>
+}
+
+<div class="card table-card">
+    <table>
+        <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th class="numero">Duración máxima</th>
+            <th>Requiere aprobación</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (TipoEquipamientoDetalleDto tipo in _tipos)
+        {
+            <tr>
+                <td>
+                    <strong>@tipo.Nombre</strong>
+                    @if (tipo.Descripcion != string.Empty)
+                    {
+                        <div class="descripcion">@tipo.Descripcion</div>
+                    }
+                </td>
+                <td>@TextosVisibles.Categoria(tipo.Categoria)</td>
+                <td class="numero">@tipo.DuracionMaxPrestamo días</td>
+                <td>@TextoAprobacion(tipo)</td>
+                <td><span class="@ClaseDeEstado(tipo)">@tipo.Estado</span></td>
+                <td class="celda-acciones">
+                    <button type="button" class="btn btn-ghost btn-sm" @onclick="() => AbrirEdicion(tipo)">
+                        Editar
+                    </button>
+                    @if (EstaActivo(tipo))
+                    {
+                        <button type="button" class="btn btn-ghost btn-sm" @onclick="() => PedirDiscontinuar(tipo)">
+                            Discontinuar
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-ghost btn-sm" @onclick="() => Reactivar(tipo)">
+                            Reactivar
+                        </button>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    @if (_tipos.Count == 0 && HayFiltrosAplicados())
+    {
+        <EstadoVacio Titulo="No hay tipos que coincidan con la búsqueda"
+                     Mensaje="Probá con otro nombre u otra categoría, o limpiá los filtros." />
+    }
+    else if (_tipos.Count == 0)
+    {
+        <EstadoVacio Titulo="Todavía no hay tipos de equipamiento"
+                     Mensaje="Registrá el primero con «Nuevo tipo»." />
+    }
+</div>

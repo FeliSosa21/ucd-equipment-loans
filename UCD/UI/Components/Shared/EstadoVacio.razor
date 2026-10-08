@@ -1,0 +1,15 @@
+@* Mensaje para cuando una lista no tiene datos todavía *@
+<div class="vacio">
+    <strong>@Titulo</strong>
+    @if (!string.IsNullOrEmpty(Mensaje))
+    {
+        <p>@Mensaje</p>
+    }
+    @ChildContent
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Titulo { get; set; } = string.Empty;
+    [Parameter] public string? Mensaje { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

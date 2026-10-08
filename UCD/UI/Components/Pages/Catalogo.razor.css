@@ -1,0 +1,58 @@
+﻿/* Fila del tipo cuyas unidades se muestran en el panel */
+tr.seleccionada td {
+    background: var(--navy-soft);
+}
+
+tr.seleccionada td:first-child {
+    box-shadow: inset 3px 0 0 var(--navy);
+}
+
+/* Contador de resultados: separado de la tabla */
+.resultados {
+    margin: 0 0 .6rem;
+}
+
+/* El color refuerza el numero: verde si se puede pedir, rojo si no */
+td.hay-disponibles {
+    color: var(--green);
+    font-weight: 700;
+}
+
+td.sin-disponibles {
+    color: var(--red);
+    font-weight: 700;
+}
+
+/* Boton de la fila: a la derecha y sin partirse en dos lineas */
+td.accion-fila {
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Panel de unidades: separado de la tabla de tipos */
+.panel-unidades {
+    margin-top: 1.25rem;
+}
+
+.panel-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: 1rem 1.25rem .5rem;
+}
+
+.panel-cabecera h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+/* Filtros con su etiqueta arriba (.filtro en app.css); el boton queda alineado con los campos */
+.toolbar {
+    align-items: flex-end;
+}
+
+.toolbar .btn {
+    align-self: center;
+}

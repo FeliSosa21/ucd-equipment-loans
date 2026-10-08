@@ -7,4 +7,10 @@
         <RootNamespace>Servicios</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Data\Data.csproj" />
+      <ProjectReference Include="..\Dominio\Dominio.csproj" />
+      <ProjectReference Include="..\DTOs\DTOs.csproj" />
+    </ItemGroup>
+
 </Project>

@@ -1,0 +1,19 @@
+@* Casilla para ver u ocultar las contraseñas de un formulario *@
+<label class="mostrar">
+    <input type="checkbox" checked="@Visible" @onchange="Alternar" />
+    @Texto
+</label>
+
+@code {
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
+    [Parameter] public string Texto { get; set; } = "Mostrar contraseña";
+
+    public static string TipoDeCampo(bool visible) => visible ? "text" : "password";
+
+    // No se modifica el propio parametro: se avisa al padre, que vuelve a pasar el valor nuevo.
+    private async Task Alternar(ChangeEventArgs evento)
+    {
+        await VisibleChanged.InvokeAsync(evento.Value is true);
+    }
+}

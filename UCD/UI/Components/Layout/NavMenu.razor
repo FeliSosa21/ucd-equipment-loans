@@ -1,0 +1,84 @@
+@implements IDisposable
+@inject SesionActual SesionActual
+
+@* Cada item se muestra solo si el tipo del usuario logueado tiene el permiso (letra, req. 1) *@
+<nav class="nav">
+    @if (PuedeAlguno(Permisos.ConsultarMisSolicitudes, Permisos.ConsultarCatalogo, Permisos.SolicitarPrestamo))
+    {
+        <div class="nav-section">General</div>
+        @if (Puede(Permisos.ConsultarMisSolicitudes))
+        {
+            <NavLink class="nav-item" href="" Match="NavLinkMatch.All">Mis solicitudes</NavLink>
+        }
+        @if (Puede(Permisos.ConsultarCatalogo))
+        {
+            <NavLink class="nav-item" href="catalogo">Catálogo</NavLink>
+        }
+        @if (Puede(Permisos.SolicitarPrestamo))
+        {
+            <NavLink class="nav-item" href="solicitar-prestamo">Solicitar préstamo</NavLink>
+        }
+    }
+
+    @if (PuedeAlguno(Permisos.GestionarCatalogo, Permisos.GestionarUnidades, Permisos.EvaluarSolicitud,
+             Permisos.RealizarPrestamo, Permisos.RegistrarDevolucion, Permisos.ConsultarPrestamos,
+             Permisos.ConsultarHistorico))
+    {
+        <div class="nav-section">Gestión</div>
+        @if (Puede(Permisos.GestionarCatalogo))
+        {
+            <NavLink class="nav-item" href="tipos-equipamiento">Tipos de equipamiento</NavLink>
+        }
+        @if (Puede(Permisos.GestionarUnidades))
+        {
+            <NavLink class="nav-item" href="unidades">Unidades físicas</NavLink>
+            <NavLink class="nav-item" href="inventario">Inventario</NavLink>
+        }
+        @if (Puede(Permisos.EvaluarSolicitud))
+        {
+            <NavLink class="nav-item" href="aprobaciones">Aprobaciones</NavLink>
+        }
+        @if (Puede(Permisos.RealizarPrestamo))
+        {
+            <NavLink class="nav-item" href="entregas">Entregas</NavLink>
+        }
+        @if (Puede(Permisos.RegistrarDevolucion))
+        {
+            <NavLink class="nav-item" href="devoluciones">Devoluciones</NavLink>
+        }
+        @if (Puede(Permisos.ConsultarPrestamos))
+        {
+            <NavLink class="nav-item" href="prestamos">Préstamos</NavLink>
+        }
+        @if (Puede(Permisos.ConsultarHistorico))
+        {
+            <NavLink class="nav-item" href="auditoria">Registro histórico</NavLink>
+        }
+    }
+
+    @if (Puede(Permisos.GestionarUsuarios))
+    {
+        <div class="nav-section">Administración</div>
+        <NavLink class="nav-item" href="usuarios">Usuarios</NavLink>
+    }
+</nav>
+
+@code {
+    protected override void OnInitialized()
+    {
+        SesionActual.Cambio += StateHasChanged;
+    }
+
+    // Mientras deba cambiar la contrasena, solo se muestra "Cambiar contraseña".
+    private bool Puede(string permiso) =>
+        SesionActual.EstaIniciada && !SesionActual.Usuario!.DebeCambiarContrasena &&
+        SesionActual.Usuario.Permisos.Contains(permiso);
+
+    // Una seccion se muestra si el usuario puede ver al menos uno de sus items.
+    private bool PuedeAlguno(params string[] permisos) => permisos.Any(Puede);
+
+    public void Dispose()
+    {
+        SesionActual.Cambio -= StateHasChanged;
+    }
+}

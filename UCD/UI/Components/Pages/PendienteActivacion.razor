@@ -1,0 +1,45 @@
+@page "/pendiente-activacion"
+@layout UI.Components.Layout.AuthLayout
+@inject SesionActual SesionActual
+@inject NavigationManager Navigation
+
+<PageTitle>UCD · Cuenta pendiente de activación</PageTitle>
+
+<div class="card pendiente">
+    <div class="icono" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="9" /><path d="M12 8v5" /><path d="M12 16h.01" />
+        </svg>
+    </div>
+    <h1>Esperando activación por un administrador</h1>
+    <p>
+        Tu cuenta todavía no tiene un tipo de usuario asignado. Un administrador debe habilitar
+        tu acceso antes de que puedas ver solicitudes, el catálogo o cualquier otra sección.
+    </p>
+    @* Con sesion, volver al inicio revisa de nuevo si un administrador ya le asigno un tipo. *@
+    <a class="btn btn-ghost" href="">Volver al inicio</a>
+    @if (SesionActual.EstaIniciada)
+    {
+        @* Mientras tanto puede gestionar su cuenta: cambiar la contraseña y modificar sus datos. *@
+        <a class="btn btn-ghost" href="mis-datos">Mis datos</a>
+        <a class="btn btn-ghost" href="cambiar-contrasena">Cambiar contraseña</a>
+        <button class="btn btn-ghost" @onclick="Salir">Salir</button>
+    }
+</div>
+
+@code {
+    // Con sesion, la pagina solo tiene sentido mientras la cuenta espera un tipo (sin sesion se llega al registrarse).
+    protected override void OnInitialized()
+    {
+        if (SesionActual.EstaIniciada && !SesionActual.Usuario!.PendienteDeActivacion)
+        {
+            Navigation.NavigateTo(SesionActual.PaginaObligatoria() ?? "/");
+        }
+    }
+
+    private async Task Salir()
+    {
+        await SesionActual.CerrarAsync();
+        Navigation.NavigateTo("/");
+    }
+}

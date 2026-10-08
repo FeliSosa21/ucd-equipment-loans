@@ -1,0 +1,183 @@
+namespace Dominio.Tests;
+
+[TestClass]
+public sealed class MovimientoTests
+{
+    private static readonly DateTime FechaFija = new(2026, 10, 5, 10, 0, 0);
+
+    [TestMethod]
+    public void Constructor_DatosValidos_ConservaFechaSolicitanteEvaluadorYUnidad()
+    {
+        Usuario solicitante = CrearSolicitante();
+        Usuario evaluador = CrearEvaluador();
+        UnidadFisica unidad = CrearUnidad(idInstitucional: "EQP-0001");
+
+        Movimiento movimiento = CrearMovimiento(
+            solicitante: solicitante,
+            evaluador: evaluador,
+            unidad: unidad);
+
+        Assert.AreEqual(FechaFija, movimiento.FechaHora);
+        Assert.AreSame(solicitante, movimiento.Solicitante);
+        Assert.AreSame(evaluador, movimiento.Evaluador);
+        Assert.AreSame(unidad, movimiento.Unidad);
+    }
+
+    [TestMethod]
+    [DataRow(TipoMovimiento.Prestamo)]
+    [DataRow(TipoMovimiento.Devolucion)]
+    [DataRow(TipoMovimiento.Aprobacion)]
+    public void Constructor_MovimientoDeUnidad_ConservaElTipo(TipoMovimiento tipo)
+    {
+        Movimiento movimiento = CrearMovimiento(tipo: tipo, evaluador: CrearEvaluador());
+
+        Assert.AreEqual(tipo, movimiento.Tipo);
+    }
+
+    [TestMethod]
+    [DataRow(TipoMovimiento.Solicitud)]
+    [DataRow(TipoMovimiento.Rechazo)]
+    public void Constructor_SolicitudORechazo_ConservaElTipo(TipoMovimiento tipo)
+    {
+        Movimiento movimiento = CrearMovimientoSinUnidad(tipo: tipo);
+
+        Assert.AreEqual(tipo, movimiento.Tipo);
+    }
+
+    [TestMethod]
+    public void Constructor_SinEvaluador_QuedaSinEvaluador()
+    {
+        Movimiento movimiento = CrearMovimiento(evaluador: null);
+
+        Assert.IsNull(movimiento.Evaluador);
+    }
+
+    [TestMethod]
+    public void Constructor_SolicitanteNulo_LanzaExcepcion()
+    {
+        Usuario evaluador = CrearEvaluador();
+        UnidadFisica unidad = CrearUnidad(idInstitucional: "EQP-0001");
+
+        Assert.ThrowsException<DominioException>(() => new Movimiento(
+            fechaHora: FechaFija,
+            tipo: TipoMovimiento.Prestamo,
+            solicitante: null!,
+            evaluador: evaluador,
+            unidad: unidad));
+    }
+
+    [TestMethod]
+    [DataRow(TipoMovimiento.Prestamo)]
+    [DataRow(TipoMovimiento.Devolucion)]
+    [DataRow(TipoMovimiento.Aprobacion)]
+    public void Constructor_MovimientoDeUnidadSinUnidad_LanzaExcepcion(TipoMovimiento tipo)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearMovimientoSinUnidad(tipo: tipo));
+    }
+
+    [TestMethod]
+    [DataRow(TipoMovimiento.Solicitud)]
+    [DataRow(TipoMovimiento.Rechazo)]
+    public void Constructor_SolicitudORechazoSinUnidad_LoCrea(TipoMovimiento tipo)
+    {
+        Movimiento movimiento = CrearMovimientoSinUnidad(tipo: tipo);
+
+        Assert.IsNull(movimiento.Unidad);
+    }
+
+    [TestMethod]
+    [DataRow(TipoMovimiento.Solicitud)]
+    [DataRow(TipoMovimiento.Rechazo)]
+    public void Constructor_SolicitudORechazoConUnidad_LanzaExcepcion(TipoMovimiento tipo)
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() =>
+            CrearMovimiento(tipo: tipo, unidad: CrearUnidad(idInstitucional: "EQP-0001")));
+
+        Assert.AreEqual("La solicitud y el rechazo no llevan unidad", excepcion.Message);
+    }
+
+    [TestMethod]
+    public void Constructor_AprobacionSinEvaluador_LanzaExcepcion()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() =>
+            CrearMovimiento(tipo: TipoMovimiento.Aprobacion, evaluador: null));
+
+        Assert.AreEqual("La aprobacion debe tener un evaluador", excepcion.Message);
+    }
+
+    [TestMethod]
+    [DataRow(0)]
+    [DataRow(99)]
+    public void Constructor_TipoInexistente_LanzaExcepcion(int valorInvalido)
+    {
+        TipoMovimiento tipoInexistente = (TipoMovimiento)valorInvalido;
+
+        Assert.ThrowsException<DominioException>(() => CrearMovimiento(tipo: tipoInexistente));
+    }
+
+    private static Usuario CrearSolicitante()
+    {
+        Usuario usuario = new Usuario(
+            dni: "12345672",
+            nombre: "Renato",
+            apellido: "Alves",
+            correo: "renato.alves@ejemplo.com",
+            contrasena: "VivalaOrt2026");
+
+        usuario.AsignarTipo(TipoUsuario.Docente);
+
+        return usuario;
+    }
+
+    private static Usuario CrearEvaluador()
+    {
+        Usuario usuario = new Usuario(
+            dni: "45678905",
+            nombre: "Ana",
+            apellido: "Perez",
+            correo: "ana.perez@ejemplo.com",
+            contrasena: "VivalaOrt2026");
+
+        usuario.AsignarTipo(TipoUsuario.Supervisor);
+
+        return usuario;
+    }
+
+    private static UnidadFisica CrearUnidad(string idInstitucional)
+    {
+        UnidadFisica unidad = new UnidadFisica(
+            idInstitucional: idInstitucional,
+            ubiFisica: "Laboratorio Prueba",
+            numSerie: null);
+
+        return unidad;
+    }
+
+    private static Movimiento CrearMovimiento(
+        TipoMovimiento tipo = TipoMovimiento.Prestamo,
+        Usuario? solicitante = null,
+        Usuario? evaluador = null,
+        UnidadFisica? unidad = null)
+    {
+        Movimiento movimiento = new Movimiento(
+            fechaHora: FechaFija,
+            tipo: tipo,
+            solicitante: solicitante ?? CrearSolicitante(),
+            evaluador: evaluador,
+            unidad: unidad ?? CrearUnidad(idInstitucional: "EQP-0001"));
+
+        return movimiento;
+    }
+
+    private static Movimiento CrearMovimientoSinUnidad(TipoMovimiento tipo)
+    {
+        Movimiento movimiento = new Movimiento(
+            fechaHora: FechaFija,
+            tipo: tipo,
+            solicitante: CrearSolicitante(),
+            evaluador: CrearEvaluador(),
+            unidad: null);
+
+        return movimiento;
+    }
+}

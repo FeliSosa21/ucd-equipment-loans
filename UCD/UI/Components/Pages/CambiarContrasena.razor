@@ -1,0 +1,124 @@
+@page "/cambiar-contrasena"
+@using Servicios
+@inherits PaginaConSesion
+@inject ServicioSesion ServicioSesion
+
+<PageTitle>UCD · Cambiar contraseña</PageTitle>
+
+<div class="page-header">
+    <h1>Cambiar contraseña</h1>
+    <p>Ingresá tu contraseña actual y elegí una nueva.</p>
+    @if (_obligatorio)
+    {
+        <div class="alert alert-info">Es tu primer ingreso: tenés que cambiar la contraseña antes de seguir.</div>
+    }
+</div>
+
+<div class="card formulario">
+    <form class="form-grid" @onsubmit="Cambiar" novalidate>
+        <div>
+            <label class="lbl" for="actual">Contraseña actual</label>
+            <input id="actual" type="@TipoContrasena" class="field" autocomplete="current-password"
+                   @bind="_actual" @bind:event="oninput" />
+        </div>
+        <div>
+            <label class="lbl" for="nueva">Nueva contraseña</label>
+            <input id="nueva" type="@TipoContrasena" class="field" autocomplete="new-password"
+                   @bind="_nueva" @bind:event="oninput" />
+        </div>
+        <div>
+            <label class="lbl" for="repetir">Repetir nueva contraseña</label>
+            <input id="repetir" type="@TipoContrasena" class="field" autocomplete="new-password"
+                   @bind="_repetir" @bind:event="oninput" />
+        </div>
+
+        <MostrarContrasena @bind-Visible="_mostrarContrasena" Texto="Mostrar contraseñas" />
+
+        @if (_error is not null)
+        {
+            <div class="alert alert-error" role="alert">@_error</div>
+        }
+        @if (_exito)
+        {
+            <div class="alert alert-success" role="status">Tu contraseña se cambió correctamente.</div>
+        }
+
+        <button type="submit" class="btn btn-primary" disabled="@(!FormularioCompleto)">
+            Guardar contraseña
+        </button>
+    </form>
+</div>
+
+@code {
+    private string _actual = string.Empty;
+    private string _nueva = string.Empty;
+    private string _repetir = string.Empty;
+    private string? _error;
+    private bool _exito;
+    private bool _obligatorio;
+    private bool _mostrarContrasena;
+
+    private string TipoContrasena => MostrarContrasena.TipoDeCampo(_mostrarContrasena);
+
+    private bool FormularioCompleto =>
+        !string.IsNullOrEmpty(_actual) && !string.IsNullOrEmpty(_nueva) && !string.IsNullOrEmpty(_repetir);
+
+    protected override void OnInitialized()
+    {
+        if (RedirigirSiNoHaySesion())
+        {
+            return;
+        }
+
+        _obligatorio = SesionActual.Usuario!.DebeCambiarContrasena;
+    }
+
+    private void Cambiar()
+    {
+        // Un doble clic manda dos envios: el segundo llega con los campos ya vaciados.
+        if (!FormularioCompleto)
+        {
+            return;
+        }
+
+        _error = null;
+        _exito = false;
+
+        if (_nueva != _repetir)
+        {
+            _error = "Las contraseñas nuevas no coinciden.";
+            return;
+        }
+
+        try
+        {
+            ServicioSesion.CambiarContrasena(DniUsuario, _actual, _nueva);
+            SesionActual.MarcarContrasenaCambiada();
+            VaciarCampos();
+            ContinuarOAvisar();
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    // Se vacian siempre, tambien antes de salir de la pagina: asi un doble clic no vuelve a enviar la vieja.
+    private void VaciarCampos()
+    {
+        _actual = string.Empty;
+        _nueva = string.Empty;
+        _repetir = string.Empty;
+    }
+
+    private void ContinuarOAvisar()
+    {
+        if (!_obligatorio)
+        {
+            _exito = true;
+            return;
+        }
+
+        Navigation.NavigateTo(SesionActual.PaginaObligatoria() ?? "/");
+    }
+}

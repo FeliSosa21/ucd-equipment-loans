@@ -1,0 +1,12 @@
+/* Observaciones debajo de la ubicacion, mas chicas y atenuadas */
+.observaciones {
+    font-size: .78rem;
+    color: var(--ink-soft);
+    margin-top: .15rem;
+    max-width: 360px;
+}
+
+/* Aviso de las unidades prestadas, alineado con los botones de la fila */
+.celda-acciones .hint {
+    margin-top: 0;
+}

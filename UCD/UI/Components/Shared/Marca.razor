@@ -1,0 +1,12 @@
+@* Logo y nombre de UCD que encabezan las pantallas *@
+<a class="brand @(Grande ? "grande" : string.Empty)" href="">
+    <span class="brand-logo mono">UCD</span>
+    <span class="brand-text">
+        <strong>UCD</strong>
+        <small>Úsalo, cuídalo, devuélvelo entero</small>
+    </span>
+</a>
+
+@code {
+    [Parameter] public bool Grande { get; set; }
+}
