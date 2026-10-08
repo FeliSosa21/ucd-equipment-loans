@@ -63,6 +63,12 @@ public class SesionActual
         Cambio?.Invoke();
     }
 
+    public const string PaginaPendienteDeActivacion = "/pendiente-activacion";
+
+    // Mientras espera la activacion puede gestionar su propia cuenta: la letra (pag. 5) dice que cualquier
+    // usuario puede cambiar su contrasena en cualquier momento, y el foro (24/09) que puede modificar sus datos.
+    private static readonly string[] PaginasDeSuCuenta = { "/mis-datos", "/cambiar-contrasena" };
+
     // Pagina a la que el usuario tiene que ir antes que a cualquier otra, o null si puede navegar libremente.
     public string? PaginaObligatoria()
     {
@@ -78,10 +84,17 @@ public class SesionActual
 
         if (Usuario.PendienteDeActivacion)
         {
-            return "/pendiente-activacion";
+            return PaginaPendienteDeActivacion;
         }
 
         return null;
+    }
+
+    // Indica si la direccion es una de las paginas de su cuenta, que se pueden usar aunque espere la activacion.
+    public static bool EsPaginaDeSuCuenta(string direccion)
+    {
+        string camino = new Uri(direccion).AbsolutePath.TrimEnd('/');
+        return PaginasDeSuCuenta.Contains(camino, StringComparer.OrdinalIgnoreCase);
     }
 
     public async Task IniciarAsync(UsuarioSesionDto usuario)
