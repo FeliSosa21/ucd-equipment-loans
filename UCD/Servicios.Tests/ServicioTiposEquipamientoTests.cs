@@ -125,6 +125,25 @@ public class ServicioTiposEquipamientoTests
 
         Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniSupervisor));
     }
+
+    [TestMethod]
+    public void Modificar_DatosValidos_ActualizaElTipo()
+    {
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+        DatosTipoEquipamientoDto datos = CrearDatos("Camara Canon EOS R", "Electronica");
+
+        servicio.Modificar("Camara Canon EOS", datos, DniSupervisor);
+
+        List<TipoEquipamientoDetalleDto> tipos = servicio.Listar(null, null);
+        Assert.AreEqual(1, tipos.Count);
+        Assert.AreEqual("Camara Canon EOS R", tipos[0].Nombre);
+        Assert.AreEqual("Descripcion de prueba", tipos[0].Descripcion);
+        Assert.AreEqual(4, tipos[0].DuracionMaxPrestamo);
+        Assert.IsTrue(tipos[0].RequiereAprobacion);
+        Assert.AreEqual("Electronica", tipos[0].Categoria);
+    }
+
     private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Memoria memoria = new Memoria();

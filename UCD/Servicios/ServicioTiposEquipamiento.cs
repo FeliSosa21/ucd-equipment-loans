@@ -48,6 +48,10 @@ public class ServicioTiposEquipamiento
         }
     }
 
+    public void Modificar(string nombreActual, DatosTipoEquipamientoDto datos, string dniResponsable)
+    {
+    }
+
     private Catalogo ObtenerCatalogo()
     {
         Catalogo? catalogo = _repositorioCatalogo.Obtener();
