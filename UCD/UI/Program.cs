@@ -1,5 +1,6 @@
 using Data;
 using Data.Repositorios;
+using Microsoft.EntityFrameworkCore;
 using Servicios;
 using UI.Components;
 using UI.Sesion;
@@ -8,6 +9,11 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Contexto de Entity Framework: se conecta a la base de Docker con la connection string de appsettings.json.
+// AddDbContext lo registra como Scoped: un contexto por conexion del navegador.
+builder.Services.AddDbContext<SqlContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Una sola Memoria para toda la aplicacion: guarda los datos mientras corre el sistema.
 builder.Services.AddSingleton<Memoria>();
