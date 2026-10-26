@@ -98,8 +98,8 @@ public class TipoUsuario
     {
         ValidarDescripcion(descripcion);
         ValidarImagen(imagen);
-        ValidarMaxUnidadesPorCatalogo(maxUnidadesPorCatalogo);
-        ValidarMaxPrestamosConcurrentes(maxPrestamosConcurrentes);
+        ValidarTope(maxUnidadesPorCatalogo, "maximo de unidades por catalogo");
+        ValidarTope(maxPrestamosConcurrentes, "maximo de prestamos concurrentes");
 
         Nombre = nombre;
         Descripcion = descripcion;
@@ -188,19 +188,11 @@ public class TipoUsuario
         }
     }
 
-    private static void ValidarMaxUnidadesPorCatalogo(int? maxUnidadesPorCatalogo)
+    private static void ValidarTope(int? tope, string campo)
     {
-        if (maxUnidadesPorCatalogo < 0)
+        if (tope < 0)
         {
-            throw new DominioException("El maximo de unidades por catalogo no puede ser negativo");
-        }
-    }
-
-    private static void ValidarMaxPrestamosConcurrentes(int? maxPrestamosConcurrentes)
-    {
-        if (maxPrestamosConcurrentes < 0)
-        {
-            throw new DominioException("El maximo de prestamos concurrentes no puede ser negativo");
+            throw new DominioException($"El {campo} no puede ser negativo");
         }
     }
 }
