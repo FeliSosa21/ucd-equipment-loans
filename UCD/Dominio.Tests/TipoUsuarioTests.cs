@@ -612,6 +612,15 @@ public sealed class TipoUsuarioTests
             tipo.ModificarTopes(maxUnidadesPorCatalogo, maxPrestamosConcurrentes));
     }
 
+    [TestMethod]
+    public void ModificarTopes_TipoSinLimites_LanzaExcepcion()
+    {
+        TipoUsuario tipo = CrearTipo(maxUnidadesPorCatalogo: null, maxPrestamosConcurrentes: null);
+
+        Assert.ThrowsException<DominioException>(() =>
+            tipo.ModificarTopes(maxUnidadesPorCatalogo: 2, maxPrestamosConcurrentes: 3));
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
