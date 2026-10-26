@@ -579,6 +579,17 @@ public sealed class TipoUsuarioTests
         Assert.AreEqual(imagen, tipo.Imagen);
     }
 
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("data:image/gif;base64,R0lGODlh")]
+    public void ModificarImagen_ImagenInvalida_LanzaExcepcion(string? imagen)
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        Assert.ThrowsException<DominioException>(() => tipo.ModificarImagen(imagen!));
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
