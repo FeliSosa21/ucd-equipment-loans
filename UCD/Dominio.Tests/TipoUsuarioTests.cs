@@ -466,6 +466,15 @@ public sealed class TipoUsuarioTests
         Assert.AreEqual(descripcion, tipo.Descripcion);
     }
 
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void Constructor_ImagenNulaVaciaOEspacios_LanzaExcepcion(string? imagen)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(imagen: imagen!));
+    }
+
     private static TipoUsuario CrearTipo(
         string descripcion = "Alumnos de grado",
         string imagen = ImagenPng,
