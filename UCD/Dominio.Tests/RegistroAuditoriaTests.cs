@@ -54,6 +54,12 @@ public sealed class RegistroAuditoriaTests
         Assert.ThrowsException<DominioException>(() => CrearRegistro(accion: (AccionAuditada)accion));
     }
 
+    [TestMethod]
+    public void Constructor_FechaHoraSinAsignar_LanzaExcepcion()
+    {
+        Assert.ThrowsException<DominioException>(() => CrearRegistro(fechaHora: default(DateTime)));
+    }
+
     private static RegistroAuditoria CrearRegistro(
         DateTime? fechaHora = null,
         AccionAuditada accion = AccionAuditada.SolicitudDePrestamo,
