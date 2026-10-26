@@ -46,6 +46,14 @@ public sealed class RegistroAuditoriaTests
         Assert.IsFalse(resultado);
     }
 
+    [TestMethod]
+    [DataRow(0)]
+    [DataRow(99)]
+    public void Constructor_AccionInvalida_LanzaExcepcion(int accion)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearRegistro(accion: (AccionAuditada)accion));
+    }
+
     private static RegistroAuditoria CrearRegistro(
         DateTime? fechaHora = null,
         AccionAuditada accion = AccionAuditada.SolicitudDePrestamo,
