@@ -9,6 +9,7 @@ public class RegistroAuditoria
 
     public RegistroAuditoria(DateTime fechaHora, Usuario? responsable, AccionAuditada accion, string detalle)
     {
+        ValidarFechaHora(fechaHora);
         ValidarAccion(accion);
 
         FechaHora = fechaHora;
@@ -20,6 +21,14 @@ public class RegistroAuditoria
     public bool EsDelSistema()
     {
         return Responsable is null;
+    }
+
+    private static void ValidarFechaHora(DateTime fechaHora)
+    {
+        if (fechaHora == default)
+        {
+            throw new DominioException("El registro de auditoria debe tener fecha y hora");
+        }
     }
 
     private static void ValidarAccion(AccionAuditada accion)
