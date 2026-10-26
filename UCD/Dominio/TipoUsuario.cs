@@ -99,6 +99,7 @@ public class TipoUsuario
         ValidarDescripcion(descripcion);
         ValidarImagen(imagen);
         ValidarMaxUnidadesPorCatalogo(maxUnidadesPorCatalogo);
+        ValidarMaxPrestamosConcurrentes(maxPrestamosConcurrentes);
 
         Nombre = nombre;
         Descripcion = descripcion;
@@ -192,6 +193,14 @@ public class TipoUsuario
         if (maxUnidadesPorCatalogo < 0)
         {
             throw new DominioException("El maximo de unidades por catalogo no puede ser negativo");
+        }
+    }
+
+    private static void ValidarMaxPrestamosConcurrentes(int? maxPrestamosConcurrentes)
+    {
+        if (maxPrestamosConcurrentes < 0)
+        {
+            throw new DominioException("El maximo de prestamos concurrentes no puede ser negativo");
         }
     }
 }
