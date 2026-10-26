@@ -641,6 +641,16 @@ public sealed class TipoUsuarioTests
         Assert.IsFalse(resultado);
     }
 
+    [TestMethod]
+    public void Constructor_DatosValidos_AsignaLosPermisos()
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        bool resultado = tipo.TienePermiso(Permiso.SolicitarPrestamo);
+
+        Assert.IsTrue(resultado);
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
