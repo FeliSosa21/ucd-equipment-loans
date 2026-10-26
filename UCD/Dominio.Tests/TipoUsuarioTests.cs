@@ -495,6 +495,15 @@ public sealed class TipoUsuarioTests
         Assert.AreEqual(imagen, tipo.Imagen);
     }
 
+    [TestMethod]
+    [DataRow("data:image/png;base64,")]
+    [DataRow("data:image/png;base64,@@@@")]
+    [DataRow("data:image/png;base64,abc")]
+    public void Constructor_ImagenConContenidoInvalido_LanzaExcepcion(string imagen)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(imagen: imagen));
+    }
+
     private static TipoUsuario CrearTipo(
         string descripcion = "Alumnos de grado",
         string imagen = ImagenPng,
