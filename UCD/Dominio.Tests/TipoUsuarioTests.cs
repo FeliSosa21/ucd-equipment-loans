@@ -590,6 +590,17 @@ public sealed class TipoUsuarioTests
         Assert.ThrowsException<DominioException>(() => tipo.ModificarImagen(imagen!));
     }
 
+    [TestMethod]
+    public void ModificarTopes_TopesValidos_LosModifica()
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        tipo.ModificarTopes(maxUnidadesPorCatalogo: 5, maxPrestamosConcurrentes: 4);
+
+        Assert.AreEqual(5, tipo.MaxUnidadesPorCatalogo);
+        Assert.AreEqual(4, tipo.MaxPrestamosConcurrentes);
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);

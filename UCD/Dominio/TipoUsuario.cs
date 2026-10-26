@@ -131,6 +131,10 @@ public class TipoUsuario
         Imagen = imagen;
     }
 
+    public void ModificarTopes(int maxUnidadesPorCatalogo, int maxPrestamosConcurrentes)
+    {
+    }
+
     public bool TienePermiso(Permiso permiso)
     {
         return permisos.Contains(permiso);
