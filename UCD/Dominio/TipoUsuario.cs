@@ -133,6 +133,8 @@ public class TipoUsuario
 
     public void ModificarTopes(int maxUnidadesPorCatalogo, int maxPrestamosConcurrentes)
     {
+        MaxUnidadesPorCatalogo = maxUnidadesPorCatalogo;
+        MaxPrestamosConcurrentes = maxPrestamosConcurrentes;
     }
 
     public bool TienePermiso(Permiso permiso)
