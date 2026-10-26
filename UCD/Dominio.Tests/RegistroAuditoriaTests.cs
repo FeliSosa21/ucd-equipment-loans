@@ -36,6 +36,16 @@ public sealed class RegistroAuditoriaTests
         Assert.IsTrue(resultado);
     }
 
+    [TestMethod]
+    public void EsDelSistema_ConResponsable_DevuelveFalse()
+    {
+        RegistroAuditoria registro = CrearRegistro();
+
+        bool resultado = registro.EsDelSistema();
+
+        Assert.IsFalse(resultado);
+    }
+
     private static RegistroAuditoria CrearRegistro(
         DateTime? fechaHora = null,
         AccionAuditada accion = AccionAuditada.SolicitudDePrestamo,
