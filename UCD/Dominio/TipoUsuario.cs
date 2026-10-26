@@ -145,6 +145,15 @@ public class TipoUsuario
 
     private static void ValidarImagen(string imagen)
     {
+        ValidarFormatoDeImagen(imagen);
+
+        int cantidadDeBytes = ContarBytesDeLaImagen(imagen);
+
+        ValidarTamanoDeImagen(cantidadDeBytes);
+    }
+
+    private static void ValidarFormatoDeImagen(string imagen)
+    {
         if (string.IsNullOrWhiteSpace(imagen))
         {
             throw new DominioException("La imagen no puede estar vacia");
@@ -154,7 +163,10 @@ public class TipoUsuario
         {
             throw new DominioException("La imagen debe ser PNG o JPG");
         }
+    }
 
+    private static int ContarBytesDeLaImagen(string imagen)
+    {
         string contenido = imagen.Substring(imagen.IndexOf(',') + 1);
         byte[] bytes = new byte[contenido.Length];
 
@@ -163,6 +175,11 @@ public class TipoUsuario
             throw new DominioException("La imagen no tiene un contenido base64 valido");
         }
 
+        return cantidadDeBytes;
+    }
+
+    private static void ValidarTamanoDeImagen(int cantidadDeBytes)
+    {
         if (cantidadDeBytes > KilobytesMaximosImagen * 1024)
         {
             throw new DominioException($"La imagen debe pesar como maximo {KilobytesMaximosImagen} KB");
