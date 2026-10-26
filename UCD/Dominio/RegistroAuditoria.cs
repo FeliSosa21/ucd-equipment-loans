@@ -11,6 +11,7 @@ public class RegistroAuditoria
     {
         ValidarFechaHora(fechaHora);
         ValidarAccion(accion);
+        ValidarDetalle(detalle);
 
         FechaHora = fechaHora;
         Responsable = responsable;
@@ -36,6 +37,14 @@ public class RegistroAuditoria
         if (!Enum.IsDefined(accion))
         {
             throw new DominioException("El registro de auditoria debe tener una accion valida");
+        }
+    }
+
+    private static void ValidarDetalle(string detalle)
+    {
+        if (string.IsNullOrWhiteSpace(detalle))
+        {
+            throw new DominioException("El detalle no puede estar vacio");
         }
     }
 }
