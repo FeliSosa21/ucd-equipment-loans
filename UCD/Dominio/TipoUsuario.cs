@@ -3,6 +3,7 @@
 public class TipoUsuario
 {
     private const int LargoMaximoDescripcion = 100;
+    private const int KilobytesMaximosImagen = 500;
     private static readonly string[] PrefijosDeImagenAdmitidos = { "data:image/png;base64,", "data:image/jpeg;base64," };
 
     private readonly int? maxPrestamosConcurrentes;
@@ -157,9 +158,14 @@ public class TipoUsuario
         string contenido = imagen.Substring(imagen.IndexOf(',') + 1);
         byte[] bytes = new byte[contenido.Length];
 
-        if (contenido.Length == 0 || !Convert.TryFromBase64String(contenido, bytes, out _))
+        if (contenido.Length == 0 || !Convert.TryFromBase64String(contenido, bytes, out int cantidadDeBytes))
         {
             throw new DominioException("La imagen no tiene un contenido base64 valido");
+        }
+
+        if (cantidadDeBytes > KilobytesMaximosImagen * 1024)
+        {
+            throw new DominioException($"La imagen debe pesar como maximo {KilobytesMaximosImagen} KB");
         }
     }
 }
