@@ -439,6 +439,15 @@ public sealed class TipoUsuarioTests
         Assert.AreEqual(3, tipo.MaxPrestamosConcurrentes);
     }
 
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void Constructor_DescripcionNulaVaciaOEspacios_LanzaExcepcion(string? descripcion)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(descripcion: descripcion!));
+    }
+
     private static TipoUsuario CrearTipo(
         string descripcion = "Alumnos de grado",
         string imagen = ImagenPng,
