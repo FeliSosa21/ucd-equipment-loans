@@ -133,6 +133,9 @@ public class TipoUsuario
 
     public void ModificarTopes(int maxUnidadesPorCatalogo, int maxPrestamosConcurrentes)
     {
+        ValidarTope(maxUnidadesPorCatalogo, "maximo de unidades por catalogo");
+        ValidarTope(maxPrestamosConcurrentes, "maximo de prestamos concurrentes");
+
         MaxUnidadesPorCatalogo = maxUnidadesPorCatalogo;
         MaxPrestamosConcurrentes = maxPrestamosConcurrentes;
     }
