@@ -22,6 +22,20 @@ public sealed class RegistroAuditoriaTests
         Assert.AreEqual("Prestamo de 2 Notebook", registro.Detalle);
     }
 
+    [TestMethod]
+    public void EsDelSistema_SinResponsable_DevuelveTrue()
+    {
+        RegistroAuditoria registro = new RegistroAuditoria(
+            fechaHora: FechaHoraValida,
+            responsable: null,
+            accion: AccionAuditada.ActivacionDePrestamo,
+            detalle: "Prestamo activado automaticamente");
+
+        bool resultado = registro.EsDelSistema();
+
+        Assert.IsTrue(resultado);
+    }
+
     private static RegistroAuditoria CrearRegistro(
         DateTime? fechaHora = null,
         AccionAuditada accion = AccionAuditada.SolicitudDePrestamo,

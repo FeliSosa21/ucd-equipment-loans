@@ -14,4 +14,9 @@ public class RegistroAuditoria
         Accion = accion;
         Detalle = detalle;
     }
+
+    public bool EsDelSistema()
+    {
+        return false;
+    }
 }
