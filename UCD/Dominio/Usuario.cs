@@ -10,6 +10,7 @@ public class Usuario
     private const int LargoDni = 8;
     private static readonly int[] PesosDni = { 2, 9, 8, 7, 6, 3, 4 };
 
+    public int Id { get; private set; }
     public string Dni { get; private set; }
     public string Nombre { get; private set; }
     public string Apellido { get; private set; }
@@ -18,6 +19,7 @@ public class Usuario
     public EstadoUsuario Estado { get; private set; }
     public bool DebeCambiarContrasena { get; private set; }
     public TipoUsuario Tipo { get; private set; }
+    
 
     public Usuario(string dni, string nombre, string apellido, string correo, string contrasena)
     {

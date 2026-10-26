@@ -1,9 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Dominio;
 
 namespace Data;
 
 public class SqlContext : DbContext
 {
+    public DbSet<Usuario> Usuarios { get; set; }
     public SqlContext(DbContextOptions<SqlContext> options) : base(options)
     {
         if (Database.IsRelational())
@@ -11,6 +13,7 @@ public class SqlContext : DbContext
             Database.Migrate();
         }
     }
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
