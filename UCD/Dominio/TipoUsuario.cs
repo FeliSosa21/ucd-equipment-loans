@@ -92,8 +92,12 @@ public class TipoUsuario
     public TipoUsuario(string nombre, string descripcion, string imagen, int? maxUnidadesPorCatalogo,
         int? maxPrestamosConcurrentes, IEnumerable<Permiso> permisos)
     {
-        Nombre = string.Empty;
-        this.permisos = new HashSet<Permiso>();
+        Nombre = nombre;
+        Descripcion = descripcion;
+        Imagen = imagen;
+        MaxUnidadesPorCatalogo = maxUnidadesPorCatalogo;
+        MaxPrestamosConcurrentes = maxPrestamosConcurrentes;
+        this.permisos = new HashSet<Permiso>(permisos);
     }
 
     private TipoUsuario(string nombre, int? maxPrestamosConcurrentes, int? maxUnidadesPorPrestamo, HashSet<Permiso> permisos)
