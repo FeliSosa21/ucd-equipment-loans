@@ -512,6 +512,16 @@ public sealed class TipoUsuarioTests
         Assert.ThrowsException<DominioException>(() => CrearTipo(imagen: imagen));
     }
 
+    [TestMethod]
+    public void Constructor_ImagenDe500KB_SeCrea()
+    {
+        string imagen = CrearImagenPng(cantidadDeBytes: 500 * 1024);
+
+        TipoUsuario tipo = CrearTipo(imagen: imagen);
+
+        Assert.AreEqual(imagen, tipo.Imagen);
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
