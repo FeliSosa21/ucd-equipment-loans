@@ -124,6 +124,10 @@ public class TipoUsuario
         Descripcion = descripcion;
     }
 
+    public void ModificarImagen(string imagen)
+    {
+    }
+
     public bool TienePermiso(Permiso permiso)
     {
         return permisos.Contains(permiso);
