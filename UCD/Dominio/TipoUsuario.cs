@@ -126,6 +126,7 @@ public class TipoUsuario
 
     public void ModificarImagen(string imagen)
     {
+        Imagen = imagen;
     }
 
     public bool TienePermiso(Permiso permiso)
