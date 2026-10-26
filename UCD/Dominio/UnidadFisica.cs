@@ -14,6 +14,13 @@ public class UnidadFisica
     public string? NumSerie { get; private set; }
     public string? Observaciones { get; private set; }
     public EstadoUnidadFisica Estado { get; private set; }
+    public int Id { get; private set; }
+
+    private UnidadFisica()
+    {
+        IdInstitucional = null!;
+        UbiFisica = null!;
+    }
 
     public UnidadFisica(string idInstitucional, string ubiFisica, string? numSerie)
     {
