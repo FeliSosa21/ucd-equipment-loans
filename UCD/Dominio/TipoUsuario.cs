@@ -7,6 +7,10 @@ public class TipoUsuario
     private readonly HashSet<Permiso> permisos;
 
     public string Nombre { get; }
+    public string Descripcion { get; private set; } = string.Empty;
+    public string Imagen { get; private set; } = string.Empty;
+    public int? MaxUnidadesPorCatalogo { get; private set; }
+    public int? MaxPrestamosConcurrentes { get; private set; }
 
     public static TipoUsuario SinPermisos { get; } = new TipoUsuario(
         "Sin permisos",
@@ -83,6 +87,13 @@ public class TipoUsuario
             Supervisor,
             Administrador
         };
+    }
+
+    public TipoUsuario(string nombre, string descripcion, string imagen, int? maxUnidadesPorCatalogo,
+        int? maxPrestamosConcurrentes, IEnumerable<Permiso> permisos)
+    {
+        Nombre = string.Empty;
+        this.permisos = new HashSet<Permiso>();
     }
 
     private TipoUsuario(string nombre, int? maxPrestamosConcurrentes, int? maxUnidadesPorPrestamo, HashSet<Permiso> permisos)

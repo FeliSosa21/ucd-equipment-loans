@@ -3,6 +3,8 @@
 [TestClass]
 public sealed class TipoUsuarioTests
 {
+    private const string ImagenPng = "data:image/png;base64,iVBORw0KGgo=";
+
     [TestMethod]
     public void TienePermiso_SinPermisosYCualquierPermiso_DevuelveFalse()
     {
@@ -424,5 +426,31 @@ public sealed class TipoUsuarioTests
     
         Assert.IsFalse(resultado);
     }
+
+    [TestMethod]
+    public void Constructor_DatosValidos_AsignaLosDatos()
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        Assert.AreEqual("Estudiante", tipo.Nombre);
+        Assert.AreEqual("Alumnos de grado", tipo.Descripcion);
+        Assert.AreEqual(ImagenPng, tipo.Imagen);
+        Assert.AreEqual(2, tipo.MaxUnidadesPorCatalogo);
+        Assert.AreEqual(3, tipo.MaxPrestamosConcurrentes);
+    }
+
+    private static TipoUsuario CrearTipo(
+        string descripcion = "Alumnos de grado",
+        string imagen = ImagenPng,
+        int? maxUnidadesPorCatalogo = 2,
+        int? maxPrestamosConcurrentes = 3)
+    {
+        return new TipoUsuario(
+            nombre: "Estudiante",
+            descripcion: descripcion,
+            imagen: imagen,
+            maxUnidadesPorCatalogo: maxUnidadesPorCatalogo,
+            maxPrestamosConcurrentes: maxPrestamosConcurrentes,
+            permisos: new[] { Permiso.SolicitarPrestamo });
+    }
 }
-    
