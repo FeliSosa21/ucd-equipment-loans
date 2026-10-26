@@ -4,7 +4,11 @@ public class TipoUsuario
 {
     private const int LargoMaximoDescripcion = 100;
     private const int KilobytesMaximosImagen = 500;
-    private static readonly string[] PrefijosDeImagenAdmitidos = { "data:image/png;base64,", "data:image/jpeg;base64," };
+    private static readonly string[] PrefijosDeImagenAdmitidos =
+    {
+        "data:image/png;base64,",
+        "data:image/jpeg;base64,"
+    };
 
     private readonly HashSet<Permiso> permisos;
 
@@ -99,8 +103,7 @@ public class TipoUsuario
         ValidarNombre(nombre);
         ValidarDescripcion(descripcionRecortada);
         ValidarImagen(imagen);
-        ValidarTope(maxUnidadesPorCatalogo, "maximo de unidades por catalogo");
-        ValidarTope(maxPrestamosConcurrentes, "maximo de prestamos concurrentes");
+        ValidarTopes(maxUnidadesPorCatalogo, maxPrestamosConcurrentes);
 
         Nombre = nombre;
         Descripcion = descripcionRecortada;
@@ -136,13 +139,12 @@ public class TipoUsuario
 
     public void ModificarTopes(int maxUnidadesPorCatalogo, int maxPrestamosConcurrentes)
     {
-        if (MaxUnidadesPorCatalogo is null && MaxPrestamosConcurrentes is null)
+        if (NoTieneLimites())
         {
             throw new DominioException("Un tipo de usuario sin limites no admite configurar topes");
         }
 
-        ValidarTope(maxUnidadesPorCatalogo, "maximo de unidades por catalogo");
-        ValidarTope(maxPrestamosConcurrentes, "maximo de prestamos concurrentes");
+        ValidarTopes(maxUnidadesPorCatalogo, maxPrestamosConcurrentes);
 
         MaxUnidadesPorCatalogo = maxUnidadesPorCatalogo;
         MaxPrestamosConcurrentes = maxPrestamosConcurrentes;
@@ -161,6 +163,11 @@ public class TipoUsuario
     public bool PermiteUnidades(int cantidadSolicitada)
     {
         return MaxUnidadesPorCatalogo is null || cantidadSolicitada <= MaxUnidadesPorCatalogo;
+    }
+
+    private bool NoTieneLimites()
+    {
+        return MaxUnidadesPorCatalogo is null && MaxPrestamosConcurrentes is null;
     }
 
     private static string Recortar(string texto)
@@ -230,6 +237,12 @@ public class TipoUsuario
         {
             throw new DominioException($"La imagen debe pesar como maximo {KilobytesMaximosImagen} KB");
         }
+    }
+
+    private static void ValidarTopes(int? maxUnidadesPorCatalogo, int? maxPrestamosConcurrentes)
+    {
+        ValidarTope(maxUnidadesPorCatalogo, "maximo de unidades por catalogo");
+        ValidarTope(maxPrestamosConcurrentes, "maximo de prestamos concurrentes");
     }
 
     private static void ValidarTope(int? tope, string campo)
