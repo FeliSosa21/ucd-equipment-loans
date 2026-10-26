@@ -9,6 +9,8 @@ public class RegistroAuditoria
 
     public RegistroAuditoria(DateTime fechaHora, Usuario? responsable, AccionAuditada accion, string detalle)
     {
+        ValidarAccion(accion);
+
         FechaHora = fechaHora;
         Responsable = responsable;
         Accion = accion;
@@ -18,5 +20,13 @@ public class RegistroAuditoria
     public bool EsDelSistema()
     {
         return Responsable is null;
+    }
+
+    private static void ValidarAccion(AccionAuditada accion)
+    {
+        if (!Enum.IsDefined(accion))
+        {
+            throw new DominioException("El registro de auditoria debe tener una accion valida");
+        }
     }
 }
