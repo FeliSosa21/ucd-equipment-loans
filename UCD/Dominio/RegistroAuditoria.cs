@@ -11,14 +11,16 @@ public class RegistroAuditoria
 
     public RegistroAuditoria(DateTime fechaHora, Usuario? responsable, AccionAuditada accion, string detalle)
     {
+        string detalleRecortado = detalle?.Trim() ?? string.Empty;
+
         ValidarFechaHora(fechaHora);
         ValidarAccion(accion);
-        ValidarDetalle(detalle);
+        ValidarDetalle(detalleRecortado);
 
         FechaHora = fechaHora;
         Responsable = responsable;
         Accion = accion;
-        Detalle = detalle;
+        Detalle = detalleRecortado;
     }
 
     public bool EsDelSistema()
