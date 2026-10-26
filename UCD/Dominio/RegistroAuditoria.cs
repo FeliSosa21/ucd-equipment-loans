@@ -9,5 +9,9 @@ public class RegistroAuditoria
 
     public RegistroAuditoria(DateTime fechaHora, Usuario? responsable, AccionAuditada accion, string detalle)
     {
+        FechaHora = fechaHora;
+        Responsable = responsable;
+        Accion = accion;
+        Detalle = detalle;
     }
 }
