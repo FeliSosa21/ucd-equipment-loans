@@ -92,6 +92,8 @@ public class TipoUsuario
     public TipoUsuario(string nombre, string descripcion, string imagen, int? maxUnidadesPorCatalogo,
         int? maxPrestamosConcurrentes, IEnumerable<Permiso> permisos)
     {
+        ValidarDescripcion(descripcion);
+
         Nombre = nombre;
         Descripcion = descripcion;
         Imagen = imagen;
@@ -121,5 +123,13 @@ public class TipoUsuario
     public bool PermiteUnidades(int cantidadSolicitada)
     {
         return maxUnidadesPorPrestamo is null || cantidadSolicitada <= maxUnidadesPorPrestamo;
+    }
+
+    private static void ValidarDescripcion(string descripcion)
+    {
+        if (string.IsNullOrWhiteSpace(descripcion))
+        {
+            throw new DominioException("La descripcion no puede estar vacia");
+        }
     }
 }
