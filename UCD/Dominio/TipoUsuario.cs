@@ -98,6 +98,7 @@ public class TipoUsuario
     {
         ValidarDescripcion(descripcion);
         ValidarImagen(imagen);
+        ValidarMaxUnidadesPorCatalogo(maxUnidadesPorCatalogo);
 
         Nombre = nombre;
         Descripcion = descripcion;
@@ -183,6 +184,14 @@ public class TipoUsuario
         if (cantidadDeBytes > KilobytesMaximosImagen * 1024)
         {
             throw new DominioException($"La imagen debe pesar como maximo {KilobytesMaximosImagen} KB");
+        }
+    }
+
+    private static void ValidarMaxUnidadesPorCatalogo(int? maxUnidadesPorCatalogo)
+    {
+        if (maxUnidadesPorCatalogo < 0)
+        {
+            throw new DominioException("El maximo de unidades por catalogo no puede ser negativo");
         }
     }
 }
