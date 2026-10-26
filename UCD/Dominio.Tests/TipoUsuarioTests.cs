@@ -456,6 +456,16 @@ public sealed class TipoUsuarioTests
         Assert.ThrowsException<DominioException>(() => CrearTipo(descripcion: descripcion));
     }
 
+    [TestMethod]
+    public void Constructor_DescripcionCon100Caracteres_SeCrea()
+    {
+        string descripcion = new string('a', 100);
+
+        TipoUsuario tipo = CrearTipo(descripcion: descripcion);
+
+        Assert.AreEqual(descripcion, tipo.Descripcion);
+    }
+
     private static TipoUsuario CrearTipo(
         string descripcion = "Alumnos de grado",
         string imagen = ImagenPng,
