@@ -668,6 +668,16 @@ public sealed class TipoUsuarioTests
         Assert.AreEqual("Alumnos de grado", tipo.Descripcion);
     }
 
+    [TestMethod]
+    public void ModificarDescripcion_DescripcionConEspaciosAlrededor_LaGuardaRecortada()
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        tipo.ModificarDescripcion("  Alumnos de posgrado  ");
+
+        Assert.AreEqual("Alumnos de posgrado", tipo.Descripcion);
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
