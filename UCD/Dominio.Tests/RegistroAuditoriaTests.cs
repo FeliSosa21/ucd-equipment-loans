@@ -77,6 +77,16 @@ public sealed class RegistroAuditoriaTests
         Assert.ThrowsException<DominioException>(() => CrearRegistro(detalle: detalle));
     }
 
+    [TestMethod]
+    public void Constructor_DetalleCon200Caracteres_SeCrea()
+    {
+        string detalle = new string('a', 200);
+
+        RegistroAuditoria registro = CrearRegistro(detalle: detalle);
+
+        Assert.AreEqual(detalle, registro.Detalle);
+    }
+
     private static RegistroAuditoria CrearRegistro(
         DateTime? fechaHora = null,
         AccionAuditada accion = AccionAuditada.SolicitudDePrestamo,
