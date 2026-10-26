@@ -119,6 +119,7 @@ public class TipoUsuario
 
     public void ModificarDescripcion(string descripcion)
     {
+        Descripcion = descripcion;
     }
 
     public bool TienePermiso(Permiso permiso)
