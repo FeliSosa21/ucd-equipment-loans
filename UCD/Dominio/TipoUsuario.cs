@@ -115,6 +115,7 @@ public class TipoUsuario
         this.maxPrestamosConcurrentes = maxPrestamosConcurrentes;
         MaxPrestamosConcurrentes = maxPrestamosConcurrentes;
         this.maxUnidadesPorPrestamo = maxUnidadesPorPrestamo;
+        MaxUnidadesPorCatalogo = maxUnidadesPorPrestamo;
         this.permisos = permisos;
     }
 
@@ -158,7 +159,7 @@ public class TipoUsuario
 
     public bool PermiteUnidades(int cantidadSolicitada)
     {
-        return maxUnidadesPorPrestamo is null || cantidadSolicitada <= maxUnidadesPorPrestamo;
+        return MaxUnidadesPorCatalogo is null || cantidadSolicitada <= MaxUnidadesPorCatalogo;
     }
 
     private static void ValidarDescripcion(string descripcion)
