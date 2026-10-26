@@ -522,6 +522,14 @@ public sealed class TipoUsuarioTests
         Assert.AreEqual(imagen, tipo.Imagen);
     }
 
+    [TestMethod]
+    [DataRow(-1)]
+    [DataRow(-10)]
+    public void Constructor_MaxUnidadesPorCatalogoNegativo_LanzaExcepcion(int maxUnidadesPorCatalogo)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(maxUnidadesPorCatalogo: maxUnidadesPorCatalogo));
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
