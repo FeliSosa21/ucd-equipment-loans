@@ -113,6 +113,7 @@ public class TipoUsuario
     {
         Nombre = nombre;
         this.maxPrestamosConcurrentes = maxPrestamosConcurrentes;
+        MaxPrestamosConcurrentes = maxPrestamosConcurrentes;
         this.maxUnidadesPorPrestamo = maxUnidadesPorPrestamo;
         this.permisos = permisos;
     }
@@ -152,7 +153,7 @@ public class TipoUsuario
 
     public bool PuedeAgregarPrestamo(int prestamosVigentes)
     {
-        return maxPrestamosConcurrentes is null || prestamosVigentes < maxPrestamosConcurrentes;
+        return MaxPrestamosConcurrentes is null || prestamosVigentes < MaxPrestamosConcurrentes;
     }
 
     public bool PermiteUnidades(int cantidadSolicitada)
