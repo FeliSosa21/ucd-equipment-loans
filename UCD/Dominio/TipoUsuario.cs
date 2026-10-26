@@ -6,8 +6,6 @@ public class TipoUsuario
     private const int KilobytesMaximosImagen = 500;
     private static readonly string[] PrefijosDeImagenAdmitidos = { "data:image/png;base64,", "data:image/jpeg;base64," };
 
-    private readonly int? maxPrestamosConcurrentes;
-    private readonly int? maxUnidadesPorPrestamo;
     private readonly HashSet<Permiso> permisos;
 
     public string Nombre { get; }
@@ -19,13 +17,13 @@ public class TipoUsuario
     public static TipoUsuario SinPermisos { get; } = new TipoUsuario(
         "Sin permisos",
         maxPrestamosConcurrentes: 0,
-        maxUnidadesPorPrestamo: 0,
+        maxUnidadesPorCatalogo: 0,
         new HashSet<Permiso>());
 
     public static TipoUsuario Estudiante { get; } = new TipoUsuario(
         "Estudiante",
         maxPrestamosConcurrentes: 2,
-        maxUnidadesPorPrestamo: 2,
+        maxUnidadesPorCatalogo: 2,
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -37,7 +35,7 @@ public class TipoUsuario
     public static TipoUsuario Docente { get; } = new TipoUsuario(
         "Docente",
         maxPrestamosConcurrentes: 3,
-        maxUnidadesPorPrestamo: 40,
+        maxUnidadesPorCatalogo: 40,
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -50,7 +48,7 @@ public class TipoUsuario
     public static TipoUsuario FuncionarioCE { get; } = new TipoUsuario(
         "Funcionario del centro de equipamiento",
         maxPrestamosConcurrentes: 0,
-        maxUnidadesPorPrestamo: 0,
+        maxUnidadesPorCatalogo: 0,
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -62,7 +60,7 @@ public class TipoUsuario
     public static TipoUsuario Supervisor { get; } = new TipoUsuario(
         "Supervisor",
         maxPrestamosConcurrentes: 0,
-        maxUnidadesPorPrestamo: 0,
+        maxUnidadesPorCatalogo: 0,
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -77,7 +75,7 @@ public class TipoUsuario
     public static TipoUsuario Administrador { get; } = new TipoUsuario(
         "Administrador",
         maxPrestamosConcurrentes: null,
-        maxUnidadesPorPrestamo: null,
+        maxUnidadesPorCatalogo: null,
         new HashSet<Permiso>(Enum.GetValues<Permiso>()));
 
     public static IReadOnlyList<TipoUsuario> Todos()
@@ -109,13 +107,11 @@ public class TipoUsuario
         this.permisos = new HashSet<Permiso>(permisos);
     }
 
-    private TipoUsuario(string nombre, int? maxPrestamosConcurrentes, int? maxUnidadesPorPrestamo, HashSet<Permiso> permisos)
+    private TipoUsuario(string nombre, int? maxPrestamosConcurrentes, int? maxUnidadesPorCatalogo, HashSet<Permiso> permisos)
     {
         Nombre = nombre;
-        this.maxPrestamosConcurrentes = maxPrestamosConcurrentes;
         MaxPrestamosConcurrentes = maxPrestamosConcurrentes;
-        this.maxUnidadesPorPrestamo = maxUnidadesPorPrestamo;
-        MaxUnidadesPorCatalogo = maxUnidadesPorPrestamo;
+        MaxUnidadesPorCatalogo = maxUnidadesPorCatalogo;
         this.permisos = permisos;
     }
 
