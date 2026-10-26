@@ -621,6 +621,16 @@ public sealed class TipoUsuarioTests
             tipo.ModificarTopes(maxUnidadesPorCatalogo: 2, maxPrestamosConcurrentes: 3));
     }
 
+    [TestMethod]
+    public void PuedeAgregarPrestamo_TipoConMaximoDeTresYTresVigentes_DevuelveFalse()
+    {
+        TipoUsuario tipo = CrearTipo(maxPrestamosConcurrentes: 3);
+
+        bool resultado = tipo.PuedeAgregarPrestamo(3);
+
+        Assert.IsFalse(resultado);
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
