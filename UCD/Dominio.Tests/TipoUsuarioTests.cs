@@ -601,6 +601,17 @@ public sealed class TipoUsuarioTests
         Assert.AreEqual(4, tipo.MaxPrestamosConcurrentes);
     }
 
+    [TestMethod]
+    [DataRow(-1, 2)]
+    [DataRow(2, -1)]
+    public void ModificarTopes_TopeNegativo_LanzaExcepcion(int maxUnidadesPorCatalogo, int maxPrestamosConcurrentes)
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        Assert.ThrowsException<DominioException>(() =>
+            tipo.ModificarTopes(maxUnidadesPorCatalogo, maxPrestamosConcurrentes));
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
