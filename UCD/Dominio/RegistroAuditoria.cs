@@ -2,6 +2,8 @@ namespace Dominio;
 
 public class RegistroAuditoria
 {
+    private const int LargoMaximoDetalle = 200;
+
     public DateTime FechaHora { get; private set; }
     public Usuario? Responsable { get; private set; }
     public AccionAuditada Accion { get; private set; }
@@ -45,6 +47,11 @@ public class RegistroAuditoria
         if (string.IsNullOrWhiteSpace(detalle))
         {
             throw new DominioException("El detalle no puede estar vacio");
+        }
+
+        if (detalle.Length > LargoMaximoDetalle)
+        {
+            throw new DominioException($"El detalle debe tener como maximo {LargoMaximoDetalle} caracteres");
         }
     }
 }
