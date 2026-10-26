@@ -631,6 +631,16 @@ public sealed class TipoUsuarioTests
         Assert.IsFalse(resultado);
     }
 
+    [TestMethod]
+    public void PermiteUnidades_TipoConMaximoDeDosYTresUnidades_DevuelveFalse()
+    {
+        TipoUsuario tipo = CrearTipo(maxUnidadesPorCatalogo: 2);
+
+        bool resultado = tipo.PermiteUnidades(3);
+
+        Assert.IsFalse(resultado);
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
