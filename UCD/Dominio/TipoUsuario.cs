@@ -120,9 +120,11 @@ public class TipoUsuario
 
     public void ModificarDescripcion(string descripcion)
     {
-        ValidarDescripcion(descripcion);
+        string descripcionRecortada = Recortar(descripcion);
 
-        Descripcion = descripcion;
+        ValidarDescripcion(descripcionRecortada);
+
+        Descripcion = descripcionRecortada;
     }
 
     public void ModificarImagen(string imagen)
