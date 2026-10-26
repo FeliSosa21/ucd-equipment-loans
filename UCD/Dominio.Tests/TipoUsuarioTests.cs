@@ -559,6 +559,15 @@ public sealed class TipoUsuarioTests
         Assert.ThrowsException<DominioException>(() => tipo.ModificarDescripcion(descripcion!));
     }
 
+    [TestMethod]
+    public void ModificarDescripcion_DescripcionCon101Caracteres_LanzaExcepcion()
+    {
+        TipoUsuario tipo = CrearTipo();
+        string descripcion = new string('a', 101);
+
+        Assert.ThrowsException<DominioException>(() => tipo.ModificarDescripcion(descripcion));
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
