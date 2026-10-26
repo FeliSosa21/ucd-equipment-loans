@@ -651,19 +651,29 @@ public sealed class TipoUsuarioTests
         Assert.IsTrue(resultado);
     }
 
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void Constructor_NombreNuloVacioOEspacios_LanzaExcepcion(string? nombre)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(nombre: nombre!));
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
     }
 
     private static TipoUsuario CrearTipo(
+        string nombre = "Estudiante",
         string descripcion = "Alumnos de grado",
         string imagen = ImagenPng,
         int? maxUnidadesPorCatalogo = 2,
         int? maxPrestamosConcurrentes = 3)
     {
         return new TipoUsuario(
-            nombre: "Estudiante",
+            nombre: nombre,
             descripcion: descripcion,
             imagen: imagen,
             maxUnidadesPorCatalogo: maxUnidadesPorCatalogo,
