@@ -117,6 +117,10 @@ public class TipoUsuario
         this.permisos = permisos;
     }
 
+    public void ModificarDescripcion(string descripcion)
+    {
+    }
+
     public bool TienePermiso(Permiso permiso)
     {
         return permisos.Contains(permiso);

@@ -538,6 +538,16 @@ public sealed class TipoUsuarioTests
         Assert.ThrowsException<DominioException>(() => CrearTipo(maxPrestamosConcurrentes: maxPrestamosConcurrentes));
     }
 
+    [TestMethod]
+    public void ModificarDescripcion_DescripcionValida_LaModifica()
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        tipo.ModificarDescripcion("Alumnos de grado y posgrado");
+
+        Assert.AreEqual("Alumnos de grado y posgrado", tipo.Descripcion);
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
