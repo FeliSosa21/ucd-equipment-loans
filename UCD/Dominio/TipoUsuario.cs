@@ -126,6 +126,8 @@ public class TipoUsuario
 
     public void ModificarImagen(string imagen)
     {
+        ValidarImagen(imagen);
+
         Imagen = imagen;
     }
 
