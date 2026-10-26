@@ -3,6 +3,7 @@
 public class TipoUsuario
 {
     private const int LargoMaximoDescripcion = 100;
+    private static readonly string[] PrefijosDeImagenAdmitidos = { "data:image/png;base64,", "data:image/jpeg;base64," };
 
     private readonly int? maxPrestamosConcurrentes;
     private readonly int? maxUnidadesPorPrestamo;
@@ -146,6 +147,11 @@ public class TipoUsuario
         if (string.IsNullOrWhiteSpace(imagen))
         {
             throw new DominioException("La imagen no puede estar vacia");
+        }
+
+        if (!PrefijosDeImagenAdmitidos.Any(prefijo => imagen.StartsWith(prefijo, StringComparison.Ordinal)))
+        {
+            throw new DominioException("La imagen debe ser PNG o JPG");
         }
     }
 }
