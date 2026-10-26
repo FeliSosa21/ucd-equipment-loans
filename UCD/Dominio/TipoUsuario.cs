@@ -153,5 +153,13 @@ public class TipoUsuario
         {
             throw new DominioException("La imagen debe ser PNG o JPG");
         }
+
+        string contenido = imagen.Substring(imagen.IndexOf(',') + 1);
+        byte[] bytes = new byte[contenido.Length];
+
+        if (contenido.Length == 0 || !Convert.TryFromBase64String(contenido, bytes, out _))
+        {
+            throw new DominioException("La imagen no tiene un contenido base64 valido");
+        }
     }
 }
