@@ -119,6 +119,8 @@ public class TipoUsuario
 
     public void ModificarDescripcion(string descripcion)
     {
+        ValidarDescripcion(descripcion);
+
         Descripcion = descripcion;
     }
 
