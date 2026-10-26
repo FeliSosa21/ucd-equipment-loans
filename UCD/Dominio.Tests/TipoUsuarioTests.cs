@@ -475,6 +475,16 @@ public sealed class TipoUsuarioTests
         Assert.ThrowsException<DominioException>(() => CrearTipo(imagen: imagen!));
     }
 
+    [TestMethod]
+    [DataRow("data:image/gif;base64,R0lGODlh")]
+    [DataRow("data:image/svg+xml;base64,PHN2Zz4=")]
+    [DataRow("data:text/plain;base64,aG9sYQ==")]
+    [DataRow("iVBORw0KGgo=")]
+    public void Constructor_ImagenConFormatoNoAdmitido_LanzaExcepcion(string imagen)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(imagen: imagen));
+    }
+
     private static TipoUsuario CrearTipo(
         string descripcion = "Alumnos de grado",
         string imagen = ImagenPng,
