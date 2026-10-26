@@ -530,6 +530,14 @@ public sealed class TipoUsuarioTests
         Assert.ThrowsException<DominioException>(() => CrearTipo(maxUnidadesPorCatalogo: maxUnidadesPorCatalogo));
     }
 
+    [TestMethod]
+    [DataRow(-1)]
+    [DataRow(-10)]
+    public void Constructor_MaxPrestamosConcurrentesNegativo_LanzaExcepcion(int maxPrestamosConcurrentes)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(maxPrestamosConcurrentes: maxPrestamosConcurrentes));
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
