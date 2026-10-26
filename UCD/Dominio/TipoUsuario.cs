@@ -2,6 +2,8 @@
 
 public class TipoUsuario
 {
+    private const int LargoMaximoDescripcion = 100;
+
     private readonly int? maxPrestamosConcurrentes;
     private readonly int? maxUnidadesPorPrestamo;
     private readonly HashSet<Permiso> permisos;
@@ -130,6 +132,11 @@ public class TipoUsuario
         if (string.IsNullOrWhiteSpace(descripcion))
         {
             throw new DominioException("La descripcion no puede estar vacia");
+        }
+
+        if (descripcion.Length > LargoMaximoDescripcion)
+        {
+            throw new DominioException($"La descripcion debe tener como maximo {LargoMaximoDescripcion} caracteres");
         }
     }
 }
