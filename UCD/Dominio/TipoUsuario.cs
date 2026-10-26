@@ -94,14 +94,16 @@ public class TipoUsuario
     public TipoUsuario(string nombre, string descripcion, string imagen, int? maxUnidadesPorCatalogo,
         int? maxPrestamosConcurrentes, IEnumerable<Permiso> permisos)
     {
+        string descripcionRecortada = Recortar(descripcion);
+
         ValidarNombre(nombre);
-        ValidarDescripcion(descripcion);
+        ValidarDescripcion(descripcionRecortada);
         ValidarImagen(imagen);
         ValidarTope(maxUnidadesPorCatalogo, "maximo de unidades por catalogo");
         ValidarTope(maxPrestamosConcurrentes, "maximo de prestamos concurrentes");
 
         Nombre = nombre;
-        Descripcion = descripcion;
+        Descripcion = descripcionRecortada;
         Imagen = imagen;
         MaxUnidadesPorCatalogo = maxUnidadesPorCatalogo;
         MaxPrestamosConcurrentes = maxPrestamosConcurrentes;
@@ -157,6 +159,11 @@ public class TipoUsuario
     public bool PermiteUnidades(int cantidadSolicitada)
     {
         return MaxUnidadesPorCatalogo is null || cantidadSolicitada <= MaxUnidadesPorCatalogo;
+    }
+
+    private static string Recortar(string texto)
+    {
+        return texto?.Trim() ?? string.Empty;
     }
 
     private static void ValidarNombre(string nombre)
