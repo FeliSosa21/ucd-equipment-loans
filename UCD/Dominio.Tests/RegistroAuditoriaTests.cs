@@ -87,6 +87,14 @@ public sealed class RegistroAuditoriaTests
         Assert.AreEqual(detalle, registro.Detalle);
     }
 
+    [TestMethod]
+    public void Constructor_DetalleConEspaciosAlrededor_LoGuardaRecortado()
+    {
+        RegistroAuditoria registro = CrearRegistro(detalle: "  Prestamo de 2 Notebook  ");
+
+        Assert.AreEqual("Prestamo de 2 Notebook", registro.Detalle);
+    }
+
     private static RegistroAuditoria CrearRegistro(
         DateTime? fechaHora = null,
         AccionAuditada accion = AccionAuditada.SolicitudDePrestamo,
