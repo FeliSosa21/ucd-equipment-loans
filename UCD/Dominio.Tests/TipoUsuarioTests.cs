@@ -660,6 +660,14 @@ public sealed class TipoUsuarioTests
         Assert.ThrowsException<DominioException>(() => CrearTipo(nombre: nombre!));
     }
 
+    [TestMethod]
+    public void Constructor_DescripcionConEspaciosAlrededor_LaGuardaRecortada()
+    {
+        TipoUsuario tipo = CrearTipo(descripcion: "  Alumnos de grado  ");
+
+        Assert.AreEqual("Alumnos de grado", tipo.Descripcion);
+    }
+
     private static string CrearImagenPng(int cantidadDeBytes)
     {
         return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
