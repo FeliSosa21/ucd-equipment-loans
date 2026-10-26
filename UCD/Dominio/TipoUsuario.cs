@@ -133,6 +133,11 @@ public class TipoUsuario
 
     public void ModificarTopes(int maxUnidadesPorCatalogo, int maxPrestamosConcurrentes)
     {
+        if (MaxUnidadesPorCatalogo is null && MaxPrestamosConcurrentes is null)
+        {
+            throw new DominioException("Un tipo de usuario sin limites no admite configurar topes");
+        }
+
         ValidarTope(maxUnidadesPorCatalogo, "maximo de unidades por catalogo");
         ValidarTope(maxPrestamosConcurrentes, "maximo de prestamos concurrentes");
 
