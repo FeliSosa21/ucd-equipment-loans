@@ -95,6 +95,7 @@ public class TipoUsuario
         int? maxPrestamosConcurrentes, IEnumerable<Permiso> permisos)
     {
         ValidarDescripcion(descripcion);
+        ValidarImagen(imagen);
 
         Nombre = nombre;
         Descripcion = descripcion;
@@ -137,6 +138,14 @@ public class TipoUsuario
         if (descripcion.Length > LargoMaximoDescripcion)
         {
             throw new DominioException($"La descripcion debe tener como maximo {LargoMaximoDescripcion} caracteres");
+        }
+    }
+
+    private static void ValidarImagen(string imagen)
+    {
+        if (string.IsNullOrWhiteSpace(imagen))
+        {
+            throw new DominioException("La imagen no puede estar vacia");
         }
     }
 }
