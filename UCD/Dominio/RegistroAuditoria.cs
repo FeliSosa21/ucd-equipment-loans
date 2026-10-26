@@ -17,6 +17,6 @@ public class RegistroAuditoria
 
     public bool EsDelSistema()
     {
-        return false;
+        return Responsable is null;
     }
 }
