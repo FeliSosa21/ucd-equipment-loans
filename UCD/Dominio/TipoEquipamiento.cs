@@ -15,10 +15,17 @@ public class TipoEquipamiento
     public Categoria Categoria { get; private set; }
     public EstadoTipoEquipamiento Estado { get; private set; } = EstadoTipoEquipamiento.Activo;
     public bool EstaActivo => Estado == EstadoTipoEquipamiento.Activo;
+    public int Id { get; private set; }
 
     private readonly List<UnidadFisica> _unidades = new();
 
     public IReadOnlyCollection<UnidadFisica> Unidades => _unidades.AsReadOnly();
+
+    private TipoEquipamiento()
+    {
+        Nombre = null!;
+        Descripcion = null!;
+    }
 
     public TipoEquipamiento(string nombre, string descripcion, int duracionMaxPrestamo, bool requiereAprobacion,
         Categoria categoria)
