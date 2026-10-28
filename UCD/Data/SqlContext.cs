@@ -1,10 +1,11 @@
 ﻿using Dominio;
 using Microsoft.EntityFrameworkCore;
+
 namespace Data;
 
 public class SqlContext : DbContext
 {
-    public DbSet<Catalogo> catalogos { get; set; }
+    public DbSet<Catalogo> Catalogos { get; set; }
 
     public SqlContext(DbContextOptions<SqlContext> options) : base(options)
     {

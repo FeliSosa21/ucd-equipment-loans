@@ -8,7 +8,7 @@ public class ConfiguracionUnidadFisica : IEntityTypeConfiguration<UnidadFisica>
 {
     public void Configure(EntityTypeBuilder<UnidadFisica> builder)
     {
-        builder.ToTable("UnidadesFisica");
+        builder.ToTable("UnidadesFisicas");
 
         builder.HasKey(unidad => unidad.Id);
 
