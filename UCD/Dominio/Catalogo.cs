@@ -3,7 +3,7 @@ namespace Dominio;
 public class Catalogo
 {
     private const int LargoMinimoNombre = 3;
-    private const int LargoMaximoNombre = 80;
+    public const int LargoMaximoNombre = 80;
 
     private readonly List<TipoEquipamiento> _tipos = new();
     public string Nombre { get; private set; }
