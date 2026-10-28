@@ -5,8 +5,8 @@ namespace Dominio;
 public class TipoEquipamiento
 {
     private const int LargoMinimoNombre = 3;
-    private const int LargoMaximoNombre = 80;
-    private const int LargoMaximoDescripcion = 300;
+    public const int LargoMaximoNombre = 80;
+    public const int LargoMaximoDescripcion = 300;
 
     public string Nombre { get; private set; }
     public string Descripcion { get; private set; }
