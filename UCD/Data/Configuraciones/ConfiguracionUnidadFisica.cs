@@ -23,5 +23,7 @@ public class ConfiguracionUnidadFisica : IEntityTypeConfiguration<UnidadFisica>
         builder.Property(unidad => unidad.Observaciones).HasMaxLength(UnidadFisica.LargoMaxObservaciones);
 
         builder.Property(unidad => unidad.Estado).HasConversion<string>();
+
+        builder.Property<int>("TipoEquipamientoId");
     }
 }
