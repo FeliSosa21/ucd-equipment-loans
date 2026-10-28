@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-
+﻿using Dominio;
+using Microsoft.EntityFrameworkCore;
 namespace Data;
 
 public class SqlContext : DbContext
 {
+    public DbSet<Catalogo> catalogos { get; set; }
+
     public SqlContext(DbContextOptions<SqlContext> options) : base(options)
     {
         if (Database.IsRelational())
@@ -19,3 +21,4 @@ public class SqlContext : DbContext
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SqlContext).Assembly);
     }
 }
+
