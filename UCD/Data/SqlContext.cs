@@ -9,10 +9,6 @@ public class SqlContext : DbContext
 
     public SqlContext(DbContextOptions<SqlContext> options) : base(options)
     {
-        if (Database.IsRelational())
-        {
-            Database.Migrate();
-        }
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -47,8 +47,11 @@ WebApplication app = builder.Build();
 
 // Precarga el usuario root, el catalogo unico y los datos de ejemplo al arrancar (la Memoria empieza vacia).
 // El catalogo va antes que los datos de ejemplo: ahi se agregan los tipos de equipamiento.
+//Tambien aplica las migraciones
 using (IServiceScope scope = app.Services.CreateScope())
 {
+    SqlContext contexto = scope.ServiceProvider.GetRequiredService<SqlContext>();
+    contexto.Database.Migrate();
     CargaInicial cargaInicial = scope.ServiceProvider.GetRequiredService<CargaInicial>();
     cargaInicial.CargarRoot();
     cargaInicial.CargarCatalogo();
