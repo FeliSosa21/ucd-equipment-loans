@@ -139,6 +139,14 @@ public sealed class CatalogoTests
         Assert.AreSame(tipoEquipamientoExistente, resultado);
     }
 
+    [TestMethod]
+    public void Constructor_CatalogoNuevo_EstaActivo()
+    {
+        var catalogo = CrearCatalogo();
+
+        Assert.IsTrue(catalogo.Activo);
+    }
+
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
