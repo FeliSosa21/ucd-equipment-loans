@@ -138,6 +138,16 @@ public class ServicioDevolucionTests
     }
 
     [TestMethod]
+    public void RegistrarDevolucion_DatosValidos_DevuelveQuienLaRegistro()
+    {
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+
+        DevolucionRegistradaDto registrada = servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
+
+        Assert.AreEqual("Felipe Sosa", registrada.RegistradaPor);
+    }
+
+    [TestMethod]
     public void RegistrarDevolucion_DevolucionFallida_NoRegistraMovimientos()
     {
         Memoria memoria = new Memoria();

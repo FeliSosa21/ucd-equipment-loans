@@ -45,7 +45,7 @@ public class ServicioDevolucion
         return _prestamos.ObtenerPrestamosActivos().Select(CrearPrestamoActivoDto).ToList();
     }
 
-    public void RegistrarDevolucion(DevolucionDto datos, string dniResponsable)
+    public DevolucionRegistradaDto RegistrarDevolucion(DevolucionDto datos, string dniResponsable)
     {
         ArgumentNullException.ThrowIfNull(datos);
         ArgumentNullException.ThrowIfNull(datos.Unidades);
@@ -63,6 +63,8 @@ public class ServicioDevolucion
             _devoluciones.AgregarDevolucion(devolucion);
             RegistrarMovimientos(devolucion);
         });
+
+        return new DevolucionRegistradaDto();
     }
 
     // Registro historico (req. 10): un movimiento por unidad, con la fecha efectiva de devolucion.
