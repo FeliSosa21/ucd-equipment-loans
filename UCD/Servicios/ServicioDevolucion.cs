@@ -58,7 +58,7 @@ public class ServicioDevolucion
                 .Select(unidad => CrearUnidadDevuelta(unidad, prestamo))
                 .ToList();
             DateTime ahora = _reloj.GetLocalNow().DateTime;
-            Devolucion devolucion = new Devolucion(prestamo, responsable, ahora, unidades);
+            Devolucion devolucion = new Devolucion(prestamo, new RegistroDeAccion(responsable, ahora), unidades);
             devolucion.Aplicar();
             _devoluciones.AgregarDevolucion(devolucion);
             RegistrarMovimientos(devolucion);
