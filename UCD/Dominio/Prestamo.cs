@@ -64,7 +64,7 @@ public class Prestamo
 
     public void Rechazar(Usuario evaluador, string motivo)
     {
-        ValidarQueSePuedaRechazar();
+        ValidarQueEsteSolicitado();
         ValidarEvaluador(evaluador);
         ValidarMotivo(motivo);
         LiberarUnidades();
