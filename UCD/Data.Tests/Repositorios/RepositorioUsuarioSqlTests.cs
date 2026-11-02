@@ -71,7 +71,7 @@ public sealed class RepositorioUsuarioSqlTests
         Usuario usuario = CrearUsuario();
         _repositorio.AgregarUsuario(usuario);
         
-        Usuario? resultado = _repositorio.ObtenerUsuarioPorCorreo(usuario.Correo);
+        Usuario? resultado = _repositorio.ObtenerUsuarioPorCorreo("LUCIA.Fernandez@UCD.edu.uy");
         
         Assert.AreSame(usuario, resultado);
     }
