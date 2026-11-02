@@ -54,7 +54,7 @@ public class Usuario
 
     public bool EstaPendienteDeActivacion()
     {
-        return false;
+        return Tipo.NoTienePermisos();
     }
 
     public void ModificarDatos(string nombre, string apellido, string correo)
