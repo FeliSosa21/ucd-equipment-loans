@@ -25,6 +25,11 @@ public class Catalogo
 
     public void ModificarNombre(string nombre)
     {
+        if (!Activo)
+        {
+            throw new DominioException("No se puede modificar un catalogo dado de baja");
+        }
+
         ValidarNombre(nombre);
         Nombre = nombre;
     }
