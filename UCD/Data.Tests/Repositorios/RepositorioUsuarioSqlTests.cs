@@ -56,6 +56,19 @@ public sealed class RepositorioUsuarioSqlTests
         Assert.IsNull(resultado);
     }
 
+    [TestMethod]
+    public void ObtenerUsuarioPorCorreo_UsuarioAgregado_LoDevuelve()
+    {
+        RepositorioUsuarioSql repositorio = new RepositorioUsuarioSql(_contexto);
+        Usuario usuario = CrearUsuario();
+        repositorio.AgregarUsuario(usuario);
+        
+        Usuario? resultado = repositorio.ObtenerUsuarioPorCorreo(usuario.Correo);
+        
+        Assert.AreSame(usuario, resultado);
+        
+    }
+
     private static Usuario CrearUsuario()
     {
         return new Usuario(dni: "47153923",
