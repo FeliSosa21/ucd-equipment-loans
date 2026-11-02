@@ -87,6 +87,32 @@ public class ServicioUsuarioTests
     }
 
     [TestMethod]
+    public void Registrar_DniDuplicado_ElErrorIndicaElCampoDni()
+    {
+        Memoria memoria = new Memoria();
+        ServicioUsuario servicio = new ServicioUsuario(new RepositorioUsuario(memoria));
+        servicio.Registrar(CrearDto());
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
+            servicio.Registrar(CrearDto(correo: "otro@hotmail.com")));
+
+        Assert.AreEqual("Dni", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Registrar_CorreoDuplicado_ElErrorIndicaElCampoCorreo()
+    {
+        Memoria memoria = new Memoria();
+        ServicioUsuario servicio = new ServicioUsuario(new RepositorioUsuario(memoria));
+        servicio.Registrar(CrearDto());
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
+            servicio.Registrar(CrearDto(dni: "11111111")));
+
+        Assert.AreEqual("Correo", excepcion.Campo);
+    }
+
+    [TestMethod]
     public void Registrar_DatosValidos_GuardaLosDatosIngresados()
     {
         Memoria memoria = new Memoria();

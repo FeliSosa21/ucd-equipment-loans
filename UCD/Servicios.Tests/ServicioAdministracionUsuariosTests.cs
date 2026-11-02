@@ -211,6 +211,19 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void ModificarDatos_CorreoDeOtroUsuario_ElErrorIndicaElCampoCorreo()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+        servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Estudiante.Nombre, DniResponsable);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
+            servicio.ModificarDatos(
+                CrearDatos(dni: DniValido, nombre: "Felipe", apellido: "Sosa", correo: CorreoNuevo), DniValido));
+
+        Assert.AreEqual("Correo", excepcion.Campo);
+    }
+
+    [TestMethod]
     public void ModificarDatos_NombreInvalido_LanzaExcepcion()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
