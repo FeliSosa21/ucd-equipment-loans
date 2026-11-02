@@ -22,4 +22,9 @@ public class RepositorioUsuarioSql
         return _contexto.Usuarios.FirstOrDefault(usuario => usuario.Dni == dni);
     }
 
+    public Usuario? ObtenerUsuarioPorCorreo(string correo)
+    {
+        return _contexto.Usuarios.FirstOrDefault(usuario => usuario.Correo == correo);
+    }
+
 }
