@@ -31,4 +31,12 @@ public sealed class DominioExceptionTests
         Assert.AreEqual("El nombre es invalido", excepcion.Message);
         Assert.AreSame(interna, excepcion.InnerException);
     }
+
+    [TestMethod]
+    public void Constructor_ConCampoYMensaje_GuardaElCampo()
+    {
+        DominioException excepcion = new DominioException("Nombre", "El nombre es invalido");
+
+        Assert.AreEqual("Nombre", excepcion.Campo);
+    }
 }
