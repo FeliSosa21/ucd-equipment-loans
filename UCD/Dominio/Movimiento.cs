@@ -21,6 +21,16 @@ public class Movimiento
         };
     }
 
+    public static Movimiento DeRechazo(Prestamo prestamo, RegistroDeAccion registro)
+    {
+        return new Movimiento(registro.FechaHora, TipoMovimiento.Rechazo, prestamo.Solicitante,
+            prestamo.Evaluador, unidad: null)
+        {
+            Prestamo = prestamo,
+            Responsable = registro.Responsable
+        };
+    }
+
     public Movimiento(DateTime fechaHora, TipoMovimiento tipo, Usuario solicitante, Usuario? evaluador,
         UnidadFisica? unidad)
     {
