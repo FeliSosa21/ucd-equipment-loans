@@ -2,15 +2,22 @@ namespace Dominio;
 
 public class Movimiento
 {
-    private readonly RegistroDeAccion _registro;
+    private RegistroDeAccion _registro;
 
-    public Prestamo Prestamo { get; }
-    public TipoMovimiento Tipo { get; }
-    public Usuario? Evaluador { get; }
+    public int Id { get; private set; }
+    public Prestamo Prestamo { get; private set; }
+    public TipoMovimiento Tipo { get; private set; }
+    public Usuario? Evaluador { get; private set; }
     public UnidadFisica? Unidad { get; private init; }
     public DateTime FechaHora => _registro.FechaHora;
     public Usuario? Responsable => _registro.Responsable;
     public Usuario Solicitante => Prestamo.Solicitante;
+
+    private Movimiento()
+    {
+        _registro = null!;
+        Prestamo = null!;
+    }
 
     private Movimiento(Prestamo prestamo, TipoMovimiento tipo, RegistroDeAccion registro)
     {

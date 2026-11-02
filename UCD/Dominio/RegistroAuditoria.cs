@@ -4,12 +4,19 @@ public class RegistroAuditoria
 {
     private const int LargoMaximoDetalle = 200;
 
-    private readonly RegistroDeAccion _registro;
+    private RegistroDeAccion _registro;
+
+    public int Id { get; private set; }
 
     public DateTime FechaHora => _registro.FechaHora;
     public Usuario? Responsable => _registro.Responsable;
     public AccionAuditada Accion { get; private set; }
     public string Detalle { get; private set; } = string.Empty;
+
+    private RegistroAuditoria()
+    {
+        _registro = null!;
+    }
 
     public RegistroAuditoria(RegistroDeAccion registro, AccionAuditada accion, string detalle)
     {
