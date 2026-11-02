@@ -27,6 +27,11 @@ public class RepositorioUsuario
             string.Equals(usuario.Correo, correo, StringComparison.OrdinalIgnoreCase));
     }
 
+    public IReadOnlyList<Usuario> ObtenerPaginaDeUsuarios(string? filtro, int pagina, int tamanoPagina)
+    {
+        return new List<Usuario>();
+    }
+
     public IReadOnlyList<Usuario> ObtenerUsuariosQueCoinciden(string? texto, int maximo)
     {
         string busqueda = texto?.Trim() ?? string.Empty;

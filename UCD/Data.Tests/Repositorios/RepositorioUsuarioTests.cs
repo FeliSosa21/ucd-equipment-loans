@@ -112,6 +112,50 @@ public class RepositorioUsuarioTests
         Assert.AreEqual(1, resultado.Count);
     }
 
+    [TestMethod]
+    public void ObtenerPaginaDeUsuarios_PrimeraPagina_DevuelveLosPrimerosOrdenadosPorApellido()
+    {
+        RepositorioUsuario repositorio = CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno, out _);
+
+        IReadOnlyList<Usuario> resultado = repositorio.ObtenerPaginaDeUsuarios(null, pagina: 1, tamanoPagina: 2);
+
+        CollectionAssert.AreEqual(new List<Usuario> { ana, bruno }, resultado.ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerPaginaDeUsuarios_SegundaPagina_DevuelveLosSiguientes()
+    {
+        RepositorioUsuario repositorio = CrearRepositorioConTresUsuarios(out _, out _, out Usuario carla);
+
+        IReadOnlyList<Usuario> resultado = repositorio.ObtenerPaginaDeUsuarios(null, pagina: 2, tamanoPagina: 2);
+
+        CollectionAssert.AreEqual(new List<Usuario> { carla }, resultado.ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerPaginaDeUsuarios_ConFiltro_DevuelveSoloLosQueCoinciden()
+    {
+        RepositorioUsuario repositorio = CrearRepositorioConTresUsuarios(out _, out Usuario bruno, out _);
+
+        IReadOnlyList<Usuario> resultado = repositorio.ObtenerPaginaDeUsuarios(" bruno ", pagina: 1, tamanoPagina: 2);
+
+        CollectionAssert.AreEqual(new List<Usuario> { bruno }, resultado.ToList());
+    }
+
+    // Se agregan desordenados para comprobar que la pagina sale ordenada por apellido.
+    private static RepositorioUsuario CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno,
+        out Usuario carla)
+    {
+        RepositorioUsuario repositorio = new RepositorioUsuario(new Memoria());
+        ana = CrearUsuario(dni: "11111111", nombre: "Ana", apellido: "Acosta", correo: "ana@hotmail.com");
+        bruno = CrearUsuario(dni: "22222222", nombre: "Bruno", apellido: "Bentancur", correo: "bruno@hotmail.com");
+        carla = CrearUsuario(dni: "12345672", nombre: "Carla", apellido: "Castro", correo: "carla@hotmail.com");
+        repositorio.AgregarUsuario(carla);
+        repositorio.AgregarUsuario(ana);
+        repositorio.AgregarUsuario(bruno);
+        return repositorio;
+    }
+
     private static Usuario CrearUsuario(string dni = "12345672", string nombre = "Felipe", string apellido = "Sosa",
         string correo = "felipe@hotmail.com")
     {
