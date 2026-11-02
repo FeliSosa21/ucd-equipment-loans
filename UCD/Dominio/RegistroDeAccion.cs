@@ -5,7 +5,7 @@ public class RegistroDeAccion
     public Usuario? Responsable { get; }
     public DateTime FechaHora { get; }
 
-    public RegistroDeAccion(Usuario? responsable, DateTime fechaHora)
+    private RegistroDeAccion(Usuario? responsable, DateTime fechaHora)
     {
         ValidarFechaHora(fechaHora);
 
@@ -15,12 +15,17 @@ public class RegistroDeAccion
 
     public static RegistroDeAccion DeUsuario(Usuario usuario, DateTime fechaHora)
     {
-        throw new NotImplementedException();
+        if (usuario is null)
+        {
+            throw new DominioException("El registro debe tener el usuario que hizo la accion");
+        }
+
+        return new RegistroDeAccion(usuario, fechaHora);
     }
 
     public static RegistroDeAccion DelSistema(DateTime fechaHora)
     {
-        throw new NotImplementedException();
+        return new RegistroDeAccion(null, fechaHora);
     }
 
     private static void ValidarFechaHora(DateTime fechaHora)

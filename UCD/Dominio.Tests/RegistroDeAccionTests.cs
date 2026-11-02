@@ -10,7 +10,7 @@ public sealed class RegistroDeAccionTests
     {
         Usuario responsable = CrearUsuario();
 
-        RegistroDeAccion registro = new RegistroDeAccion(responsable, FechaHora);
+        RegistroDeAccion registro = RegistroDeAccion.DeUsuario(responsable, FechaHora);
 
         Assert.AreEqual(responsable, registro.Responsable);
         Assert.AreEqual(FechaHora, registro.FechaHora);
@@ -21,7 +21,7 @@ public sealed class RegistroDeAccionTests
     {
         Usuario responsable = CrearUsuario();
 
-        Assert.ThrowsException<DominioException>(() => new RegistroDeAccion(responsable, default));
+        Assert.ThrowsException<DominioException>(() => RegistroDeAccion.DeUsuario(responsable, default));
     }
 
     [TestMethod]
