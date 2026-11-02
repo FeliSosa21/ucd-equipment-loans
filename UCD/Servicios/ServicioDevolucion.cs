@@ -52,19 +52,29 @@ public class ServicioDevolucion
         Usuario responsable = ObtenerResponsable(dniResponsable);
         Prestamo prestamo = ObtenerPrestamo(datos.IdPrestamo);
 
-        TraduccionDeErrores.Ejecutar(() =>
+        Devolucion devolucion = TraduccionDeErrores.Ejecutar(() =>
         {
             List<UnidadDevuelta> unidades = datos.Unidades
                 .Select(unidad => CrearUnidadDevuelta(unidad, prestamo))
                 .ToList();
             DateTime ahora = _reloj.GetLocalNow().DateTime;
-            Devolucion devolucion = new Devolucion(prestamo, new RegistroDeAccion(responsable, ahora), unidades);
-            devolucion.Aplicar();
-            _devoluciones.AgregarDevolucion(devolucion);
-            RegistrarMovimientos(devolucion);
+            Devolucion nueva = new Devolucion(prestamo, new RegistroDeAccion(responsable, ahora), unidades);
+            nueva.Aplicar();
+            _devoluciones.AgregarDevolucion(nueva);
+            RegistrarMovimientos(nueva);
+            return nueva;
         });
 
-        return new DevolucionRegistradaDto { RegistradaPor = responsable.NombreCompleto };
+        return new DevolucionRegistradaDto
+        {
+            RegistradaPor = responsable.NombreCompleto,
+            Unidades = devolucion.Unidades.Select(unidad => new UnidadDevueltaDto
+            {
+                IdInstitucional = unidad.Unidad.IdInstitucional,
+                Condicion = Condiciones.First(par => par.Value == unidad.Condicion).Key,
+                Observaciones = unidad.Observaciones
+            }).ToList()
+        };
     }
 
     // Registro historico (req. 10): un movimiento por unidad, con la fecha efectiva de devolucion.
