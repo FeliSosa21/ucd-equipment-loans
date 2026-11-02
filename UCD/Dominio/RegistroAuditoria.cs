@@ -4,26 +4,22 @@ public class RegistroAuditoria
 {
     private const int LargoMaximoDetalle = 200;
 
-    public DateTime FechaHora { get; private set; }
-    public Usuario? Responsable { get; private set; }
+    private readonly RegistroDeAccion _registro;
+
+    public DateTime FechaHora => _registro.FechaHora;
+    public Usuario? Responsable => _registro.Responsable;
     public AccionAuditada Accion { get; private set; }
     public string Detalle { get; private set; } = string.Empty;
 
     public RegistroAuditoria(RegistroDeAccion registro, AccionAuditada accion, string detalle)
-        : this(ValidarRegistro(registro).FechaHora, registro.Responsable, accion, detalle)
-    {
-    }
-
-    public RegistroAuditoria(DateTime fechaHora, Usuario? responsable, AccionAuditada accion, string detalle)
     {
         string detalleRecortado = detalle?.Trim() ?? string.Empty;
 
-        ValidarFechaHora(fechaHora);
+        ValidarRegistro(registro);
         ValidarAccion(accion);
         ValidarDetalle(detalleRecortado);
 
-        FechaHora = fechaHora;
-        Responsable = responsable;
+        _registro = registro;
         Accion = accion;
         Detalle = detalleRecortado;
     }
@@ -33,21 +29,11 @@ public class RegistroAuditoria
         return Responsable is null;
     }
 
-    private static RegistroDeAccion ValidarRegistro(RegistroDeAccion registro)
+    private static void ValidarRegistro(RegistroDeAccion registro)
     {
         if (registro is null)
         {
             throw new DominioException("El registro de auditoria debe tener quien y cuando");
-        }
-
-        return registro;
-    }
-
-    private static void ValidarFechaHora(DateTime fechaHora)
-    {
-        if (fechaHora == default)
-        {
-            throw new DominioException("El registro de auditoria debe tener fecha y hora");
         }
     }
 

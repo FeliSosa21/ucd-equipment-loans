@@ -11,8 +11,7 @@ public sealed class RegistroAuditoriaTests
         Usuario responsable = CrearUsuario();
 
         RegistroAuditoria registro = new RegistroAuditoria(
-            fechaHora: FechaHoraValida,
-            responsable: responsable,
+            registro: RegistroDeAccion.DeUsuario(responsable, FechaHoraValida),
             accion: AccionAuditada.SolicitudDePrestamo,
             detalle: "Prestamo de 2 Notebook");
 
@@ -26,8 +25,7 @@ public sealed class RegistroAuditoriaTests
     public void EsDelSistema_SinResponsable_DevuelveTrue()
     {
         RegistroAuditoria registro = new RegistroAuditoria(
-            fechaHora: FechaHoraValida,
-            responsable: null,
+            registro: RegistroDeAccion.DelSistema(FechaHoraValida),
             accion: AccionAuditada.ActivacionDePrestamo,
             detalle: "Prestamo activado automaticamente");
 
@@ -52,12 +50,6 @@ public sealed class RegistroAuditoriaTests
     public void Constructor_AccionInvalida_LanzaExcepcion(int accion)
     {
         Assert.ThrowsException<DominioException>(() => CrearRegistro(accion: (AccionAuditada)accion));
-    }
-
-    [TestMethod]
-    public void Constructor_FechaHoraSinAsignar_LanzaExcepcion()
-    {
-        Assert.ThrowsException<DominioException>(() => CrearRegistro(fechaHora: default(DateTime)));
     }
 
     [TestMethod]
@@ -96,21 +88,6 @@ public sealed class RegistroAuditoriaTests
     }
 
     [TestMethod]
-    public void Constructor_ConRegistroDeAccion_TomaResponsableYFechaHoraDelRegistro()
-    {
-        Usuario responsable = CrearUsuario();
-        RegistroDeAccion registroDeAccion = RegistroDeAccion.DeUsuario(responsable, FechaHoraValida);
-
-        RegistroAuditoria registro = new RegistroAuditoria(
-            registro: registroDeAccion,
-            accion: AccionAuditada.SolicitudDePrestamo,
-            detalle: "Prestamo de 2 Notebook");
-
-        Assert.AreSame(responsable, registro.Responsable);
-        Assert.AreEqual(FechaHoraValida, registro.FechaHora);
-    }
-
-    [TestMethod]
     public void Constructor_SinRegistroDeAccion_LanzaExcepcion()
     {
         Assert.ThrowsException<DominioException>(() => new RegistroAuditoria(
@@ -120,13 +97,11 @@ public sealed class RegistroAuditoriaTests
     }
 
     private static RegistroAuditoria CrearRegistro(
-        DateTime? fechaHora = null,
         AccionAuditada accion = AccionAuditada.SolicitudDePrestamo,
         string detalle = "Prestamo de 2 Notebook")
     {
         return new RegistroAuditoria(
-            fechaHora: fechaHora ?? FechaHoraValida,
-            responsable: CrearUsuario(),
+            registro: RegistroDeAccion.DeUsuario(CrearUsuario(), FechaHoraValida),
             accion: accion,
             detalle: detalle);
     }
