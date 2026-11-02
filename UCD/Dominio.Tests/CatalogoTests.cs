@@ -166,6 +166,15 @@ public sealed class CatalogoTests
         Assert.ThrowsException<DominioException>(() => catalogo.DarDeBaja());
     }
 
+    [TestMethod]
+    public void ModificarNombre_CatalogoDadoDeBaja_LanzaDominioException()
+    {
+        var catalogo = CrearCatalogo();
+        catalogo.DarDeBaja();
+
+        Assert.ThrowsException<DominioException>(() => catalogo.ModificarNombre("CatalogoNuevo"));
+    }
+
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
