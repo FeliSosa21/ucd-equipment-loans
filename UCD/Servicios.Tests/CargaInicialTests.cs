@@ -32,7 +32,7 @@ public class CargaInicialTests
         carga.CargarRoot();
         carga.CargarRoot();
 
-        Assert.AreEqual(1, repositorio.ObtenerUsuariosQueCoinciden(null, 50).Count);
+        Assert.AreEqual(1, repositorio.ContarUsuarios(null));
     }
 
     [TestMethod]

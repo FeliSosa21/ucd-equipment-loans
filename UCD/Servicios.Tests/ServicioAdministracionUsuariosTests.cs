@@ -18,7 +18,7 @@ public class ServicioAdministracionUsuariosTests
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
-        List<UsuarioResumenDto> usuarios = servicio.ListarUsuarios(DniResponsable, null);
+        List<UsuarioResumenDto> usuarios = servicio.ListarUsuarios(DniResponsable, null, 1).Elementos;
 
         UsuarioResumenDto registrado = usuarios.Single(usuario => usuario.Dni == DniValido);
         Assert.AreEqual(2, usuarios.Count);
@@ -27,11 +27,11 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
-    public void ListarPaginaDeUsuarios_PocosUsuarios_DevuelveUnaSolaPagina()
+    public void ListarUsuarios_PocosUsuarios_DevuelveUnaSolaPagina()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
-        PaginaDto<UsuarioResumenDto> pagina = servicio.ListarPaginaDeUsuarios(DniResponsable, null, 1);
+        PaginaDto<UsuarioResumenDto> pagina = servicio.ListarUsuarios(DniResponsable, null, 1);
 
         Assert.AreEqual(2, pagina.Elementos.Count);
         Assert.IsFalse(pagina.HayPaginaAnterior);
@@ -39,24 +39,24 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
-    public void ListarPaginaDeUsuarios_MasUsuariosQueUnaPagina_LaPrimeraIndicaQueHaySiguiente()
+    public void ListarUsuarios_MasUsuariosQueUnaPagina_LaPrimeraIndicaQueHaySiguiente()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
         AgregarUsuarios(repositorio, ServicioAdministracionUsuarios.TamanoPagina);
 
-        PaginaDto<UsuarioResumenDto> pagina = servicio.ListarPaginaDeUsuarios(DniResponsable, null, 1);
+        PaginaDto<UsuarioResumenDto> pagina = servicio.ListarUsuarios(DniResponsable, null, 1);
 
         Assert.AreEqual(ServicioAdministracionUsuarios.TamanoPagina, pagina.Elementos.Count);
         Assert.IsTrue(pagina.HayPaginaSiguiente);
     }
 
     [TestMethod]
-    public void ListarPaginaDeUsuarios_UltimaPagina_IndicaQueHayAnteriorYNoSiguiente()
+    public void ListarUsuarios_UltimaPagina_IndicaQueHayAnteriorYNoSiguiente()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
         AgregarUsuarios(repositorio, ServicioAdministracionUsuarios.TamanoPagina);
 
-        PaginaDto<UsuarioResumenDto> pagina = servicio.ListarPaginaDeUsuarios(DniResponsable, null, 2);
+        PaginaDto<UsuarioResumenDto> pagina = servicio.ListarUsuarios(DniResponsable, null, 2);
 
         Assert.AreEqual(2, pagina.Elementos.Count);
         Assert.IsTrue(pagina.HayPaginaAnterior);
@@ -64,12 +64,12 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
-    public void ListarPaginaDeUsuarios_PaginaMenorAUno_LanzaExcepcion()
+    public void ListarUsuarios_PaginaMenorAUno_LanzaExcepcion()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
         Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
-            servicio.ListarPaginaDeUsuarios(DniResponsable, null, 0));
+            servicio.ListarUsuarios(DniResponsable, null, 0));
     }
 
     [TestMethod]
@@ -475,7 +475,7 @@ public class ServicioAdministracionUsuariosTests
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.ListarUsuarios(DniValido, null));
+        Assert.ThrowsException<ServicioException>(() => servicio.ListarUsuarios(DniValido, null, 1));
     }
 
     [TestMethod]

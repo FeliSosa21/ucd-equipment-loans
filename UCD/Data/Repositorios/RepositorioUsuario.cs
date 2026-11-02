@@ -29,11 +29,7 @@ public class RepositorioUsuario
 
     public IReadOnlyList<Usuario> ObtenerPaginaDeUsuarios(string? filtro, int pagina, int tamanoPagina)
     {
-        string busqueda = filtro?.Trim() ?? string.Empty;
-
-        return _memoria.Usuarios
-            .Where(usuario => $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
-                .Contains(busqueda, StringComparison.OrdinalIgnoreCase))
+        return FiltrarPor(filtro)
             .OrderBy(usuario => usuario.Apellido)
             .ThenBy(usuario => usuario.Nombre)
             .ThenBy(usuario => usuario.Dni)
@@ -44,21 +40,15 @@ public class RepositorioUsuario
 
     public int ContarUsuarios(string? filtro)
     {
-        string busqueda = filtro?.Trim() ?? string.Empty;
-
-        return _memoria.Usuarios
-            .Count(usuario => $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
-                .Contains(busqueda, StringComparison.OrdinalIgnoreCase));
+        return FiltrarPor(filtro).Count();
     }
 
-    public IReadOnlyList<Usuario> ObtenerUsuariosQueCoinciden(string? texto, int maximo)
+    // Busca el texto en nombre, apellido, cedula o correo; sin texto no filtra.
+    private IEnumerable<Usuario> FiltrarPor(string? filtro)
     {
-        string busqueda = texto?.Trim() ?? string.Empty;
+        string busqueda = filtro?.Trim() ?? string.Empty;
 
-        return _memoria.Usuarios
-            .Where(usuario => $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
-                .Contains(busqueda, StringComparison.OrdinalIgnoreCase))
-            .Take(maximo)
-            .ToList();
+        return _memoria.Usuarios.Where(usuario => $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
+            .Contains(busqueda, StringComparison.OrdinalIgnoreCase));
     }
 }

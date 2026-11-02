@@ -72,47 +72,6 @@ public class RepositorioUsuarioTests
     }
 
     [TestMethod]
-    public void ObtenerUsuariosQueCoinciden_SinTexto_DevuelveLosUsuarios()
-    {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        Usuario usuario = CrearUsuario();
-        repositorio.AgregarUsuario(usuario);
-
-        IReadOnlyList<Usuario> resultado = repositorio.ObtenerUsuariosQueCoinciden(null, 50);
-
-        CollectionAssert.Contains(resultado.ToList(), usuario);
-    }
-
-    [TestMethod]
-    public void ObtenerUsuariosQueCoinciden_TextoDeUnUsuario_DevuelveSoloEse()
-    {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        Usuario felipe = CrearUsuario();
-        Usuario otro = CrearUsuario(dni: "11111111", nombre: "Ana", apellido: "Perez", correo: "ana@hotmail.com");
-        repositorio.AgregarUsuario(felipe);
-        repositorio.AgregarUsuario(otro);
-
-        IReadOnlyList<Usuario> resultado = repositorio.ObtenerUsuariosQueCoinciden(" sosa ", 50);
-
-        CollectionAssert.AreEqual(new List<Usuario> { felipe }, resultado.ToList());
-    }
-
-    [TestMethod]
-    public void ObtenerUsuariosQueCoinciden_MasUsuariosQueElMaximo_DevuelveSoloElMaximo()
-    {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        repositorio.AgregarUsuario(CrearUsuario());
-        repositorio.AgregarUsuario(CrearUsuario(dni: "11111111", nombre: "Ana", apellido: "Perez", correo: "ana@hotmail.com"));
-
-        IReadOnlyList<Usuario> resultado = repositorio.ObtenerUsuariosQueCoinciden(null, 1);
-
-        Assert.AreEqual(1, resultado.Count);
-    }
-
-    [TestMethod]
     public void ObtenerPaginaDeUsuarios_PrimeraPagina_DevuelveLosPrimerosOrdenadosPorApellido()
     {
         RepositorioUsuario repositorio = CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno, out _);

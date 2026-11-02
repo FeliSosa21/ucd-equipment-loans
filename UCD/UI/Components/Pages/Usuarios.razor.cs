@@ -8,7 +8,8 @@ namespace UI.Components.Pages;
 
 public partial class Usuarios
 {
-    private List<UsuarioResumenDto> _usuarios = new List<UsuarioResumenDto>();
+    private PaginaDto<UsuarioResumenDto> _pagina = new PaginaDto<UsuarioResumenDto>();
+    private int _numeroPagina = 1;
     private List<string> _tipos = new List<string>();
     private string _busqueda = string.Empty;
     private string? _error;
@@ -27,7 +28,7 @@ public partial class Usuarios
     // Accion delicada que espera que el administrador la confirme antes de ejecutarse.
     private sealed record Confirmacion(string Pregunta, string TextoBoton, Action Accion);
 
-    private bool HayMasResultados => _usuarios.Count == ServicioAdministracionUsuarios.MaximoResultadosBusqueda;
+    private List<UsuarioResumenDto> UsuariosDeLaPagina => _pagina.Elementos;
 
     private bool AltaCompleta =>
         !string.IsNullOrWhiteSpace(_nuevo.Dni) &&
@@ -245,14 +246,27 @@ public partial class Usuarios
     {
         try
         {
-            _usuarios = ServicioAdministracion.ListarUsuarios(DniUsuario, _busqueda);
+            _pagina = ServicioAdministracion.ListarUsuarios(DniUsuario, _busqueda, _numeroPagina);
         }
         catch (ServicioException ex)
         {
-            _usuarios = new List<UsuarioResumenDto>();
+            _pagina = new PaginaDto<UsuarioResumenDto>();
             _error = ex.Message;
         }
 
         _recargas++;
+    }
+
+    // Una busqueda nueva arranca desde la primera pagina.
+    private void Buscar()
+    {
+        _numeroPagina = 1;
+        Recargar();
+    }
+
+    private void IrAPagina(int numero)
+    {
+        _numeroPagina = numero;
+        Recargar();
     }
 }
