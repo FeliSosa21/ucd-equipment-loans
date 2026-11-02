@@ -32,6 +32,7 @@ public class ServicioHistorico
             Tipo = movimiento.Tipo.ToString(),
             Solicitante = movimiento.Solicitante.NombreCompleto,
             Evaluador = movimiento.Evaluador?.NombreCompleto,
+            Responsable = movimiento.Responsable?.NombreCompleto ?? "Sistema",
             Unidad = movimiento.Unidad?.IdInstitucional
         };
     }
