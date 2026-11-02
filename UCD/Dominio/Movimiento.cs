@@ -8,6 +8,18 @@ public class Movimiento
     public Usuario Solicitante { get; }
     public Usuario? Evaluador { get; }
     public UnidadFisica? Unidad { get; }
+    public Prestamo? Prestamo { get; private init; }
+    public Usuario? Responsable { get; private init; }
+
+    public static Movimiento DeSolicitud(Prestamo prestamo, RegistroDeAccion registro)
+    {
+        return new Movimiento(registro.FechaHora, TipoMovimiento.Solicitud, prestamo.Solicitante,
+            prestamo.Evaluador, unidad: null)
+        {
+            Prestamo = prestamo,
+            Responsable = registro.Responsable
+        };
+    }
 
     public Movimiento(DateTime fechaHora, TipoMovimiento tipo, Usuario solicitante, Usuario? evaluador,
         UnidadFisica? unidad)
