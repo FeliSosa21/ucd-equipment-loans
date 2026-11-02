@@ -14,6 +14,7 @@ public class ServicioAdministracionUsuarios
     public const string ContrasenaPredeterminada = "Ucd12345";
     public static readonly string NombreTipoAdministrador = TipoUsuario.Administrador.Nombre;
     public const int MaximoResultadosBusqueda = 50;
+    public const int TamanoPagina = 50;
     private const string MensajeSoloAdministrador = "Solo un administrador activo puede gestionar usuarios";
 
     private readonly RepositorioUsuario _repositorio;
@@ -48,6 +49,11 @@ public class ServicioAdministracionUsuarios
     {
         ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         return _repositorio.ObtenerUsuariosQueCoinciden(busqueda, MaximoResultadosBusqueda).Select(CrearResumen).ToList();
+    }
+
+    public PaginaDto<UsuarioResumenDto> ListarPaginaDeUsuarios(string dniResponsable, string? busqueda, int pagina)
+    {
+        return new PaginaDto<UsuarioResumenDto>();
     }
 
     public List<string> NombresDeTipos()

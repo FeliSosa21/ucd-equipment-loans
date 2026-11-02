@@ -27,6 +27,52 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void ListarPaginaDeUsuarios_PocosUsuarios_DevuelveUnaSolaPagina()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        PaginaDto<UsuarioResumenDto> pagina = servicio.ListarPaginaDeUsuarios(DniResponsable, null, 1);
+
+        Assert.AreEqual(2, pagina.Elementos.Count);
+        Assert.IsFalse(pagina.HayPaginaAnterior);
+        Assert.IsFalse(pagina.HayPaginaSiguiente);
+    }
+
+    [TestMethod]
+    public void ListarPaginaDeUsuarios_MasUsuariosQueUnaPagina_LaPrimeraIndicaQueHaySiguiente()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
+        AgregarUsuarios(repositorio, ServicioAdministracionUsuarios.TamanoPagina);
+
+        PaginaDto<UsuarioResumenDto> pagina = servicio.ListarPaginaDeUsuarios(DniResponsable, null, 1);
+
+        Assert.AreEqual(ServicioAdministracionUsuarios.TamanoPagina, pagina.Elementos.Count);
+        Assert.IsTrue(pagina.HayPaginaSiguiente);
+    }
+
+    [TestMethod]
+    public void ListarPaginaDeUsuarios_UltimaPagina_IndicaQueHayAnteriorYNoSiguiente()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
+        AgregarUsuarios(repositorio, ServicioAdministracionUsuarios.TamanoPagina);
+
+        PaginaDto<UsuarioResumenDto> pagina = servicio.ListarPaginaDeUsuarios(DniResponsable, null, 2);
+
+        Assert.AreEqual(2, pagina.Elementos.Count);
+        Assert.IsTrue(pagina.HayPaginaAnterior);
+        Assert.IsFalse(pagina.HayPaginaSiguiente);
+    }
+
+    [TestMethod]
+    public void ListarPaginaDeUsuarios_PaginaMenorAUno_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
+            servicio.ListarPaginaDeUsuarios(DniResponsable, null, 0));
+    }
+
+    [TestMethod]
     public void NombresDeTipos_ConNombreTipoAdministrador_LoIncluyeEntreLosAsignables()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
@@ -536,6 +582,24 @@ public class ServicioAdministracionUsuariosTests
         {
             Dni = DniNuevo, Nombre = "Ana", Apellido = "Perez", Correo = CorreoNuevo
         };
+    }
+
+    private static void AgregarUsuarios(RepositorioUsuario repositorio, int cantidad)
+    {
+        for (int numero = 0; numero < cantidad; numero++)
+        {
+            repositorio.AgregarUsuario(new Usuario(CedulaValida(3000000 + numero), "Relleno",
+                $"Apellido{numero:D3}", $"relleno{numero}@ucd.edu.uy", "Relleno2026"));
+        }
+    }
+
+    // Arma una cedula con su digito verificador (datos de prueba: 7 digitos + verificador).
+    private static string CedulaValida(int sinVerificador)
+    {
+        int[] pesos = { 2, 9, 8, 7, 6, 3, 4 };
+        string digitos = sinVerificador.ToString("D7");
+        int suma = digitos.Select((digito, i) => (digito - '0') * pesos[i]).Sum();
+        return digitos + (10 - suma % 10) % 10;
     }
 
     private static ServicioAdministracionUsuarios CrearServicioConAdministrador(out RepositorioUsuario repositorio)

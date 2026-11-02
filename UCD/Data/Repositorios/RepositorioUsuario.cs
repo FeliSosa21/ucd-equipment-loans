@@ -42,6 +42,11 @@ public class RepositorioUsuario
             .ToList();
     }
 
+    public int ContarUsuarios(string? filtro)
+    {
+        return 0;
+    }
+
     public IReadOnlyList<Usuario> ObtenerUsuariosQueCoinciden(string? texto, int maximo)
     {
         string busqueda = texto?.Trim() ?? string.Empty;

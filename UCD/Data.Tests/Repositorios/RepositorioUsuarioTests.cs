@@ -142,6 +142,15 @@ public class RepositorioUsuarioTests
         CollectionAssert.AreEqual(new List<Usuario> { bruno }, resultado.ToList());
     }
 
+    [TestMethod]
+    public void ContarUsuarios_ConFiltro_CuentaSoloLosQueCoinciden()
+    {
+        RepositorioUsuario repositorio = CrearRepositorioConTresUsuarios(out _, out _, out _);
+
+        Assert.AreEqual(3, repositorio.ContarUsuarios(null));
+        Assert.AreEqual(1, repositorio.ContarUsuarios("bruno"));
+    }
+
     // Se agregan desordenados para comprobar que la pagina sale ordenada por apellido.
     private static RepositorioUsuario CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno,
         out Usuario carla)
