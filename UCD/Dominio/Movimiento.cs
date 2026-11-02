@@ -13,6 +13,8 @@ public class Movimiento
 
     public static Movimiento DeSolicitud(Prestamo prestamo, RegistroDeAccion registro)
     {
+        ValidarPrestamoYRegistro(prestamo, registro);
+
         return new Movimiento(registro.FechaHora, TipoMovimiento.Solicitud, prestamo.Solicitante,
             prestamo.Evaluador, unidad: null)
         {
@@ -74,6 +76,19 @@ public class Movimiento
         Solicitante = solicitante;
         Evaluador = evaluador;
         Unidad = unidad;
+    }
+
+    private static void ValidarPrestamoYRegistro(Prestamo prestamo, RegistroDeAccion registro)
+    {
+        if (prestamo is null)
+        {
+            throw new DominioException("El movimiento debe tener un prestamo");
+        }
+
+        if (registro is null)
+        {
+            throw new DominioException("El movimiento debe tener quien y cuando");
+        }
     }
 
     private static void ValidarTipo(TipoMovimiento tipo)
