@@ -8,6 +8,7 @@ namespace Data.Tests.Repositorios;
 public sealed class RepositorioUsuarioSqlTests
 {
     private SqlContext _contexto = null!;
+    private RepositorioUsuarioSql _repositorio = null!;
 
     [TestInitialize]
     public void Inicializar()
@@ -15,6 +16,7 @@ public sealed class RepositorioUsuarioSqlTests
         DbContextOptions<SqlContext> opciones = new DbContextOptionsBuilder<SqlContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
         _contexto = new SqlContext(opciones);
+        _repositorio = new RepositorioUsuarioSql(_contexto);
     }
 
     [TestCleanup]
@@ -26,32 +28,28 @@ public sealed class RepositorioUsuarioSqlTests
     [TestMethod]
     public void AgregarUsuario_UsuarioValido_QuedaGuardado()
     {
-        RepositorioUsuarioSql repositorio = new RepositorioUsuarioSql(_contexto);
         Usuario usuario = CrearUsuario();
 
-        repositorio.AgregarUsuario(usuario);
+        _repositorio.AgregarUsuario(usuario);
 
         Assert.AreEqual(1, _contexto.Usuarios.Count());
     }
 
     [TestMethod]
-    public void ObtenerUsuariosPorDni_UsuarioAgregado_LoDevuelve()
+    public void ObtenerUsuarioPorDni_UsuarioAgregado_LoDevuelve()
     {
-        RepositorioUsuarioSql repositorio = new RepositorioUsuarioSql(_contexto);
         Usuario usuario = CrearUsuario();
-        repositorio.AgregarUsuario(usuario);
-        
-        Usuario? resultado = repositorio.ObtenerUsuarioPorDni(usuario.Dni);
-        
+        _repositorio.AgregarUsuario(usuario);
+
+        Usuario? resultado = _repositorio.ObtenerUsuarioPorDni(usuario.Dni);
+
         Assert.AreSame(usuario, resultado);
     }
-    
+
     [TestMethod]
     public void ObtenerUsuarioPorDni_DniInexistente_DevuelveNull()
     {
-        RepositorioUsuarioSql repositorio = new RepositorioUsuarioSql(_contexto);
-
-        Usuario? resultado = repositorio.ObtenerUsuarioPorDni("54670643");
+        Usuario? resultado = _repositorio.ObtenerUsuarioPorDni("54670643");
 
         Assert.IsNull(resultado);
     }
@@ -59,14 +57,12 @@ public sealed class RepositorioUsuarioSqlTests
     [TestMethod]
     public void ObtenerUsuarioPorCorreo_UsuarioAgregado_LoDevuelve()
     {
-        RepositorioUsuarioSql repositorio = new RepositorioUsuarioSql(_contexto);
         Usuario usuario = CrearUsuario();
-        repositorio.AgregarUsuario(usuario);
-        
-        Usuario? resultado = repositorio.ObtenerUsuarioPorCorreo(usuario.Correo);
-        
+        _repositorio.AgregarUsuario(usuario);
+
+        Usuario? resultado = _repositorio.ObtenerUsuarioPorCorreo(usuario.Correo);
+
         Assert.AreSame(usuario, resultado);
-        
     }
 
     private static Usuario CrearUsuario()
