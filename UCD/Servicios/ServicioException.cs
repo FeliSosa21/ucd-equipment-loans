@@ -20,4 +20,9 @@ public class ServicioException : Exception
     {
         Campo = campo;
     }
+
+    public ServicioException(string? campo, string mensaje, Exception interna) : base(mensaje, interna)
+    {
+        Campo = campo;
+    }
 }
