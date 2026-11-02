@@ -65,16 +65,7 @@ public class ServicioDevolucion
             return nueva;
         });
 
-        return new DevolucionRegistradaDto
-        {
-            RegistradaPor = responsable.NombreCompleto,
-            Unidades = devolucion.Unidades.Select(unidad => new UnidadDevueltaDto
-            {
-                IdInstitucional = unidad.Unidad.IdInstitucional,
-                Condicion = Condiciones.First(par => par.Value == unidad.Condicion).Key,
-                Observaciones = unidad.Observaciones
-            }).ToList()
-        };
+        return CrearDevolucionRegistradaDto(devolucion);
     }
 
     // Registro historico (req. 10): un movimiento por unidad, con la fecha efectiva de devolucion.
@@ -129,6 +120,25 @@ public class ServicioDevolucion
         }
 
         return new UnidadDevuelta(unidad, condicion, datos.Observaciones);
+    }
+
+    private static DevolucionRegistradaDto CrearDevolucionRegistradaDto(Devolucion devolucion)
+    {
+        return new DevolucionRegistradaDto
+        {
+            RegistradaPor = devolucion.RegistradaPor.NombreCompleto,
+            Unidades = devolucion.Unidades.Select(CrearUnidadDevueltaDto).ToList()
+        };
+    }
+
+    private static UnidadDevueltaDto CrearUnidadDevueltaDto(UnidadDevuelta unidadDevuelta)
+    {
+        return new UnidadDevueltaDto
+        {
+            IdInstitucional = unidadDevuelta.Unidad.IdInstitucional,
+            Condicion = Condiciones.First(par => par.Value == unidadDevuelta.Condicion).Key,
+            Observaciones = unidadDevuelta.Observaciones
+        };
     }
 
     private static PrestamoActivoDto CrearPrestamoActivoDto(Prestamo prestamo)
