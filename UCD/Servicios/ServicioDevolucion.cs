@@ -64,7 +64,7 @@ public class ServicioDevolucion
             RegistrarMovimientos(devolucion);
         });
 
-        return new DevolucionRegistradaDto();
+        return new DevolucionRegistradaDto { RegistradaPor = responsable.NombreCompleto };
     }
 
     // Registro historico (req. 10): un movimiento por unidad, con la fecha efectiva de devolucion.
