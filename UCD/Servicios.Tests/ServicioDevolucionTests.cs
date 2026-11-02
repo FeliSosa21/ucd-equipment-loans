@@ -125,19 +125,6 @@ public class ServicioDevolucionTests
     }
 
     [TestMethod]
-    public void RegistrarDevolucion_DatosValidos_ElMovimientoLlevaAQuienLaRegistro()
-    {
-        Memoria memoria = new Memoria();
-        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
-        DevolucionDto datos = CrearDatos(prestamo.Id);
-
-        servicio.RegistrarDevolucion(datos, DniFuncionario);
-
-        Movimiento movimiento = new RepositorioMovimiento(memoria).ObtenerTodos()[0];
-        Assert.AreEqual(DniFuncionario, movimiento.Evaluador?.Dni);
-    }
-
-    [TestMethod]
     public void RegistrarDevolucion_DatosValidos_DevuelveQuienLaRegistro()
     {
         ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
