@@ -64,6 +64,11 @@ public class Catalogo
 
     public void AgregarTipo(TipoEquipamiento tipo)
     {
+        if (!Activo)
+        {
+            throw new DominioException("No se puede modificar un catalogo dado de baja");
+        }
+
         if (tipo is null)
         {
             throw new DominioException("El tipo no puede ser nulo");
