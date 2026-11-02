@@ -1,81 +1,51 @@
 namespace Dominio;
 
-// Registro historico del req. 10: un movimiento por unidad para prestamo, aprobacion y devolucion; solicitud y rechazo, sin unidad. La aprobacion lleva evaluador. No se modifica ni se elimina.
 public class Movimiento
 {
-    public DateTime FechaHora { get; }
+    private readonly RegistroDeAccion _registro;
+
+    public Prestamo Prestamo { get; }
     public TipoMovimiento Tipo { get; }
-    public Usuario Solicitante { get; }
     public Usuario? Evaluador { get; }
-    public UnidadFisica? Unidad { get; }
-    public Prestamo? Prestamo { get; private init; }
-    public Usuario? Responsable { get; private init; }
+    public UnidadFisica? Unidad { get; private init; }
+    public DateTime FechaHora => _registro.FechaHora;
+    public Usuario? Responsable => _registro.Responsable;
+    public Usuario Solicitante => Prestamo.Solicitante;
+
+    private Movimiento(Prestamo prestamo, TipoMovimiento tipo, RegistroDeAccion registro)
+    {
+        ValidarPrestamoYRegistro(prestamo, registro);
+        ValidarEvaluador(tipo, prestamo.Evaluador);
+
+        Prestamo = prestamo;
+        Tipo = tipo;
+        Evaluador = prestamo.Evaluador;
+        _registro = registro;
+    }
 
     public static Movimiento DeSolicitud(Prestamo prestamo, RegistroDeAccion registro)
     {
-        ValidarPrestamoYRegistro(prestamo, registro);
-
-        return new Movimiento(registro.FechaHora, TipoMovimiento.Solicitud, prestamo.Solicitante,
-            prestamo.Evaluador, unidad: null)
-        {
-            Prestamo = prestamo,
-            Responsable = registro.Responsable
-        };
+        return new Movimiento(prestamo, TipoMovimiento.Solicitud, registro);
     }
 
     public static Movimiento DeRechazo(Prestamo prestamo, RegistroDeAccion registro)
     {
-        return new Movimiento(registro.FechaHora, TipoMovimiento.Rechazo, prestamo.Solicitante,
-            prestamo.Evaluador, unidad: null)
-        {
-            Prestamo = prestamo,
-            Responsable = registro.Responsable
-        };
+        return new Movimiento(prestamo, TipoMovimiento.Rechazo, registro);
     }
 
     public static Movimiento DeAprobacion(Prestamo prestamo, RegistroDeAccion registro, UnidadFisica unidad)
     {
-        return new Movimiento(registro.FechaHora, TipoMovimiento.Aprobacion, prestamo.Solicitante,
-            prestamo.Evaluador, unidad)
-        {
-            Prestamo = prestamo,
-            Responsable = registro.Responsable
-        };
+        return new Movimiento(prestamo, TipoMovimiento.Aprobacion, registro) { Unidad = ValidarUnidad(unidad) };
     }
 
     public static Movimiento DePrestamo(Prestamo prestamo, RegistroDeAccion registro, UnidadFisica unidad)
     {
-        return new Movimiento(registro.FechaHora, TipoMovimiento.Prestamo, prestamo.Solicitante,
-            prestamo.Evaluador, unidad)
-        {
-            Prestamo = prestamo,
-            Responsable = registro.Responsable
-        };
+        return new Movimiento(prestamo, TipoMovimiento.Prestamo, registro) { Unidad = ValidarUnidad(unidad) };
     }
 
     public static Movimiento DeDevolucion(Prestamo prestamo, RegistroDeAccion registro, UnidadFisica unidad)
     {
-        return new Movimiento(registro.FechaHora, TipoMovimiento.Devolucion, prestamo.Solicitante,
-            prestamo.Evaluador, unidad)
-        {
-            Prestamo = prestamo,
-            Responsable = registro.Responsable
-        };
-    }
-
-    public Movimiento(DateTime fechaHora, TipoMovimiento tipo, Usuario solicitante, Usuario? evaluador,
-        UnidadFisica? unidad)
-    {
-        ValidarTipo(tipo);
-        ValidarSolicitante(solicitante);
-        ValidarUnidad(tipo, unidad);
-        ValidarEvaluador(tipo, evaluador);
-
-        FechaHora = fechaHora;
-        Tipo = tipo;
-        Solicitante = solicitante;
-        Evaluador = evaluador;
-        Unidad = unidad;
+        return new Movimiento(prestamo, TipoMovimiento.Devolucion, registro) { Unidad = ValidarUnidad(unidad) };
     }
 
     private static void ValidarPrestamoYRegistro(Prestamo prestamo, RegistroDeAccion registro)
@@ -91,43 +61,21 @@ public class Movimiento
         }
     }
 
-    private static void ValidarTipo(TipoMovimiento tipo)
-    {
-        if (!Enum.IsDefined(tipo))
-        {
-            throw new DominioException("El movimiento debe tener un tipo valido");
-        }
-    }
-
-    private static void ValidarSolicitante(Usuario solicitante)
-    {
-        if (solicitante is null)
-        {
-            throw new DominioException("El movimiento debe tener un solicitante");
-        }
-    }
-
-    private static void ValidarUnidad(TipoMovimiento tipo, UnidadFisica? unidad)
-    {
-        bool requiereUnidad = tipo == TipoMovimiento.Prestamo || tipo == TipoMovimiento.Devolucion
-            || tipo == TipoMovimiento.Aprobacion;
-
-        if (requiereUnidad && unidad is null)
-        {
-            throw new DominioException("El movimiento debe tener una unidad");
-        }
-
-        if (!requiereUnidad && unidad is not null)
-        {
-            throw new DominioException("La solicitud y el rechazo no llevan unidad");
-        }
-    }
-
     private static void ValidarEvaluador(TipoMovimiento tipo, Usuario? evaluador)
     {
         if (tipo == TipoMovimiento.Aprobacion && evaluador is null)
         {
             throw new DominioException("La aprobacion debe tener un evaluador");
         }
+    }
+
+    private static UnidadFisica ValidarUnidad(UnidadFisica unidad)
+    {
+        if (unidad is null)
+        {
+            throw new DominioException("El movimiento debe tener una unidad");
+        }
+
+        return unidad;
     }
 }

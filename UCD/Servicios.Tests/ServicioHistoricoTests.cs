@@ -24,12 +24,12 @@ public sealed class ServicioHistoricoTests
     public void ListarMovimientos_MovimientoDePrestamo_DevuelveSusDatos()
     {
         Memoria memoria = new Memoria();
-        new RepositorioMovimiento(memoria).AgregarMovimiento(new Movimiento(
-            fechaHora: FechaFija,
-            tipo: TipoMovimiento.Prestamo,
-            solicitante: CrearSolicitante(),
-            evaluador: CrearEvaluador(),
-            unidad: CrearUnidad(idInstitucional: "EQP-0001")));
+        Usuario evaluador = CrearEvaluador();
+        UnidadFisica unidad = CrearUnidad(idInstitucional: "EQP-0001");
+        Prestamo prestamo = CrearPrestamo(requiereAprobacion: true, unidad);
+        prestamo.Aprobar(evaluador, new List<UnidadFisica> { unidad });
+        new RepositorioMovimiento(memoria).AgregarMovimiento(Movimiento.DePrestamo(prestamo,
+            RegistroDeAccion.DeUsuario(evaluador, FechaFija), unidad));
         ServicioHistorico servicio = CrearServicio(memoria);
 
         MovimientoDto movimiento = servicio.ListarMovimientos().Single();
@@ -90,22 +90,27 @@ public sealed class ServicioHistoricoTests
 
     private static void RegistrarSolicitud(Memoria memoria, DateTime fechaHora)
     {
-        new RepositorioMovimiento(memoria).AgregarMovimiento(new Movimiento(
-            fechaHora: fechaHora,
-            tipo: TipoMovimiento.Solicitud,
-            solicitante: CrearSolicitante(),
-            evaluador: null,
-            unidad: null));
+        Prestamo prestamo = CrearPrestamo(requiereAprobacion: true, CrearUnidad(idInstitucional: "EQP-0001"));
+        new RepositorioMovimiento(memoria).AgregarMovimiento(Movimiento.DeSolicitud(prestamo,
+            RegistroDeAccion.DeUsuario(prestamo.Solicitante, fechaHora)));
     }
 
     private static void RegistrarPrestamo(Memoria memoria, DateTime fechaHora)
     {
-        new RepositorioMovimiento(memoria).AgregarMovimiento(new Movimiento(
-            fechaHora: fechaHora,
-            tipo: TipoMovimiento.Prestamo,
-            solicitante: CrearSolicitante(),
-            evaluador: null,
-            unidad: CrearUnidad(idInstitucional: "EQP-0001")));
+        UnidadFisica unidad = CrearUnidad(idInstitucional: "EQP-0001");
+        Prestamo prestamo = CrearPrestamo(requiereAprobacion: false, unidad);
+        prestamo.Activar(new List<UnidadFisica> { unidad });
+        new RepositorioMovimiento(memoria).AgregarMovimiento(Movimiento.DePrestamo(prestamo,
+            RegistroDeAccion.DelSistema(fechaHora), unidad));
+    }
+
+    private static Prestamo CrearPrestamo(bool requiereAprobacion, UnidadFisica unidad)
+    {
+        TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",
+            duracionMaxPrestamo: 5, requiereAprobacion: requiereAprobacion, categoria: Categoria.Audiovisual);
+        tipo.AgregarUnidad(unidad);
+
+        return new Prestamo(CrearSolicitante(), tipo, cantidadSolicitada: 1, fechaHoraPrestamo: FechaFija);
     }
 
     private static Usuario CrearSolicitante()
