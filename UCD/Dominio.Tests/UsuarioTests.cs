@@ -561,6 +561,14 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void NombreCompleto_DatosValidos_DevuelveNombreYApellido()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.AreEqual($"{NombreValido} {ApellidoValido}", usuario.NombreCompleto);
+    }
+
+    [TestMethod]
     public void TienePermiso_UsuarioSinPermisos_DevuelveFalse()
     {
         Usuario usuario = CrearUsuario();

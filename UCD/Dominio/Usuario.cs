@@ -18,6 +18,7 @@ public class Usuario
     public EstadoUsuario Estado { get; private set; }
     public bool DebeCambiarContrasena { get; private set; }
     public TipoUsuario Tipo { get; private set; }
+    public string NombreCompleto => $"{Nombre} {Apellido}";
 
     public Usuario(string dni, string nombre, string apellido, string correo, string contrasena)
     {

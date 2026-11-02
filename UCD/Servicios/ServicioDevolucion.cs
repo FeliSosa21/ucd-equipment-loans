@@ -124,7 +124,7 @@ public class ServicioDevolucion
         return new PrestamoActivoDto
         {
             Id = prestamo.Id,
-            Solicitante = NombresDeUsuario.Completo(prestamo.Solicitante),
+            Solicitante = prestamo.Solicitante.NombreCompleto,
             TipoEquipamiento = prestamo.TipoEquipamiento.Nombre,
             FechaHoraPrestamo = prestamo.FechaHoraPrestamo,
             Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList()
