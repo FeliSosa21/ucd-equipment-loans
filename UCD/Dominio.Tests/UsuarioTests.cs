@@ -623,6 +623,23 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void EstaPendienteDeActivacion_UsuarioRecienRegistrado_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.IsTrue(usuario.EstaPendienteDeActivacion());
+    }
+
+    [TestMethod]
+    public void EstaPendienteDeActivacion_ConTipoAsignado_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante);
+
+        Assert.IsFalse(usuario.EstaPendienteDeActivacion());
+    }
+
+    [TestMethod]
     public void NombreCompleto_DatosValidos_DevuelveNombreYApellido()
     {
         Usuario usuario = CrearUsuario();

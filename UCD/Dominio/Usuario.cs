@@ -52,6 +52,11 @@ public class Usuario
         return Tipo.TienePermiso(permiso);
     }
 
+    public bool EstaPendienteDeActivacion()
+    {
+        return false;
+    }
+
     public void ModificarDatos(string nombre, string apellido, string correo)
     {
         nombre = Recortar(nombre);
