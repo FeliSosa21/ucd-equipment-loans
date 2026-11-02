@@ -71,7 +71,7 @@ public class ServicioDevolucion
         foreach (UnidadDevuelta unidadDevuelta in devolucion.Unidades)
         {
             _movimientos.AgregarMovimiento(new Movimiento(devolucion.FechaHoraDevolucion,
-                TipoMovimiento.Devolucion, devolucion.Prestamo.Solicitante, devolucion.Prestamo.Evaluador,
+                TipoMovimiento.Devolucion, devolucion.Prestamo.Solicitante, devolucion.RegistradaPor,
                 unidadDevuelta.Unidad));
         }
     }
