@@ -38,6 +38,10 @@ public class ErroresDeFormulario
 
     public bool Tiene(string campo) => _porCampo.ContainsKey(campo);
 
+    // Blazor escribe un bool true como atributo vacio (aria-invalid=""), que los lectores de pantalla toman como
+    // falso: por eso se devuelve el texto "true", o null para que no se escriba el atributo.
+    public string? AriaInvalid(string campo) => Tiene(campo) ? "true" : null;
+
     public string? De(string campo) => _porCampo.GetValueOrDefault(campo);
 
     // Id del mensaje para aria-describedby; null si el campo no tiene error.

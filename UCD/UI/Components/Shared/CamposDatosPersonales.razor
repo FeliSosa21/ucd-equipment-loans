@@ -4,14 +4,14 @@
     <div>
         <label class="lbl" for="@IdNombre">Nombre</label>
         <input id="@IdNombre" class="field" autocomplete="given-name"
-               aria-invalid="@Errores.Tiene(CampoNombre)" aria-describedby="@Errores.IdDelError(CampoNombre, IdNombre)"
+               aria-invalid="@Errores.AriaInvalid(CampoNombre)" aria-describedby="@Errores.IdDelError(CampoNombre, IdNombre)"
                value="@Nombre" @oninput="evento => Cambiar(CampoNombre, NombreChanged, evento)" />
         <ErrorDeCampo Errores="Errores" Campo="@CampoNombre" IdDelCampo="@IdNombre" />
     </div>
     <div>
         <label class="lbl" for="@IdApellido">Apellido</label>
         <input id="@IdApellido" class="field" autocomplete="family-name"
-               aria-invalid="@Errores.Tiene(CampoApellido)" aria-describedby="@Errores.IdDelError(CampoApellido, IdApellido)"
+               aria-invalid="@Errores.AriaInvalid(CampoApellido)" aria-describedby="@Errores.IdDelError(CampoApellido, IdApellido)"
                value="@Apellido" @oninput="evento => Cambiar(CampoApellido, ApellidoChanged, evento)" />
         <ErrorDeCampo Errores="Errores" Campo="@CampoApellido" IdDelCampo="@IdApellido" />
     </div>
@@ -19,7 +19,7 @@
 <div>
     <label class="lbl" for="@IdCorreo">Correo electrónico</label>
     <input id="@IdCorreo" type="email" class="field" autocomplete="email"
-           aria-invalid="@Errores.Tiene(CampoCorreo)" aria-describedby="@Errores.IdDelError(CampoCorreo, IdCorreo)"
+           aria-invalid="@Errores.AriaInvalid(CampoCorreo)" aria-describedby="@Errores.IdDelError(CampoCorreo, IdCorreo)"
            value="@Correo" @oninput="evento => Cambiar(CampoCorreo, CorreoChanged, evento)" />
     <ErrorDeCampo Errores="Errores" Campo="@CampoCorreo" IdDelCampo="@IdCorreo" />
 </div>

@@ -19,21 +19,21 @@
         <div>
             <label class="lbl" for="actual">Contraseña actual</label>
             <input id="actual" type="@TipoContrasena" class="field"
-                   aria-invalid="@_errores.Tiene(CampoActual)" aria-describedby="@_errores.IdDelError(CampoActual, "actual")" autocomplete="current-password"
+                   aria-invalid="@_errores.AriaInvalid(CampoActual)" aria-describedby="@_errores.IdDelError(CampoActual, "actual")" autocomplete="current-password"
                    @bind="_actual" @bind:event="oninput" @bind:after="() => _errores.QuitarDe(CampoActual)" />
             <ErrorDeCampo Errores="_errores" Campo="@CampoActual" IdDelCampo="actual" />
         </div>
         <div>
             <label class="lbl" for="nueva">Nueva contraseña</label>
             <input id="nueva" type="@TipoContrasena" class="field"
-                   aria-invalid="@_errores.Tiene(CampoNueva)" aria-describedby="@_errores.IdDelError(CampoNueva, "nueva")" autocomplete="new-password"
+                   aria-invalid="@_errores.AriaInvalid(CampoNueva)" aria-describedby="@_errores.IdDelError(CampoNueva, "nueva")" autocomplete="new-password"
                    @bind="_nueva" @bind:event="oninput" @bind:after="() => _errores.QuitarDe(CampoNueva)" />
             <ErrorDeCampo Errores="_errores" Campo="@CampoNueva" IdDelCampo="nueva" />
         </div>
         <div>
             <label class="lbl" for="repetir">Repetir nueva contraseña</label>
             <input id="repetir" type="@TipoContrasena" class="field"
-                   aria-invalid="@_errores.Tiene(CampoRepetir)" aria-describedby="@_errores.IdDelError(CampoRepetir, "repetir")" autocomplete="new-password"
+                   aria-invalid="@_errores.AriaInvalid(CampoRepetir)" aria-describedby="@_errores.IdDelError(CampoRepetir, "repetir")" autocomplete="new-password"
                    @bind="_repetir" @bind:event="oninput" @bind:after="() => _errores.QuitarDe(CampoRepetir)" />
             <ErrorDeCampo Errores="_errores" Campo="@CampoRepetir" IdDelCampo="repetir" />
         </div>

@@ -26,7 +26,7 @@
                 <div>
                     <label class="lbl" for="alta-ci">Cédula de identidad</label>
                     <input id="alta-ci" class="field mono" inputmode="numeric" spellcheck="false"
-                           aria-invalid="@_erroresFormulario.Tiene(CampoDni)"
+                           aria-invalid="@_erroresFormulario.AriaInvalid(CampoDni)"
                            aria-describedby="@_erroresFormulario.IdDelError(CampoDni, "alta-ci")"
                            @bind="_nuevo.Dni" @bind:event="oninput" @bind:after="() => _erroresFormulario.QuitarDe(CampoDni)" />
                     <ErrorDeCampo Errores="_erroresFormulario" Campo="@CampoDni" IdDelCampo="alta-ci" />

@@ -18,7 +18,7 @@
         <div>
             <label class="lbl" for="ci">Cédula de identidad</label>
             <input id="ci" class="field mono" inputmode="numeric" autocomplete="off" spellcheck="false"
-                   aria-invalid="@_errores.Tiene(CampoDni)" aria-describedby="@_errores.IdDelError(CampoDni, "ci")"
+                   aria-invalid="@_errores.AriaInvalid(CampoDni)" aria-describedby="@_errores.IdDelError(CampoDni, "ci")"
                    placeholder="12345672" @bind="_ci" @bind:event="oninput" @bind:after="() => _errores.QuitarDe(CampoDni)" />
             <ErrorDeCampo Errores="_errores" Campo="@CampoDni" IdDelCampo="ci" />
             <div class="hint">Sin puntos ni guion, incluyendo el dígito verificador.</div>
@@ -28,7 +28,7 @@
             <div>
                 <label class="lbl" for="nombre">Nombre</label>
                 <input id="nombre" class="field" autocomplete="given-name"
-                       aria-invalid="@_errores.Tiene(CampoNombre)" aria-describedby="@_errores.IdDelError(CampoNombre, "nombre")"
+                       aria-invalid="@_errores.AriaInvalid(CampoNombre)" aria-describedby="@_errores.IdDelError(CampoNombre, "nombre")"
                        @bind="_nombre" @bind:event="oninput" @bind:after="() => _errores.QuitarDe(CampoNombre)" />
                 <ErrorDeCampo Errores="_errores" Campo="@CampoNombre" IdDelCampo="nombre" />
                 <div class="hint">Entre 2 y 50 caracteres.</div>
@@ -36,7 +36,7 @@
             <div>
                 <label class="lbl" for="apellido">Apellido</label>
                 <input id="apellido" class="field" autocomplete="family-name"
-                       aria-invalid="@_errores.Tiene(CampoApellido)" aria-describedby="@_errores.IdDelError(CampoApellido, "apellido")"
+                       aria-invalid="@_errores.AriaInvalid(CampoApellido)" aria-describedby="@_errores.IdDelError(CampoApellido, "apellido")"
                        @bind="_apellido" @bind:event="oninput" @bind:after="() => _errores.QuitarDe(CampoApellido)" />
                 <ErrorDeCampo Errores="_errores" Campo="@CampoApellido" IdDelCampo="apellido" />
                 <div class="hint">Entre 2 y 50 caracteres.</div>
@@ -46,7 +46,7 @@
         <div>
             <label class="lbl" for="correo">Correo electrónico</label>
             <input id="correo" type="email" class="field" autocomplete="email" spellcheck="false"
-                   aria-invalid="@_errores.Tiene(CampoCorreo)" aria-describedby="@_errores.IdDelError(CampoCorreo, "correo")"
+                   aria-invalid="@_errores.AriaInvalid(CampoCorreo)" aria-describedby="@_errores.IdDelError(CampoCorreo, "correo")"
                    placeholder="nombre@ejemplo.com" @bind="_correo" @bind:event="oninput" @bind:after="() => _errores.QuitarDe(CampoCorreo)" />
             <ErrorDeCampo Errores="_errores" Campo="@CampoCorreo" IdDelCampo="correo" />
         </div>
@@ -55,14 +55,14 @@
             <div>
                 <label class="lbl" for="contrasena">Contraseña</label>
                 <input id="contrasena" type="@TipoContrasena" class="field" autocomplete="new-password"
-                       aria-invalid="@_errores.Tiene(CampoContrasena)" aria-describedby="@_errores.IdDelError(CampoContrasena, "contrasena")"
+                       aria-invalid="@_errores.AriaInvalid(CampoContrasena)" aria-describedby="@_errores.IdDelError(CampoContrasena, "contrasena")"
                        @bind="_contrasena" @bind:event="oninput" @bind:after="() => _errores.QuitarDe(CampoContrasena)" />
                 <ErrorDeCampo Errores="_errores" Campo="@CampoContrasena" IdDelCampo="contrasena" />
             </div>
             <div>
                 <label class="lbl" for="repetir">Repetir contraseña</label>
                 <input id="repetir" type="@TipoContrasena" class="field" autocomplete="new-password"
-                       aria-invalid="@_errores.Tiene(CampoRepetir)" aria-describedby="@_errores.IdDelError(CampoRepetir, "repetir")"
+                       aria-invalid="@_errores.AriaInvalid(CampoRepetir)" aria-describedby="@_errores.IdDelError(CampoRepetir, "repetir")"
                        @bind="_repetirContrasena" @bind:event="oninput" @bind:after="() => _errores.QuitarDe(CampoRepetir)" />
                 <ErrorDeCampo Errores="_errores" Campo="@CampoRepetir" IdDelCampo="repetir" />
             </div>
