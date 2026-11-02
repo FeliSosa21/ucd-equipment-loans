@@ -57,14 +57,7 @@ public class ServicioSesion
             throw new ServicioException("La contrasena actual es incorrecta");
         }
 
-        try
-        {
-            usuario.CambiarContrasena(nueva);
-        }
-        catch (DominioException ex)
-        {
-            throw new ServicioException(ex.Message, ex);
-        }
+        TraduccionDeErrores.Ejecutar(() => usuario.CambiarContrasena(nueva));
     }
 
     private static UsuarioSesionDto CrearSesion(Usuario usuario)

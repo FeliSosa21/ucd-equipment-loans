@@ -52,7 +52,7 @@ public class ServicioDevolucion
         Usuario responsable = ObtenerResponsable(dniResponsable);
         Prestamo prestamo = ObtenerPrestamo(datos.IdPrestamo);
 
-        try
+        TraduccionDeErrores.Ejecutar(() =>
         {
             List<UnidadDevuelta> unidades = datos.Unidades
                 .Select(unidad => CrearUnidadDevuelta(unidad, prestamo))
@@ -62,11 +62,7 @@ public class ServicioDevolucion
             devolucion.Aplicar();
             _devoluciones.AgregarDevolucion(devolucion);
             RegistrarMovimientos(devolucion);
-        }
-        catch (DominioException ex)
-        {
-            throw new ServicioException(ex.Message, ex);
-        }
+        });
     }
 
     // Registro historico (req. 10): un movimiento por unidad, con la fecha efectiva de devolucion.

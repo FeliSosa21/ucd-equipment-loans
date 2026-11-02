@@ -88,14 +88,7 @@ public class ServicioAdministracionUsuarios
             throw new ServicioException("El correo ya existe");
         }
 
-        try
-        {
-            usuario.ModificarDatos(nombre, apellido, correo);
-        }
-        catch (DominioException ex)
-        {
-            throw new ServicioException(ex.Message, ex);
-        }
+        TraduccionDeErrores.Ejecutar(() => usuario.ModificarDatos(nombre, apellido, correo));
     }
 
     public void Desactivar(string dni, string dniResponsable)

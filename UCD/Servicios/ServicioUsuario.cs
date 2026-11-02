@@ -32,18 +32,11 @@ public class ServicioUsuario
 
     private static Usuario CrearUsuario(UsuarioDto dto)
     {
-        try
-        {
-            return new Usuario(
-                dni: dto.Dni,
-                nombre: dto.Nombre,
-                apellido: dto.Apellido,
-                correo: dto.Correo,
-                contrasena: dto.Contrasena);
-        }
-        catch (DominioException ex)
-        {
-            throw new ServicioException(ex.Message);
-        }
+        return TraduccionDeErrores.Ejecutar(() => new Usuario(
+            dni: dto.Dni,
+            nombre: dto.Nombre,
+            apellido: dto.Apellido,
+            correo: dto.Correo,
+            contrasena: dto.Contrasena));
     }
 }
