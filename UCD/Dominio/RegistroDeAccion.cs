@@ -7,5 +7,7 @@ public class RegistroDeAccion
 
     public RegistroDeAccion(Usuario? responsable, DateTime fechaHora)
     {
+        Responsable = responsable;
+        FechaHora = fechaHora;
     }
 }
