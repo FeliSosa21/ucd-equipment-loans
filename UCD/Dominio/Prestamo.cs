@@ -55,19 +55,11 @@ public class Prestamo
         Evaluador = evaluador;
     }
 
-    public void Realizar()
-    {
-        ValidarQueEsteAprobado();
-
-        Estado = EstadoPrestamo.Activo;
-    }
-
     public void Rechazar(Usuario evaluador, string motivo)
     {
         ValidarQueEsteSolicitado();
         ValidarEvaluador(evaluador);
         ValidarMotivo(motivo);
-        LiberarUnidades();
 
         Estado = EstadoPrestamo.Rechazado;
         Evaluador = evaluador;
@@ -102,7 +94,6 @@ public class Prestamo
     public bool EstaVigente()
     {
         return Estado == EstadoPrestamo.Solicitado
-               || Estado == EstadoPrestamo.Aprobado
                || Estado == EstadoPrestamo.Activo;
     }
 
@@ -221,38 +212,12 @@ public class Prestamo
         _unidadesAsignadas.AddRange(unidadesFisicas);
     }
 
-    private void ValidarQueEsteAprobado()
-    {
-        if (Estado != EstadoPrestamo.Aprobado)
-        {
-            throw new DominioException("El prestamo debe estar aprobado");
-        }
-    }
-
-    private void ValidarQueSePuedaRechazar()
-    {
-        if (Estado != EstadoPrestamo.Solicitado && Estado != EstadoPrestamo.Aprobado)
-        {
-            throw new DominioException("Solo se puede rechazar un prestamo solicitado o aprobado");
-        }
-    }
-
     private static void ValidarMotivo(string motivo)
     {
         if (string.IsNullOrWhiteSpace(motivo))
         {
             throw new DominioException("El motivo de rechazo no puede ser vacio");
         }
-    }
-
-    private void LiberarUnidades()
-    {
-        foreach (UnidadFisica unidadFisica in _unidadesAsignadas)
-        {
-            unidadFisica.Disponible();
-        }
-
-        _unidadesAsignadas.Clear();
     }
 
     private void ValidarQueSePuedaEntregar()

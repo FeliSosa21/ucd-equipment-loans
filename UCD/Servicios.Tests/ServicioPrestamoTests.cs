@@ -701,7 +701,7 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void Aprobar_PrestamoYaAprobado_LanzaExcepcion()
+    public void Aprobar_PrestamoYaActivo_LanzaExcepcion()
     {
         Memoria memoria = new Memoria();
         ServicioPrestamo servicio = CrearServicio(memoria);
