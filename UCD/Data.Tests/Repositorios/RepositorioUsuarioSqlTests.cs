@@ -34,6 +34,18 @@ public sealed class RepositorioUsuarioSqlTests
         Assert.AreEqual(1, _contexto.Usuarios.Count());
     }
 
+    [TestMethod]
+    public void ObtenerUsuariosPorDni_UsuarioAgregado_LoDevuelve()
+    {
+        RepositorioUsuarioSql repositorio = new RepositorioUsuarioSql(_contexto);
+        Usuario usuario = CrearUsuario();
+        repositorio.AgregarUsuario(usuario);
+        
+        Usuario? resultado = repositorio.ObtenerUsuarioPorDni(usuario.Dni);
+        
+        Assert.AreSame(usuario, resultado);
+    }
+
     private static Usuario CrearUsuario()
     {
         return new Usuario(dni: "47153923",
