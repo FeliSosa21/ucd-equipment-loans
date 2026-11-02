@@ -75,6 +75,18 @@ public class ServicioUsuarioTests
     }
 
     [TestMethod]
+    public void Registrar_DniInvalido_ElErrorIndicaElCampoDni()
+    {
+        Memoria memoria = new Memoria();
+        ServicioUsuario servicio = new ServicioUsuario(new RepositorioUsuario(memoria));
+        UsuarioDto dto = CrearDto(dni: "12345678");
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(() => servicio.Registrar(dto));
+
+        Assert.AreEqual("Dni", excepcion.Campo);
+    }
+
+    [TestMethod]
     public void Registrar_DatosValidos_GuardaLosDatosIngresados()
     {
         Memoria memoria = new Memoria();
