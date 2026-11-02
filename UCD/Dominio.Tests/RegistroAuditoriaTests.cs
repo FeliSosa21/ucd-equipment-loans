@@ -110,6 +110,15 @@ public sealed class RegistroAuditoriaTests
         Assert.AreEqual(FechaHoraValida, registro.FechaHora);
     }
 
+    [TestMethod]
+    public void Constructor_SinRegistroDeAccion_LanzaExcepcion()
+    {
+        Assert.ThrowsException<DominioException>(() => new RegistroAuditoria(
+            registro: null!,
+            accion: AccionAuditada.SolicitudDePrestamo,
+            detalle: "Prestamo de 2 Notebook"));
+    }
+
     private static RegistroAuditoria CrearRegistro(
         DateTime? fechaHora = null,
         AccionAuditada accion = AccionAuditada.SolicitudDePrestamo,
