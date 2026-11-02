@@ -65,6 +65,17 @@ public sealed class RepositorioUsuarioSqlTests
         Assert.AreSame(usuario, resultado);
     }
 
+    [TestMethod]
+    public void ObtenerUsuarioPorCorreo_CorreoConOtrasMayusculas_LoDevuelve()
+    {
+        Usuario usuario = CrearUsuario();
+        _repositorio.AgregarUsuario(usuario);
+        
+        Usuario? resultado = _repositorio.ObtenerUsuarioPorCorreo(usuario.Correo);
+        
+        Assert.AreSame(usuario, resultado);
+    }
+
     private static Usuario CrearUsuario()
     {
         return new Usuario(dni: "47153923",
