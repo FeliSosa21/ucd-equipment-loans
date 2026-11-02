@@ -29,6 +29,11 @@ public class Catalogo
         Nombre = nombre;
     }
 
+    public void DarDeBaja()
+    {
+        Activo = false;
+    }
+
     private static void ValidarNombre(string nombre)
     {
         if (string.IsNullOrWhiteSpace(nombre))
