@@ -86,7 +86,7 @@ public class ServicioAdministracionUsuarios
 
         if (duenoDelCorreo != null && duenoDelCorreo != usuario)
         {
-            throw new ServicioException("El correo ya existe");
+            throw new ServicioException(nameof(Usuario.Correo), "El correo ya existe");
         }
 
         TraduccionDeErrores.Ejecutar(() => usuario.ModificarDatos(nombre, apellido, correo));

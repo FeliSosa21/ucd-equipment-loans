@@ -19,12 +19,12 @@ public class ServicioUsuario
 
         if (_repositorio.ObtenerUsuarioPorDni(usuario.Dni) != null)
         {
-            throw new ServicioException("El DNI ya existe");
+            throw new ServicioException(nameof(Usuario.Dni), "El DNI ya existe");
         }
 
         if (_repositorio.ObtenerUsuarioPorCorreo(usuario.Correo) != null)
         {
-            throw new ServicioException("El correo ya existe");
+            throw new ServicioException(nameof(Usuario.Correo), "El correo ya existe");
         }
 
         _repositorio.AgregarUsuario(usuario);

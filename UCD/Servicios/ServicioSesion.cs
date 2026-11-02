@@ -6,6 +6,8 @@ namespace Servicios;
 
 public class ServicioSesion
 {
+    public const string CampoContrasenaActual = "ContrasenaActual";
+
     private readonly RepositorioUsuario _repositorio;
 
     public ServicioSesion(RepositorioUsuario repositorio)
@@ -54,7 +56,7 @@ public class ServicioSesion
 
         if (!usuario.ContrasenaEsCorrecta(actual))
         {
-            throw new ServicioException("La contrasena actual es incorrecta");
+            throw new ServicioException(CampoContrasenaActual, "La contrasena actual es incorrecta");
         }
 
         TraduccionDeErrores.Ejecutar(() => usuario.CambiarContrasena(nueva));
