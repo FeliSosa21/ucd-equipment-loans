@@ -59,7 +59,7 @@
     private string _actual = string.Empty;
     private string _nueva = string.Empty;
     private string _repetir = string.Empty;
-    private readonly ErroresDeFormulario _errores = new ErroresDeFormulario();
+    private readonly ErroresDeFormulario _errores = new ErroresDeFormulario(CampoActual, CampoNueva, CampoRepetir);
 
     private const string CampoActual = ServicioSesion.CampoContrasenaActual;
     private const string CampoNueva = nameof(DTOs.UsuarioDto.Contrasena);

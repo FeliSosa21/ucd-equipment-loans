@@ -2,23 +2,32 @@ using Servicios;
 
 namespace UI.Presentacion;
 
-// Errores de un formulario: los que vienen con campo se muestran junto a ese campo; el resto, en un aviso general.
+// Errores de un formulario: los de un campo que el formulario muestra van junto a ese campo; el resto
+// (sin campo, o de un campo que este formulario no tiene) va al aviso general para que no se pierda.
 public class ErroresDeFormulario
 {
     private readonly Dictionary<string, string> _porCampo = new Dictionary<string, string>();
+    private readonly HashSet<string> _camposDelFormulario;
+
+    public ErroresDeFormulario(params string[] camposDelFormulario)
+    {
+        _camposDelFormulario = new HashSet<string>(camposDelFormulario);
+    }
 
     public string? General { get; private set; }
 
     public void Agregar(ServicioException excepcion)
     {
-        if (excepcion.Campo is null)
+        if (!Muestra(excepcion.Campo))
         {
             General = excepcion.Message;
             return;
         }
 
-        _porCampo[excepcion.Campo] = excepcion.Message;
+        _porCampo[excepcion.Campo!] = excepcion.Message;
     }
+
+    public bool Muestra(string? campo) => campo is not null && _camposDelFormulario.Contains(campo);
 
     public void AgregarEnCampo(string campo, string mensaje)
     {

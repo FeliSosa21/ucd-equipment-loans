@@ -37,7 +37,8 @@
     private string _nombre = string.Empty;
     private string _apellido = string.Empty;
     private string _correo = string.Empty;
-    private readonly ErroresDeFormulario _errores = new ErroresDeFormulario();
+    private readonly ErroresDeFormulario _errores = new ErroresDeFormulario(
+        nameof(UsuarioDto.Nombre), nameof(UsuarioDto.Apellido), nameof(UsuarioDto.Correo));
     private bool _exito;
 
     private bool FormularioCompleto => CamposDatosPersonales.EstanCompletos(_nombre, _apellido, _correo);

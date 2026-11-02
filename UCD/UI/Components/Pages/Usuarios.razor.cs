@@ -12,7 +12,8 @@ public partial class Usuarios
     private List<string> _tipos = new List<string>();
     private string _busqueda = string.Empty;
     private string? _error;
-    private readonly ErroresDeFormulario _erroresFormulario = new ErroresDeFormulario();
+    private readonly ErroresDeFormulario _erroresFormulario = new ErroresDeFormulario(
+        CampoDni, nameof(UsuarioDto.Nombre), nameof(UsuarioDto.Apellido), nameof(UsuarioDto.Correo));
 
     private const string CampoDni = nameof(UsuarioDto.Dni);
     private string? _exito;
@@ -222,7 +223,7 @@ public partial class Usuarios
         {
             accion();
         }
-        catch (ServicioException ex) when (erroresDelFormulario is not null && ex.Campo is not null)
+        catch (ServicioException ex) when (erroresDelFormulario is not null && erroresDelFormulario.Muestra(ex.Campo))
         {
             erroresDelFormulario.Agregar(ex);
             exito = false;

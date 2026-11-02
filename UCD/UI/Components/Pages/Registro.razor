@@ -95,7 +95,8 @@
     private string _correo = string.Empty;
     private string _contrasena = string.Empty;
     private string _repetirContrasena = string.Empty;
-    private readonly ErroresDeFormulario _errores = new ErroresDeFormulario();
+    private readonly ErroresDeFormulario _errores = new ErroresDeFormulario(
+        CampoDni, CampoNombre, CampoApellido, CampoCorreo, CampoContrasena, CampoRepetir);
 
     private const string CampoDni = nameof(UsuarioDto.Dni);
     private const string CampoNombre = nameof(UsuarioDto.Nombre);
