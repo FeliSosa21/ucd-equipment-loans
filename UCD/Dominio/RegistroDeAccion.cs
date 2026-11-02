@@ -13,6 +13,16 @@ public class RegistroDeAccion
         FechaHora = fechaHora;
     }
 
+    public static RegistroDeAccion DeUsuario(Usuario usuario, DateTime fechaHora)
+    {
+        throw new NotImplementedException();
+    }
+
+    public static RegistroDeAccion DelSistema(DateTime fechaHora)
+    {
+        throw new NotImplementedException();
+    }
+
     private static void ValidarFechaHora(DateTime fechaHora)
     {
         if (fechaHora == default)

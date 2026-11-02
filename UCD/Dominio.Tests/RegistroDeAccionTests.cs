@@ -24,6 +24,31 @@ public sealed class RegistroDeAccionTests
         Assert.ThrowsException<DominioException>(() => new RegistroDeAccion(responsable, default));
     }
 
+    [TestMethod]
+    public void DeUsuario_UsuarioValido_LoGuardaComoResponsable()
+    {
+        Usuario usuario = CrearUsuario();
+
+        RegistroDeAccion registro = RegistroDeAccion.DeUsuario(usuario, FechaHora);
+
+        Assert.AreSame(usuario, registro.Responsable);
+    }
+
+    [TestMethod]
+    public void DeUsuario_UsuarioNulo_LanzaExcepcion()
+    {
+        Assert.ThrowsException<DominioException>(() => RegistroDeAccion.DeUsuario(null!, FechaHora));
+    }
+
+    [TestMethod]
+    public void DelSistema_FechaValida_NoTieneResponsable()
+    {
+        RegistroDeAccion registro = RegistroDeAccion.DelSistema(FechaHora);
+
+        Assert.IsNull(registro.Responsable);
+        Assert.AreEqual(FechaHora, registro.FechaHora);
+    }
+
     private static Usuario CrearUsuario()
     {
         return new Usuario("12345672", "Felipe", "Sosa", "felipe@hotmail.com", "VivaLaOrt2026");
