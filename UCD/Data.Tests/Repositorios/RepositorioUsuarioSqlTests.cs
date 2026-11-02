@@ -45,6 +45,16 @@ public sealed class RepositorioUsuarioSqlTests
         
         Assert.AreSame(usuario, resultado);
     }
+    
+    [TestMethod]
+    public void ObtenerUsuarioPorDni_DniInexistente_DevuelveNull()
+    {
+        RepositorioUsuarioSql repositorio = new RepositorioUsuarioSql(_contexto);
+
+        Usuario? resultado = repositorio.ObtenerUsuarioPorDni("54670643");
+
+        Assert.IsNull(resultado);
+    }
 
     private static Usuario CrearUsuario()
     {
