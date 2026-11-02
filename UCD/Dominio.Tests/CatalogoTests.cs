@@ -157,6 +157,15 @@ public sealed class CatalogoTests
         Assert.IsFalse(catalogo.Activo);
     }
 
+    [TestMethod]
+    public void DarDeBaja_CatalogoYaDadoDeBaja_LanzaDominioException()
+    {
+        var catalogo = CrearCatalogo();
+        catalogo.DarDeBaja();
+
+        Assert.ThrowsException<DominioException>(() => catalogo.DarDeBaja());
+    }
+
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
