@@ -23,6 +23,9 @@ public class Usuario
     public Usuario(string dni, string nombre, string apellido, string correo, string contrasena)
     {
         dni = NormalizarDni(dni);
+        nombre = Recortar(nombre);
+        apellido = Recortar(apellido);
+        correo = Recortar(correo);
         ValidarDni(dni);
         ValidarNombreOApellido(nombre, nameof(Nombre));
         ValidarNombreOApellido(apellido, nameof(Apellido));
@@ -51,6 +54,9 @@ public class Usuario
 
     public void ModificarDatos(string nombre, string apellido, string correo)
     {
+        nombre = Recortar(nombre);
+        apellido = Recortar(apellido);
+        correo = Recortar(correo);
         ValidarNombreOApellido(nombre, nameof(Nombre));
         ValidarNombreOApellido(apellido, nameof(Apellido));
         ValidarCorreo(correo);
@@ -91,6 +97,12 @@ public class Usuario
 
         Contrasena = nueva;
         DebeCambiarContrasena = false;
+    }
+
+    // Los espacios de alrededor no cuentan para el largo ni se guardan.
+    private static string Recortar(string? texto)
+    {
+        return texto?.Trim() ?? string.Empty;
     }
 
     private static void ValidarNombreOApellido(string valor, string campo)
