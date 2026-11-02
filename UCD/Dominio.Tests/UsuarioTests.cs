@@ -601,6 +601,28 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void Constructor_DatosConEspaciosAlrededor_LosGuardaRecortados()
+    {
+        Usuario usuario = CrearUsuario(nombre: "  Felipe ", apellido: " Sosa  ", correo: " " + CorreoValido + " ");
+
+        Assert.AreEqual(NombreValido, usuario.Nombre);
+        Assert.AreEqual(ApellidoValido, usuario.Apellido);
+        Assert.AreEqual(CorreoValido, usuario.Correo);
+    }
+
+    [TestMethod]
+    public void ModificarDatos_DatosConEspaciosAlrededor_LosGuardaRecortados()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.ModificarDatos("  Pedro ", " Suarez  ", " pedro@hotmail.com ");
+
+        Assert.AreEqual("Pedro", usuario.Nombre);
+        Assert.AreEqual("Suarez", usuario.Apellido);
+        Assert.AreEqual("pedro@hotmail.com", usuario.Correo);
+    }
+
+    [TestMethod]
     public void NombreCompleto_DatosValidos_DevuelveNombreYApellido()
     {
         Usuario usuario = CrearUsuario();
