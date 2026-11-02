@@ -6,5 +6,6 @@ public enum AccionAuditada
     SolicitudDePrestamo,
     ActivacionDePrestamo,
     RechazoDePrestamo,
-    DevolucionDePrestamo
+    DevolucionDePrestamo,
+    IntentoDeAprobacion
 }
