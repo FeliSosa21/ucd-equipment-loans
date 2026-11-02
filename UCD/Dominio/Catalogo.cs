@@ -25,23 +25,23 @@ public class Catalogo
 
     public void ModificarNombre(string nombre)
     {
-        if (!Activo)
-        {
-            throw new DominioException("No se puede modificar un catalogo dado de baja");
-        }
-
+        ValidarQueEsteActivo();
         ValidarNombre(nombre);
         Nombre = nombre;
     }
 
     public void DarDeBaja()
     {
+        ValidarQueEsteActivo();
+        Activo = false;
+    }
+
+    private void ValidarQueEsteActivo()
+    {
         if (!Activo)
         {
-            throw new DominioException("El catalogo ya fue dado de baja");
+            throw new DominioException("El catalogo esta dado de baja");
         }
-
-        Activo = false;
     }
 
     private static void ValidarNombre(string nombre)
@@ -64,10 +64,7 @@ public class Catalogo
 
     public void AgregarTipo(TipoEquipamiento tipo)
     {
-        if (!Activo)
-        {
-            throw new DominioException("No se puede modificar un catalogo dado de baja");
-        }
+        ValidarQueEsteActivo();
 
         if (tipo is null)
         {
