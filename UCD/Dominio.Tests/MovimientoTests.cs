@@ -131,6 +131,20 @@ public sealed class MovimientoTests
         Assert.IsNull(movimiento.Unidad);
     }
 
+    [TestMethod]
+    public void DeRechazo_DelSistema_QuedaSinResponsableYSinUnidad()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        Movimiento movimiento = Movimiento.DeRechazo(prestamo, RegistroDeAccion.DelSistema(FechaFija));
+
+        Assert.AreEqual(TipoMovimiento.Rechazo, movimiento.Tipo);
+        Assert.AreSame(prestamo, movimiento.Prestamo);
+        Assert.IsNull(movimiento.Responsable);
+        Assert.AreEqual(FechaFija, movimiento.FechaHora);
+        Assert.IsNull(movimiento.Unidad);
+    }
+
     private static Prestamo CrearPrestamo()
     {
         TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",
