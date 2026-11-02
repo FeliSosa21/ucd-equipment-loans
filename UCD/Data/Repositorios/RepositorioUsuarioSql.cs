@@ -24,7 +24,8 @@ public class RepositorioUsuarioSql
 
     public Usuario? ObtenerUsuarioPorCorreo(string correo)
     {
-        return _contexto.Usuarios.FirstOrDefault(usuario => usuario.Correo == correo);
+        string buscado = correo.ToLower();
+        return _contexto.Usuarios.FirstOrDefault(usuario => usuario.Correo.ToLower() == buscado);
     }
 
 }
