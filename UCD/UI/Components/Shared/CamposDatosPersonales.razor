@@ -1,20 +1,27 @@
+@using DTOs
 @* Nombre, apellido y correo: los mismos campos en el alta y la edicion de usuarios y en "Mis datos" *@
 <div class="form-row">
     <div>
-        <label class="lbl" for="@($"{Prefijo}nombre")">Nombre</label>
-        <input id="@($"{Prefijo}nombre")" class="field" autocomplete="given-name"
-               value="@Nombre" @oninput="evento => NombreChanged.InvokeAsync(Texto(evento))" />
+        <label class="lbl" for="@IdNombre">Nombre</label>
+        <input id="@IdNombre" class="field" autocomplete="given-name"
+               aria-invalid="@Errores.Tiene(CampoNombre)" aria-describedby="@Errores.IdDelError(CampoNombre, IdNombre)"
+               value="@Nombre" @oninput="evento => Cambiar(CampoNombre, NombreChanged, evento)" />
+        <ErrorDeCampo Errores="Errores" Campo="@CampoNombre" IdDelCampo="@IdNombre" />
     </div>
     <div>
-        <label class="lbl" for="@($"{Prefijo}apellido")">Apellido</label>
-        <input id="@($"{Prefijo}apellido")" class="field" autocomplete="family-name"
-               value="@Apellido" @oninput="evento => ApellidoChanged.InvokeAsync(Texto(evento))" />
+        <label class="lbl" for="@IdApellido">Apellido</label>
+        <input id="@IdApellido" class="field" autocomplete="family-name"
+               aria-invalid="@Errores.Tiene(CampoApellido)" aria-describedby="@Errores.IdDelError(CampoApellido, IdApellido)"
+               value="@Apellido" @oninput="evento => Cambiar(CampoApellido, ApellidoChanged, evento)" />
+        <ErrorDeCampo Errores="Errores" Campo="@CampoApellido" IdDelCampo="@IdApellido" />
     </div>
 </div>
 <div>
-    <label class="lbl" for="@($"{Prefijo}correo")">Correo electrónico</label>
-    <input id="@($"{Prefijo}correo")" type="email" class="field" autocomplete="email"
-           value="@Correo" @oninput="evento => CorreoChanged.InvokeAsync(Texto(evento))" />
+    <label class="lbl" for="@IdCorreo">Correo electrónico</label>
+    <input id="@IdCorreo" type="email" class="field" autocomplete="email"
+           aria-invalid="@Errores.Tiene(CampoCorreo)" aria-describedby="@Errores.IdDelError(CampoCorreo, IdCorreo)"
+           value="@Correo" @oninput="evento => Cambiar(CampoCorreo, CorreoChanged, evento)" />
+    <ErrorDeCampo Errores="Errores" Campo="@CampoCorreo" IdDelCampo="@IdCorreo" />
 </div>
 
 @code {
@@ -32,6 +39,23 @@
     public static bool EstanCompletos(string nombre, string apellido, string correo) =>
         !string.IsNullOrWhiteSpace(nombre) && !string.IsNullOrWhiteSpace(apellido) &&
         !string.IsNullOrWhiteSpace(correo);
+
+    // Errores del formulario que contiene estos campos; muestra los suyos y los borra cuando se editan.
+    [Parameter] public ErroresDeFormulario Errores { get; set; } = new ErroresDeFormulario();
+
+    private const string CampoNombre = nameof(UsuarioDto.Nombre);
+    private const string CampoApellido = nameof(UsuarioDto.Apellido);
+    private const string CampoCorreo = nameof(UsuarioDto.Correo);
+
+    private string IdNombre => $"{Prefijo}nombre";
+    private string IdApellido => $"{Prefijo}apellido";
+    private string IdCorreo => $"{Prefijo}correo";
+
+    private Task Cambiar(string campo, EventCallback<string> cambio, ChangeEventArgs evento)
+    {
+        Errores.QuitarDe(campo);
+        return cambio.InvokeAsync(Texto(evento));
+    }
 
     private static string Texto(ChangeEventArgs evento) => evento.Value?.ToString() ?? string.Empty;
 }

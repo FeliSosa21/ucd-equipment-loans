@@ -17,11 +17,11 @@
             <label class="lbl" for="ci">Cédula de identidad</label>
             <input id="ci" class="field mono" value="@_dni" disabled />
         </div>
-        <CamposDatosPersonales @bind-Nombre="_nombre" @bind-Apellido="_apellido" @bind-Correo="_correo" />
+        <CamposDatosPersonales @bind-Nombre="_nombre" @bind-Apellido="_apellido" @bind-Correo="_correo" Errores="_errores" />
 
-        @if (_error is not null)
+        @if (_errores.General is not null)
         {
-            <div class="alert alert-error" role="alert">@_error</div>
+            <div class="alert alert-error" role="alert">@_errores.General</div>
         }
         @if (_exito)
         {
@@ -37,7 +37,7 @@
     private string _nombre = string.Empty;
     private string _apellido = string.Empty;
     private string _correo = string.Empty;
-    private string? _error;
+    private readonly ErroresDeFormulario _errores = new ErroresDeFormulario();
     private bool _exito;
 
     private bool FormularioCompleto => CamposDatosPersonales.EstanCompletos(_nombre, _apellido, _correo);
@@ -59,7 +59,7 @@
         }
         catch (ServicioException ex)
         {
-            _error = ex.Message;
+            _errores.Agregar(ex);
         }
     }
 
@@ -71,7 +71,7 @@
             return;
         }
 
-        _error = null;
+        _errores.Limpiar();
         _exito = false;
 
         try
@@ -86,7 +86,7 @@
         }
         catch (ServicioException ex)
         {
-            _error = ex.Message;
+            _errores.Agregar(ex);
         }
     }
 }

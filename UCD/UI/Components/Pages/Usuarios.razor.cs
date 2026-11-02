@@ -1,6 +1,7 @@
 using DTOs;
 using Servicios;
 using UI.Components.Shared;
+using UI.Presentacion;
 using UI.Sesion;
 
 namespace UI.Components.Pages;
@@ -11,6 +12,9 @@ public partial class Usuarios
     private List<string> _tipos = new List<string>();
     private string _busqueda = string.Empty;
     private string? _error;
+    private readonly ErroresDeFormulario _erroresFormulario = new ErroresDeFormulario();
+
+    private const string CampoDni = nameof(UsuarioDto.Dni);
     private string? _exito;
     private bool _mostrarAlta;
     private UsuarioDto _nuevo = new UsuarioDto();
@@ -72,7 +76,7 @@ public partial class Usuarios
             Correo = _nuevo.Correo.Trim()
         };
 
-        if (Ejecutar(() => ServicioAdministracion.CrearUsuario(datos, _tipoNuevo, DniUsuario)))
+        if (Ejecutar(() => ServicioAdministracion.CrearUsuario(datos, _tipoNuevo, DniUsuario), _erroresFormulario))
         {
             _exito = $"Se creó la cuenta de {datos.Nombre} {datos.Apellido}.";
             _nuevo = new UsuarioDto();
@@ -104,7 +108,7 @@ public partial class Usuarios
         editado.Apellido = editado.Apellido.Trim();
         editado.Correo = editado.Correo.Trim();
 
-        if (Ejecutar(() => ServicioAdministracion.ModificarDatos(editado, DniUsuario)))
+        if (Ejecutar(() => ServicioAdministracion.ModificarDatos(editado, DniUsuario), _erroresFormulario))
         {
             if (EsElMismoDni(editado.Dni))
             {
@@ -205,16 +209,23 @@ public partial class Usuarios
     {
         _error = null;
         _exito = null;
+        _erroresFormulario.Limpiar();
     }
 
-    // Devuelve si la accion se pudo hacer; si no, deja el mensaje del servicio en _error.
-    private bool Ejecutar(Action accion)
+    // Devuelve si la accion se pudo hacer. Si no, el error de un campo va junto a ese campo del formulario
+    // abierto, y el resto queda en _error.
+    private bool Ejecutar(Action accion, ErroresDeFormulario? erroresDelFormulario = null)
     {
         LimpiarMensajes();
         bool exito = true;
         try
         {
             accion();
+        }
+        catch (ServicioException ex) when (erroresDelFormulario is not null && ex.Campo is not null)
+        {
+            erroresDelFormulario.Agregar(ex);
+            exito = false;
         }
         catch (ServicioException ex)
         {

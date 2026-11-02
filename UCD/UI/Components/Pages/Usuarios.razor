@@ -26,7 +26,10 @@
                 <div>
                     <label class="lbl" for="alta-ci">Cédula de identidad</label>
                     <input id="alta-ci" class="field mono" inputmode="numeric" spellcheck="false"
-                           @bind="_nuevo.Dni" @bind:event="oninput" />
+                           aria-invalid="@_erroresFormulario.Tiene(CampoDni)"
+                           aria-describedby="@_erroresFormulario.IdDelError(CampoDni, "alta-ci")"
+                           @bind="_nuevo.Dni" @bind:event="oninput" @bind:after="() => _erroresFormulario.QuitarDe(CampoDni)" />
+                    <ErrorDeCampo Errores="_erroresFormulario" Campo="@CampoDni" IdDelCampo="alta-ci" />
                 </div>
                 <div>
                     <label class="lbl" for="alta-tipo">Tipo de usuario</label>
@@ -39,7 +42,7 @@
                 </div>
             </div>
             <CamposDatosPersonales Prefijo="alta-" @bind-Nombre="_nuevo.Nombre" @bind-Apellido="_nuevo.Apellido"
-                                   @bind-Correo="_nuevo.Correo" />
+                                   @bind-Correo="_nuevo.Correo" Errores="_erroresFormulario" />
             <div class="hint">
                 La cuenta se crea con la contraseña <strong class="mono">@ServicioAdministracionUsuarios.ContrasenaPredeterminada</strong>
                 y el usuario debe cambiarla en su primer ingreso.
@@ -58,7 +61,8 @@
         <form class="form-grid" @onsubmit="GuardarEdicion" novalidate>
             <div class="lbl">Editar datos de la cédula <span class="mono">@_editando.Dni</span></div>
             <CamposDatosPersonales Prefijo="edicion-" @bind-Nombre="_editando.Nombre"
-                                   @bind-Apellido="_editando.Apellido" @bind-Correo="_editando.Correo" />
+                                   @bind-Apellido="_editando.Apellido" @bind-Correo="_editando.Correo"
+                                   Errores="_erroresFormulario" />
             <div class="acciones">
                 <button type="submit" class="btn btn-primary" disabled="@(!EdicionCompleta)">Guardar cambios</button>
                 <button type="button" class="btn btn-ghost" @onclick="CancelarEdicion">Cancelar</button>
