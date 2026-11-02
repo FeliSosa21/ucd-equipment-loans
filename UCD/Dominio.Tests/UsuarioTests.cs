@@ -561,6 +561,46 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void Constructor_DniInvalido_ElErrorIndicaElCampoDni()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: "1"));
+
+        Assert.AreEqual("Dni", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Constructor_NombreInvalido_ElErrorIndicaElCampoNombre()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(nombre: "A"));
+
+        Assert.AreEqual("Nombre", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Constructor_ApellidoInvalido_ElErrorIndicaElCampoApellido()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(apellido: "A"));
+
+        Assert.AreEqual("Apellido", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Constructor_CorreoInvalido_ElErrorIndicaElCampoCorreo()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: "sinarroba"));
+
+        Assert.AreEqual("Correo", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Constructor_ContrasenaInvalida_ElErrorIndicaElCampoContrasena()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(contrasena: "corta"));
+
+        Assert.AreEqual("Contrasena", excepcion.Campo);
+    }
+
+    [TestMethod]
     public void NombreCompleto_DatosValidos_DevuelveNombreYApellido()
     {
         Usuario usuario = CrearUsuario();
