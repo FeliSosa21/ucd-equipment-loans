@@ -6,7 +6,7 @@ public sealed class RegistroDeAccionTests
     private static readonly DateTime FechaHora = new DateTime(2026, 11, 2, 10, 30, 0);
 
     [TestMethod]
-    public void Constructor_DatosValidos_AsignaResponsableYFechaHora()
+    public void DeUsuario_DatosValidos_AsignaResponsableYFechaHora()
     {
         Usuario responsable = CrearUsuario();
 
@@ -17,21 +17,11 @@ public sealed class RegistroDeAccionTests
     }
 
     [TestMethod]
-    public void Constructor_FechaHoraSinAsignar_LanzaExcepcion()
+    public void DeUsuario_FechaHoraSinAsignar_LanzaExcepcion()
     {
         Usuario responsable = CrearUsuario();
 
         Assert.ThrowsException<DominioException>(() => RegistroDeAccion.DeUsuario(responsable, default));
-    }
-
-    [TestMethod]
-    public void DeUsuario_UsuarioValido_LoGuardaComoResponsable()
-    {
-        Usuario usuario = CrearUsuario();
-
-        RegistroDeAccion registro = RegistroDeAccion.DeUsuario(usuario, FechaHora);
-
-        Assert.AreSame(usuario, registro.Responsable);
     }
 
     [TestMethod]
