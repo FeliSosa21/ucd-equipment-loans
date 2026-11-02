@@ -322,14 +322,14 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
-    public void Aprobar_SolicitudDeTipoConAprobacion_QuedaAprobado()
+    public void Aprobar_SolicitudDeTipoConAprobacion_QuedaActivo()
     {
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearSolicitudDeTipoConAprobacion();
         Usuario evaluador = CrearEvaluador();
 
         prestamo.Aprobar(evaluador, unidades);
 
-        Assert.AreEqual(EstadoPrestamo.Aprobado, prestamo.Estado);
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
     }
 
     [TestMethod]
