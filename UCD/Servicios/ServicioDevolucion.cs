@@ -58,10 +58,11 @@ public class ServicioDevolucion
                 .Select(unidad => CrearUnidadDevuelta(unidad, prestamo))
                 .ToList();
             DateTime ahora = _reloj.GetLocalNow().DateTime;
-            Devolucion nueva = new Devolucion(prestamo, RegistroDeAccion.DeUsuario(responsable, ahora), unidades);
+            RegistroDeAccion registro = RegistroDeAccion.DeUsuario(responsable, ahora);
+            Devolucion nueva = new Devolucion(prestamo, registro, unidades);
             nueva.Aplicar();
             _devoluciones.AgregarDevolucion(nueva);
-            RegistrarMovimientos(nueva);
+            RegistrarMovimientos(nueva, registro);
             return nueva;
         });
 
@@ -69,12 +70,11 @@ public class ServicioDevolucion
     }
 
     // Registro historico (req. 10): un movimiento por unidad, con la fecha efectiva de devolucion.
-    private void RegistrarMovimientos(Devolucion devolucion)
+    private void RegistrarMovimientos(Devolucion devolucion, RegistroDeAccion registro)
     {
         foreach (UnidadDevuelta unidadDevuelta in devolucion.Unidades)
         {
-            _movimientos.AgregarMovimiento(new Movimiento(devolucion.FechaHoraDevolucion,
-                TipoMovimiento.Devolucion, devolucion.Prestamo.Solicitante, devolucion.Prestamo.Evaluador,
+            _movimientos.AgregarMovimiento(Movimiento.DeDevolucion(devolucion.Prestamo, registro,
                 unidadDevuelta.Unidad));
         }
     }
