@@ -41,6 +41,16 @@ public class Movimiento
         };
     }
 
+    public static Movimiento DePrestamo(Prestamo prestamo, RegistroDeAccion registro, UnidadFisica unidad)
+    {
+        return new Movimiento(registro.FechaHora, TipoMovimiento.Prestamo, prestamo.Solicitante,
+            prestamo.Evaluador, unidad)
+        {
+            Prestamo = prestamo,
+            Responsable = registro.Responsable
+        };
+    }
+
     public Movimiento(DateTime fechaHora, TipoMovimiento tipo, Usuario solicitante, Usuario? evaluador,
         UnidadFisica? unidad)
     {
