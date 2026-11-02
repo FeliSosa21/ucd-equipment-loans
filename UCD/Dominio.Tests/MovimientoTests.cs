@@ -161,6 +161,23 @@ public sealed class MovimientoTests
         Assert.AreSame(evaluador, movimiento.Evaluador);
     }
 
+    [TestMethod]
+    public void DePrestamo_PrestamoActivo_LlevaLaUnidadYQuienYCuandoDelRegistro()
+    {
+        Usuario evaluador = CrearEvaluador();
+        UnidadFisica unidad = CrearUnidad(idInstitucional: "EQP-0001");
+        Prestamo prestamo = CrearPrestamoAprobado(evaluador, unidad);
+
+        Movimiento movimiento = Movimiento.DePrestamo(prestamo, RegistroDeAccion.DeUsuario(evaluador, FechaFija),
+            unidad);
+
+        Assert.AreEqual(TipoMovimiento.Prestamo, movimiento.Tipo);
+        Assert.AreSame(prestamo, movimiento.Prestamo);
+        Assert.AreSame(unidad, movimiento.Unidad);
+        Assert.AreSame(evaluador, movimiento.Responsable);
+        Assert.AreEqual(FechaFija, movimiento.FechaHora);
+    }
+
     private static Prestamo CrearPrestamoAprobado(Usuario evaluador, UnidadFisica unidad)
     {
         Prestamo prestamo = CrearPrestamo();
