@@ -16,6 +16,14 @@ public sealed class RegistroDeAccionTests
         Assert.AreEqual(FechaHora, registro.FechaHora);
     }
 
+    [TestMethod]
+    public void Constructor_FechaHoraSinAsignar_LanzaExcepcion()
+    {
+        Usuario responsable = CrearUsuario();
+
+        Assert.ThrowsException<DominioException>(() => new RegistroDeAccion(responsable, default));
+    }
+
     private static Usuario CrearUsuario()
     {
         return new Usuario("12345672", "Felipe", "Sosa", "felipe@hotmail.com", "VivaLaOrt2026");
