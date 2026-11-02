@@ -18,5 +18,6 @@ public class DominioException : Exception
 
     public DominioException(string campo, string mensaje) : base(mensaje)
     {
+        Campo = campo;
     }
 }
