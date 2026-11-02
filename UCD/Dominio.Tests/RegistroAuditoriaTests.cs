@@ -96,6 +96,14 @@ public sealed class RegistroAuditoriaTests
             detalle: "Prestamo de 2 Notebook"));
     }
 
+    [TestMethod]
+    public void Constructor_IntentoDeAprobacion_SeCrea()
+    {
+        RegistroAuditoria registro = CrearRegistro(accion: AccionAuditada.IntentoDeAprobacion);
+
+        Assert.AreEqual(AccionAuditada.IntentoDeAprobacion, registro.Accion);
+    }
+
     private static RegistroAuditoria CrearRegistro(
         AccionAuditada accion = AccionAuditada.SolicitudDePrestamo,
         string detalle = "Prestamo de 2 Notebook")
