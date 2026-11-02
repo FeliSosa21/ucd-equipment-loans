@@ -31,6 +31,11 @@ public class Catalogo
 
     public void DarDeBaja()
     {
+        if (!Activo)
+        {
+            throw new DominioException("El catalogo ya fue dado de baja");
+        }
+
         Activo = false;
     }
 
