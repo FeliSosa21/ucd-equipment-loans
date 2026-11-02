@@ -38,20 +38,15 @@ public class Prestamo
     {
         ValidarQueEsteSolicitado();
         ValidarQueNoRequieraAprobacion();
-        ValidarUnidades(unidadesFisicas);
-        AsignarUnidades(unidadesFisicas);
-
-        Estado = EstadoPrestamo.Activo;
+        AsignarYActivar(unidadesFisicas);
     }
 
     public void Aprobar(Usuario evaluador, IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         ValidarQueEsteSolicitado();
         ValidarEvaluador(evaluador);
-        ValidarUnidades(unidadesFisicas);
-        AsignarUnidades(unidadesFisicas);
+        AsignarYActivar(unidadesFisicas);
 
-        Estado = EstadoPrestamo.Activo;
         Evaluador = evaluador;
     }
 
@@ -200,6 +195,14 @@ public class Prestamo
                 throw new DominioException($"La unidad {unidadFisica.IdInstitucional} no esta disponible");
             }
         }
+    }
+
+    private void AsignarYActivar(IReadOnlyList<UnidadFisica> unidadesFisicas)
+    {
+        ValidarUnidades(unidadesFisicas);
+        AsignarUnidades(unidadesFisicas);
+
+        Estado = EstadoPrestamo.Activo;
     }
 
     private void AsignarUnidades(IReadOnlyList<UnidadFisica> unidadesFisicas)
