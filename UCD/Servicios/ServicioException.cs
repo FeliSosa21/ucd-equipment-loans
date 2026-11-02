@@ -18,5 +18,6 @@ public class ServicioException : Exception
 
     public ServicioException(string campo, string mensaje) : base(mensaje)
     {
+        Campo = campo;
     }
 }
