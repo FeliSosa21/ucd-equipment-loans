@@ -3,12 +3,18 @@ namespace Dominio;
 public class Catalogo
 {
     private const int LargoMinimoNombre = 3;
-    private const int LargoMaximoNombre = 80;
+    public const int LargoMaximoNombre = 80;
 
     private readonly List<TipoEquipamiento> _tipos = new();
     public string Nombre { get; private set; }
+    public int Id { get; private set; }
 
     public IReadOnlyCollection<TipoEquipamiento> Tipos => _tipos.AsReadOnly();
+
+    private Catalogo()
+    {
+        Nombre = null!;
+    }
 
     public Catalogo(string nombre)
     {

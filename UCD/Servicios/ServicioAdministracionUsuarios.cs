@@ -13,6 +13,7 @@ public class ServicioAdministracionUsuarios
 {
     public const string ContrasenaPredeterminada = "Ucd12345";
     public static readonly string NombreTipoAdministrador = TipoUsuario.Administrador.Nombre;
+    public const int TamanoPagina = 50;
     private const string MensajeSoloAdministrador = "Solo un administrador activo puede gestionar usuarios";
 
     private readonly RepositorioUsuario _repositorio;
@@ -29,29 +30,33 @@ public class ServicioAdministracionUsuarios
         ArgumentNullException.ThrowIfNull(dto);
         ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         TipoUsuario tipo = ObtenerTipo(nombreTipo);
-        string correo = Recortar(dto.Correo);
 
-        _servicioUsuario.Registrar(new UsuarioDto
+        Usuario creado = _servicioUsuario.Agregar(new UsuarioDto
         {
             Dni = dto.Dni,
-            Nombre = Recortar(dto.Nombre),
-            Apellido = Recortar(dto.Apellido),
-            Correo = correo,
+            Nombre = dto.Nombre,
+            Apellido = dto.Apellido,
+            Correo = dto.Correo,
             Contrasena = ContrasenaPredeterminada
         });
-
-        // Se busca por correo porque el registro puede normalizar el DNI (cedulas de 7 digitos).
-        // Registrar acaba de guardarlo con ese mismo correo, asi que la busqueda no puede devolver null.
-        Usuario creado = _repositorio.ObtenerUsuarioPorCorreo(correo)!;
 
         creado.AsignarTipo(tipo);
         creado.ExigirCambioDeContrasena();
     }
 
-    public List<UsuarioResumenDto> ListarUsuarios(string dniResponsable)
+    public PaginaDto<UsuarioResumenDto> ListarUsuarios(string dniResponsable, string? busqueda, int pagina)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(pagina, 1);
         ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
-        return _repositorio.ObtenerTodos().Select(CrearResumen).ToList();
+        int total = _repositorio.ContarUsuarios(busqueda);
+
+        return new PaginaDto<UsuarioResumenDto>
+        {
+            Elementos = _repositorio.ObtenerPaginaDeUsuarios(busqueda, pagina, TamanoPagina).Select(CrearResumen).ToList(),
+            Pagina = pagina,
+            HayPaginaAnterior = pagina > 1,
+            HayPaginaSiguiente = pagina * TamanoPagina < total
+        };
     }
 
     public List<string> NombresDeTipos()
@@ -78,24 +83,14 @@ public class ServicioAdministracionUsuarios
         ArgumentNullException.ThrowIfNull(datos);
         ValidarQuePuedeModificar(datos.Dni, dniResponsable);
         Usuario usuario = ObtenerUsuario(datos.Dni);
-        string nombre = Recortar(datos.Nombre);
-        string apellido = Recortar(datos.Apellido);
-        string correo = Recortar(datos.Correo);
-        Usuario? duenoDelCorreo = _repositorio.ObtenerUsuarioPorCorreo(correo);
+        Usuario? duenoDelCorreo = _repositorio.ObtenerUsuarioPorCorreo(Usuario.NormalizarCorreo(datos.Correo));
 
         if (duenoDelCorreo != null && duenoDelCorreo != usuario)
         {
-            throw new ServicioException("El correo ya existe");
+            throw new ServicioException(nameof(Usuario.Correo), "El correo ya existe");
         }
 
-        try
-        {
-            usuario.ModificarDatos(nombre, apellido, correo);
-        }
-        catch (DominioException ex)
-        {
-            throw new ServicioException(ex.Message, ex);
-        }
+        TraduccionDeErrores.Ejecutar(() => usuario.ModificarDatos(datos.Nombre, datos.Apellido, datos.Correo));
     }
 
     public void Desactivar(string dni, string dniResponsable)
@@ -128,7 +123,7 @@ public class ServicioAdministracionUsuarios
     {
         Usuario? responsable = _repositorio.ObtenerUsuarioPorDni(dniResponsable);
 
-        if (responsable is null || !EsAdministradorActivo(responsable))
+        if (responsable is null || !PuedeGestionarUsuarios(responsable))
         {
             throw new ServicioException(mensaje);
         }
@@ -152,9 +147,9 @@ public class ServicioAdministracionUsuarios
         }
     }
 
-    private static bool EsAdministradorActivo(Usuario usuario)
+    private static bool PuedeGestionarUsuarios(Usuario usuario)
     {
-        return usuario.Tipo == TipoUsuario.Administrador && usuario.Estado == EstadoUsuario.Activo;
+        return usuario.Estado == EstadoUsuario.Activo && usuario.TienePermiso(Permiso.GestionarUsuarios);
     }
 
     private static TipoUsuario ObtenerTipo(string nombreTipo)
@@ -179,12 +174,6 @@ public class ServicioAdministracionUsuarios
         }
 
         return usuario;
-    }
-
-    // Los espacios de alrededor no cuentan para el largo minimo ni se guardan.
-    private static string Recortar(string? valor)
-    {
-        return valor?.Trim() ?? string.Empty;
     }
 
     private static UsuarioResumenDto CrearResumen(Usuario usuario)

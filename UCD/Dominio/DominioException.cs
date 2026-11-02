@@ -2,6 +2,8 @@
 
 public class DominioException : Exception
 {
+    public string? Campo { get; }
+
     public DominioException() : base()
     {
     }
@@ -12,5 +14,10 @@ public class DominioException : Exception
 
     public DominioException(string mensaje, Exception interna) : base(mensaje, interna)
     {
+    }
+
+    public DominioException(string campo, string mensaje) : base(mensaje)
+    {
+        Campo = campo;
     }
 }

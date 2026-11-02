@@ -20,6 +20,138 @@ namespace Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Dominio.Catalogo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Catalogos", (string)null);
+                });
+
+            modelBuilder.Entity("Dominio.TipoEquipamiento", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CatalogoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Categoria")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int>("DuracionMaxPrestamo")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<bool>("RequiereAprobacion")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CatalogoId", "Nombre")
+                        .IsUnique();
+
+                    b.ToTable("TiposEquipamiento", (string)null);
+                });
+
+            modelBuilder.Entity("Dominio.UnidadFisica", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IdInstitucional")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("nvarchar(8)");
+
+                    b.Property<string>("NumSerie")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Observaciones")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int>("TipoEquipamientoId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UbiFisica")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdInstitucional")
+                        .IsUnique();
+
+                    b.HasIndex("TipoEquipamientoId");
+
+                    b.ToTable("UnidadesFisicas", (string)null);
+                });
+
+            modelBuilder.Entity("Dominio.TipoEquipamiento", b =>
+                {
+                    b.HasOne("Dominio.Catalogo", null)
+                        .WithMany("Tipos")
+                        .HasForeignKey("CatalogoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Dominio.UnidadFisica", b =>
+                {
+                    b.HasOne("Dominio.TipoEquipamiento", null)
+                        .WithMany("Unidades")
+                        .HasForeignKey("TipoEquipamientoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Dominio.Catalogo", b =>
+                {
+                    b.Navigation("Tipos");
+                });
+
+            modelBuilder.Entity("Dominio.TipoEquipamiento", b =>
+                {
+                    b.Navigation("Unidades");
+                });
 #pragma warning restore 612, 618
         }
     }

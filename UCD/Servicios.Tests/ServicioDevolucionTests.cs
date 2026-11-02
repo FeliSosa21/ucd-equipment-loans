@@ -125,6 +125,31 @@ public class ServicioDevolucionTests
     }
 
     [TestMethod]
+    public void RegistrarDevolucion_DatosValidos_DevuelveQuienLaRegistro()
+    {
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+
+        DevolucionRegistradaDto registrada = servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
+
+        Assert.AreEqual("Felipe Sosa", registrada.RegistradaPor);
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_DatosValidos_DevuelveLaCondicionDeCadaUnidad()
+    {
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+        DevolucionDto datos = CrearDatos(prestamo.Id, condicionSegunda: "Con fallas");
+        datos.Unidades[1].Observaciones = "No enciende";
+
+        DevolucionRegistradaDto registrada = servicio.RegistrarDevolucion(datos, DniFuncionario);
+
+        Assert.AreEqual(2, registrada.Unidades.Count);
+        UnidadDevueltaDto segunda = registrada.Unidades.Single(unidad => unidad.IdInstitucional == "EQP-0002");
+        Assert.AreEqual("Con fallas", segunda.Condicion);
+        Assert.AreEqual("No enciende", segunda.Observaciones);
+    }
+
+    [TestMethod]
     public void RegistrarDevolucion_DevolucionFallida_NoRegistraMovimientos()
     {
         Memoria memoria = new Memoria();

@@ -15,35 +15,34 @@ public class ServicioUsuario
 
     public void Registrar(UsuarioDto dto)
     {
+        Agregar(dto);
+    }
+
+    internal Usuario Agregar(UsuarioDto dto)
+    {
         Usuario usuario = CrearUsuario(dto);
 
         if (_repositorio.ObtenerUsuarioPorDni(usuario.Dni) != null)
         {
-            throw new ServicioException("El DNI ya existe");
+            throw new ServicioException(nameof(Usuario.Dni), "El DNI ya existe");
         }
 
         if (_repositorio.ObtenerUsuarioPorCorreo(usuario.Correo) != null)
         {
-            throw new ServicioException("El correo ya existe");
+            throw new ServicioException(nameof(Usuario.Correo), "El correo ya existe");
         }
 
         _repositorio.AgregarUsuario(usuario);
+        return usuario;
     }
 
     private static Usuario CrearUsuario(UsuarioDto dto)
     {
-        try
-        {
-            return new Usuario(
-                dni: dto.Dni,
-                nombre: dto.Nombre,
-                apellido: dto.Apellido,
-                correo: dto.Correo,
-                contrasena: dto.Contrasena);
-        }
-        catch (DominioException ex)
-        {
-            throw new ServicioException(ex.Message);
-        }
+        return TraduccionDeErrores.Ejecutar(() => new Usuario(
+            dni: dto.Dni,
+            nombre: dto.Nombre,
+            apellido: dto.Apellido,
+            correo: dto.Correo,
+            contrasena: dto.Contrasena));
     }
 }

@@ -76,12 +76,12 @@ public class RepositorioPrestamoTests
         RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
         (Prestamo primerPendiente, _) = CrearSolicitudDeTipoConAprobacion();
         (Prestamo segundoPendiente, _) = CrearSolicitudDeTipoConAprobacion();
-        (Prestamo aprobado, _) = CrearPrestamoAprobado();
+        (Prestamo activoPorAprobacion, _) = CrearPrestamoActivoPorAprobacion();
         (Prestamo activo, _) = CrearPrestamoActivo();
         Prestamo rechazado = CrearPrestamoRechazado();
 
         repositorio.AgregarPrestamo(primerPendiente);
-        repositorio.AgregarPrestamo(aprobado);
+        repositorio.AgregarPrestamo(activoPorAprobacion);
         repositorio.AgregarPrestamo(activo);
         repositorio.AgregarPrestamo(rechazado);
         repositorio.AgregarPrestamo(segundoPendiente);
@@ -97,10 +97,10 @@ public class RepositorioPrestamoTests
     {
         Memoria memoria = new Memoria();
         RepositorioPrestamo repositorio = new RepositorioPrestamo(memoria);
-        (Prestamo aprobado, _) = CrearPrestamoAprobado();
+        (Prestamo activoPorAprobacion, _) = CrearPrestamoActivoPorAprobacion();
         (Prestamo activo, _) = CrearPrestamoActivo();
 
-        repositorio.AgregarPrestamo(aprobado);
+        repositorio.AgregarPrestamo(activoPorAprobacion);
         repositorio.AgregarPrestamo(activo);
 
         IReadOnlyList<Prestamo> resultado = repositorio.ObtenerPrestamosPendientes();
@@ -293,7 +293,7 @@ public class RepositorioPrestamoTests
         return (prestamo, unidades);
     }
 
-    private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoAprobado()
+    private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoActivoPorAprobacion()
     {
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearSolicitudDeTipoConAprobacion();
 
