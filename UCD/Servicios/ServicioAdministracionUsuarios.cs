@@ -121,7 +121,7 @@ public class ServicioAdministracionUsuarios
     {
         Usuario? responsable = _repositorio.ObtenerUsuarioPorDni(dniResponsable);
 
-        if (responsable is null || !EsAdministradorActivo(responsable))
+        if (responsable is null || !PuedeGestionarUsuarios(responsable))
         {
             throw new ServicioException(mensaje);
         }
@@ -145,9 +145,9 @@ public class ServicioAdministracionUsuarios
         }
     }
 
-    private static bool EsAdministradorActivo(Usuario usuario)
+    private static bool PuedeGestionarUsuarios(Usuario usuario)
     {
-        return usuario.Tipo == TipoUsuario.Administrador && usuario.Estado == EstadoUsuario.Activo;
+        return usuario.Estado == EstadoUsuario.Activo && usuario.TienePermiso(Permiso.GestionarUsuarios);
     }
 
     private static TipoUsuario ObtenerTipo(string nombreTipo)

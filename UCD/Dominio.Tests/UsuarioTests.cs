@@ -560,6 +560,23 @@ public sealed class UsuarioTests
         Assert.ThrowsException<DominioException>(() => usuario.CambiarContrasena("corta1A"));
     }
 
+    [TestMethod]
+    public void TienePermiso_UsuarioSinPermisos_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.IsFalse(usuario.TienePermiso(Permiso.GestionarUsuarios));
+    }
+
+    [TestMethod]
+    public void TienePermiso_PermisoDeSuTipo_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Administrador);
+
+        Assert.IsTrue(usuario.TienePermiso(Permiso.GestionarUsuarios));
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {

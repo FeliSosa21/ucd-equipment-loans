@@ -43,6 +43,11 @@ public class Usuario
         return Contrasena == contrasena;
     }
 
+    public bool TienePermiso(Permiso permiso)
+    {
+        return Tipo.TienePermiso(permiso);
+    }
+
     public void ModificarDatos(string nombre, string apellido, string correo)
     {
         ValidarNombreOApellido(nombre, "nombre");

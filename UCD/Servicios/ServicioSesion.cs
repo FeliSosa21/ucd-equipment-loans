@@ -62,6 +62,8 @@ public class ServicioSesion
 
     private static UsuarioSesionDto CrearSesion(Usuario usuario)
     {
+        List<string> permisos = PermisosDe(usuario);
+
         return new UsuarioSesionDto
         {
             Dni = usuario.Dni,
@@ -69,15 +71,15 @@ public class ServicioSesion
             Nombre = usuario.Nombre,
             Tipo = usuario.Tipo.Nombre,
             DebeCambiarContrasena = usuario.DebeCambiarContrasena,
-            PendienteDeActivacion = usuario.Tipo == TipoUsuario.SinPermisos,
-            Permisos = PermisosDe(usuario.Tipo)
+            PendienteDeActivacion = permisos.Count == 0,
+            Permisos = permisos
         };
     }
 
-    private static List<string> PermisosDe(TipoUsuario tipo)
+    private static List<string> PermisosDe(Usuario usuario)
     {
         return Enum.GetValues<Permiso>()
-            .Where(tipo.TienePermiso)
+            .Where(usuario.TienePermiso)
             .Select(permiso => permiso.ToString())
             .ToList();
     }
