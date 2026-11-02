@@ -161,10 +161,7 @@ public class ServicioPrestamo
 
     public List<PrestamoDto> ListarPrestamosPorEntregar()
     {
-        return _prestamos.ObtenerPrestamosActivos()
-            .Where(prestamo => prestamo.FechaHoraEntrega is null)
-            .Select(CrearPrestamoDto)
-            .ToList();
+        return _prestamos.ObtenerPrestamosActivos().Select(CrearPrestamoDto).ToList();
     }
 
     public List<PrestamoDto> ListarPrestamos()
