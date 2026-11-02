@@ -145,6 +145,31 @@ public sealed class MovimientoTests
         Assert.IsNull(movimiento.Unidad);
     }
 
+    [TestMethod]
+    public void DeAprobacion_PrestamoAprobado_LlevaLaUnidadYAlEvaluadorComoResponsable()
+    {
+        Usuario evaluador = CrearEvaluador();
+        UnidadFisica unidad = CrearUnidad(idInstitucional: "EQP-0001");
+        Prestamo prestamo = CrearPrestamoAprobado(evaluador, unidad);
+
+        Movimiento movimiento = Movimiento.DeAprobacion(prestamo, RegistroDeAccion.DeUsuario(evaluador, FechaFija),
+            unidad);
+
+        Assert.AreEqual(TipoMovimiento.Aprobacion, movimiento.Tipo);
+        Assert.AreSame(unidad, movimiento.Unidad);
+        Assert.AreSame(evaluador, movimiento.Responsable);
+        Assert.AreSame(evaluador, movimiento.Evaluador);
+    }
+
+    private static Prestamo CrearPrestamoAprobado(Usuario evaluador, UnidadFisica unidad)
+    {
+        Prestamo prestamo = CrearPrestamo();
+        prestamo.TipoEquipamiento.AgregarUnidad(unidad);
+        prestamo.Aprobar(evaluador, new List<UnidadFisica> { unidad });
+
+        return prestamo;
+    }
+
     private static Prestamo CrearPrestamo()
     {
         TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",
