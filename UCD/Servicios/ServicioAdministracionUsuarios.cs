@@ -30,20 +30,15 @@ public class ServicioAdministracionUsuarios
         ArgumentNullException.ThrowIfNull(dto);
         ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         TipoUsuario tipo = ObtenerTipo(nombreTipo);
-        string correo = Recortar(dto.Correo);
 
-        _servicioUsuario.Registrar(new UsuarioDto
+        Usuario creado = _servicioUsuario.Agregar(new UsuarioDto
         {
             Dni = dto.Dni,
-            Nombre = Recortar(dto.Nombre),
-            Apellido = Recortar(dto.Apellido),
-            Correo = correo,
+            Nombre = dto.Nombre,
+            Apellido = dto.Apellido,
+            Correo = dto.Correo,
             Contrasena = ContrasenaPredeterminada
         });
-
-        // Se busca por correo porque el registro puede normalizar el DNI (cedulas de 7 digitos).
-        // Registrar acaba de guardarlo con ese mismo correo, asi que la busqueda no puede devolver null.
-        Usuario creado = _repositorio.ObtenerUsuarioPorCorreo(correo)!;
 
         creado.AsignarTipo(tipo);
         creado.ExigirCambioDeContrasena();
@@ -79,17 +74,14 @@ public class ServicioAdministracionUsuarios
         ArgumentNullException.ThrowIfNull(datos);
         ValidarQuePuedeModificar(datos.Dni, dniResponsable);
         Usuario usuario = ObtenerUsuario(datos.Dni);
-        string nombre = Recortar(datos.Nombre);
-        string apellido = Recortar(datos.Apellido);
-        string correo = Recortar(datos.Correo);
-        Usuario? duenoDelCorreo = _repositorio.ObtenerUsuarioPorCorreo(correo);
+        Usuario? duenoDelCorreo = _repositorio.ObtenerUsuarioPorCorreo(Usuario.NormalizarCorreo(datos.Correo));
 
         if (duenoDelCorreo != null && duenoDelCorreo != usuario)
         {
             throw new ServicioException(nameof(Usuario.Correo), "El correo ya existe");
         }
 
-        TraduccionDeErrores.Ejecutar(() => usuario.ModificarDatos(nombre, apellido, correo));
+        TraduccionDeErrores.Ejecutar(() => usuario.ModificarDatos(datos.Nombre, datos.Apellido, datos.Correo));
     }
 
     public void Desactivar(string dni, string dniResponsable)
@@ -173,12 +165,6 @@ public class ServicioAdministracionUsuarios
         }
 
         return usuario;
-    }
-
-    // Los espacios de alrededor no cuentan para el largo minimo ni se guardan.
-    private static string Recortar(string? valor)
-    {
-        return valor?.Trim() ?? string.Empty;
     }
 
     private static UsuarioResumenDto CrearResumen(Usuario usuario)

@@ -15,6 +15,11 @@ public class ServicioUsuario
 
     public void Registrar(UsuarioDto dto)
     {
+        Agregar(dto);
+    }
+
+    internal Usuario Agregar(UsuarioDto dto)
+    {
         Usuario usuario = CrearUsuario(dto);
 
         if (_repositorio.ObtenerUsuarioPorDni(usuario.Dni) != null)
@@ -28,6 +33,7 @@ public class ServicioUsuario
         }
 
         _repositorio.AgregarUsuario(usuario);
+        return usuario;
     }
 
     private static Usuario CrearUsuario(UsuarioDto dto)

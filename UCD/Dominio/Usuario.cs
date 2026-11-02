@@ -25,7 +25,7 @@ public class Usuario
         dni = NormalizarDni(dni);
         nombre = Recortar(nombre);
         apellido = Recortar(apellido);
-        correo = Recortar(correo);
+        correo = NormalizarCorreo(correo);
         ValidarDni(dni);
         ValidarNombreOApellido(nombre, nameof(Nombre));
         ValidarNombreOApellido(apellido, nameof(Apellido));
@@ -56,7 +56,7 @@ public class Usuario
     {
         nombre = Recortar(nombre);
         apellido = Recortar(apellido);
-        correo = Recortar(correo);
+        correo = NormalizarCorreo(correo);
         ValidarNombreOApellido(nombre, nameof(Nombre));
         ValidarNombreOApellido(apellido, nameof(Apellido));
         ValidarCorreo(correo);
@@ -98,6 +98,9 @@ public class Usuario
         Contrasena = nueva;
         DebeCambiarContrasena = false;
     }
+
+    // Para buscar un correo como lo guarda Usuario (por ejemplo, al controlar que no se repita).
+    public static string NormalizarCorreo(string? correo) => Recortar(correo);
 
     // Los espacios de alrededor no cuentan para el largo ni se guardan.
     private static string Recortar(string? texto)
