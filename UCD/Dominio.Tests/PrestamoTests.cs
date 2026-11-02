@@ -438,26 +438,6 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
-    public void Realizar_PrestamoAprobado_QuedaActivo()
-    {
-        (Prestamo prestamo, _) = CrearPrestamoAprobado();
-
-        prestamo.Realizar();
-
-        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
-    }
-
-    [TestMethod]
-    public void Realizar_PrestamoSolicitado_LanzaExcepcion()
-    {
-        (Prestamo prestamo, _) = CrearSolicitudDeTipoConAprobacion();
-
-        Assert.ThrowsException<DominioException>(() => prestamo.Realizar());
-
-        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
-    }
-
-    [TestMethod]
     public void MarcarDevuelto_PrestamoActivoSinUnidadesPrestadas_QuedaDevuelto()
     {
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
@@ -561,36 +541,6 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
-    public void Rechazar_PrestamoAprobado_QuedaRechazadoConEvaluadorYMotivo()
-    {
-        (Prestamo prestamo, _) = CrearPrestamoAprobado();
-        Usuario evaluador = CrearEvaluador();
-
-        prestamo.Rechazar(evaluador, MotivoDeRechazo);
-
-        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
-        Assert.AreSame(evaluador, prestamo.Evaluador);
-        Assert.AreEqual(MotivoDeRechazo, prestamo.MotivoRechazo);
-    }
-
-    [TestMethod]
-    public void Rechazar_PrestamoAprobado_LiberaLasUnidadesYQuedaSinAsignadas()
-    {
-        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoAprobado();
-        Usuario evaluador = CrearEvaluador();
-
-        prestamo.Rechazar(evaluador, MotivoDeRechazo);
-
-        foreach (UnidadFisica unidad in unidades)
-        {
-            Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado,
-                $"La unidad {unidad.IdInstitucional} deberia quedar disponible");
-        }
-
-        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
-    }
-
-    [TestMethod]
     public void Rechazar_PrestamoActivo_LanzaExcepcion()
     {
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
@@ -664,16 +614,6 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
-    public void EstaVigente_PrestamoAprobado_DevuelveVerdadero()
-    {
-        (Prestamo prestamo, _) = CrearPrestamoAprobado();
-
-        bool vigente = prestamo.EstaVigente();
-
-        Assert.IsTrue(vigente);
-    }
-
-    [TestMethod]
     public void EstaVigente_PrestamoActivo_DevuelveVerdadero()
     {
         (Prestamo prestamo, _) = CrearPrestamoActivo();
@@ -740,21 +680,6 @@ public sealed class PrestamoTests
 
         Assert.AreEqual("Solo se puede registrar la entrega de un prestamo activo", excepcion.Message);
         Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
-        Assert.IsNull(prestamo.ResponsableEntrega);
-        Assert.IsNull(prestamo.FechaHoraEntrega);
-    }
-
-    [TestMethod]
-    public void RegistrarEntrega_PrestamoAprobado_LanzaExcepcion()
-    {
-        (Prestamo prestamo, _) = CrearPrestamoAprobado();
-        Usuario responsable = CrearResponsableDeEntrega();
-
-        DominioException excepcion = Assert.ThrowsException<DominioException>(
-            () => prestamo.RegistrarEntrega(responsable, FechaDeEntrega));
-
-        Assert.AreEqual("Solo se puede registrar la entrega de un prestamo activo", excepcion.Message);
-        Assert.AreEqual(EstadoPrestamo.Aprobado, prestamo.Estado);
         Assert.IsNull(prestamo.ResponsableEntrega);
         Assert.IsNull(prestamo.FechaHoraEntrega);
     }
@@ -917,15 +842,6 @@ public sealed class PrestamoTests
         TipoEquipamiento tipo = CrearTipoEquipamiento(requiereAprobacion: true);
         Prestamo prestamo = CrearPrestamo(tipoEquipamiento: tipo);
         List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: tipo, cantidad: CantidadSolicitadaPorDefecto);
-
-        return (prestamo, unidades);
-    }
-
-    private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoAprobado()
-    {
-        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearSolicitudDeTipoConAprobacion();
-
-        prestamo.Aprobar(CrearEvaluador(), unidades);
 
         return (prestamo, unidades);
     }
