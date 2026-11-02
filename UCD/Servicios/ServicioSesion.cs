@@ -64,8 +64,6 @@ public class ServicioSesion
 
     private static UsuarioSesionDto CrearSesion(Usuario usuario)
     {
-        List<string> permisos = PermisosDe(usuario);
-
         return new UsuarioSesionDto
         {
             Dni = usuario.Dni,
@@ -73,8 +71,8 @@ public class ServicioSesion
             Nombre = usuario.Nombre,
             Tipo = usuario.Tipo.Nombre,
             DebeCambiarContrasena = usuario.DebeCambiarContrasena,
-            PendienteDeActivacion = permisos.Count == 0,
-            Permisos = permisos
+            PendienteDeActivacion = usuario.EstaPendienteDeActivacion(),
+            Permisos = PermisosDe(usuario)
         };
     }
 
