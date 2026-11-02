@@ -11,5 +11,4 @@ public class PrestamoDto
     public string Estado { get; set; } = string.Empty;
     public string? MotivoRechazo { get; set; }
     public List<string> Unidades { get; set; } = new List<string>();
-    public DateTime? FechaHoraEntrega { get; set; }
 }

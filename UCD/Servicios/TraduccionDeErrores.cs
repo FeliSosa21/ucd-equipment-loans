@@ -13,7 +13,7 @@ internal static class TraduccionDeErrores
         }
         catch (DominioException ex)
         {
-            throw new ServicioException(ex.Message, ex);
+            throw new ServicioException(ex.Campo, ex.Message, ex);
         }
     }
 
@@ -25,7 +25,7 @@ internal static class TraduccionDeErrores
         }
         catch (DominioException ex)
         {
-            throw new ServicioException(ex.Message, ex);
+            throw new ServicioException(ex.Campo, ex.Message, ex);
         }
     }
 }

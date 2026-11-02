@@ -64,7 +64,25 @@
 
 @if (_exito is not null)
 {
-    <div class="alert alert-success mensaje" role="status">@_exito</div>
+    <div class="alert alert-success mensaje" role="status">
+        @_exito
+        @if (_registrada is not null)
+        {
+            <div>Registrada por <strong>@_registrada.RegistradaPor</strong>.</div>
+            <ul class="resumen-unidades">
+                @foreach (UnidadDevueltaDto unidad in _registrada.Unidades)
+                {
+                    <li>
+                        <span class="mono">@unidad.IdInstitucional</span>: @unidad.Condicion
+                        @if (!string.IsNullOrWhiteSpace(unidad.Observaciones))
+                        {
+                            <span> (@unidad.Observaciones)</span>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+    </div>
 }
 
 @if (_avisoLista is not null)

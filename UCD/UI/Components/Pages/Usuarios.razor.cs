@@ -1,16 +1,22 @@
 using DTOs;
 using Servicios;
 using UI.Components.Shared;
+using UI.Presentacion;
 using UI.Sesion;
 
 namespace UI.Components.Pages;
 
 public partial class Usuarios
 {
-    private List<UsuarioResumenDto> _usuarios = new List<UsuarioResumenDto>();
+    private PaginaDto<UsuarioResumenDto> _pagina = new PaginaDto<UsuarioResumenDto>();
+    private int _numeroPagina = 1;
     private List<string> _tipos = new List<string>();
     private string _busqueda = string.Empty;
     private string? _error;
+    private readonly ErroresDeFormulario _erroresFormulario = new ErroresDeFormulario(
+        CampoDni, nameof(UsuarioDto.Nombre), nameof(UsuarioDto.Apellido), nameof(UsuarioDto.Correo));
+
+    private const string CampoDni = nameof(UsuarioDto.Dni);
     private string? _exito;
     private bool _mostrarAlta;
     private UsuarioDto _nuevo = new UsuarioDto();
@@ -22,10 +28,7 @@ public partial class Usuarios
     // Accion delicada que espera que el administrador la confirme antes de ejecutarse.
     private sealed record Confirmacion(string Pregunta, string TextoBoton, Action Accion);
 
-    private IEnumerable<UsuarioResumenDto> UsuariosFiltrados =>
-        _usuarios.Where(usuario => string.IsNullOrWhiteSpace(_busqueda) ||
-                                   $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
-                                       .Contains(_busqueda.Trim(), StringComparison.OrdinalIgnoreCase));
+    private List<UsuarioResumenDto> UsuariosDeLaPagina => _pagina.Elementos;
 
     private bool AltaCompleta =>
         !string.IsNullOrWhiteSpace(_nuevo.Dni) &&
@@ -75,7 +78,7 @@ public partial class Usuarios
             Correo = _nuevo.Correo.Trim()
         };
 
-        if (Ejecutar(() => ServicioAdministracion.CrearUsuario(datos, _tipoNuevo, DniUsuario)))
+        if (Ejecutar(() => ServicioAdministracion.CrearUsuario(datos, _tipoNuevo, DniUsuario), _erroresFormulario))
         {
             _exito = $"Se creó la cuenta de {datos.Nombre} {datos.Apellido}.";
             _nuevo = new UsuarioDto();
@@ -107,7 +110,7 @@ public partial class Usuarios
         editado.Apellido = editado.Apellido.Trim();
         editado.Correo = editado.Correo.Trim();
 
-        if (Ejecutar(() => ServicioAdministracion.ModificarDatos(editado, DniUsuario)))
+        if (Ejecutar(() => ServicioAdministracion.ModificarDatos(editado, DniUsuario), _erroresFormulario))
         {
             if (EsElMismoDni(editado.Dni))
             {
@@ -208,16 +211,23 @@ public partial class Usuarios
     {
         _error = null;
         _exito = null;
+        _erroresFormulario.Limpiar();
     }
 
-    // Devuelve si la accion se pudo hacer; si no, deja el mensaje del servicio en _error.
-    private bool Ejecutar(Action accion)
+    // Devuelve si la accion se pudo hacer. Si no, el error de un campo va junto a ese campo del formulario
+    // abierto, y el resto queda en _error.
+    private bool Ejecutar(Action accion, ErroresDeFormulario? erroresDelFormulario = null)
     {
         LimpiarMensajes();
         bool exito = true;
         try
         {
             accion();
+        }
+        catch (ServicioException ex) when (erroresDelFormulario is not null && erroresDelFormulario.Muestra(ex.Campo))
+        {
+            erroresDelFormulario.Agregar(ex);
+            exito = false;
         }
         catch (ServicioException ex)
         {
@@ -236,14 +246,27 @@ public partial class Usuarios
     {
         try
         {
-            _usuarios = ServicioAdministracion.ListarUsuarios(DniUsuario);
+            _pagina = ServicioAdministracion.ListarUsuarios(DniUsuario, _busqueda, _numeroPagina);
         }
         catch (ServicioException ex)
         {
-            _usuarios = new List<UsuarioResumenDto>();
+            _pagina = new PaginaDto<UsuarioResumenDto>();
             _error = ex.Message;
         }
 
         _recargas++;
+    }
+
+    // Una busqueda nueva arranca desde la primera pagina.
+    private void Buscar()
+    {
+        _numeroPagina = 1;
+        Recargar();
+    }
+
+    private void IrAPagina(int numero)
+    {
+        _numeroPagina = numero;
+        Recargar();
     }
 }
