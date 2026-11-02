@@ -709,12 +709,11 @@ public sealed class TipoUsuarioTests
         int? maxUnidadesPorCatalogo = 2,
         int? maxPrestamosConcurrentes = 3)
     {
-        return new TipoUsuario(
-            nombre: nombre,
-            descripcion: descripcion,
-            imagen: imagen,
-            maxUnidadesPorCatalogo: maxUnidadesPorCatalogo,
-            maxPrestamosConcurrentes: maxPrestamosConcurrentes,
-            permisos: new[] { Permiso.SolicitarPrestamo });
+        PresentacionTipoUsuario presentacion = new PresentacionTipoUsuario(nombre, descripcion, imagen);
+        TopesDePrestamo? topes = maxUnidadesPorCatalogo is null || maxPrestamosConcurrentes is null
+            ? null
+            : new TopesDePrestamo(maxUnidadesPorCatalogo.Value, maxPrestamosConcurrentes.Value);
+
+        return new TipoUsuario(presentacion, topes, new[] { Permiso.SolicitarPrestamo });
     }
 }
