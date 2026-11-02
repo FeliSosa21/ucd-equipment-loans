@@ -15,7 +15,7 @@
     <button class="btn btn-primary btn-sm" @onclick="AbrirAlta" disabled="@_mostrarAlta">Nuevo usuario</button>
     <input class="field busqueda" type="search" placeholder="Buscar por nombre, CI o correo…"
            aria-label="Buscar usuario"
-           @bind="_busqueda" @bind:event="oninput" />
+           @bind="_busqueda" @bind:event="oninput" @bind:after="Recargar" />
 </div>
 
 @if (_mostrarAlta)
@@ -101,7 +101,7 @@
             </tr>
         </thead>
         <tbody @key="_recargas">
-            @foreach (UsuarioResumenDto usuario in UsuariosFiltrados)
+            @foreach (UsuarioResumenDto usuario in _usuarios)
             {
                 <tr>
                     <td>@usuario.Nombre @usuario.Apellido</td>
@@ -130,8 +130,12 @@
             }
         </tbody>
     </table>
-    @if (!UsuariosFiltrados.Any())
+    @if (!_usuarios.Any())
     {
         <EstadoVacio Titulo="No hay usuarios que coincidan" />
+    }
+    @if (HayMasResultados)
+    {
+        <p class="hint">Se muestran los primeros @ServicioAdministracionUsuarios.MaximoResultadosBusqueda. Buscá por nombre, CI o correo para encontrar otros.</p>
     }
 </div>

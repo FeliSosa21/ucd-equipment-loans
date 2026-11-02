@@ -72,25 +72,54 @@ public class RepositorioUsuarioTests
     }
 
     [TestMethod]
-    public void ObtenerTodos_ConUnUsuario_LoDevuelve()
+    public void ObtenerUsuariosQueCoinciden_SinTexto_DevuelveLosUsuarios()
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
         Usuario usuario = CrearUsuario();
         repositorio.AgregarUsuario(usuario);
 
-        IReadOnlyList<Usuario> resultado = repositorio.ObtenerTodos();
+        IReadOnlyList<Usuario> resultado = repositorio.ObtenerUsuariosQueCoinciden(null, 50);
 
         CollectionAssert.Contains(resultado.ToList(), usuario);
     }
 
-    private static Usuario CrearUsuario()
+    [TestMethod]
+    public void ObtenerUsuariosQueCoinciden_TextoDeUnUsuario_DevuelveSoloEse()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        Usuario felipe = CrearUsuario();
+        Usuario otro = CrearUsuario(dni: "11111111", nombre: "Ana", apellido: "Perez", correo: "ana@hotmail.com");
+        repositorio.AgregarUsuario(felipe);
+        repositorio.AgregarUsuario(otro);
+
+        IReadOnlyList<Usuario> resultado = repositorio.ObtenerUsuariosQueCoinciden(" sosa ", 50);
+
+        CollectionAssert.AreEqual(new List<Usuario> { felipe }, resultado.ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerUsuariosQueCoinciden_MasUsuariosQueElMaximo_DevuelveSoloElMaximo()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        repositorio.AgregarUsuario(CrearUsuario());
+        repositorio.AgregarUsuario(CrearUsuario(dni: "11111111", nombre: "Ana", apellido: "Perez", correo: "ana@hotmail.com"));
+
+        IReadOnlyList<Usuario> resultado = repositorio.ObtenerUsuariosQueCoinciden(null, 1);
+
+        Assert.AreEqual(1, resultado.Count);
+    }
+
+    private static Usuario CrearUsuario(string dni = "12345672", string nombre = "Felipe", string apellido = "Sosa",
+        string correo = "felipe@hotmail.com")
     {
         return new Usuario(
-            dni: "12345672",
-            nombre: "Felipe",
-            apellido: "Sosa",
-            correo: "felipe@hotmail.com",
+            dni: dni,
+            nombre: nombre,
+            apellido: apellido,
+            correo: correo,
             contrasena: "VivaLaOrt2026");
     }
 }

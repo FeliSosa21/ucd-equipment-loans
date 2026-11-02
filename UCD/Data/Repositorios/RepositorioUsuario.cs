@@ -27,8 +27,14 @@ public class RepositorioUsuario
             string.Equals(usuario.Correo, correo, StringComparison.OrdinalIgnoreCase));
     }
 
-    public IReadOnlyList<Usuario> ObtenerTodos()
+    public IReadOnlyList<Usuario> ObtenerUsuariosQueCoinciden(string? texto, int maximo)
     {
-        return _memoria.Usuarios.AsReadOnly();
+        string busqueda = texto?.Trim() ?? string.Empty;
+
+        return _memoria.Usuarios
+            .Where(usuario => $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
+                .Contains(busqueda, StringComparison.OrdinalIgnoreCase))
+            .Take(maximo)
+            .ToList();
     }
 }

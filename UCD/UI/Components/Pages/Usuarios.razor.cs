@@ -22,10 +22,7 @@ public partial class Usuarios
     // Accion delicada que espera que el administrador la confirme antes de ejecutarse.
     private sealed record Confirmacion(string Pregunta, string TextoBoton, Action Accion);
 
-    private IEnumerable<UsuarioResumenDto> UsuariosFiltrados =>
-        _usuarios.Where(usuario => string.IsNullOrWhiteSpace(_busqueda) ||
-                                   $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
-                                       .Contains(_busqueda.Trim(), StringComparison.OrdinalIgnoreCase));
+    private bool HayMasResultados => _usuarios.Count == ServicioAdministracionUsuarios.MaximoResultadosBusqueda;
 
     private bool AltaCompleta =>
         !string.IsNullOrWhiteSpace(_nuevo.Dni) &&
@@ -236,7 +233,7 @@ public partial class Usuarios
     {
         try
         {
-            _usuarios = ServicioAdministracion.ListarUsuarios(DniUsuario);
+            _usuarios = ServicioAdministracion.ListarUsuarios(DniUsuario, _busqueda);
         }
         catch (ServicioException ex)
         {

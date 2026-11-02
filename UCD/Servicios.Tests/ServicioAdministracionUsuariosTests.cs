@@ -18,7 +18,7 @@ public class ServicioAdministracionUsuariosTests
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
-        List<UsuarioResumenDto> usuarios = servicio.ListarUsuarios(DniResponsable);
+        List<UsuarioResumenDto> usuarios = servicio.ListarUsuarios(DniResponsable, null);
 
         UsuarioResumenDto registrado = usuarios.Single(usuario => usuario.Dni == DniValido);
         Assert.AreEqual(2, usuarios.Count);
@@ -416,7 +416,7 @@ public class ServicioAdministracionUsuariosTests
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.ListarUsuarios(DniValido));
+        Assert.ThrowsException<ServicioException>(() => servicio.ListarUsuarios(DniValido, null));
     }
 
     [TestMethod]
