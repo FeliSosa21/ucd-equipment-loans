@@ -44,7 +44,11 @@ public class RepositorioUsuario
 
     public int ContarUsuarios(string? filtro)
     {
-        return 0;
+        string busqueda = filtro?.Trim() ?? string.Empty;
+
+        return _memoria.Usuarios
+            .Count(usuario => $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
+                .Contains(busqueda, StringComparison.OrdinalIgnoreCase));
     }
 
     public IReadOnlyList<Usuario> ObtenerUsuariosQueCoinciden(string? texto, int maximo)

@@ -53,7 +53,17 @@ public class ServicioAdministracionUsuarios
 
     public PaginaDto<UsuarioResumenDto> ListarPaginaDeUsuarios(string dniResponsable, string? busqueda, int pagina)
     {
-        return new PaginaDto<UsuarioResumenDto>();
+        ArgumentOutOfRangeException.ThrowIfLessThan(pagina, 1);
+        ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
+        int total = _repositorio.ContarUsuarios(busqueda);
+
+        return new PaginaDto<UsuarioResumenDto>
+        {
+            Elementos = _repositorio.ObtenerPaginaDeUsuarios(busqueda, pagina, TamanoPagina).Select(CrearResumen).ToList(),
+            Pagina = pagina,
+            HayPaginaAnterior = pagina > 1,
+            HayPaginaSiguiente = pagina * TamanoPagina < total
+        };
     }
 
     public List<string> NombresDeTipos()
