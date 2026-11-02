@@ -95,6 +95,21 @@ public sealed class RegistroAuditoriaTests
         Assert.AreEqual("Prestamo de 2 Notebook", registro.Detalle);
     }
 
+    [TestMethod]
+    public void Constructor_ConRegistroDeAccion_TomaResponsableYFechaHoraDelRegistro()
+    {
+        Usuario responsable = CrearUsuario();
+        RegistroDeAccion registroDeAccion = RegistroDeAccion.DeUsuario(responsable, FechaHoraValida);
+
+        RegistroAuditoria registro = new RegistroAuditoria(
+            registro: registroDeAccion,
+            accion: AccionAuditada.SolicitudDePrestamo,
+            detalle: "Prestamo de 2 Notebook");
+
+        Assert.AreSame(responsable, registro.Responsable);
+        Assert.AreEqual(FechaHoraValida, registro.FechaHora);
+    }
+
     private static RegistroAuditoria CrearRegistro(
         DateTime? fechaHora = null,
         AccionAuditada accion = AccionAuditada.SolicitudDePrestamo,
