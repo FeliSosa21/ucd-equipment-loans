@@ -115,6 +115,30 @@ public sealed class MovimientoTests
         Assert.ThrowsException<DominioException>(() => CrearMovimiento(tipo: tipoInexistente));
     }
 
+    [TestMethod]
+    public void DeSolicitud_Prestamo_TomaElSolicitanteDelPrestamoYQuienYCuandoDelRegistro()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        RegistroDeAccion registro = RegistroDeAccion.DeUsuario(prestamo.Solicitante, FechaFija);
+
+        Movimiento movimiento = Movimiento.DeSolicitud(prestamo, registro);
+
+        Assert.AreEqual(TipoMovimiento.Solicitud, movimiento.Tipo);
+        Assert.AreSame(prestamo, movimiento.Prestamo);
+        Assert.AreSame(prestamo.Solicitante, movimiento.Solicitante);
+        Assert.AreSame(prestamo.Solicitante, movimiento.Responsable);
+        Assert.AreEqual(FechaFija, movimiento.FechaHora);
+        Assert.IsNull(movimiento.Unidad);
+    }
+
+    private static Prestamo CrearPrestamo()
+    {
+        TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",
+            duracionMaxPrestamo: 5, requiereAprobacion: true, categoria: Categoria.Audiovisual);
+
+        return new Prestamo(CrearSolicitante(), tipo, cantidadSolicitada: 1, fechaHoraPrestamo: FechaFija);
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
