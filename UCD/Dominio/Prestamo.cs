@@ -51,7 +51,7 @@ public class Prestamo
         ValidarUnidades(unidadesFisicas);
         AsignarUnidades(unidadesFisicas);
 
-        Estado = EstadoPrestamo.Aprobado;
+        Estado = EstadoPrestamo.Activo;
         Evaluador = evaluador;
     }
 

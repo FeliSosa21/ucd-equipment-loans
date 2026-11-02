@@ -101,7 +101,6 @@ public class ServicioPrestamo
                     RegistrarMovimiento(prestamo, TipoMovimiento.Aprobacion, fechaHoraEvaluacion, unidad);
                 }
 
-                prestamo.Realizar();
                 RegistrarMovimientos(prestamo, fechaHoraEvaluacion);
             }
 
