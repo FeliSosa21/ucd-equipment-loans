@@ -16,4 +16,10 @@ public class RepositorioUsuarioSql
         _contexto.Usuarios.Add(usuario);
         _contexto.SaveChanges();
     }
+
+    public Usuario? ObtenerUsuarioPorDni(string dni)
+    {
+        return _contexto.Usuarios.FirstOrDefault(usuario => usuario.Dni == dni);
+    }
+
 }
