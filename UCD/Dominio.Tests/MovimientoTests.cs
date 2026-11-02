@@ -195,6 +195,19 @@ public sealed class MovimientoTests
         Assert.AreSame(evaluador, movimiento.Evaluador);
     }
 
+    [TestMethod]
+    public void DeSolicitud_SinPrestamo_LanzaExcepcion()
+    {
+        Assert.ThrowsException<DominioException>(() =>
+            Movimiento.DeSolicitud(null!, RegistroDeAccion.DelSistema(FechaFija)));
+    }
+
+    [TestMethod]
+    public void DeSolicitud_SinRegistro_LanzaExcepcion()
+    {
+        Assert.ThrowsException<DominioException>(() => Movimiento.DeSolicitud(CrearPrestamo(), null!));
+    }
+
     private static Usuario CrearFuncionario()
     {
         Usuario usuario = new Usuario(
