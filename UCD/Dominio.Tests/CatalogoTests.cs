@@ -147,6 +147,16 @@ public sealed class CatalogoTests
         Assert.IsTrue(catalogo.Activo);
     }
 
+    [TestMethod]
+    public void DarDeBaja_CatalogoActivo_QuedaInactivo()
+    {
+        var catalogo = CrearCatalogo();
+
+        catalogo.DarDeBaja();
+
+        Assert.IsFalse(catalogo.Activo);
+    }
+
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);
