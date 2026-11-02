@@ -8,6 +8,7 @@ public class Catalogo
     private readonly List<TipoEquipamiento> _tipos = new();
     public string Nombre { get; private set; }
     public int Id { get; private set; }
+    public bool Activo { get; private set; } = true;
 
     public IReadOnlyCollection<TipoEquipamiento> Tipos => _tipos.AsReadOnly();
 
