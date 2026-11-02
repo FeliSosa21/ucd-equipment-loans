@@ -7,7 +7,17 @@ public class RegistroDeAccion
 
     public RegistroDeAccion(Usuario? responsable, DateTime fechaHora)
     {
+        ValidarFechaHora(fechaHora);
+
         Responsable = responsable;
         FechaHora = fechaHora;
+    }
+
+    private static void ValidarFechaHora(DateTime fechaHora)
+    {
+        if (fechaHora == default)
+        {
+            throw new DominioException("El registro debe tener fecha y hora");
+        }
     }
 }
