@@ -4,8 +4,6 @@ public class Prestamo
 {
     private const string MotivoFaltaDeUnidades = "No hay unidades suficientes para el tipo de equipamiento";
     private readonly List<UnidadFisica> _unidadesAsignadas = new List<UnidadFisica>();
-    public Usuario? ResponsableEntrega { get; private set; }
-    public DateTime? FechaHoraEntrega { get; private set; }
 
     public Guid Id { get; } = Guid.NewGuid();
     public EstadoPrestamo Estado { get; private set; } = EstadoPrestamo.Solicitado;
@@ -38,36 +36,23 @@ public class Prestamo
     {
         ValidarQueEsteSolicitado();
         ValidarQueNoRequieraAprobacion();
-        ValidarUnidades(unidadesFisicas);
-        AsignarUnidades(unidadesFisicas);
-
-        Estado = EstadoPrestamo.Activo;
+        AsignarYActivar(unidadesFisicas);
     }
 
     public void Aprobar(Usuario evaluador, IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         ValidarQueEsteSolicitado();
         ValidarEvaluador(evaluador);
-        ValidarUnidades(unidadesFisicas);
-        AsignarUnidades(unidadesFisicas);
+        AsignarYActivar(unidadesFisicas);
 
-        Estado = EstadoPrestamo.Aprobado;
         Evaluador = evaluador;
-    }
-
-    public void Realizar()
-    {
-        ValidarQueEsteAprobado();
-
-        Estado = EstadoPrestamo.Activo;
     }
 
     public void Rechazar(Usuario evaluador, string motivo)
     {
-        ValidarQueSePuedaRechazar();
+        ValidarQueEsteSolicitado();
         ValidarEvaluador(evaluador);
         ValidarMotivo(motivo);
-        LiberarUnidades();
 
         Estado = EstadoPrestamo.Rechazado;
         Evaluador = evaluador;
@@ -82,15 +67,6 @@ public class Prestamo
         MotivoRechazo = MotivoFaltaDeUnidades;
     }
 
-    public void RegistrarEntrega(Usuario responsable, DateTime fechaHoraEntrega)
-    {
-        ValidarQueSePuedaEntregar();
-        ValidarResponsable(responsable);
-
-        ResponsableEntrega = responsable;
-        FechaHoraEntrega = fechaHoraEntrega;
-    }
-
     public void MarcarDevuelto()
     {
         ValidarQueEsteActivo();
@@ -102,7 +78,6 @@ public class Prestamo
     public bool EstaVigente()
     {
         return Estado == EstadoPrestamo.Solicitado
-               || Estado == EstadoPrestamo.Aprobado
                || Estado == EstadoPrestamo.Activo;
     }
 
@@ -211,6 +186,14 @@ public class Prestamo
         }
     }
 
+    private void AsignarYActivar(IReadOnlyList<UnidadFisica> unidadesFisicas)
+    {
+        ValidarUnidades(unidadesFisicas);
+        AsignarUnidades(unidadesFisicas);
+
+        Estado = EstadoPrestamo.Activo;
+    }
+
     private void AsignarUnidades(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         foreach (UnidadFisica unidadFisica in unidadesFisicas)
@@ -221,58 +204,11 @@ public class Prestamo
         _unidadesAsignadas.AddRange(unidadesFisicas);
     }
 
-    private void ValidarQueEsteAprobado()
-    {
-        if (Estado != EstadoPrestamo.Aprobado)
-        {
-            throw new DominioException("El prestamo debe estar aprobado");
-        }
-    }
-
-    private void ValidarQueSePuedaRechazar()
-    {
-        if (Estado != EstadoPrestamo.Solicitado && Estado != EstadoPrestamo.Aprobado)
-        {
-            throw new DominioException("Solo se puede rechazar un prestamo solicitado o aprobado");
-        }
-    }
-
     private static void ValidarMotivo(string motivo)
     {
         if (string.IsNullOrWhiteSpace(motivo))
         {
             throw new DominioException("El motivo de rechazo no puede ser vacio");
-        }
-    }
-
-    private void LiberarUnidades()
-    {
-        foreach (UnidadFisica unidadFisica in _unidadesAsignadas)
-        {
-            unidadFisica.Disponible();
-        }
-
-        _unidadesAsignadas.Clear();
-    }
-
-    private void ValidarQueSePuedaEntregar()
-    {
-        if (Estado != EstadoPrestamo.Activo)
-        {
-            throw new DominioException("Solo se puede registrar la entrega de un prestamo activo");
-        }
-
-        if (FechaHoraEntrega is not null)
-        {
-            throw new DominioException("La entrega del prestamo ya fue registrada");
-        }
-    }
-
-    private static void ValidarResponsable(Usuario responsable)
-    {
-        if (responsable is null)
-        {
-            throw new DominioException("La entrega debe tener un responsable");
         }
     }
 
