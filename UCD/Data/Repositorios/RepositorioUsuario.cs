@@ -29,7 +29,17 @@ public class RepositorioUsuario
 
     public IReadOnlyList<Usuario> ObtenerPaginaDeUsuarios(string? filtro, int pagina, int tamanoPagina)
     {
-        return new List<Usuario>();
+        string busqueda = filtro?.Trim() ?? string.Empty;
+
+        return _memoria.Usuarios
+            .Where(usuario => $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
+                .Contains(busqueda, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(usuario => usuario.Apellido)
+            .ThenBy(usuario => usuario.Nombre)
+            .ThenBy(usuario => usuario.Dni)
+            .Skip((pagina - 1) * tamanoPagina)
+            .Take(tamanoPagina)
+            .ToList();
     }
 
     public IReadOnlyList<Usuario> ObtenerUsuariosQueCoinciden(string? texto, int maximo)
