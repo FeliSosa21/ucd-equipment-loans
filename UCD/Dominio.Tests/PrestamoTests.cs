@@ -546,9 +546,10 @@ public sealed class PrestamoTests
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
         Usuario evaluador = CrearEvaluador();
 
-        Assert.ThrowsException<DominioException>(
+        DominioException excepcion = Assert.ThrowsException<DominioException>(
             () => prestamo.Rechazar(evaluador, MotivoDeRechazo));
 
+        Assert.AreEqual("El prestamo debe estar solicitado", excepcion.Message);
         Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
 
         foreach (UnidadFisica unidad in unidades)
