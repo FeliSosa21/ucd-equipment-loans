@@ -2,6 +2,8 @@ namespace Servicios;
 
 public class ServicioException : Exception
 {
+    public string? Campo { get; }
+
     public ServicioException() : base()
     {
     }
@@ -12,5 +14,15 @@ public class ServicioException : Exception
 
     public ServicioException(string mensaje, Exception interna) : base(mensaje, interna)
     {
+    }
+
+    public ServicioException(string campo, string mensaje) : base(mensaje)
+    {
+        Campo = campo;
+    }
+
+    public ServicioException(string? campo, string mensaje, Exception interna) : base(mensaje, interna)
+    {
+        Campo = campo;
     }
 }

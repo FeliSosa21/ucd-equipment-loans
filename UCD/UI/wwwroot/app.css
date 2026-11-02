@@ -110,6 +110,8 @@ tr:last-child td { border-bottom: none; }
     transition: border-color .15s ease, box-shadow .15s ease;
 }
 .field:focus { border-color: var(--focus); outline: none; box-shadow: 0 0 0 3px var(--navy-ring); }
+.field[aria-invalid="true"] { border-color: var(--red); }
+.error-campo { font-size: .78rem; color: var(--red); margin-top: .35rem; }
 .field::placeholder { color: var(--ink-faint); opacity: .8; }
 .hint { font-size: .75rem; color: var(--ink-faint); margin-top: .35rem; }
 

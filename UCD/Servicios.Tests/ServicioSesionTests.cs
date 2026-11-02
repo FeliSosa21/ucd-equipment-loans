@@ -123,6 +123,17 @@ public class ServicioSesionTests
     }
 
     [TestMethod]
+    public void CambiarContrasena_ActualIncorrecta_ElErrorIndicaElCampoContrasenaActual()
+    {
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
+            servicio.CambiarContrasena(DniValido, "OtraClave2026", ContrasenaNueva));
+
+        Assert.AreEqual("ContrasenaActual", excepcion.Campo);
+    }
+
+    [TestMethod]
     public void CambiarContrasena_NuevaInvalida_LanzaExcepcionConLaDelDominio()
     {
         ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);

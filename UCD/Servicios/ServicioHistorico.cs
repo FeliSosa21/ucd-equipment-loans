@@ -30,8 +30,8 @@ public class ServicioHistorico
         {
             FechaHora = movimiento.FechaHora,
             Tipo = movimiento.Tipo.ToString(),
-            Solicitante = NombresDeUsuario.Completo(movimiento.Solicitante),
-            Evaluador = movimiento.Evaluador is null ? null : NombresDeUsuario.Completo(movimiento.Evaluador),
+            Solicitante = movimiento.Solicitante.NombreCompleto,
+            Evaluador = movimiento.Evaluador?.NombreCompleto,
             Unidad = movimiento.Unidad?.IdInstitucional
         };
     }

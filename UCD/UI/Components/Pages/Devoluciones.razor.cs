@@ -13,6 +13,7 @@ public partial class Devoluciones
     private string _busqueda = string.Empty;
     private string? _error;
     private string? _exito;
+    private DevolucionRegistradaDto? _registrada;
     private string? _avisoLista;
 
     private IEnumerable<PrestamoActivoDto> PrestamosFiltrados =>
@@ -36,6 +37,7 @@ public partial class Devoluciones
         _seleccionado = prestamo;
         _error = null;
         _exito = null;
+        _registrada = null;
         _avisoLista = null;
         _unidades = prestamo.Unidades
             .Select(id => new UnidadDevueltaDto { IdInstitucional = id, Condicion = _condiciones.First() })
@@ -65,7 +67,7 @@ public partial class Devoluciones
 
         try
         {
-            ServicioDevolucion.RegistrarDevolucion(datos, DniUsuario);
+            _registrada = ServicioDevolucion.RegistrarDevolucion(datos, DniUsuario);
             _exito = $"Se registró la devolución de {prestamo.TipoEquipamiento} de {prestamo.Solicitante}.";
             _seleccionado = null;
             Recargar();
@@ -108,6 +110,7 @@ public partial class Devoluciones
             _seleccionado = null;
             _error = null;
             _exito = null;
+            _registrada = null;
             _avisoLista = ex.Message;
             return false;
         }

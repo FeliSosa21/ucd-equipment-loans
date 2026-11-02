@@ -1,0 +1,10 @@
+@if (Errores.De(Campo) is string mensaje)
+{
+    <div id="@ErroresDeFormulario.IdDelMensaje(IdDelCampo)" class="error-campo">@mensaje</div>
+}
+
+@code {
+    [Parameter, EditorRequired] public ErroresDeFormulario Errores { get; set; } = null!;
+    [Parameter, EditorRequired] public string Campo { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string IdDelCampo { get; set; } = string.Empty;
+}
