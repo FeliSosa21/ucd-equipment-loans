@@ -6,6 +6,7 @@ namespace Data;
 public class SqlContext : DbContext
 {
     public DbSet<Catalogo> Catalogos { get; set; }
+    public DbSet<Usuario> Usuarios { get; set; }
 
     public SqlContext(DbContextOptions<SqlContext> options) : base(options)
     {
