@@ -3,13 +3,14 @@ namespace Dominio;
 public class Usuario
 {
     private const int LargoMinimoNombreOApellido = 2;
-    private const int LargoMaximoNombreOApellido = 50;
+    public const int LargoMaximoNombreOApellido = 50;
     private const int LargoMinimoTld = 2;
     private const int LargoMaximoTld = 63;
     private const int LargoMinimoContrasena = 8;
-    private const int LargoDni = 8;
+    public const int LargoDni = 8;
     private static readonly int[] PesosDni = { 2, 9, 8, 7, 6, 3, 4 };
 
+    public int Id { get; private set; }
     public string Dni { get; private set; }
     public string Nombre { get; private set; }
     public string Apellido { get; private set; }
