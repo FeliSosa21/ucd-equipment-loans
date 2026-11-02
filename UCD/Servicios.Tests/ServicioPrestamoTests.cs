@@ -925,7 +925,7 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void ListarPrestamosPorEntregar_VariosEstados_DevuelveSoloLosActivosSinEntrega()
+    public void ListarPrestamosPorEntregar_VariosEstados_DevuelveLosActivos()
     {
         Memoria memoria = new Memoria();
         ServicioPrestamo servicio = CrearServicio(memoria);
@@ -940,7 +940,8 @@ public sealed class ServicioPrestamoTests
         List<PrestamoDto> resultado = servicio.ListarPrestamosPorEntregar();
 
         CollectionAssert.AreEquivalent(
-            new List<Guid> { idActivoSinEntrega }, resultado.Select(prestamo => prestamo.Id).ToList());
+            new List<Guid> { idActivoSinEntrega, idEntregado },
+            resultado.Select(prestamo => prestamo.Id).ToList());
     }
 
     [TestMethod]
