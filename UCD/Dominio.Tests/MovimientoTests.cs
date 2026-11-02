@@ -178,6 +178,37 @@ public sealed class MovimientoTests
         Assert.AreEqual(FechaFija, movimiento.FechaHora);
     }
 
+    [TestMethod]
+    public void DeDevolucion_RegistradaPorFuncionario_ResponsableEsElFuncionarioYEvaluadorElDelPrestamo()
+    {
+        Usuario evaluador = CrearEvaluador();
+        Usuario funcionario = CrearFuncionario();
+        UnidadFisica unidad = CrearUnidad(idInstitucional: "EQP-0001");
+        Prestamo prestamo = CrearPrestamoAprobado(evaluador, unidad);
+
+        Movimiento movimiento = Movimiento.DeDevolucion(prestamo,
+            RegistroDeAccion.DeUsuario(funcionario, FechaFija), unidad);
+
+        Assert.AreEqual(TipoMovimiento.Devolucion, movimiento.Tipo);
+        Assert.AreSame(unidad, movimiento.Unidad);
+        Assert.AreSame(funcionario, movimiento.Responsable);
+        Assert.AreSame(evaluador, movimiento.Evaluador);
+    }
+
+    private static Usuario CrearFuncionario()
+    {
+        Usuario usuario = new Usuario(
+            dni: "11111111",
+            nombre: "Laura",
+            apellido: "Diaz",
+            correo: "laura.diaz@ejemplo.com",
+            contrasena: "VivalaOrt2026");
+
+        usuario.AsignarTipo(TipoUsuario.FuncionarioCE);
+
+        return usuario;
+    }
+
     private static Prestamo CrearPrestamoAprobado(Usuario evaluador, UnidadFisica unidad)
     {
         Prestamo prestamo = CrearPrestamo();
