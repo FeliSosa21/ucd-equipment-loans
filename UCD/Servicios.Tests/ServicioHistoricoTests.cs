@@ -83,6 +83,30 @@ public sealed class ServicioHistoricoTests
         Assert.AreEqual("Prestamo", movimientos[0].Tipo);
     }
 
+    [TestMethod]
+    public void ListarMovimientos_MovimientoDeUnUsuario_DevuelveSuNombreComoResponsable()
+    {
+        Memoria memoria = new Memoria();
+        RegistrarSolicitud(memoria, fechaHora: FechaFija);
+        ServicioHistorico servicio = CrearServicio(memoria);
+
+        MovimientoDto movimiento = servicio.ListarMovimientos().Single();
+
+        Assert.AreEqual("Ana Perez", movimiento.Responsable);
+    }
+
+    [TestMethod]
+    public void ListarMovimientos_MovimientoDelSistema_DevuelveSistemaComoResponsable()
+    {
+        Memoria memoria = new Memoria();
+        RegistrarPrestamo(memoria, fechaHora: FechaFija);
+        ServicioHistorico servicio = CrearServicio(memoria);
+
+        MovimientoDto movimiento = servicio.ListarMovimientos().Single();
+
+        Assert.AreEqual("Sistema", movimiento.Responsable);
+    }
+
     private static ServicioHistorico CrearServicio(Memoria memoria)
     {
         return new ServicioHistorico(new RepositorioMovimiento(memoria));
