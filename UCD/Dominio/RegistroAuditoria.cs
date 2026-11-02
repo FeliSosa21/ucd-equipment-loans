@@ -10,7 +10,7 @@ public class RegistroAuditoria
     public string Detalle { get; private set; } = string.Empty;
 
     public RegistroAuditoria(RegistroDeAccion registro, AccionAuditada accion, string detalle)
-        : this(registro.FechaHora, registro.Responsable, accion, detalle)
+        : this(ValidarRegistro(registro).FechaHora, registro.Responsable, accion, detalle)
     {
     }
 
@@ -31,6 +31,16 @@ public class RegistroAuditoria
     public bool EsDelSistema()
     {
         return Responsable is null;
+    }
+
+    private static RegistroDeAccion ValidarRegistro(RegistroDeAccion registro)
+    {
+        if (registro is null)
+        {
+            throw new DominioException("El registro de auditoria debe tener quien y cuando");
+        }
+
+        return registro;
     }
 
     private static void ValidarFechaHora(DateTime fechaHora)
