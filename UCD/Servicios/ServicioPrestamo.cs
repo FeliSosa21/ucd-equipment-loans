@@ -7,7 +7,6 @@ namespace Servicios;
 public class ServicioPrestamo
 {
     private const string MensajeSinPermisoParaEvaluar = "El usuario no tiene permiso para evaluar solicitudes";
-    private const string MensajeSinPermisoParaRealizar = "El usuario no tiene permiso para realizar prestamos";
 
     private readonly RepositorioPrestamo _prestamos;
     private readonly RepositorioUsuario _usuarios;
@@ -122,24 +121,6 @@ public class ServicioPrestamo
         {
             prestamo.Rechazar(evaluador, motivo);
             RegistrarMovimiento(prestamo, TipoMovimiento.Rechazo, _reloj.GetLocalNow().DateTime, unidad: null);
-
-            return CrearPrestamoDto(prestamo);
-        }
-        catch (DominioException excepcion)
-        {
-            throw new ServicioException(excepcion.Message, excepcion);
-        }
-    }
-
-    public PrestamoDto RegistrarEntrega(Guid idPrestamo, string dniResponsable)
-    {
-        Usuario responsable = ObtenerUsuarioHabilitado(
-            dniResponsable, Permiso.RealizarPrestamo, MensajeSinPermisoParaRealizar);
-        Prestamo prestamo = ObtenerPrestamo(idPrestamo);
-
-        try
-        {
-            prestamo.RegistrarEntrega(responsable, _reloj.GetLocalNow().DateTime);
 
             return CrearPrestamoDto(prestamo);
         }
@@ -290,8 +271,7 @@ public class ServicioPrestamo
             FechaEsperadaDevolucion = prestamo.FechaEsperadaDevolucion,
             Estado = prestamo.Estado.ToString(),
             MotivoRechazo = prestamo.MotivoRechazo,
-            Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList(),
-            FechaHoraEntrega = prestamo.FechaHoraEntrega
+            Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList()
         };
     }
 }
