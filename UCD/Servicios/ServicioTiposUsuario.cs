@@ -27,6 +27,7 @@ public class ServicioTiposUsuario
     {
         TipoUsuario tipo = _repositorioTipos.ObtenerTipoPorNombre(dto.Nombre)!;
         tipo.ModificarDescripcion(dto.Descripcion);
+        tipo.ModificarImagen(dto.Imagen);
     }
 
     private void ValidarQueSeaAdministradorActivo(string dniResponsable)
