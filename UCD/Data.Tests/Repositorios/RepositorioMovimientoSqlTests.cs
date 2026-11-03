@@ -65,6 +65,27 @@ public sealed class RepositorioMovimientoSqlTests
             resultado.Select(movimiento => movimiento.Tipo).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerPaginaDeMovimientos_FiltroPorCatalogo_DevuelveSoloLosDeEseCatalogo()
+    {
+        Usuario solicitante = CrearUsuario(dni: "12345672", correo: "renato.alves@ejemplo.com");
+        TipoEquipamiento notebook = CrearTipo("Notebook Lenovo ThinkPad", Categoria.Computacion);
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson", Categoria.Audiovisual);
+        Catalogo electronica = CrearCatalogoCon("Electronica", notebook);
+        Catalogo audiovisuales = CrearCatalogoCon("Audiovisuales", proyector);
+        Prestamo deNotebook = new Prestamo(solicitante, notebook, cantidadSolicitada: 1, fechaHoraPrestamo: FechaFija);
+        Prestamo deProyector = new Prestamo(solicitante, proyector, cantidadSolicitada: 1, fechaHoraPrestamo: FechaFija);
+        GuardarCatalogosYMovimientos(new[] { electronica, audiovisuales },
+            Movimiento.DeSolicitud(deNotebook, RegistroDeAccion.DeUsuario(solicitante, FechaFija)),
+            Movimiento.DeRechazo(deProyector, RegistroDeAccion.DelSistema(FechaFija)));
+
+        IReadOnlyList<Movimiento> resultado =
+            LeerPagina(new FiltroMovimientos { IdCatalogo = electronica.Id }, pagina: 1, tamanoPagina: 10);
+
+        CollectionAssert.AreEqual(new List<TipoMovimiento> { TipoMovimiento.Solicitud },
+            resultado.Select(movimiento => movimiento.Tipo).ToList());
+    }
+
     private void GuardarTresMovimientos()
     {
         Prestamo prestamo = CrearPrestamoActivo();
@@ -81,6 +102,33 @@ public sealed class RepositorioMovimientoSqlTests
         RepositorioMovimientoSql repositorio = new RepositorioMovimientoSql(contextoQueLee);
 
         return repositorio.ObtenerPaginaDeMovimientos(filtro, pagina, tamanoPagina);
+    }
+
+    private void GuardarCatalogosYMovimientos(IEnumerable<Catalogo> catalogos, params Movimiento[] movimientos)
+    {
+        using SqlContext contextoQueGuarda = new SqlContext(_opciones);
+        contextoQueGuarda.Catalogos.AddRange(catalogos);
+        contextoQueGuarda.SaveChanges();
+        RepositorioMovimientoSql repositorio = new RepositorioMovimientoSql(contextoQueGuarda);
+
+        foreach (Movimiento movimiento in movimientos)
+        {
+            repositorio.AgregarMovimiento(movimiento);
+        }
+    }
+
+    private static TipoEquipamiento CrearTipo(string nombre, Categoria categoria)
+    {
+        return new TipoEquipamiento(nombre: nombre, descripcion: "Equipo de prueba", duracionMaxPrestamo: 5,
+            requiereAprobacion: false, categoria: categoria);
+    }
+
+    private static Catalogo CrearCatalogoCon(string nombre, TipoEquipamiento tipo)
+    {
+        Catalogo catalogo = new Catalogo(nombre);
+        catalogo.AgregarTipo(tipo);
+
+        return catalogo;
     }
 
     private void GuardarConOtroContexto(params Movimiento[] movimientos)
