@@ -5,7 +5,7 @@ public class Prestamo
     private const string MotivoFaltaDeUnidades = "No hay unidades suficientes para el tipo de equipamiento";
     private readonly List<UnidadFisica> _unidadesAsignadas = new List<UnidadFisica>();
 
-    public Guid Id { get; } = Guid.NewGuid();
+    public Guid Id { get; private set; } = Guid.NewGuid();
     public EstadoPrestamo Estado { get; private set; } = EstadoPrestamo.Solicitado;
     public Usuario Solicitante { get; }
     public TipoEquipamiento TipoEquipamiento { get; }
@@ -15,6 +15,12 @@ public class Prestamo
     public Usuario? Evaluador { get; private set; }
     public string? MotivoRechazo { get; private set; }
     public IReadOnlyList<UnidadFisica> UnidadesAsignadas => _unidadesAsignadas.AsReadOnly();
+
+    private Prestamo()
+    {
+        Solicitante = null!;
+        TipoEquipamiento = null!;
+    }
 
     public Prestamo(Usuario solicitante, TipoEquipamiento tipoEquipamiento, int cantidadSolicitada,
         DateTime fechaHoraPrestamo)
