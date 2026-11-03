@@ -36,6 +36,8 @@ public class MovimientoConfiguracion : IEntityTypeConfiguration<Movimiento>
         {
             registro.Property(accion => accion.FechaHora).HasColumnName("FechaHora").IsRequired();
 
+            registro.Property<int?>("ResponsableId").HasColumnName("ResponsableId");
+
             registro.HasOne(accion => accion.Responsable)
                 .WithMany()
                 .HasForeignKey("ResponsableId")
