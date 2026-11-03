@@ -8,6 +8,7 @@ public class SqlContext : DbContext
     public DbSet<Catalogo> Catalogos { get; set; }
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Prestamo> Prestamos { get; set; }
+    public DbSet<Movimiento> Movimientos { get; set; }
 
     public SqlContext(DbContextOptions<SqlContext> options) : base(options)
     {
