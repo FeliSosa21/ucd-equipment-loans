@@ -40,7 +40,7 @@ public class CargaInicial
 
         Usuario root = new Usuario(dni: DniRoot, nombre: "Root", apellido: "Admin", correo: CorreoRoot,
             contrasena: ContrasenaRoot);
-        root.AsignarTipo(TipoUsuario.Administrador());
+        root.AsignarTipo(_repositorioTipoUsuario.ObtenerTipoPorNombre(TipoUsuario.Administrador().Nombre)!);
         // El root no debe cambiar la contrasena en el primer ingreso: la letra lo exceptua ("salvo el root").
         _repositorioUsuario.AgregarUsuario(root);
     }

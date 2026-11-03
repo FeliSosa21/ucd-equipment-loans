@@ -13,6 +13,7 @@ public class CargaInicialTests
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
         CargaInicial carga = CrearCarga(memoria);
+        carga.CargarTiposDeUsuario();
 
         carga.CargarRoot();
 
@@ -28,6 +29,7 @@ public class CargaInicialTests
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
         CargaInicial carga = CrearCarga(memoria);
+        carga.CargarTiposDeUsuario();
 
         carga.CargarRoot();
         carga.CargarRoot();
