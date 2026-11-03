@@ -23,10 +23,13 @@ public class DatosDeEjemplo
     private readonly RepositorioCatalogo _repositorioCatalogo;
     private readonly RepositorioMovimiento _movimientos;
     private readonly TimeProvider _reloj;
+    private readonly RepositorioTipoUsuario _repositorioTipos;
 
     public DatosDeEjemplo(RepositorioUsuario usuarios, RepositorioPrestamo prestamos,
-        RepositorioCatalogo repositorioCatalogo, RepositorioMovimiento movimientos, TimeProvider reloj)
+        RepositorioCatalogo repositorioCatalogo, RepositorioMovimiento movimientos, TimeProvider reloj,
+        RepositorioTipoUsuario repositorioTipos)
     {
+        _repositorioTipos = repositorioTipos;
         _usuarios = usuarios;
         _prestamos = prestamos;
         _repositorioCatalogo = repositorioCatalogo;

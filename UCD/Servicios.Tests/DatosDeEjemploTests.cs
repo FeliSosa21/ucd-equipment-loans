@@ -12,6 +12,7 @@ public class DatosDeEjemploTests
     private RepositorioPrestamo _prestamos = null!;
     private RepositorioCatalogo _repositorioCatalogo = null!;
     private RepositorioMovimiento _movimientos = null!;
+    private RepositorioTipoUsuario _repositorioTipos = null!;
     private DatosDeEjemplo _datos = null!;
 
     private static readonly DateTime Hoy = new DateTime(2026, 10, 7, 9, 0, 0);
@@ -25,7 +26,9 @@ public class DatosDeEjemploTests
         _repositorioCatalogo = new RepositorioCatalogo(_memoria);
         _repositorioCatalogo.Guardar(new Catalogo(CargaInicial.NombreCatalogo));
         _movimientos = new RepositorioMovimiento(_memoria);
-        _datos = new DatosDeEjemplo(_usuarios, _prestamos, _repositorioCatalogo, _movimientos, new RelojFijo(Hoy));
+        _repositorioTipos = TiposDePrueba.Cargados(_memoria);
+        _datos = new DatosDeEjemplo(_usuarios, _prestamos, _repositorioCatalogo, _movimientos, new RelojFijo(Hoy),
+            _repositorioTipos);
     }
 
     [TestMethod]
@@ -38,6 +41,15 @@ public class DatosDeEjemploTests
             _usuarios.ObtenerUsuarioPorCorreo(DatosDeEjemplo.CorreoEstudiante)!.Tipo.Nombre);
         Assert.AreEqual(TipoUsuario.FuncionarioCE().Nombre,
             _usuarios.ObtenerUsuarioPorCorreo(DatosDeEjemplo.CorreoFuncionario)!.Tipo.Nombre);
+    }
+
+    [TestMethod]
+    public void Cargar_MemoriaVacia_LeAsignaAlDocenteElTipoDelRepositorio()
+    {
+        _datos.Cargar();
+
+        TipoUsuario docente = _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!;
+        Assert.AreSame(docente, _usuarios.ObtenerUsuarioPorCorreo(DatosDeEjemplo.CorreoDocente)!.Tipo);
     }
 
     [TestMethod]
@@ -133,7 +145,7 @@ public class DatosDeEjemploTests
         Memoria memoria = new Memoria();
         DatosDeEjemplo datos = new DatosDeEjemplo(new RepositorioUsuario(memoria),
             new RepositorioPrestamo(memoria), new RepositorioCatalogo(memoria), new RepositorioMovimiento(memoria),
-            new RelojFijo(Hoy));
+            new RelojFijo(Hoy), TiposDePrueba.Cargados(memoria));
 
         Assert.ThrowsException<InvalidOperationException>(() => datos.Cargar());
     }
