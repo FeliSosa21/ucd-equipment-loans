@@ -13,5 +13,7 @@ public class RepositorioPrestamoSql
 
     public void AgregarPrestamo(Prestamo prestamo)
     {
+        _contexto.Prestamos.Add(prestamo);
+        _contexto.SaveChanges();
     }
 }

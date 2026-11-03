@@ -9,9 +9,9 @@ public class Prestamo
     public EstadoPrestamo Estado { get; private set; } = EstadoPrestamo.Solicitado;
     public Usuario Solicitante { get; }
     public TipoEquipamiento TipoEquipamiento { get; }
-    public int CantidadSolicitada { get; }
-    public DateTime FechaHoraPrestamo { get; }
-    public DateTime FechaEsperadaDevolucion { get; }
+    public int CantidadSolicitada { get; private set; }
+    public DateTime FechaHoraPrestamo { get; private set; }
+    public DateTime FechaEsperadaDevolucion { get; private set; }
     public Usuario? Evaluador { get; private set; }
     public string? MotivoRechazo { get; private set; }
     public IReadOnlyList<UnidadFisica> UnidadesAsignadas => _unidadesAsignadas.AsReadOnly();
