@@ -43,21 +43,44 @@ public sealed class RepositorioMovimientoSqlTests
     [TestMethod]
     public void ObtenerPaginaDeMovimientos_SinFiltro_DelMasRecienteAlMasViejoYEnEmpateElUltimoRegistrado()
     {
+        GuardarTresMovimientos();
+
+        IReadOnlyList<Movimiento> resultado =
+            LeerPagina(new FiltroMovimientos(), pagina: 1, tamanoPagina: 10);
+
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Devolucion, TipoMovimiento.Prestamo, TipoMovimiento.Solicitud },
+            resultado.Select(movimiento => movimiento.Tipo).ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerPaginaDeMovimientos_SegundaPaginaDeUno_DevuelveSoloElSegundo()
+    {
+        GuardarTresMovimientos();
+
+        IReadOnlyList<Movimiento> resultado =
+            LeerPagina(new FiltroMovimientos(), pagina: 2, tamanoPagina: 1);
+
+        CollectionAssert.AreEqual(new List<TipoMovimiento> { TipoMovimiento.Prestamo },
+            resultado.Select(movimiento => movimiento.Tipo).ToList());
+    }
+
+    private void GuardarTresMovimientos()
+    {
         Prestamo prestamo = CrearPrestamoActivo();
         UnidadFisica unidad = prestamo.UnidadesAsignadas[0];
         GuardarConOtroContexto(
             Movimiento.DeSolicitud(prestamo, RegistroDeAccion.DeUsuario(prestamo.Solicitante, FechaFija)),
             Movimiento.DePrestamo(prestamo, RegistroDeAccion.DelSistema(FechaFija), unidad),
             Movimiento.DeDevolucion(prestamo, RegistroDeAccion.DelSistema(FechaFija.AddDays(1)), unidad));
+    }
 
+    private IReadOnlyList<Movimiento> LeerPagina(FiltroMovimientos filtro, int pagina, int tamanoPagina)
+    {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioMovimientoSql repositorio = new RepositorioMovimientoSql(contextoQueLee);
-        IReadOnlyList<Movimiento> resultado =
-            repositorio.ObtenerPaginaDeMovimientos(new FiltroMovimientos(), pagina: 1, tamanoPagina: 10);
 
-        CollectionAssert.AreEqual(
-            new List<TipoMovimiento> { TipoMovimiento.Devolucion, TipoMovimiento.Prestamo, TipoMovimiento.Solicitud },
-            resultado.Select(movimiento => movimiento.Tipo).ToList());
+        return repositorio.ObtenerPaginaDeMovimientos(filtro, pagina, tamanoPagina);
     }
 
     private void GuardarConOtroContexto(params Movimiento[] movimientos)
