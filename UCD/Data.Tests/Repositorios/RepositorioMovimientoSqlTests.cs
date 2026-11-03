@@ -86,6 +86,18 @@ public sealed class RepositorioMovimientoSqlTests
             resultado.Select(movimiento => movimiento.Tipo).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerPaginaDeMovimientos_FiltroPorFechas_IncluyeDesdeYExcluyeHasta()
+    {
+        GuardarTresMovimientos();
+        FiltroMovimientos filtro = new FiltroMovimientos { Desde = FechaFija, Hasta = FechaFija.AddDays(1) };
+
+        IReadOnlyList<Movimiento> resultado = LeerPagina(filtro, pagina: 1, tamanoPagina: 10);
+
+        CollectionAssert.AreEqual(new List<TipoMovimiento> { TipoMovimiento.Prestamo, TipoMovimiento.Solicitud },
+            resultado.Select(movimiento => movimiento.Tipo).ToList());
+    }
+
     private void GuardarTresMovimientos()
     {
         Prestamo prestamo = CrearPrestamoActivo();
