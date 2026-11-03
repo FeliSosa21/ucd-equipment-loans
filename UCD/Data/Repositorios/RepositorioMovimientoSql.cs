@@ -1,4 +1,5 @@
 using Dominio;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositorios;
 
@@ -15,5 +16,13 @@ public class RepositorioMovimientoSql
     {
         _contexto.Movimientos.Add(movimiento);
         _contexto.SaveChanges();
+    }
+
+    public IReadOnlyList<Movimiento> ObtenerPaginaDeMovimientos(FiltroMovimientos filtro, int pagina, int tamanoPagina)
+    {
+        return _contexto.Movimientos
+            .OrderByDescending(movimiento => EF.Property<RegistroDeAccion>(movimiento, "_registro").FechaHora)
+            .ThenByDescending(movimiento => movimiento.Id)
+            .ToList();
     }
 }
