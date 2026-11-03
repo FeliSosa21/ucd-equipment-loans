@@ -33,13 +33,16 @@ public class ServicioTiposUsuario
             throw new ServicioException("El tipo de usuario no existe");
         }
 
-        tipo.ModificarDescripcion(dto.Descripcion);
-        tipo.ModificarImagen(dto.Imagen);
-
-        if (dto.MaxUnidadesPorCatalogo.HasValue && dto.MaxPrestamosConcurrentes.HasValue)
+        TraduccionDeErrores.Ejecutar(() =>
         {
-            tipo.ModificarTopes(dto.MaxUnidadesPorCatalogo.Value, dto.MaxPrestamosConcurrentes.Value);
-        }
+            tipo.ModificarDescripcion(dto.Descripcion);
+            tipo.ModificarImagen(dto.Imagen);
+
+            if (dto.MaxUnidadesPorCatalogo.HasValue && dto.MaxPrestamosConcurrentes.HasValue)
+            {
+                tipo.ModificarTopes(dto.MaxUnidadesPorCatalogo.Value, dto.MaxPrestamosConcurrentes.Value);
+            }
+        });
     }
 
     private void ValidarQueSeaAdministradorActivo(string dniResponsable)
