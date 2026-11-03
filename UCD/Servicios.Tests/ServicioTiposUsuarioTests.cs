@@ -9,6 +9,7 @@ namespace Servicios.Tests;
 public class ServicioTiposUsuarioTests
 {
     private const string DniAdministrador = "11111111";
+    private const string DniEstudiante = "12345672";
 
     private Memoria _memoria = null!;
     private RepositorioUsuario _repositorioUsuarios = null!;
@@ -48,5 +49,16 @@ public class ServicioTiposUsuarioTests
         Assert.AreEqual(3, docente.MaxPrestamosConcurrentes);
         Assert.IsNull(administrador.MaxUnidadesPorCatalogo);
         Assert.IsNull(administrador.MaxPrestamosConcurrentes);
+    }
+
+    [TestMethod]
+    public void ListarTipos_ResponsableNoAdministrador_LanzaExcepcion()
+    {
+        Usuario estudiante = new Usuario(dni: DniEstudiante, nombre: "Juan", apellido: "Gomez",
+            correo: "juan@hotmail.com", contrasena: "VivaLaOrt2026");
+        estudiante.AsignarTipo(_repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Estudiante().Nombre)!);
+        _repositorioUsuarios.AgregarUsuario(estudiante);
+
+        Assert.ThrowsException<ServicioException>(() => _servicio.ListarTipos(DniEstudiante));
     }
 }
