@@ -64,7 +64,7 @@ public class ServicioAdministracionUsuarios
 
     public List<string> NombresDeTipos()
     {
-        return TipoUsuario.Todos().Select(tipo => tipo.Nombre).ToList();
+        return _repositorioTipos.ObtenerTodos().Select(tipo => tipo.Nombre).ToList();
     }
 
     public void AsignarTipo(string dni, string nombreTipo, string dniResponsable)
@@ -155,9 +155,9 @@ public class ServicioAdministracionUsuarios
         return usuario.Estado == EstadoUsuario.Activo && usuario.TienePermiso(Permiso.GestionarUsuarios);
     }
 
-    private static TipoUsuario ObtenerTipo(string nombreTipo)
+    private TipoUsuario ObtenerTipo(string nombreTipo)
     {
-        TipoUsuario? tipo = TipoUsuario.Todos().FirstOrDefault(t => t.Nombre == nombreTipo);
+        TipoUsuario? tipo = _repositorioTipos.ObtenerTipoPorNombre(nombreTipo);
 
         if (tipo is null)
         {
