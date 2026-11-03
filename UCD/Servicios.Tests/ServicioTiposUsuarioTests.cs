@@ -126,6 +126,22 @@ public class ServicioTiposUsuarioTests
         Assert.ThrowsException<ServicioException>(() => _servicio.ModificarTipo(dto, DniAdministrador));
     }
 
+    [TestMethod]
+    public void ModificarTipo_ResponsableNoAdministrador_LanzaExcepcion()
+    {
+        AgregarEstudiante();
+
+        Assert.ThrowsException<ServicioException>(() => _servicio.ModificarTipo(CrearDtoDocente(), DniEstudiante));
+    }
+
+    private void AgregarEstudiante()
+    {
+        Usuario estudiante = new Usuario(dni: DniEstudiante, nombre: "Juan", apellido: "Gomez",
+            correo: "juan@hotmail.com", contrasena: "VivaLaOrt2026");
+        estudiante.AsignarTipo(_repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Estudiante().Nombre)!);
+        _repositorioUsuarios.AgregarUsuario(estudiante);
+    }
+
     private static TipoUsuarioDto CrearDtoDocente()
     {
         return new TipoUsuarioDto
