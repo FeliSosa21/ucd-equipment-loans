@@ -32,7 +32,7 @@ public class CargaInicialTests
         carga.CargarRoot();
         carga.CargarRoot();
 
-        Assert.AreEqual(1, repositorio.ObtenerTodos().Count);
+        Assert.AreEqual(1, repositorio.ContarUsuarios(null));
     }
 
     [TestMethod]

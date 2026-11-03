@@ -127,6 +127,11 @@ public class TipoUsuario
         return permisos.Contains(permiso);
     }
 
+    public bool NoTienePermisos()
+    {
+        return permisos.Count == 0;
+    }
+
     public bool PuedeAgregarPrestamo(int prestamosVigentes)
     {
         return topes is null || topes.PuedeAgregarPrestamo(prestamosVigentes);

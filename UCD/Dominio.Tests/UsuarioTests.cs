@@ -560,6 +560,110 @@ public sealed class UsuarioTests
         Assert.ThrowsException<DominioException>(() => usuario.CambiarContrasena("corta1A"));
     }
 
+    [TestMethod]
+    public void Constructor_DniInvalido_ElErrorIndicaElCampoDni()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: "1"));
+
+        Assert.AreEqual("Dni", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Constructor_NombreInvalido_ElErrorIndicaElCampoNombre()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(nombre: "A"));
+
+        Assert.AreEqual("Nombre", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Constructor_ApellidoInvalido_ElErrorIndicaElCampoApellido()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(apellido: "A"));
+
+        Assert.AreEqual("Apellido", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Constructor_CorreoInvalido_ElErrorIndicaElCampoCorreo()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: "sinarroba"));
+
+        Assert.AreEqual("Correo", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Constructor_ContrasenaInvalida_ElErrorIndicaElCampoContrasena()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(contrasena: "corta"));
+
+        Assert.AreEqual("Contrasena", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Constructor_DatosConEspaciosAlrededor_LosGuardaRecortados()
+    {
+        Usuario usuario = CrearUsuario(nombre: "  Felipe ", apellido: " Sosa  ", correo: " " + CorreoValido + " ");
+
+        Assert.AreEqual(NombreValido, usuario.Nombre);
+        Assert.AreEqual(ApellidoValido, usuario.Apellido);
+        Assert.AreEqual(CorreoValido, usuario.Correo);
+    }
+
+    [TestMethod]
+    public void ModificarDatos_DatosConEspaciosAlrededor_LosGuardaRecortados()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.ModificarDatos("  Pedro ", " Suarez  ", " pedro@hotmail.com ");
+
+        Assert.AreEqual("Pedro", usuario.Nombre);
+        Assert.AreEqual("Suarez", usuario.Apellido);
+        Assert.AreEqual("pedro@hotmail.com", usuario.Correo);
+    }
+
+    [TestMethod]
+    public void EstaPendienteDeActivacion_UsuarioRecienRegistrado_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.IsTrue(usuario.EstaPendienteDeActivacion());
+    }
+
+    [TestMethod]
+    public void EstaPendienteDeActivacion_ConTipoAsignado_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante);
+
+        Assert.IsFalse(usuario.EstaPendienteDeActivacion());
+    }
+
+    [TestMethod]
+    public void NombreCompleto_DatosValidos_DevuelveNombreYApellido()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.AreEqual($"{NombreValido} {ApellidoValido}", usuario.NombreCompleto);
+    }
+
+    [TestMethod]
+    public void TienePermiso_UsuarioSinPermisos_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.IsFalse(usuario.TienePermiso(Permiso.GestionarUsuarios));
+    }
+
+    [TestMethod]
+    public void TienePermiso_PermisoDeSuTipo_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Administrador);
+
+        Assert.IsTrue(usuario.TienePermiso(Permiso.GestionarUsuarios));
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {

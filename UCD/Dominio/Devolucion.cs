@@ -4,23 +4,22 @@ namespace Dominio;
 public class Devolucion
 {
     private readonly List<UnidadDevuelta> _unidades;
+    private readonly RegistroDeAccion _registro;
 
     public Prestamo Prestamo { get; }
-    public Usuario RegistradaPor { get; }
-    public DateTime FechaHoraDevolucion { get; }
+    public Usuario RegistradaPor => _registro.Responsable!;
+    public DateTime FechaHoraDevolucion => _registro.FechaHora;
     public IReadOnlyList<UnidadDevuelta> Unidades => _unidades.AsReadOnly();
 
-    public Devolucion(Prestamo prestamo, Usuario registradaPor, DateTime fechaHoraDevolucion,
-        IReadOnlyList<UnidadDevuelta> unidades)
+    public Devolucion(Prestamo prestamo, RegistroDeAccion registro, IReadOnlyList<UnidadDevuelta> unidades)
     {
         ValidarPrestamo(prestamo);
-        ValidarUsuario(registradaPor);
-        ValidarFecha(fechaHoraDevolucion, prestamo.FechaHoraPrestamo);
+        ValidarUsuario(registro?.Responsable);
+        ValidarFecha(registro!.FechaHora, prestamo.FechaHoraPrestamo);
         ValidarUnidades(unidades, prestamo);
 
         Prestamo = prestamo;
-        RegistradaPor = registradaPor;
-        FechaHoraDevolucion = fechaHoraDevolucion;
+        _registro = registro;
         _unidades = unidades.ToList();
     }
 
@@ -50,7 +49,7 @@ public class Devolucion
         }
     }
 
-    private static void ValidarUsuario(Usuario registradaPor)
+    private static void ValidarUsuario(Usuario? registradaPor)
     {
         if (registradaPor is null)
         {

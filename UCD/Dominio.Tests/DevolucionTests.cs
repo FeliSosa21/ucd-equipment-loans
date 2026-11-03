@@ -13,7 +13,7 @@ public sealed class DevolucionTests
         DateTime fecha = InicioPrestamo.AddDays(3);
         List<UnidadDevuelta> unidades = DevolverTodasSinObservaciones(prestamo);
 
-        Devolucion devolucion = new Devolucion(prestamo, funcionario, fecha, unidades);
+        Devolucion devolucion = new Devolucion(prestamo, RegistroDeAccion.DeUsuario(funcionario, fecha), unidades);
 
         Assert.AreSame(prestamo, devolucion.Prestamo);
         Assert.AreSame(funcionario, devolucion.RegistradaPor);
@@ -25,7 +25,7 @@ public sealed class DevolucionTests
     public void Constructor_PrestamoNulo_LanzaExcepcion()
     {
         Assert.ThrowsException<DominioException>(() =>
-            new Devolucion(null!, CrearFuncionario(), InicioPrestamo, new List<UnidadDevuelta>()));
+            new Devolucion(null!, RegistroDeAccion.DeUsuario(CrearFuncionario(), InicioPrestamo), new List<UnidadDevuelta>()));
     }
 
     [TestMethod]
@@ -34,7 +34,7 @@ public sealed class DevolucionTests
         Prestamo solicitado = CrearPrestamoSolicitado();
 
         Assert.ThrowsException<DominioException>(() =>
-            new Devolucion(solicitado, CrearFuncionario(), InicioPrestamo, new List<UnidadDevuelta>()));
+            new Devolucion(solicitado, RegistroDeAccion.DeUsuario(CrearFuncionario(), InicioPrestamo), new List<UnidadDevuelta>()));
     }
 
     [TestMethod]
@@ -43,7 +43,7 @@ public sealed class DevolucionTests
         Prestamo prestamo = CrearPrestamoActivo();
 
         Assert.ThrowsException<DominioException>(() =>
-            new Devolucion(prestamo, null!, InicioPrestamo, DevolverTodasSinObservaciones(prestamo)));
+            new Devolucion(prestamo, RegistroDeAccion.DelSistema(InicioPrestamo), DevolverTodasSinObservaciones(prestamo)));
     }
 
     [TestMethod]
@@ -51,8 +51,8 @@ public sealed class DevolucionTests
     {
         Prestamo prestamo = CrearPrestamoActivo();
 
-        Assert.ThrowsException<DominioException>(() => new Devolucion(prestamo, CrearFuncionario(),
-            InicioPrestamo.AddMinutes(-1), DevolverTodasSinObservaciones(prestamo)));
+        Assert.ThrowsException<DominioException>(() => new Devolucion(prestamo,
+            RegistroDeAccion.DeUsuario(CrearFuncionario(), InicioPrestamo.AddMinutes(-1)), DevolverTodasSinObservaciones(prestamo)));
     }
 
     [TestMethod]
@@ -60,7 +60,7 @@ public sealed class DevolucionTests
     {
         Prestamo prestamo = CrearPrestamoActivo();
 
-        Devolucion devolucion = new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo,
+        Devolucion devolucion = new Devolucion(prestamo, RegistroDeAccion.DeUsuario(CrearFuncionario(), InicioPrestamo),
             DevolverTodasSinObservaciones(prestamo));
 
         Assert.AreEqual(InicioPrestamo, devolucion.FechaHoraDevolucion);
@@ -72,7 +72,7 @@ public sealed class DevolucionTests
         Prestamo prestamo = CrearPrestamoActivo();
 
         Assert.ThrowsException<DominioException>(() =>
-            new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo, null!));
+            new Devolucion(prestamo, RegistroDeAccion.DeUsuario(CrearFuncionario(), InicioPrestamo), null!));
     }
 
     [TestMethod]
@@ -83,7 +83,7 @@ public sealed class DevolucionTests
         unidades[1] = null!;
 
         Assert.ThrowsException<DominioException>(() =>
-            new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo, unidades));
+            new Devolucion(prestamo, RegistroDeAccion.DeUsuario(CrearFuncionario(), InicioPrestamo), unidades));
     }
 
     [TestMethod]
@@ -93,7 +93,7 @@ public sealed class DevolucionTests
         List<UnidadDevuelta> soloUna = DevolverTodasSinObservaciones(prestamo).Take(1).ToList();
 
         Assert.ThrowsException<DominioException>(() =>
-            new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo, soloUna));
+            new Devolucion(prestamo, RegistroDeAccion.DeUsuario(CrearFuncionario(), InicioPrestamo), soloUna));
     }
 
     [TestMethod]
@@ -106,7 +106,7 @@ public sealed class DevolucionTests
         unidades[1] = new UnidadDevuelta(ajena, CondicionDevolucion.SinObservaciones, null);
 
         Assert.ThrowsException<DominioException>(() =>
-            new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo, unidades));
+            new Devolucion(prestamo, RegistroDeAccion.DeUsuario(CrearFuncionario(), InicioPrestamo), unidades));
     }
 
     [TestMethod]
@@ -121,7 +121,7 @@ public sealed class DevolucionTests
         };
 
         Assert.ThrowsException<DominioException>(() =>
-            new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo, repetidas));
+            new Devolucion(prestamo, RegistroDeAccion.DeUsuario(CrearFuncionario(), InicioPrestamo), repetidas));
     }
 
     [TestMethod]
@@ -130,7 +130,7 @@ public sealed class DevolucionTests
         Prestamo prestamo = CrearPrestamoActivo();
         UnidadFisica sana = prestamo.UnidadesAsignadas[0];
         UnidadFisica rota = prestamo.UnidadesAsignadas[1];
-        Devolucion devolucion = new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo.AddDays(1),
+        Devolucion devolucion = new Devolucion(prestamo, RegistroDeAccion.DeUsuario(CrearFuncionario(), InicioPrestamo.AddDays(1)),
             new List<UnidadDevuelta>
             {
                 new UnidadDevuelta(sana, CondicionDevolucion.SinObservaciones, null),
@@ -147,7 +147,7 @@ public sealed class DevolucionTests
     public void Aplicar_DevolucionValida_DejaElPrestamoDevuelto()
     {
         Prestamo prestamo = CrearPrestamoActivo();
-        Devolucion devolucion = new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo.AddDays(1),
+        Devolucion devolucion = new Devolucion(prestamo, RegistroDeAccion.DeUsuario(CrearFuncionario(), InicioPrestamo.AddDays(1)),
             DevolverTodasSinObservaciones(prestamo));
 
         devolucion.Aplicar();
@@ -159,7 +159,7 @@ public sealed class DevolucionTests
     public void Aplicar_DosVeces_LanzaExcepcion()
     {
         Prestamo prestamo = CrearPrestamoActivo();
-        Devolucion devolucion = new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo,
+        Devolucion devolucion = new Devolucion(prestamo, RegistroDeAccion.DeUsuario(CrearFuncionario(), InicioPrestamo),
             DevolverTodasSinObservaciones(prestamo));
         devolucion.Aplicar();
 
@@ -173,7 +173,7 @@ public sealed class DevolucionTests
         Prestamo prestamo = CrearPrestamoActivo();
         UnidadFisica primera = prestamo.UnidadesAsignadas[0];
         UnidadFisica segunda = prestamo.UnidadesAsignadas[1];
-        Devolucion devolucion = new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo,
+        Devolucion devolucion = new Devolucion(prestamo, RegistroDeAccion.DeUsuario(CrearFuncionario(), InicioPrestamo),
             DevolverTodasSinObservaciones(prestamo));
         segunda.Disponible();
 
@@ -188,7 +188,7 @@ public sealed class DevolucionTests
         Prestamo prestamo = CrearPrestamoActivo();
         prestamo.Solicitante.Desactivar();
 
-        Devolucion devolucion = new Devolucion(prestamo, CrearFuncionario(), InicioPrestamo,
+        Devolucion devolucion = new Devolucion(prestamo, RegistroDeAccion.DeUsuario(CrearFuncionario(), InicioPrestamo),
             DevolverTodasSinObservaciones(prestamo));
 
         Assert.AreSame(prestamo, devolucion.Prestamo);

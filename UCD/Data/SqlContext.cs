@@ -1,15 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Dominio;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data;
 
 public class SqlContext : DbContext
 {
+    public DbSet<Catalogo> Catalogos { get; set; }
+    public DbSet<Usuario> Usuarios { get; set; }
+    public DbSet<Prestamo> Prestamos { get; set; }
+
     public SqlContext(DbContextOptions<SqlContext> options) : base(options)
     {
-        if (Database.IsRelational())
-        {
-            Database.Migrate();
-        }
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

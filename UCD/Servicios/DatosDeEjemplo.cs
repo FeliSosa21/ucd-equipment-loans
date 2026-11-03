@@ -174,16 +174,13 @@ public class DatosDeEjemplo
     private void GuardarConSusMovimientos(Prestamo prestamo)
     {
         _prestamos.AgregarPrestamo(prestamo);
-        RegistrarMovimiento(prestamo, TipoMovimiento.Solicitud, unidad: null);
+        _movimientos.AgregarMovimiento(Movimiento.DeSolicitud(prestamo,
+            RegistroDeAccion.DeUsuario(prestamo.Solicitante, prestamo.FechaHoraPrestamo)));
+
+        RegistroDeAccion delSistema = RegistroDeAccion.DelSistema(prestamo.FechaHoraPrestamo);
         foreach (UnidadFisica unidad in prestamo.UnidadesAsignadas)
         {
-            RegistrarMovimiento(prestamo, TipoMovimiento.Prestamo, unidad);
+            _movimientos.AgregarMovimiento(Movimiento.DePrestamo(prestamo, delSistema, unidad));
         }
-    }
-
-    private void RegistrarMovimiento(Prestamo prestamo, TipoMovimiento tipo, UnidadFisica? unidad)
-    {
-        _movimientos.AgregarMovimiento(new Movimiento(fechaHora: prestamo.FechaHoraPrestamo, tipo: tipo,
-            solicitante: prestamo.Solicitante, evaluador: null, unidad: unidad));
     }
 }

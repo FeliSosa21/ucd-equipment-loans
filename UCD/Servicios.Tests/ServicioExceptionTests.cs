@@ -31,4 +31,12 @@ public class ServicioExceptionTests
         Assert.AreEqual("El DNI ya existe", excepcion.Message);
         Assert.AreSame(interna, excepcion.InnerException);
     }
+
+    [TestMethod]
+    public void Constructor_ConCampoYMensaje_GuardaElCampo()
+    {
+        ServicioException excepcion = new ServicioException("Correo", "El correo ya existe");
+
+        Assert.AreEqual("Correo", excepcion.Campo);
+    }
 }

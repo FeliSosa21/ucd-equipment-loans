@@ -45,37 +45,36 @@ public class ServicioDevolucion
         return _prestamos.ObtenerPrestamosActivos().Select(CrearPrestamoActivoDto).ToList();
     }
 
-    public void RegistrarDevolucion(DevolucionDto datos, string dniResponsable)
+    public DevolucionRegistradaDto RegistrarDevolucion(DevolucionDto datos, string dniResponsable)
     {
         ArgumentNullException.ThrowIfNull(datos);
         ArgumentNullException.ThrowIfNull(datos.Unidades);
         Usuario responsable = ObtenerResponsable(dniResponsable);
         Prestamo prestamo = ObtenerPrestamo(datos.IdPrestamo);
 
-        try
+        Devolucion devolucion = TraduccionDeErrores.Ejecutar(() =>
         {
             List<UnidadDevuelta> unidades = datos.Unidades
                 .Select(unidad => CrearUnidadDevuelta(unidad, prestamo))
                 .ToList();
             DateTime ahora = _reloj.GetLocalNow().DateTime;
-            Devolucion devolucion = new Devolucion(prestamo, responsable, ahora, unidades);
-            devolucion.Aplicar();
-            _devoluciones.AgregarDevolucion(devolucion);
-            RegistrarMovimientos(devolucion);
-        }
-        catch (DominioException ex)
-        {
-            throw new ServicioException(ex.Message, ex);
-        }
+            RegistroDeAccion registro = RegistroDeAccion.DeUsuario(responsable, ahora);
+            Devolucion nueva = new Devolucion(prestamo, registro, unidades);
+            nueva.Aplicar();
+            _devoluciones.AgregarDevolucion(nueva);
+            RegistrarMovimientos(nueva, registro);
+            return nueva;
+        });
+
+        return CrearDevolucionRegistradaDto(devolucion);
     }
 
     // Registro historico (req. 10): un movimiento por unidad, con la fecha efectiva de devolucion.
-    private void RegistrarMovimientos(Devolucion devolucion)
+    private void RegistrarMovimientos(Devolucion devolucion, RegistroDeAccion registro)
     {
         foreach (UnidadDevuelta unidadDevuelta in devolucion.Unidades)
         {
-            _movimientos.AgregarMovimiento(new Movimiento(devolucion.FechaHoraDevolucion,
-                TipoMovimiento.Devolucion, devolucion.Prestamo.Solicitante, devolucion.Prestamo.Evaluador,
+            _movimientos.AgregarMovimiento(Movimiento.DeDevolucion(devolucion.Prestamo, registro,
                 unidadDevuelta.Unidad));
         }
     }
@@ -85,7 +84,7 @@ public class ServicioDevolucion
         Usuario? responsable = _usuarios.ObtenerUsuarioPorDni(dniResponsable);
 
         if (responsable is null || responsable.Estado == EstadoUsuario.Desactivado ||
-            !responsable.Tipo.TienePermiso(Permiso.RegistrarDevolucion))
+            !responsable.TienePermiso(Permiso.RegistrarDevolucion))
         {
             throw new ServicioException("El usuario no tiene permiso para registrar devoluciones");
         }
@@ -123,12 +122,31 @@ public class ServicioDevolucion
         return new UnidadDevuelta(unidad, condicion, datos.Observaciones);
     }
 
+    private static DevolucionRegistradaDto CrearDevolucionRegistradaDto(Devolucion devolucion)
+    {
+        return new DevolucionRegistradaDto
+        {
+            RegistradaPor = devolucion.RegistradaPor.NombreCompleto,
+            Unidades = devolucion.Unidades.Select(CrearUnidadDevueltaDto).ToList()
+        };
+    }
+
+    private static UnidadDevueltaDto CrearUnidadDevueltaDto(UnidadDevuelta unidadDevuelta)
+    {
+        return new UnidadDevueltaDto
+        {
+            IdInstitucional = unidadDevuelta.Unidad.IdInstitucional,
+            Condicion = Condiciones.First(par => par.Value == unidadDevuelta.Condicion).Key,
+            Observaciones = unidadDevuelta.Observaciones
+        };
+    }
+
     private static PrestamoActivoDto CrearPrestamoActivoDto(Prestamo prestamo)
     {
         return new PrestamoActivoDto
         {
             Id = prestamo.Id,
-            Solicitante = NombresDeUsuario.Completo(prestamo.Solicitante),
+            Solicitante = prestamo.Solicitante.NombreCompleto,
             TipoEquipamiento = prestamo.TipoEquipamiento.Nombre,
             FechaHoraPrestamo = prestamo.FechaHoraPrestamo,
             Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList()

@@ -3,12 +3,19 @@ namespace Dominio;
 public class Catalogo
 {
     private const int LargoMinimoNombre = 3;
-    private const int LargoMaximoNombre = 80;
+    public const int LargoMaximoNombre = 80;
 
     private readonly List<TipoEquipamiento> _tipos = new();
     public string Nombre { get; private set; }
+    public int Id { get; private set; }
+    public bool Activo { get; private set; } = true;
 
     public IReadOnlyCollection<TipoEquipamiento> Tipos => _tipos.AsReadOnly();
+
+    private Catalogo()
+    {
+        Nombre = null!;
+    }
 
     public Catalogo(string nombre)
     {
@@ -18,8 +25,23 @@ public class Catalogo
 
     public void ModificarNombre(string nombre)
     {
+        ValidarQueEsteActivo();
         ValidarNombre(nombre);
         Nombre = nombre;
+    }
+
+    public void DarDeBaja()
+    {
+        ValidarQueEsteActivo();
+        Activo = false;
+    }
+
+    private void ValidarQueEsteActivo()
+    {
+        if (!Activo)
+        {
+            throw new DominioException("El catalogo esta dado de baja");
+        }
     }
 
     private static void ValidarNombre(string nombre)
@@ -42,6 +64,8 @@ public class Catalogo
 
     public void AgregarTipo(TipoEquipamiento tipo)
     {
+        ValidarQueEsteActivo();
+
         if (tipo is null)
         {
             throw new DominioException("El tipo no puede ser nulo");

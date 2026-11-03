@@ -7,7 +7,6 @@ namespace Servicios;
 public class ServicioPrestamo
 {
     private const string MensajeSinPermisoParaEvaluar = "El usuario no tiene permiso para evaluar solicitudes";
-    private const string MensajeSinPermisoParaRealizar = "El usuario no tiene permiso para realizar prestamos";
 
     private readonly RepositorioPrestamo _prestamos;
     private readonly RepositorioUsuario _usuarios;
@@ -55,14 +54,17 @@ public class ServicioPrestamo
             }
 
             _prestamos.AgregarPrestamo(prestamo);
-            RegistrarMovimiento(prestamo, TipoMovimiento.Solicitud, prestamo.FechaHoraPrestamo, unidad: null);
+            _movimientos.AgregarMovimiento(Movimiento.DeSolicitud(prestamo,
+                RegistroDeAccion.DeUsuario(solicitante, prestamo.FechaHoraPrestamo)));
+
+            RegistroDeAccion delSistema = RegistroDeAccion.DelSistema(prestamo.FechaHoraPrestamo);
 
             if (prestamo.Estado == EstadoPrestamo.Rechazado)
             {
-                RegistrarMovimiento(prestamo, TipoMovimiento.Rechazo, prestamo.FechaHoraPrestamo, unidad: null);
+                _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo, delSistema));
             }
 
-            RegistrarMovimientos(prestamo, prestamo.FechaHoraPrestamo);
+            RegistrarMovimientos(prestamo, delSistema);
 
             return CrearPrestamoDto(prestamo);
         }
@@ -88,21 +90,22 @@ public class ServicioPrestamo
             {
                 prestamo.RechazarPorFaltaDeUnidades();
 
-                RegistrarMovimiento(prestamo, TipoMovimiento.Rechazo, fechaHoraEvaluacion, unidad: null);
+                _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo,
+                    RegistroDeAccion.DelSistema(fechaHoraEvaluacion)));
             }
             else
             {
                 List<UnidadFisica> unidades = prestamo.TipoEquipamiento.UnidadesDisponibles()
                     .Take(prestamo.CantidadSolicitada).ToList();
                 prestamo.Aprobar(evaluador, unidades);
+                RegistroDeAccion registro = RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion);
 
                 foreach (UnidadFisica unidad in prestamo.UnidadesAsignadas)
                 {
-                    RegistrarMovimiento(prestamo, TipoMovimiento.Aprobacion, fechaHoraEvaluacion, unidad);
+                    _movimientos.AgregarMovimiento(Movimiento.DeAprobacion(prestamo, registro, unidad));
                 }
 
-                prestamo.Realizar();
-                RegistrarMovimientos(prestamo, fechaHoraEvaluacion);
+                RegistrarMovimientos(prestamo, registro);
             }
 
             return CrearPrestamoDto(prestamo);
@@ -122,25 +125,8 @@ public class ServicioPrestamo
         try
         {
             prestamo.Rechazar(evaluador, motivo);
-            RegistrarMovimiento(prestamo, TipoMovimiento.Rechazo, _reloj.GetLocalNow().DateTime, unidad: null);
-
-            return CrearPrestamoDto(prestamo);
-        }
-        catch (DominioException excepcion)
-        {
-            throw new ServicioException(excepcion.Message, excepcion);
-        }
-    }
-
-    public PrestamoDto RegistrarEntrega(Guid idPrestamo, string dniResponsable)
-    {
-        Usuario responsable = ObtenerUsuarioHabilitado(
-            dniResponsable, Permiso.RealizarPrestamo, MensajeSinPermisoParaRealizar);
-        Prestamo prestamo = ObtenerPrestamo(idPrestamo);
-
-        try
-        {
-            prestamo.RegistrarEntrega(responsable, _reloj.GetLocalNow().DateTime);
+            _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo,
+                RegistroDeAccion.DeUsuario(evaluador, _reloj.GetLocalNow().DateTime)));
 
             return CrearPrestamoDto(prestamo);
         }
@@ -162,10 +148,7 @@ public class ServicioPrestamo
 
     public List<PrestamoDto> ListarPrestamosPorEntregar()
     {
-        return _prestamos.ObtenerPrestamosActivos()
-            .Where(prestamo => prestamo.FechaHoraEntrega is null)
-            .Select(CrearPrestamoDto)
-            .ToList();
+        return _prestamos.ObtenerPrestamosActivos().Select(CrearPrestamoDto).ToList();
     }
 
     public List<PrestamoDto> ListarPrestamos()
@@ -264,21 +247,11 @@ public class ServicioPrestamo
         }
     }
 
-    private void RegistrarMovimiento(Prestamo prestamo, TipoMovimiento tipo, DateTime fechaHora, UnidadFisica? unidad)
-    {
-        _movimientos.AgregarMovimiento(new Movimiento(
-            fechaHora: fechaHora,
-            tipo: tipo,
-            solicitante: prestamo.Solicitante,
-            evaluador: prestamo.Evaluador,
-            unidad: unidad));
-    }
-
-    private void RegistrarMovimientos(Prestamo prestamo, DateTime fechaHora)
+    private void RegistrarMovimientos(Prestamo prestamo, RegistroDeAccion registro)
     {
         foreach (UnidadFisica unidad in prestamo.UnidadesAsignadas)
         {
-            RegistrarMovimiento(prestamo, TipoMovimiento.Prestamo, fechaHora, unidad);
+            _movimientos.AgregarMovimiento(Movimiento.DePrestamo(prestamo, registro, unidad));
         }
     }
 
@@ -294,8 +267,7 @@ public class ServicioPrestamo
             FechaEsperadaDevolucion = prestamo.FechaEsperadaDevolucion,
             Estado = prestamo.Estado.ToString(),
             MotivoRechazo = prestamo.MotivoRechazo,
-            Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList(),
-            FechaHoraEntrega = prestamo.FechaHoraEntrega
+            Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList()
         };
     }
 }

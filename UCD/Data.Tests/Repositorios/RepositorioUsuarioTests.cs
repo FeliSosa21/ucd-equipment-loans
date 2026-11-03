@@ -72,25 +72,66 @@ public class RepositorioUsuarioTests
     }
 
     [TestMethod]
-    public void ObtenerTodos_ConUnUsuario_LoDevuelve()
+    public void ObtenerPaginaDeUsuarios_PrimeraPagina_DevuelveLosPrimerosOrdenadosPorApellido()
     {
-        Memoria memoria = new Memoria();
-        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        Usuario usuario = CrearUsuario();
-        repositorio.AgregarUsuario(usuario);
+        RepositorioUsuario repositorio = CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno, out _);
 
-        IReadOnlyList<Usuario> resultado = repositorio.ObtenerTodos();
+        IReadOnlyList<Usuario> resultado = repositorio.ObtenerPaginaDeUsuarios(null, pagina: 1, tamanoPagina: 2);
 
-        CollectionAssert.Contains(resultado.ToList(), usuario);
+        CollectionAssert.AreEqual(new List<Usuario> { ana, bruno }, resultado.ToList());
     }
 
-    private static Usuario CrearUsuario()
+    [TestMethod]
+    public void ObtenerPaginaDeUsuarios_SegundaPagina_DevuelveLosSiguientes()
+    {
+        RepositorioUsuario repositorio = CrearRepositorioConTresUsuarios(out _, out _, out Usuario carla);
+
+        IReadOnlyList<Usuario> resultado = repositorio.ObtenerPaginaDeUsuarios(null, pagina: 2, tamanoPagina: 2);
+
+        CollectionAssert.AreEqual(new List<Usuario> { carla }, resultado.ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerPaginaDeUsuarios_ConFiltro_DevuelveSoloLosQueCoinciden()
+    {
+        RepositorioUsuario repositorio = CrearRepositorioConTresUsuarios(out _, out Usuario bruno, out _);
+
+        IReadOnlyList<Usuario> resultado = repositorio.ObtenerPaginaDeUsuarios(" bruno ", pagina: 1, tamanoPagina: 2);
+
+        CollectionAssert.AreEqual(new List<Usuario> { bruno }, resultado.ToList());
+    }
+
+    [TestMethod]
+    public void ContarUsuarios_ConFiltro_CuentaSoloLosQueCoinciden()
+    {
+        RepositorioUsuario repositorio = CrearRepositorioConTresUsuarios(out _, out _, out _);
+
+        Assert.AreEqual(3, repositorio.ContarUsuarios(null));
+        Assert.AreEqual(1, repositorio.ContarUsuarios("bruno"));
+    }
+
+    // Se agregan desordenados para comprobar que la pagina sale ordenada por apellido.
+    private static RepositorioUsuario CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno,
+        out Usuario carla)
+    {
+        RepositorioUsuario repositorio = new RepositorioUsuario(new Memoria());
+        ana = CrearUsuario(dni: "11111111", nombre: "Ana", apellido: "Acosta", correo: "ana@hotmail.com");
+        bruno = CrearUsuario(dni: "22222222", nombre: "Bruno", apellido: "Bentancur", correo: "bruno@hotmail.com");
+        carla = CrearUsuario(dni: "12345672", nombre: "Carla", apellido: "Castro", correo: "carla@hotmail.com");
+        repositorio.AgregarUsuario(carla);
+        repositorio.AgregarUsuario(ana);
+        repositorio.AgregarUsuario(bruno);
+        return repositorio;
+    }
+
+    private static Usuario CrearUsuario(string dni = "12345672", string nombre = "Felipe", string apellido = "Sosa",
+        string correo = "felipe@hotmail.com")
     {
         return new Usuario(
-            dni: "12345672",
-            nombre: "Felipe",
-            apellido: "Sosa",
-            correo: "felipe@hotmail.com",
+            dni: dni,
+            nombre: nombre,
+            apellido: apellido,
+            correo: correo,
             contrasena: "VivaLaOrt2026");
     }
 }

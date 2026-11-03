@@ -32,6 +32,7 @@
                 <th>Tipo</th>
                 <th>Solicitante</th>
                 <th>Evaluador</th>
+                <th>Responsable</th>
                 <th>Unidad</th>
             </tr>
         </thead>
@@ -43,6 +44,7 @@
                     <td>@TraducirTipo(movimiento.Tipo)</td>
                     <td>@movimiento.Solicitante</td>
                     <td>@(movimiento.Evaluador ?? SinDato)</td>
+                    <td>@movimiento.Responsable</td>
                     <td class="mono">@(movimiento.Unidad ?? SinDato)</td>
                 </tr>
             }

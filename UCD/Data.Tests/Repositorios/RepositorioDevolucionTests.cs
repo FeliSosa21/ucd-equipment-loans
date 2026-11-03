@@ -55,7 +55,7 @@ public class RepositorioDevolucionTests
         Usuario funcionario = new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa",
             correo: "felipe@hotmail.com", contrasena: "VivaLaOrt2026");
 
-        return new Devolucion(prestamo, funcionario, InicioPrestamo.AddDays(1),
+        return new Devolucion(prestamo, RegistroDeAccion.DeUsuario(funcionario, InicioPrestamo.AddDays(1)),
             new List<UnidadDevuelta> { new UnidadDevuelta(unidad, CondicionDevolucion.SinObservaciones, null) });
     }
 }
