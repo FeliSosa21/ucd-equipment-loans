@@ -14,10 +14,9 @@ public sealed class RepositorioUsuarioSqlTests
     [TestInitialize]
     public void Inicializar()
     {
-        DbContextOptions<SqlContext> opciones = new DbContextOptionsBuilder<SqlContext>()
+        _opciones = new DbContextOptionsBuilder<SqlContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
         _contexto = new SqlContext(_opciones);
-        _contexto = new SqlContext(opciones);
         _repositorio = new RepositorioUsuarioSql(_contexto);
     }
 
