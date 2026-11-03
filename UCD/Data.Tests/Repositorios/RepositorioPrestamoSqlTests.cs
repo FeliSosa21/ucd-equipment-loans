@@ -26,10 +26,7 @@ public sealed class RepositorioPrestamoSqlTests
     {
         Prestamo prestamo = CrearPrestamo();
 
-        using (SqlContext contextoQueGuarda = new SqlContext(_opciones))
-        {
-            new RepositorioPrestamoSql(contextoQueGuarda).AgregarPrestamo(prestamo);
-        }
+        GuardarConOtroContexto(prestamo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         Prestamo? leido = contextoQueLee.Prestamos.Find(prestamo.Id);
@@ -45,10 +42,7 @@ public sealed class RepositorioPrestamoSqlTests
     {
         Prestamo prestamo = CrearPrestamo();
 
-        using (SqlContext contextoQueGuarda = new SqlContext(_opciones))
-        {
-            new RepositorioPrestamoSql(contextoQueGuarda).AgregarPrestamo(prestamo);
-        }
+        GuardarConOtroContexto(prestamo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         Prestamo leido = contextoQueLee.Prestamos
@@ -58,6 +52,12 @@ public sealed class RepositorioPrestamoSqlTests
 
         Assert.AreEqual(DniSolicitante, leido.Solicitante.Dni);
         Assert.AreEqual(NombreTipo, leido.TipoEquipamiento.Nombre);
+    }
+
+    private void GuardarConOtroContexto(Prestamo prestamo)
+    {
+        using SqlContext contextoQueGuarda = new SqlContext(_opciones);
+        new RepositorioPrestamoSql(contextoQueGuarda).AgregarPrestamo(prestamo);
     }
 
     private static Prestamo CrearPrestamo()
