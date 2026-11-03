@@ -8,7 +8,7 @@ namespace Servicios;
 // cualquier usuario activo puede ver y modificar sus propios datos. Cada operacion valida al responsable
 // (administrador activo, o el mismo usuario activo), asi nadie desactivado con la pantalla abierta puede seguir
 // operando. Como un administrador no puede actuar sobre si mismo, siempre queda al menos uno activo.
-// NombresDeTipos no valida al responsable: solo devuelve los nombres fijos de los tipos, sin datos de usuarios.
+// NombresDeTipos no valida al responsable: solo devuelve los nombres de los tipos guardados, sin datos de usuarios.
 public class ServicioAdministracionUsuarios
 {
     public const string ContrasenaPredeterminada = "Ucd12345";
