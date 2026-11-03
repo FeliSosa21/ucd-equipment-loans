@@ -110,6 +110,18 @@ public class TipoUsuario
         this.permisos = permisos;
     }
 
+    public void Modificar(string descripcion, string imagen, TopesDePrestamo? topesNuevos)
+    {
+        PresentacionTipoUsuario presentacionNueva = new PresentacionTipoUsuario(Nombre, descripcion, imagen);
+
+        if (topesNuevos is not null)
+        {
+            ModificarTopes(topesNuevos.MaxUnidadesPorCatalogo, topesNuevos.MaxPrestamosConcurrentes);
+        }
+
+        presentacion = presentacionNueva;
+    }
+
     public void ModificarPresentacion(string descripcion, string imagen)
     {
         presentacion = new PresentacionTipoUsuario(Nombre, descripcion, imagen);

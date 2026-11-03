@@ -35,12 +35,14 @@ public class ServicioTiposUsuario
 
         TraduccionDeErrores.Ejecutar(() =>
         {
+            TopesDePrestamo? topes = null;
+
             if (dto.MaxUnidadesPorCatalogo.HasValue && dto.MaxPrestamosConcurrentes.HasValue)
             {
-                tipo.ModificarTopes(dto.MaxUnidadesPorCatalogo.Value, dto.MaxPrestamosConcurrentes.Value);
+                topes = new TopesDePrestamo(dto.MaxUnidadesPorCatalogo.Value, dto.MaxPrestamosConcurrentes.Value);
             }
 
-            tipo.ModificarPresentacion(dto.Descripcion, dto.Imagen);
+            tipo.Modificar(dto.Descripcion, dto.Imagen, topes);
         });
     }
 
