@@ -110,6 +110,29 @@ public sealed class RepositorioMovimientoSqlTests
         Assert.AreEqual(2, cantidad);
     }
 
+    [TestMethod]
+    public void ObtenerPaginaDeMovimientos_Aprobacion_TraeSolicitanteEvaluadorUnidadYResponsable()
+    {
+        Usuario solicitante = CrearUsuario(dni: "12345672", correo: "renato.alves@ejemplo.com");
+        Usuario evaluador = CrearUsuario(dni: "45678905", correo: "sofia.martinez@ejemplo.com");
+        TipoEquipamiento tipo = CrearTipo("Notebook Lenovo ThinkPad", Categoria.Computacion);
+        UnidadFisica unidad = new UnidadFisica(idInstitucional: "EQP-0001", ubiFisica: "Laboratorio Prueba",
+            numSerie: null);
+        tipo.AgregarUnidad(unidad);
+        Prestamo prestamo = new Prestamo(solicitante, tipo, cantidadSolicitada: 1, fechaHoraPrestamo: FechaFija);
+        prestamo.Aprobar(evaluador, new List<UnidadFisica> { unidad });
+        GuardarConOtroContexto(
+            Movimiento.DeAprobacion(prestamo, RegistroDeAccion.DeUsuario(evaluador, FechaFija), unidad));
+
+        Movimiento leido = LeerPagina(new FiltroMovimientos(), pagina: 1, tamanoPagina: 10).Single();
+
+        Assert.IsNotNull(leido.Prestamo);
+        Assert.AreEqual("12345672", leido.Solicitante.Dni);
+        Assert.AreEqual("45678905", leido.Evaluador?.Dni);
+        Assert.AreEqual("EQP-0001", leido.Unidad?.IdInstitucional);
+        Assert.AreEqual("45678905", leido.Responsable?.Dni);
+    }
+
     private void GuardarTresMovimientos()
     {
         Prestamo prestamo = CrearPrestamoActivo();
