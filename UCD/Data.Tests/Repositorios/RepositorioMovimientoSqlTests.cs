@@ -40,6 +40,26 @@ public sealed class RepositorioMovimientoSqlTests
         Assert.AreEqual("45678905", leido.Responsable.Dni);
     }
 
+    [TestMethod]
+    public void ObtenerPaginaDeMovimientos_SinFiltro_DelMasRecienteAlMasViejoYEnEmpateElUltimoRegistrado()
+    {
+        Prestamo prestamo = CrearPrestamoActivo();
+        UnidadFisica unidad = prestamo.UnidadesAsignadas[0];
+        GuardarConOtroContexto(
+            Movimiento.DeSolicitud(prestamo, RegistroDeAccion.DeUsuario(prestamo.Solicitante, FechaFija)),
+            Movimiento.DePrestamo(prestamo, RegistroDeAccion.DelSistema(FechaFija), unidad),
+            Movimiento.DeDevolucion(prestamo, RegistroDeAccion.DelSistema(FechaFija.AddDays(1)), unidad));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioMovimientoSql repositorio = new RepositorioMovimientoSql(contextoQueLee);
+        IReadOnlyList<Movimiento> resultado =
+            repositorio.ObtenerPaginaDeMovimientos(new FiltroMovimientos(), pagina: 1, tamanoPagina: 10);
+
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Devolucion, TipoMovimiento.Prestamo, TipoMovimiento.Solicitud },
+            resultado.Select(movimiento => movimiento.Tipo).ToList());
+    }
+
     private void GuardarConOtroContexto(params Movimiento[] movimientos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
