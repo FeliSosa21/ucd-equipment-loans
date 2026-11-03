@@ -98,6 +98,18 @@ public sealed class RepositorioMovimientoSqlTests
             resultado.Select(movimiento => movimiento.Tipo).ToList());
     }
 
+    [TestMethod]
+    public void ContarMovimientos_FiltroPorFechas_CuentaSoloLosDelRango()
+    {
+        GuardarTresMovimientos();
+        FiltroMovimientos filtro = new FiltroMovimientos { Desde = FechaFija, Hasta = FechaFija.AddDays(1) };
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        int cantidad = new RepositorioMovimientoSql(contextoQueLee).ContarMovimientos(filtro);
+
+        Assert.AreEqual(2, cantidad);
+    }
+
     private void GuardarTresMovimientos()
     {
         Prestamo prestamo = CrearPrestamoActivo();
