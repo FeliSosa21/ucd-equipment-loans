@@ -56,10 +56,7 @@ public class ServicioTiposUsuarioTests
     [TestMethod]
     public void ListarTipos_ResponsableNoAdministrador_LanzaExcepcion()
     {
-        Usuario estudiante = new Usuario(dni: DniEstudiante, nombre: "Juan", apellido: "Gomez",
-            correo: "juan@hotmail.com", contrasena: "VivaLaOrt2026");
-        estudiante.AsignarTipo(_repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Estudiante().Nombre)!);
-        _repositorioUsuarios.AgregarUsuario(estudiante);
+        AgregarEstudiante();
 
         Assert.ThrowsException<ServicioException>(() => _servicio.ListarTipos(DniEstudiante));
     }
