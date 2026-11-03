@@ -87,6 +87,20 @@ public class ServicioTiposUsuarioTests
         Assert.AreEqual(ImagenJpeg, _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!.Imagen);
     }
 
+    [TestMethod]
+    public void ModificarTipo_TopesNuevos_LosGuarda()
+    {
+        TipoUsuarioDto dto = CrearDtoDocente();
+        dto.MaxUnidadesPorCatalogo = 10;
+        dto.MaxPrestamosConcurrentes = 2;
+
+        _servicio.ModificarTipo(dto, DniAdministrador);
+
+        TipoUsuario docente = _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!;
+        Assert.AreEqual(10, docente.MaxUnidadesPorCatalogo);
+        Assert.AreEqual(2, docente.MaxPrestamosConcurrentes);
+    }
+
     private static TipoUsuarioDto CrearDtoDocente()
     {
         return new TipoUsuarioDto
