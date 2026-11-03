@@ -101,6 +101,22 @@ public class ServicioTiposUsuarioTests
         Assert.AreEqual(2, docente.MaxPrestamosConcurrentes);
     }
 
+    [TestMethod]
+    public void ModificarTipo_AdministradorSinTopes_GuardaLaDescripcion()
+    {
+        TipoUsuarioDto dto = new TipoUsuarioDto
+        {
+            Nombre = TipoUsuario.Administrador().Nombre,
+            Descripcion = "Gestiona usuarios y tipos",
+            Imagen = ImagenPng
+        };
+
+        _servicio.ModificarTipo(dto, DniAdministrador);
+
+        Assert.AreEqual("Gestiona usuarios y tipos",
+            _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Administrador().Nombre)!.Descripcion);
+    }
+
     private static TipoUsuarioDto CrearDtoDocente()
     {
         return new TipoUsuarioDto
