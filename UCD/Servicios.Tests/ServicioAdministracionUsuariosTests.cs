@@ -107,6 +107,18 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void AsignarTipo_TipoDelRepositorio_AsignaLaMismaInstancia()
+    {
+        ServicioAdministracionUsuarios servicio =
+            CrearServicioConAdministrador(out RepositorioUsuario repositorio, out RepositorioTipoUsuario repositorioTipos);
+        TipoUsuario docente = repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!;
+
+        servicio.AsignarTipo(DniValido, docente.Nombre, DniResponsable);
+
+        Assert.AreSame(docente, repositorio.ObtenerUsuarioPorDni(DniValido)!.Tipo);
+    }
+
+    [TestMethod]
     public void AsignarTipo_TipoInexistente_LanzaExcepcion()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
@@ -604,8 +616,20 @@ public class ServicioAdministracionUsuariosTests
 
     private static ServicioAdministracionUsuarios CrearServicioConAdministrador(out RepositorioUsuario repositorio)
     {
+        return CrearServicioConAdministrador(out repositorio, out _);
+    }
+
+    private static ServicioAdministracionUsuarios CrearServicioConAdministrador(out RepositorioUsuario repositorio,
+        out RepositorioTipoUsuario repositorioTipos)
+    {
         Memoria memoria = new Memoria();
         repositorio = new RepositorioUsuario(memoria);
+        repositorioTipos = new RepositorioTipoUsuario(memoria);
+        foreach (TipoUsuario tipo in TipoUsuario.Todos())
+        {
+            repositorioTipos.AgregarTipo(tipo);
+        }
+
         ServicioUsuario servicioUsuario = new ServicioUsuario(repositorio);
         servicioUsuario.Registrar(new UsuarioDto
         {
@@ -616,6 +640,6 @@ public class ServicioAdministracionUsuariosTests
             correo: "root@ucd.edu.uy", contrasena: "Root2026");
         administrador.AsignarTipo(TipoUsuario.Administrador());
         repositorio.AgregarUsuario(administrador);
-        return new ServicioAdministracionUsuarios(repositorio, servicioUsuario);
+        return new ServicioAdministracionUsuarios(repositorio, servicioUsuario, repositorioTipos);
     }
 }

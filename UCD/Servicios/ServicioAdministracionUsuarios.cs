@@ -18,11 +18,14 @@ public class ServicioAdministracionUsuarios
 
     private readonly RepositorioUsuario _repositorio;
     private readonly ServicioUsuario _servicioUsuario;
+    private readonly RepositorioTipoUsuario _repositorioTipos;
 
-    public ServicioAdministracionUsuarios(RepositorioUsuario repositorio, ServicioUsuario servicioUsuario)
+    public ServicioAdministracionUsuarios(RepositorioUsuario repositorio, ServicioUsuario servicioUsuario,
+        RepositorioTipoUsuario repositorioTipos)
     {
         _repositorio = repositorio;
         _servicioUsuario = servicioUsuario;
+        _repositorioTipos = repositorioTipos;
     }
 
     public void CrearUsuario(UsuarioDto dto, string nombreTipo, string dniResponsable)
