@@ -49,6 +49,38 @@ namespace Data.Migrations
                     b.ToTable("Catalogos", (string)null);
                 });
 
+            modelBuilder.Entity("Dominio.Movimiento", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("EvaluadorId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("PrestamoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UnidadId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EvaluadorId");
+
+                    b.HasIndex("PrestamoId");
+
+                    b.HasIndex("UnidadId");
+
+                    b.ToTable("Movimientos", (string)null);
+                });
+
             modelBuilder.Entity("Dominio.Prestamo", b =>
                 {
                     b.Property<Guid>("Id")
@@ -243,6 +275,64 @@ namespace Data.Migrations
                     b.HasIndex("UnidadFisicaId");
 
                     b.ToTable("UnidadesAsignadas");
+                });
+
+            modelBuilder.Entity("Dominio.Movimiento", b =>
+                {
+                    b.HasOne("Dominio.Usuario", "Evaluador")
+                        .WithMany()
+                        .HasForeignKey("EvaluadorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Dominio.Prestamo", "Prestamo")
+                        .WithMany()
+                        .HasForeignKey("PrestamoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Dominio.UnidadFisica", "Unidad")
+                        .WithMany()
+                        .HasForeignKey("UnidadId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.OwnsOne("Dominio.RegistroDeAccion", "_registro", b1 =>
+                        {
+                            b1.Property<int>("MovimientoId")
+                                .HasColumnType("int");
+
+                            b1.Property<DateTime>("FechaHora")
+                                .HasColumnType("datetime2")
+                                .HasColumnName("FechaHora");
+
+                            b1.Property<int?>("ResponsableId")
+                                .HasColumnType("int")
+                                .HasColumnName("ResponsableId");
+
+                            b1.HasKey("MovimientoId");
+
+                            b1.HasIndex("ResponsableId");
+
+                            b1.ToTable("Movimientos");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MovimientoId");
+
+                            b1.HasOne("Dominio.Usuario", "Responsable")
+                                .WithMany()
+                                .HasForeignKey("ResponsableId")
+                                .OnDelete(DeleteBehavior.Restrict);
+
+                            b1.Navigation("Responsable");
+                        });
+
+                    b.Navigation("Evaluador");
+
+                    b.Navigation("Prestamo");
+
+                    b.Navigation("Unidad");
+
+                    b.Navigation("_registro")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Dominio.Prestamo", b =>
