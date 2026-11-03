@@ -1,4 +1,5 @@
 using Data.Repositorios;
+using Dominio;
 using DTOs;
 
 namespace Servicios;
@@ -18,6 +19,18 @@ public class ServicioTiposUsuario
 
     public List<TipoUsuarioDto> ListarTipos(string dniResponsable)
     {
-        return new List<TipoUsuarioDto>();
+        return _repositorioTipos.ObtenerTodos().Select(ADto).ToList();
+    }
+
+    private static TipoUsuarioDto ADto(TipoUsuario tipo)
+    {
+        return new TipoUsuarioDto
+        {
+            Nombre = tipo.Nombre,
+            Descripcion = tipo.Descripcion,
+            Imagen = tipo.Imagen,
+            MaxUnidadesPorCatalogo = tipo.MaxUnidadesPorCatalogo,
+            MaxPrestamosConcurrentes = tipo.MaxPrestamosConcurrentes
+        };
     }
 }
