@@ -3,6 +3,7 @@
 public class Prestamo
 {
     private const string MotivoFaltaDeUnidades = "No hay unidades suficientes para el tipo de equipamiento";
+    public const int LargoMaximoMotivoRechazo = 300;
     private readonly List<UnidadFisica> _unidadesAsignadas = new List<UnidadFisica>();
 
     public Guid Id { get; private set; } = Guid.NewGuid();
@@ -215,6 +216,11 @@ public class Prestamo
         if (string.IsNullOrWhiteSpace(motivo))
         {
             throw new DominioException("El motivo de rechazo no puede ser vacio");
+        }
+
+        if (motivo.Length > LargoMaximoMotivoRechazo)
+        {
+            throw new DominioException($"El motivo de rechazo no puede superar los {LargoMaximoMotivoRechazo} caracteres");
         }
     }
 
