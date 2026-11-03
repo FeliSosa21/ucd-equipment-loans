@@ -40,12 +40,11 @@ public class ConfiguracionPrestamo : IEntityTypeConfiguration<Prestamo>
             WithMany().
             UsingEntity(
                 "UnidadesAsignadas",
-            unidad => unidad.HasOne(typeof(UnidadFisica)).WithMany().
-                    HasForeignKey("UnidadFisicaId").OnDelete(DeleteBehavior.Restrict),
-            prestamo => prestamo.HasOne(typeof(Prestamo)).WithMany().
-                    HasForeignKey("PrestamoId").OnDelete(DeleteBehavior.Restrict),
-        tabla => tabla.HasKey("PrestamoId", "UnidadFisicaId"));
-
+                asignacion => asignacion.HasOne(typeof(UnidadFisica)).WithMany()
+                    .HasForeignKey("UnidadFisicaId").OnDelete(DeleteBehavior.Restrict),
+                asignacion => asignacion.HasOne(typeof(Prestamo)).WithMany()
+                    .HasForeignKey("PrestamoId").OnDelete(DeleteBehavior.Restrict),
+                tabla => tabla.HasKey("PrestamoId", "UnidadFisicaId"));
 
         builder.Navigation(prestamo => prestamo.UnidadesAsignadas)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
