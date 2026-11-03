@@ -2,9 +2,11 @@
 
 public class TipoUsuario
 {
-    private readonly PresentacionTipoUsuario presentacion;
-    private readonly TopesDePrestamo? topes;
-    private readonly HashSet<Permiso> permisos;
+    private PresentacionTipoUsuario presentacion;
+    private TopesDePrestamo? topes;
+    private HashSet<Permiso> permisos;
+
+    public int Id { get; private set; }
 
     public string Nombre => presentacion.Nombre;
     public string Descripcion => presentacion.Descripcion;
@@ -81,6 +83,12 @@ public class TipoUsuario
             Supervisor(),
             Administrador()
         };
+    }
+
+    private TipoUsuario()
+    {
+        presentacion = null!;
+        permisos = new HashSet<Permiso>();
     }
 
     public TipoUsuario(PresentacionTipoUsuario presentacion, TopesDePrestamo? topes, IEnumerable<Permiso> permisos)

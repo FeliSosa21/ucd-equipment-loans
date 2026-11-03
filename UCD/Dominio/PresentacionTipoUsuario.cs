@@ -10,7 +10,7 @@ public class PresentacionTipoUsuario
         "data:image/jpeg;base64,"
     };
 
-    public string Nombre { get; }
+    public string Nombre { get; private set; }
     public string Descripcion { get; private set; }
     public string Imagen { get; private set; }
 
