@@ -140,6 +140,19 @@ public class ServicioTiposUsuarioTests
         Assert.ThrowsException<ServicioException>(() => _servicio.ModificarTipo(dto, DniAdministrador));
     }
 
+    [TestMethod]
+    public void ModificarTipo_ImagenInvalida_NoCambiaLaDescripcion()
+    {
+        _servicio.ModificarTipo(CrearDtoDocente(), DniAdministrador);
+        TipoUsuarioDto dto = CrearDtoDocente();
+        dto.Descripcion = "Docentes de la facultad";
+        dto.Imagen = "imagen invalida";
+
+        Assert.ThrowsException<ServicioException>(() => _servicio.ModificarTipo(dto, DniAdministrador));
+
+        Assert.AreEqual("Docente", _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!.Descripcion);
+    }
+
     private void AgregarEstudiante()
     {
         Usuario estudiante = new Usuario(dni: DniEstudiante, nombre: "Juan", apellido: "Gomez",
