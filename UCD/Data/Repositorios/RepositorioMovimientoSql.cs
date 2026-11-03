@@ -24,6 +24,11 @@ public class RepositorioMovimientoSql
     public IReadOnlyList<Movimiento> ObtenerPaginaDeMovimientos(FiltroMovimientos filtro, int pagina, int tamanoPagina)
     {
         return FiltrarPor(filtro)
+            .Include(movimiento => movimiento.Prestamo)
+            .ThenInclude(prestamo => prestamo.Solicitante)
+            .Include(movimiento => movimiento.Evaluador)
+            .Include(movimiento => movimiento.Unidad)
+            .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}")
             .OrderByDescending(movimiento => EF.Property<RegistroDeAccion>(movimiento, CampoRegistro).FechaHora)
             .ThenByDescending(movimiento => movimiento.Id)
             .Skip((pagina - 1) * tamanoPagina)
