@@ -30,6 +30,7 @@ builder.Services.AddScoped<ServicioSesion>();
 builder.Services.AddScoped<CargaInicial>();
 builder.Services.AddScoped<DatosDeEjemplo>();
 builder.Services.AddScoped<ServicioAdministracionUsuarios>();
+builder.Services.AddScoped<ServicioTiposUsuario>();
 builder.Services.AddScoped<ServicioDevolucion>();
 builder.Services.AddScoped<ServicioPrestamo>();
 builder.Services.AddScoped<ServicioCatalogo>();
