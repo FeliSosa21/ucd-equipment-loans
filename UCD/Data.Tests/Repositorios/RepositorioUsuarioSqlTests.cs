@@ -76,12 +76,21 @@ public sealed class RepositorioUsuarioSqlTests
         Assert.AreSame(usuario, resultado);
     }
 
-    private static Usuario CrearUsuario()
+    [TestMethod]
+    public void ObtenerPaginaDeUsuarios_SinFiltro_LosDevuelveOrdenadosPorApellido()
     {
-        return new Usuario(dni: "47153923",
-            nombre: "Lucia",
-            apellido: "Fernandez",
-            correo: "lucia.fernandez@ucd.edu.uy",
-            contrasena: "Prueba2026");
+        Usuario usuario = CrearUsuario();
+        Usuario usuario2 = CrearUsuario(dni: "12345672", apellido: "Alvarez", correo:"martin.alvarez@ucd.edu.uy" );
+        _repositorio.AgregarUsuario(usuario);
+        _repositorio.AgregarUsuario(usuario2);
+        IReadOnlyList<Usuario> resultado = _repositorio.ObtenerPaginaDeUsuarios(null, pagina: 1, tamanoPagina: 10);
+        CollectionAssert.AreEqual(new List<Usuario> { usuario2, usuario1 }, resultado.ToList());
+        
+    }
+
+    private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
+        string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
+    {
+        return new Usuario(dni: dni, nombre: nombre, apellido: apellido, correo: correo, contrasena: "Prueba2026");
     }
 }
