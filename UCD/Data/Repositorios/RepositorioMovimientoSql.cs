@@ -5,6 +5,9 @@ namespace Data.Repositorios;
 
 public class RepositorioMovimientoSql
 {
+    private const string CampoRegistro = "_registro";
+    private const string ColumnaCatalogo = "CatalogoId";
+
     private readonly SqlContext _contexto;
 
     public RepositorioMovimientoSql(SqlContext contexto)
@@ -20,28 +23,8 @@ public class RepositorioMovimientoSql
 
     public IReadOnlyList<Movimiento> ObtenerPaginaDeMovimientos(FiltroMovimientos filtro, int pagina, int tamanoPagina)
     {
-        IQueryable<Movimiento> movimientos = _contexto.Movimientos;
-
-        if (filtro.IdCatalogo is not null)
-        {
-            movimientos = movimientos.Where(movimiento =>
-                EF.Property<int>(movimiento.Prestamo.TipoEquipamiento, "CatalogoId") == filtro.IdCatalogo);
-        }
-
-        if (filtro.Desde is not null)
-        {
-            movimientos = movimientos.Where(movimiento =>
-                EF.Property<RegistroDeAccion>(movimiento, "_registro").FechaHora >= filtro.Desde);
-        }
-
-        if (filtro.Hasta is not null)
-        {
-            movimientos = movimientos.Where(movimiento =>
-                EF.Property<RegistroDeAccion>(movimiento, "_registro").FechaHora < filtro.Hasta);
-        }
-
-        return movimientos
-            .OrderByDescending(movimiento => EF.Property<RegistroDeAccion>(movimiento, "_registro").FechaHora)
+        return FiltrarPor(filtro)
+            .OrderByDescending(movimiento => EF.Property<RegistroDeAccion>(movimiento, CampoRegistro).FechaHora)
             .ThenByDescending(movimiento => movimiento.Id)
             .Skip((pagina - 1) * tamanoPagina)
             .Take(tamanoPagina)
@@ -50,26 +33,31 @@ public class RepositorioMovimientoSql
 
     public int ContarMovimientos(FiltroMovimientos filtro)
     {
+        return FiltrarPor(filtro).Count();
+    }
+
+    private IQueryable<Movimiento> FiltrarPor(FiltroMovimientos filtro)
+    {
         IQueryable<Movimiento> movimientos = _contexto.Movimientos;
 
         if (filtro.IdCatalogo is not null)
         {
             movimientos = movimientos.Where(movimiento =>
-                EF.Property<int>(movimiento.Prestamo.TipoEquipamiento, "CatalogoId") == filtro.IdCatalogo);
+                EF.Property<int>(movimiento.Prestamo.TipoEquipamiento, ColumnaCatalogo) == filtro.IdCatalogo);
         }
 
         if (filtro.Desde is not null)
         {
             movimientos = movimientos.Where(movimiento =>
-                EF.Property<RegistroDeAccion>(movimiento, "_registro").FechaHora >= filtro.Desde);
+                EF.Property<RegistroDeAccion>(movimiento, CampoRegistro).FechaHora >= filtro.Desde);
         }
 
         if (filtro.Hasta is not null)
         {
             movimientos = movimientos.Where(movimiento =>
-                EF.Property<RegistroDeAccion>(movimiento, "_registro").FechaHora < filtro.Hasta);
+                EF.Property<RegistroDeAccion>(movimiento, CampoRegistro).FechaHora < filtro.Hasta);
         }
 
-        return movimientos.Count();
+        return movimientos;
     }
 }
