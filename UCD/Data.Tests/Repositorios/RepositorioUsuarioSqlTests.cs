@@ -9,12 +9,14 @@ public sealed class RepositorioUsuarioSqlTests
 {
     private SqlContext _contexto = null!;
     private RepositorioUsuarioSql _repositorio = null!;
+    private DbContextOptions<SqlContext> _opciones = null!;
 
     [TestInitialize]
     public void Inicializar()
     {
         DbContextOptions<SqlContext> opciones = new DbContextOptionsBuilder<SqlContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        _contexto = new SqlContext(_opciones);
         _contexto = new SqlContext(opciones);
         _repositorio = new RepositorioUsuarioSql(_contexto);
     }
