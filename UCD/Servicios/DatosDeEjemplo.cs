@@ -113,7 +113,7 @@ public class DatosDeEjemplo
     {
         Usuario usuario = new Usuario(dni: dni, nombre: nombre, apellido: apellido, correo: correo,
             contrasena: ContrasenaEjemplo);
-        usuario.AsignarTipo(tipo);
+        usuario.AsignarTipo(_repositorioTipos.ObtenerTipoPorNombre(tipo.Nombre)!);
         _usuarios.AgregarUsuario(usuario);
     }
 
