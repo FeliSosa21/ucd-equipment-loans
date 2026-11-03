@@ -28,6 +28,18 @@ public class RepositorioMovimientoSql
                 EF.Property<int>(movimiento.Prestamo.TipoEquipamiento, "CatalogoId") == filtro.IdCatalogo);
         }
 
+        if (filtro.Desde is not null)
+        {
+            movimientos = movimientos.Where(movimiento =>
+                EF.Property<RegistroDeAccion>(movimiento, "_registro").FechaHora >= filtro.Desde);
+        }
+
+        if (filtro.Hasta is not null)
+        {
+            movimientos = movimientos.Where(movimiento =>
+                EF.Property<RegistroDeAccion>(movimiento, "_registro").FechaHora < filtro.Hasta);
+        }
+
         return movimientos
             .OrderByDescending(movimiento => EF.Property<RegistroDeAccion>(movimiento, "_registro").FechaHora)
             .ThenByDescending(movimiento => movimiento.Id)
