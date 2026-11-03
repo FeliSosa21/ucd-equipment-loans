@@ -14,8 +14,8 @@ public sealed class RepositorioMovimientoTests
     {
         Memoria memoria = new Memoria();
         RepositorioMovimiento repositorio = new RepositorioMovimiento(memoria);
-        Movimiento primero = CrearMovimiento(tipo: TipoMovimiento.Prestamo, idInstitucional: "EQP-0001");
-        Movimiento segundo = CrearMovimiento(tipo: TipoMovimiento.Devolucion, idInstitucional: "EQP-0002");
+        Movimiento primero = CrearMovimiento(idInstitucional: "EQP-0001");
+        Movimiento segundo = CrearMovimiento(idInstitucional: "EQP-0002");
         repositorio.AgregarMovimiento(primero);
         repositorio.AgregarMovimiento(segundo);
 
@@ -41,7 +41,7 @@ public sealed class RepositorioMovimientoTests
         Memoria memoria = new Memoria();
         RepositorioMovimiento repositorioQueGuarda = new RepositorioMovimiento(memoria);
         RepositorioMovimiento repositorioQueBusca = new RepositorioMovimiento(memoria);
-        Movimiento movimiento = CrearMovimiento(tipo: TipoMovimiento.Prestamo, idInstitucional: "EQP-0001");
+        Movimiento movimiento = CrearMovimiento(idInstitucional: "EQP-0001");
         repositorioQueGuarda.AgregarMovimiento(movimiento);
 
         IReadOnlyList<Movimiento> resultado = repositorioQueBusca.ObtenerTodos();
@@ -66,7 +66,7 @@ public sealed class RepositorioMovimientoTests
         Memoria memoria = new Memoria();
         RepositorioMovimiento repositorio = new RepositorioMovimiento(memoria);
         IReadOnlyList<Movimiento> resultado = repositorio.ObtenerTodos();
-        Movimiento movimiento = CrearMovimiento(tipo: TipoMovimiento.Prestamo, idInstitucional: "EQP-0001");
+        Movimiento movimiento = CrearMovimiento(idInstitucional: "EQP-0001");
 
         repositorio.AgregarMovimiento(movimiento);
 
@@ -120,15 +120,16 @@ public sealed class RepositorioMovimientoTests
         return unidad;
     }
 
-    private static Movimiento CrearMovimiento(TipoMovimiento tipo, string idInstitucional)
+    private static Movimiento CrearMovimiento(string idInstitucional)
     {
-        Movimiento movimiento = new Movimiento(
-            fechaHora: FechaFija,
-            tipo: tipo,
-            solicitante: CrearSolicitante(),
-            evaluador: CrearEvaluador(),
-            unidad: CrearUnidad(idInstitucional: idInstitucional));
+        Usuario evaluador = CrearEvaluador();
+        UnidadFisica unidad = CrearUnidad(idInstitucional: idInstitucional);
+        TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",
+            duracionMaxPrestamo: 5, requiereAprobacion: true, categoria: Categoria.Audiovisual);
+        tipo.AgregarUnidad(unidad);
+        Prestamo prestamo = new Prestamo(CrearSolicitante(), tipo, cantidadSolicitada: 1, fechaHoraPrestamo: FechaFija);
+        prestamo.Aprobar(evaluador, new List<UnidadFisica> { unidad });
 
-        return movimiento;
+        return Movimiento.DePrestamo(prestamo, RegistroDeAccion.DeUsuario(evaluador, FechaFija), unidad);
     }
 }

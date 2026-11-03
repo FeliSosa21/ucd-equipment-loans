@@ -1,58 +1,70 @@
 namespace Dominio;
 
-// Registro historico del req. 10: un movimiento por unidad para prestamo, aprobacion y devolucion; solicitud y rechazo, sin unidad. La aprobacion lleva evaluador. No se modifica ni se elimina.
 public class Movimiento
 {
-    public DateTime FechaHora { get; }
-    public TipoMovimiento Tipo { get; }
-    public Usuario Solicitante { get; }
-    public Usuario? Evaluador { get; }
-    public UnidadFisica? Unidad { get; }
+    private RegistroDeAccion _registro;
 
-    public Movimiento(DateTime fechaHora, TipoMovimiento tipo, Usuario solicitante, Usuario? evaluador,
-        UnidadFisica? unidad)
+    public int Id { get; private set; }
+    public Prestamo Prestamo { get; private set; }
+    public TipoMovimiento Tipo { get; private set; }
+    public Usuario? Evaluador { get; private set; }
+    public UnidadFisica? Unidad { get; private init; }
+    public DateTime FechaHora => _registro.FechaHora;
+    public Usuario? Responsable => _registro.Responsable;
+    public Usuario Solicitante => Prestamo.Solicitante;
+
+    private Movimiento()
     {
-        ValidarTipo(tipo);
-        ValidarSolicitante(solicitante);
-        ValidarUnidad(tipo, unidad);
-        ValidarEvaluador(tipo, evaluador);
+        _registro = null!;
+        Prestamo = null!;
+    }
 
-        FechaHora = fechaHora;
+    private Movimiento(Prestamo prestamo, TipoMovimiento tipo, RegistroDeAccion registro)
+    {
+        ValidarPrestamoYRegistro(prestamo, registro);
+        ValidarEvaluador(tipo, prestamo.Evaluador);
+
+        Prestamo = prestamo;
         Tipo = tipo;
-        Solicitante = solicitante;
-        Evaluador = evaluador;
-        Unidad = unidad;
+        Evaluador = prestamo.Evaluador;
+        _registro = registro;
     }
 
-    private static void ValidarTipo(TipoMovimiento tipo)
+    public static Movimiento DeSolicitud(Prestamo prestamo, RegistroDeAccion registro)
     {
-        if (!Enum.IsDefined(tipo))
-        {
-            throw new DominioException("El movimiento debe tener un tipo valido");
-        }
+        return new Movimiento(prestamo, TipoMovimiento.Solicitud, registro);
     }
 
-    private static void ValidarSolicitante(Usuario solicitante)
+    public static Movimiento DeRechazo(Prestamo prestamo, RegistroDeAccion registro)
     {
-        if (solicitante is null)
-        {
-            throw new DominioException("El movimiento debe tener un solicitante");
-        }
+        return new Movimiento(prestamo, TipoMovimiento.Rechazo, registro);
     }
 
-    private static void ValidarUnidad(TipoMovimiento tipo, UnidadFisica? unidad)
+    public static Movimiento DeAprobacion(Prestamo prestamo, RegistroDeAccion registro, UnidadFisica unidad)
     {
-        bool requiereUnidad = tipo == TipoMovimiento.Prestamo || tipo == TipoMovimiento.Devolucion
-            || tipo == TipoMovimiento.Aprobacion;
+        return new Movimiento(prestamo, TipoMovimiento.Aprobacion, registro) { Unidad = ValidarUnidad(unidad) };
+    }
 
-        if (requiereUnidad && unidad is null)
+    public static Movimiento DePrestamo(Prestamo prestamo, RegistroDeAccion registro, UnidadFisica unidad)
+    {
+        return new Movimiento(prestamo, TipoMovimiento.Prestamo, registro) { Unidad = ValidarUnidad(unidad) };
+    }
+
+    public static Movimiento DeDevolucion(Prestamo prestamo, RegistroDeAccion registro, UnidadFisica unidad)
+    {
+        return new Movimiento(prestamo, TipoMovimiento.Devolucion, registro) { Unidad = ValidarUnidad(unidad) };
+    }
+
+    private static void ValidarPrestamoYRegistro(Prestamo prestamo, RegistroDeAccion registro)
+    {
+        if (prestamo is null)
         {
-            throw new DominioException("El movimiento debe tener una unidad");
+            throw new DominioException("El movimiento debe tener un prestamo");
         }
 
-        if (!requiereUnidad && unidad is not null)
+        if (registro is null)
         {
-            throw new DominioException("La solicitud y el rechazo no llevan unidad");
+            throw new DominioException("El movimiento debe tener quien y cuando");
         }
     }
 
@@ -62,5 +74,15 @@ public class Movimiento
         {
             throw new DominioException("La aprobacion debe tener un evaluador");
         }
+    }
+
+    private static UnidadFisica ValidarUnidad(UnidadFisica unidad)
+    {
+        if (unidad is null)
+        {
+            throw new DominioException("El movimiento debe tener una unidad");
+        }
+
+        return unidad;
     }
 }

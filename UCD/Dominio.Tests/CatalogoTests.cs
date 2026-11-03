@@ -139,6 +139,52 @@ public sealed class CatalogoTests
         Assert.AreSame(tipoEquipamientoExistente, resultado);
     }
 
+    [TestMethod]
+    public void Constructor_CatalogoNuevo_EstaActivo()
+    {
+        var catalogo = CrearCatalogo();
+
+        Assert.IsTrue(catalogo.Activo);
+    }
+
+    [TestMethod]
+    public void DarDeBaja_CatalogoActivo_QuedaInactivo()
+    {
+        var catalogo = CrearCatalogo();
+
+        catalogo.DarDeBaja();
+
+        Assert.IsFalse(catalogo.Activo);
+    }
+
+    [TestMethod]
+    public void DarDeBaja_CatalogoYaDadoDeBaja_LanzaDominioException()
+    {
+        var catalogo = CrearCatalogo();
+        catalogo.DarDeBaja();
+
+        Assert.ThrowsException<DominioException>(() => catalogo.DarDeBaja());
+    }
+
+    [TestMethod]
+    public void ModificarNombre_CatalogoDadoDeBaja_LanzaDominioException()
+    {
+        var catalogo = CrearCatalogo();
+        catalogo.DarDeBaja();
+
+        Assert.ThrowsException<DominioException>(() => catalogo.ModificarNombre("CatalogoNuevo"));
+    }
+
+    [TestMethod]
+    public void AgregarTipo_CatalogoDadoDeBaja_LanzaDominioException()
+    {
+        var catalogo = CrearCatalogo();
+        var tipoEquipamiento = CrearTipo();
+        catalogo.DarDeBaja();
+
+        Assert.ThrowsException<DominioException>(() => catalogo.AgregarTipo(tipoEquipamiento));
+    }
+
     private static Catalogo CrearCatalogo(string nombre = "Catalogo General")
     {
         return new Catalogo(nombre);

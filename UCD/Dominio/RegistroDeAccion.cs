@@ -2,8 +2,12 @@ namespace Dominio;
 
 public class RegistroDeAccion
 {
-    public Usuario? Responsable { get; }
-    public DateTime FechaHora { get; }
+    public Usuario? Responsable { get; private set; }
+    public DateTime FechaHora { get; private set; }
+
+    private RegistroDeAccion()
+    {
+    }
 
     private RegistroDeAccion(Usuario? responsable, DateTime fechaHora)
     {

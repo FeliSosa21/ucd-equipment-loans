@@ -8,6 +8,7 @@ public class Catalogo
     private readonly List<TipoEquipamiento> _tipos = new();
     public string Nombre { get; private set; }
     public int Id { get; private set; }
+    public bool Activo { get; private set; } = true;
 
     public IReadOnlyCollection<TipoEquipamiento> Tipos => _tipos.AsReadOnly();
 
@@ -24,8 +25,23 @@ public class Catalogo
 
     public void ModificarNombre(string nombre)
     {
+        ValidarQueEsteActivo();
         ValidarNombre(nombre);
         Nombre = nombre;
+    }
+
+    public void DarDeBaja()
+    {
+        ValidarQueEsteActivo();
+        Activo = false;
+    }
+
+    private void ValidarQueEsteActivo()
+    {
+        if (!Activo)
+        {
+            throw new DominioException("El catalogo esta dado de baja");
+        }
     }
 
     private static void ValidarNombre(string nombre)
@@ -48,6 +64,8 @@ public class Catalogo
 
     public void AgregarTipo(TipoEquipamiento tipo)
     {
+        ValidarQueEsteActivo();
+
         if (tipo is null)
         {
             throw new DominioException("El tipo no puede ser nulo");
