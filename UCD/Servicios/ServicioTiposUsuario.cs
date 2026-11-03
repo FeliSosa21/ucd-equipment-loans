@@ -25,6 +25,7 @@ public class ServicioTiposUsuario
 
     public void ModificarTipo(TipoUsuarioDto dto, string dniResponsable)
     {
+        ValidarQueSeaAdministradorActivo(dniResponsable);
         TipoUsuario? tipo = _repositorioTipos.ObtenerTipoPorNombre(dto.Nombre);
 
         if (tipo is null)
