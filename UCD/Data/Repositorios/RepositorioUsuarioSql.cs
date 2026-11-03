@@ -47,5 +47,21 @@ public class RepositorioUsuarioSql
             .Take(tamanoPagina)
             .ToList();
     }
+    
+    public int ContarUsuarios(string? filtro)
+    {
+        IQueryable<Usuario> usuarios = _contexto.Usuarios;
+
+        if (filtro is not null)
+        {
+            string buscado = filtro.ToLower();
+            usuarios = usuarios.Where(usuario => usuario.Nombre.ToLower().Contains(buscado)
+                                                 || usuario.Apellido.ToLower().Contains(buscado)
+                                                 || usuario.Dni.Contains(buscado)
+                                                 || usuario.Correo.ToLower().Contains(buscado));
+        }
+
+        return usuarios.Count();
+    }
 
 }
