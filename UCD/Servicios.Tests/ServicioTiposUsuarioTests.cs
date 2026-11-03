@@ -11,6 +11,7 @@ public class ServicioTiposUsuarioTests
     private const string DniAdministrador = "11111111";
     private const string DniEstudiante = "12345672";
     private const string ImagenPng = "data:image/png;base64,iVBORw0KGgo=";
+    private const string ImagenJpeg = "data:image/jpeg;base64,/9j/4AAQ";
 
     private Memoria _memoria = null!;
     private RepositorioUsuario _repositorioUsuarios = null!;
@@ -73,6 +74,17 @@ public class ServicioTiposUsuarioTests
 
         Assert.AreEqual("Docentes de la facultad",
             _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!.Descripcion);
+    }
+
+    [TestMethod]
+    public void ModificarTipo_ImagenNueva_LaGuarda()
+    {
+        TipoUsuarioDto dto = CrearDtoDocente();
+        dto.Imagen = ImagenJpeg;
+
+        _servicio.ModificarTipo(dto, DniAdministrador);
+
+        Assert.AreEqual(ImagenJpeg, _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!.Imagen);
     }
 
     private static TipoUsuarioDto CrearDtoDocente()
