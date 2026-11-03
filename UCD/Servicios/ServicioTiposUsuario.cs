@@ -35,12 +35,12 @@ public class ServicioTiposUsuario
 
         TraduccionDeErrores.Ejecutar(() =>
         {
-            tipo.ModificarPresentacion(dto.Descripcion, dto.Imagen);
-
             if (dto.MaxUnidadesPorCatalogo.HasValue && dto.MaxPrestamosConcurrentes.HasValue)
             {
                 tipo.ModificarTopes(dto.MaxUnidadesPorCatalogo.Value, dto.MaxPrestamosConcurrentes.Value);
             }
+
+            tipo.ModificarPresentacion(dto.Descripcion, dto.Imagen);
         });
     }
 
