@@ -23,6 +23,8 @@ public class RepositorioMovimientoSql
         return _contexto.Movimientos
             .OrderByDescending(movimiento => EF.Property<RegistroDeAccion>(movimiento, "_registro").FechaHora)
             .ThenByDescending(movimiento => movimiento.Id)
+            .Skip((pagina - 1) * tamanoPagina)
+            .Take(tamanoPagina)
             .ToList();
     }
 }
