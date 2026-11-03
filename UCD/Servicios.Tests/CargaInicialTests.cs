@@ -77,6 +77,21 @@ public class CargaInicialTests
             tipos.ObtenerTodos().Select(tipo => tipo.Nombre).ToList());
     }
 
+    [TestMethod]
+    public void CargarRoot_TiposCargados_LeAsignaElAdministradorDelRepositorio()
+    {
+        Memoria memoria = new Memoria();
+        CargaInicial carga = CrearCarga(memoria);
+        carga.CargarTiposDeUsuario();
+
+        carga.CargarRoot();
+
+        Usuario root = new RepositorioUsuario(memoria).ObtenerUsuarioPorCorreo(CargaInicial.CorreoRoot)!;
+        TipoUsuario administrador =
+            new RepositorioTipoUsuario(memoria).ObtenerTipoPorNombre(TipoUsuario.Administrador().Nombre)!;
+        Assert.AreSame(administrador, root.Tipo);
+    }
+
     private static CargaInicial CrearCarga(Memoria memoria)
     {
         return new CargaInicial(new RepositorioUsuario(memoria), new RepositorioCatalogo(memoria),
