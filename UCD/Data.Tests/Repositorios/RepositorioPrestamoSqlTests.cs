@@ -10,6 +10,9 @@ public sealed class RepositorioPrestamoSqlTests
     private const string DniSolicitante = "52083412";
     private const string NombreTipo = "Notebook Lenovo ThinkPad";
     private const int CantidadSolicitada = 2;
+    private const string IdPrimeraUnidad = "EQP-0001";
+    private const string IdSegundaUnidad = "EQP-0002";
+    private const string UbicacionUnidad = "Laboratorio Prueba";
     private static readonly DateTime FechaFija = new(2026, 11, 3, 10, 0, 0);
 
     private DbContextOptions<SqlContext> _opciones = null!;
@@ -54,10 +57,44 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(NombreTipo, leido.TipoEquipamiento.Nombre);
     }
 
-    private void GuardarConOtroContexto(Prestamo prestamo)
+    [TestMethod]
+    public void AgregarPrestamo_UnidadesPrestadasDeNuevo_CadaPrestamoConservaSusUnidades()
+    {
+        Usuario solicitante = CrearSolicitante();
+        TipoEquipamiento tipo = CrearTipoEquipamiento();
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo);
+
+        Prestamo devuelto = new Prestamo(
+            solicitante: solicitante,
+            tipoEquipamiento: tipo,
+            cantidadSolicitada: CantidadSolicitada,
+            fechaHoraPrestamo: FechaFija);
+        devuelto.Activar(unidades);
+        Devolver(devuelto);
+
+        Prestamo activo = new Prestamo(
+            solicitante: solicitante,
+            tipoEquipamiento: tipo,
+            cantidadSolicitada: CantidadSolicitada,
+            fechaHoraPrestamo: FechaFija.AddDays(10));
+        activo.Activar(unidades);
+
+        GuardarConOtroContexto(devuelto, activo);
+
+        List<string> idsEsperados = new List<string> { IdPrimeraUnidad, IdSegundaUnidad };
+        CollectionAssert.AreEquivalent(idsEsperados, LeerIdsDeUnidades(devuelto.Id));
+        CollectionAssert.AreEquivalent(idsEsperados, LeerIdsDeUnidades(activo.Id));
+    }
+
+    private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
-        new RepositorioPrestamoSql(contextoQueGuarda).AgregarPrestamo(prestamo);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueGuarda);
+
+        foreach (Prestamo prestamo in prestamos)
+        {
+            repositorio.AgregarPrestamo(prestamo);
+        }
     }
 
     private static Prestamo CrearPrestamo()
@@ -93,5 +130,36 @@ public sealed class RepositorioPrestamoSqlTests
             categoria: Categoria.Computacion);
 
         return tipo;
+    }
+
+    private List<string> LeerIdsDeUnidades(Guid idPrestamo)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo leido = contextoQueLee.Prestamos
+            .Include(guardado => guardado.UnidadesAsignadas)
+            .Single(guardado => guardado.Id == idPrestamo);
+
+        return leido.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList();
+    }
+
+    private static List<UnidadFisica> CrearUnidadesDelTipo(TipoEquipamiento tipo)
+    {
+        UnidadFisica primera = new UnidadFisica(idInstitucional: IdPrimeraUnidad, ubiFisica: UbicacionUnidad, numSerie: null);
+        UnidadFisica segunda = new UnidadFisica(idInstitucional: IdSegundaUnidad, ubiFisica: UbicacionUnidad, numSerie: null);
+
+        tipo.AgregarUnidad(primera);
+        tipo.AgregarUnidad(segunda);
+
+        return new List<UnidadFisica> { primera, segunda };
+    }
+
+    private static void Devolver(Prestamo prestamo)
+    {
+        foreach (UnidadFisica unidad in prestamo.UnidadesAsignadas)
+        {
+            unidad.Disponible();
+        }
+
+        prestamo.MarcarDevuelto();
     }
 }
