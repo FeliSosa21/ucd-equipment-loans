@@ -64,6 +64,19 @@ public class CargaInicialTests
         Assert.AreSame(primero, catalogos.Obtener());
     }
 
+    [TestMethod]
+    public void CargarTiposDeUsuario_MemoriaVacia_GuardaLosSeisTiposPredefinidos()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioTipoUsuario tipos = new RepositorioTipoUsuario(memoria);
+        CargaInicial carga = CrearCarga(memoria);
+
+        carga.CargarTiposDeUsuario();
+
+        CollectionAssert.AreEqual(TipoUsuario.Todos().Select(tipo => tipo.Nombre).ToList(),
+            tipos.ObtenerTodos().Select(tipo => tipo.Nombre).ToList());
+    }
+
     private static CargaInicial CrearCarga(Memoria memoria)
     {
         return new CargaInicial(new RepositorioUsuario(memoria), new RepositorioCatalogo(memoria));
