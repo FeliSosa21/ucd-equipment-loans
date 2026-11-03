@@ -131,6 +131,15 @@ public class ServicioTiposUsuarioTests
         Assert.ThrowsException<ServicioException>(() => _servicio.ModificarTipo(CrearDtoDocente(), DniEstudiante));
     }
 
+    [TestMethod]
+    public void ModificarTipo_DescripcionVacia_LanzaServicioException()
+    {
+        TipoUsuarioDto dto = CrearDtoDocente();
+        dto.Descripcion = "";
+
+        Assert.ThrowsException<ServicioException>(() => _servicio.ModificarTipo(dto, DniAdministrador));
+    }
+
     private void AgregarEstudiante()
     {
         Usuario estudiante = new Usuario(dni: DniEstudiante, nombre: "Juan", apellido: "Gomez",
