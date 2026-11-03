@@ -35,9 +35,7 @@ public class ServicioTiposUsuario
 
         TraduccionDeErrores.Ejecutar(() =>
         {
-            new PresentacionTipoUsuario(tipo.Nombre, dto.Descripcion, dto.Imagen);
-            tipo.ModificarDescripcion(dto.Descripcion);
-            tipo.ModificarImagen(dto.Imagen);
+            tipo.ModificarPresentacion(dto.Descripcion, dto.Imagen);
 
             if (dto.MaxUnidadesPorCatalogo.HasValue && dto.MaxPrestamosConcurrentes.HasValue)
             {
