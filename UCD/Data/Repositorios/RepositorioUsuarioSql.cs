@@ -6,6 +6,7 @@ public class RepositorioUsuarioSql
 {
     private readonly SqlContext _contexto;
     
+    
     public RepositorioUsuarioSql(SqlContext contexto)
     {
         _contexto = contexto;
@@ -55,5 +56,10 @@ public class RepositorioUsuarioSql
     public int ContarUsuarios(string? filtro)
     {
         return FiltrarPor(filtro).Count();
+    }
+    
+    public void ActualizarUsuario(Usuario usuario)
+    {
+        _contexto.SaveChanges();
     }
 }
