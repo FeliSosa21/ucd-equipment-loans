@@ -30,7 +30,11 @@ public class RepositorioUsuarioSql
 
     public IReadOnlyList<Usuario> ObtenerPaginaDeUsuarios(string? filtro, int pagina, int tamanoPagina)
     {
-        return _contexto.Usuarios.OrderBy(usuario => usuario.Apellido).ToList();
+        return _contexto.Usuarios
+            .OrderBy(usuario => usuario.Apellido)
+            .Skip((pagina-1)*tamanoPagina)
+            .Take(tamanoPagina)
+            .ToList();
     }
 
 }
