@@ -196,8 +196,9 @@ public class ServicioSesionTests
 
     private static ServicioSesion CrearServicioConUsuarioRegistrado(out RepositorioUsuario repositorio)
     {
-        repositorio = new RepositorioUsuario(new Memoria());
-        new ServicioUsuario(repositorio).Registrar(new UsuarioDto
+        Memoria memoria = new Memoria();
+        repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria)).Registrar(new UsuarioDto
         {
             Dni = DniValido,
             Nombre = "Felipe",

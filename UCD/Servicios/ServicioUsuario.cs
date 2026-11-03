@@ -7,10 +7,12 @@ namespace Servicios;
 public class ServicioUsuario
 {
     private readonly RepositorioUsuario _repositorio;
+    private readonly RepositorioTipoUsuario _repositorioTipos;
 
-    public ServicioUsuario(RepositorioUsuario repositorio)
+    public ServicioUsuario(RepositorioUsuario repositorio, RepositorioTipoUsuario repositorioTipos)
     {
         _repositorio = repositorio;
+        _repositorioTipos = repositorioTipos;
     }
 
     public void Registrar(UsuarioDto dto)

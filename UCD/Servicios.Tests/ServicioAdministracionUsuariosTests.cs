@@ -624,13 +624,9 @@ public class ServicioAdministracionUsuariosTests
     {
         Memoria memoria = new Memoria();
         repositorio = new RepositorioUsuario(memoria);
-        repositorioTipos = new RepositorioTipoUsuario(memoria);
-        foreach (TipoUsuario tipo in TipoUsuario.Todos())
-        {
-            repositorioTipos.AgregarTipo(tipo);
-        }
+        repositorioTipos = TiposDePrueba.Cargados(memoria);
 
-        ServicioUsuario servicioUsuario = new ServicioUsuario(repositorio);
+        ServicioUsuario servicioUsuario = new ServicioUsuario(repositorio, repositorioTipos);
         servicioUsuario.Registrar(new UsuarioDto
         {
             Dni = DniValido, Nombre = "Felipe", Apellido = "Sosa", Correo = "felipe@hotmail.com",
