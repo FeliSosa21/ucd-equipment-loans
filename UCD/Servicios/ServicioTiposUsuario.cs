@@ -35,6 +35,7 @@ public class ServicioTiposUsuario
 
         TraduccionDeErrores.Ejecutar(() =>
         {
+            new PresentacionTipoUsuario(tipo.Nombre, dto.Descripcion, dto.Imagen);
             tipo.ModificarDescripcion(dto.Descripcion);
             tipo.ModificarImagen(dto.Imagen);
 
