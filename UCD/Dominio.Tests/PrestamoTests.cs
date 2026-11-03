@@ -518,6 +518,34 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Rechazar_MotivoDe301Caracteres_LanzaExcepcion()
+    {
+        (Prestamo prestamo, _) = CrearSolicitudDeTipoConAprobacion();
+        Usuario evaluador = CrearEvaluador();
+        string motivoDemasiadoLargo = new string('a', 301);
+
+        Assert.ThrowsException<DominioException>(
+            () => prestamo.Rechazar(evaluador, motivoDemasiadoLargo));
+
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.IsNull(prestamo.MotivoRechazo);
+        Assert.IsNull(prestamo.Evaluador);
+    }
+
+    [TestMethod]
+    public void Rechazar_MotivoDe300Caracteres_QuedaRechazadoConElMotivo()
+    {
+        (Prestamo prestamo, _) = CrearSolicitudDeTipoConAprobacion();
+        Usuario evaluador = CrearEvaluador();
+        string motivoDelMaximo = new string('a', 300);
+
+        prestamo.Rechazar(evaluador, motivoDelMaximo);
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(motivoDelMaximo, prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
     public void Rechazar_EvaluadorNulo_LanzaExcepcion()
     {
         (Prestamo prestamo, _) = CrearSolicitudDeTipoConAprobacion();

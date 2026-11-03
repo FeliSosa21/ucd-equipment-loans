@@ -7,6 +7,7 @@ public class SqlContext : DbContext
 {
     public DbSet<Catalogo> Catalogos { get; set; }
     public DbSet<Usuario> Usuarios { get; set; }
+    public DbSet<Prestamo> Prestamos { get; set; }
 
     public SqlContext(DbContextOptions<SqlContext> options) : base(options)
     {
@@ -19,4 +20,3 @@ public class SqlContext : DbContext
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SqlContext).Assembly);
     }
 }
-
