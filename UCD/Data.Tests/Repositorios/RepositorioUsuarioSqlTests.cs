@@ -142,6 +142,19 @@ public sealed class RepositorioUsuarioSqlTests
         Usuario? leido = new RepositorioUsuarioSql(otroContexto).ObtenerUsuarioPorDni(fernandez.Dni);
         Assert.AreEqual(EstadoUsuario.Desactivado, leido?.Estado);
     }
+    
+    [TestMethod]
+    public void ObtenerPaginaDeUsuarios_MismoApellido_LosOrdenaPorNombre()
+    {
+        Usuario lucia = CrearUsuario();
+        Usuario ana = CrearUsuario(dni: "12345672", nombre: "Ana", correo: "ana.fernandez@ucd.edu.uy");
+        _repositorio.AgregarUsuario(lucia);
+        _repositorio.AgregarUsuario(ana);
+
+        IReadOnlyList<Usuario> resultado = _repositorio.ObtenerPaginaDeUsuarios(null, pagina: 1, tamanoPagina: 10);
+
+        CollectionAssert.AreEqual(new List<Usuario> { ana, lucia }, resultado.ToList());
+    }
 
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
