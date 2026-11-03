@@ -153,6 +153,19 @@ public class ServicioTiposUsuarioTests
         Assert.AreEqual("Docente", _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!.Descripcion);
     }
 
+    [TestMethod]
+    public void ModificarTipo_TopesInvalidos_NoCambiaLaDescripcion()
+    {
+        _servicio.ModificarTipo(CrearDtoDocente(), DniAdministrador);
+        TipoUsuarioDto dto = CrearDtoDocente();
+        dto.Descripcion = "Docentes de la facultad";
+        dto.MaxUnidadesPorCatalogo = -1;
+
+        Assert.ThrowsException<ServicioException>(() => _servicio.ModificarTipo(dto, DniAdministrador));
+
+        Assert.AreEqual("Docente", _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!.Descripcion);
+    }
+
     private void AgregarEstudiante()
     {
         Usuario estudiante = new Usuario(dni: DniEstudiante, nombre: "Juan", apellido: "Gomez",
