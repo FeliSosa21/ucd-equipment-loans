@@ -17,4 +17,18 @@ public sealed class RepositorioTipoUsuarioTests
 
         Assert.AreSame(docente, resultado);
     }
+
+    [TestMethod]
+    public void ObtenerTodos_DosTiposAgregados_LosDevuelveEnElOrdenEnQueSeAgregaron()
+    {
+        RepositorioTipoUsuario repositorio = new RepositorioTipoUsuario(new Memoria());
+        TipoUsuario estudiante = TipoUsuario.Estudiante();
+        TipoUsuario docente = TipoUsuario.Docente();
+        repositorio.AgregarTipo(estudiante);
+        repositorio.AgregarTipo(docente);
+
+        IReadOnlyList<TipoUsuario> resultado = repositorio.ObtenerTodos();
+
+        CollectionAssert.AreEqual(new List<TipoUsuario> { estudiante, docente }, resultado.ToList());
+    }
 }
