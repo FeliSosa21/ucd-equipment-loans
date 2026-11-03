@@ -13,11 +13,22 @@ public class CargaInicial
 
     private readonly RepositorioUsuario _repositorioUsuario;
     private readonly RepositorioCatalogo _repositorioCatalogo;
+    private readonly RepositorioTipoUsuario _repositorioTipoUsuario;
 
-    public CargaInicial(RepositorioUsuario repositorioUsuario, RepositorioCatalogo repositorioCatalogo)
+    public CargaInicial(RepositorioUsuario repositorioUsuario, RepositorioCatalogo repositorioCatalogo,
+        RepositorioTipoUsuario repositorioTipoUsuario)
     {
         _repositorioUsuario = repositorioUsuario;
         _repositorioCatalogo = repositorioCatalogo;
+        _repositorioTipoUsuario = repositorioTipoUsuario;
+    }
+
+    public void CargarTiposDeUsuario()
+    {
+        foreach (TipoUsuario tipo in TipoUsuario.Todos())
+        {
+            _repositorioTipoUsuario.AgregarTipo(tipo);
+        }
     }
 
     public void CargarRoot()

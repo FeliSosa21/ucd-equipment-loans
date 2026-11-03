@@ -79,6 +79,7 @@ public class CargaInicialTests
 
     private static CargaInicial CrearCarga(Memoria memoria)
     {
-        return new CargaInicial(new RepositorioUsuario(memoria), new RepositorioCatalogo(memoria));
+        return new CargaInicial(new RepositorioUsuario(memoria), new RepositorioCatalogo(memoria),
+            new RepositorioTipoUsuario(memoria));
     }
 }
