@@ -36,4 +36,17 @@ public class ServicioTiposUsuarioTests
         CollectionAssert.AreEqual(TipoUsuario.Todos().Select(tipo => tipo.Nombre).ToList(),
             tipos.Select(tipo => tipo.Nombre).ToList());
     }
+
+    [TestMethod]
+    public void ListarTipos_SeisTiposCargados_DevuelveLosTopesDeCadaTipo()
+    {
+        List<TipoUsuarioDto> tipos = _servicio.ListarTipos(DniAdministrador);
+
+        TipoUsuarioDto docente = tipos.Single(tipo => tipo.Nombre == TipoUsuario.Docente().Nombre);
+        TipoUsuarioDto administrador = tipos.Single(tipo => tipo.Nombre == TipoUsuario.Administrador().Nombre);
+        Assert.AreEqual(40, docente.MaxUnidadesPorCatalogo);
+        Assert.AreEqual(3, docente.MaxPrestamosConcurrentes);
+        Assert.IsNull(administrador.MaxUnidadesPorCatalogo);
+        Assert.IsNull(administrador.MaxPrestamosConcurrentes);
+    }
 }
