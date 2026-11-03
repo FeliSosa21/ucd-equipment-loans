@@ -10,6 +10,7 @@ public class ServicioTiposUsuarioTests
 {
     private const string DniAdministrador = "11111111";
     private const string DniEstudiante = "12345672";
+    private const string ImagenPng = "data:image/png;base64,iVBORw0KGgo=";
 
     private Memoria _memoria = null!;
     private RepositorioUsuario _repositorioUsuarios = null!;
@@ -60,5 +61,29 @@ public class ServicioTiposUsuarioTests
         _repositorioUsuarios.AgregarUsuario(estudiante);
 
         Assert.ThrowsException<ServicioException>(() => _servicio.ListarTipos(DniEstudiante));
+    }
+
+    [TestMethod]
+    public void ModificarTipo_DescripcionNueva_LaGuarda()
+    {
+        TipoUsuarioDto dto = CrearDtoDocente();
+        dto.Descripcion = "Docentes de la facultad";
+
+        _servicio.ModificarTipo(dto, DniAdministrador);
+
+        Assert.AreEqual("Docentes de la facultad",
+            _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!.Descripcion);
+    }
+
+    private static TipoUsuarioDto CrearDtoDocente()
+    {
+        return new TipoUsuarioDto
+        {
+            Nombre = TipoUsuario.Docente().Nombre,
+            Descripcion = "Docente",
+            Imagen = ImagenPng,
+            MaxUnidadesPorCatalogo = 40,
+            MaxPrestamosConcurrentes = 3
+        };
     }
 }

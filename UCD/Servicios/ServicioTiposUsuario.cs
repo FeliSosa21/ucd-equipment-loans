@@ -23,6 +23,10 @@ public class ServicioTiposUsuario
         return _repositorioTipos.ObtenerTodos().Select(ADto).ToList();
     }
 
+    public void ModificarTipo(TipoUsuarioDto dto, string dniResponsable)
+    {
+    }
+
     private void ValidarQueSeaAdministradorActivo(string dniResponsable)
     {
         Usuario? responsable = _repositorioUsuarios.ObtenerUsuarioPorDni(dniResponsable);
