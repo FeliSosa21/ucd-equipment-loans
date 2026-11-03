@@ -33,6 +33,8 @@ public class RepositorioUsuarioSql
     {
         return FiltrarPor(filtro)
             .OrderBy(usuario => usuario.Apellido)
+            .ThenBy(usuario => usuario.Nombre)
+            .ThenBy(usuario => usuario.Dni)
             .Skip((pagina - 1) * tamanoPagina)
             .Take(tamanoPagina)
             .ToList();
