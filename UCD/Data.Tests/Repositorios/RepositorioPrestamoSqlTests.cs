@@ -40,6 +40,26 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(prestamo.FechaEsperadaDevolucion, leido.FechaEsperadaDevolucion);
     }
 
+    [TestMethod]
+    public void AgregarPrestamo_PrestamoValido_OtroContextoLeeSolicitanteYTipo()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        using (SqlContext contextoQueGuarda = new SqlContext(_opciones))
+        {
+            new RepositorioPrestamoSql(contextoQueGuarda).AgregarPrestamo(prestamo);
+        }
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo leido = contextoQueLee.Prestamos
+            .Include(guardado => guardado.Solicitante)
+            .Include(guardado => guardado.TipoEquipamiento)
+            .Single(guardado => guardado.Id == prestamo.Id);
+
+        Assert.AreEqual(DniSolicitante, leido.Solicitante.Dni);
+        Assert.AreEqual(NombreTipo, leido.TipoEquipamiento.Nombre);
+    }
+
     private static Prestamo CrearPrestamo()
     {
         return new Prestamo(
