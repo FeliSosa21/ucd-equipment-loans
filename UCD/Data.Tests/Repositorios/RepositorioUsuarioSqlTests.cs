@@ -128,6 +128,20 @@ public sealed class RepositorioUsuarioSqlTests
 
         Assert.AreEqual(1, cantidad);
     }
+    
+    [TestMethod]
+    public void ActualizarUsuario_UsuarioDesactivado_OtroContextoLoLeeDesactivado()
+    {
+        Usuario fernandez = CrearUsuario();
+        _repositorio.AgregarUsuario(fernandez);
+        fernandez.Desactivar();
+
+        _repositorio.ActualizarUsuario(fernandez);
+
+        using SqlContext otroContexto = new SqlContext(_opciones);
+        Usuario? leido = new RepositorioUsuarioSql(otroContexto).ObtenerUsuarioPorDni(fernandez.Dni);
+        Assert.AreEqual(EstadoUsuario.Desactivado, leido?.Estado);
+    }
 
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
