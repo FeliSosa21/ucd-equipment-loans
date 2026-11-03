@@ -14,6 +14,8 @@ public class ConfiguracionCatalogo : IEntityTypeConfiguration<Catalogo>
 
         builder.Property(c => c.Nombre).IsRequired().HasMaxLength(Catalogo.LargoMaximoNombre);
 
+        builder.Property(c => c.Activo).IsRequired().HasDefaultValue(true);
+
         builder.HasMany(c => c.Tipos)
             .WithOne()
             .HasForeignKey("CatalogoId")
@@ -21,5 +23,7 @@ public class ConfiguracionCatalogo : IEntityTypeConfiguration<Catalogo>
 
         builder.Navigation(c => c.Tipos)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.HasIndex(c => c.Nombre).IsUnique().HasFilter("[Activo] = 1");
     }
 }
