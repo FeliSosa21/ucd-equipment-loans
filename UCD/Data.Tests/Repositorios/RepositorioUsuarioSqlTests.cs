@@ -102,6 +102,19 @@ public sealed class RepositorioUsuarioSqlTests
         CollectionAssert.AreEqual(new List<Usuario> { fernandez }, resultado.ToList());
     }
 
+    [TestMethod]
+    public void ObtenerPaginaDeUsuarios_FiltroConOtrasMayusculas_DevuelveSoloLosQueCoinciden()
+    {
+        Usuario fernandez = CrearUsuario();
+        Usuario alvarez = CrearUsuario(dni: "12345672", apellido: "Alvarez", correo: "martin.alvarez@ucd.edu.uy");
+        _repositorio.AgregarUsuario(fernandez);
+        _repositorio.AgregarUsuario(alvarez);
+        
+        IReadOnlyList<Usuario> resultado = _repositorio.ObtenerPaginaDeUsuarios("FERN", pagina: 1, tamanoPagina: 10);
+        
+        CollectionAssert.AreEqual(new List<Usuario> { fernandez }, resultado.ToList());
+    }
+
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
     {
