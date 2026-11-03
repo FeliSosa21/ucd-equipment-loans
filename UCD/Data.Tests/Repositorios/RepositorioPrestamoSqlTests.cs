@@ -8,11 +8,13 @@ namespace Data.Tests.Repositorios;
 public sealed class RepositorioPrestamoSqlTests
 {
     private const string DniSolicitante = "52083412";
+    private const string DniEvaluador = "67890127";
     private const string NombreTipo = "Notebook Lenovo ThinkPad";
     private const int CantidadSolicitada = 2;
     private const string IdPrimeraUnidad = "EQP-0001";
     private const string IdSegundaUnidad = "EQP-0002";
     private const string UbicacionUnidad = "Laboratorio Prueba";
+    private const string MotivoDelRechazo = "Equipo reservado para un evento";
     private static readonly DateTime FechaFija = new(2026, 11, 3, 10, 0, 0);
 
     private DbContextOptions<SqlContext> _opciones = null!;
@@ -86,6 +88,27 @@ public sealed class RepositorioPrestamoSqlTests
         CollectionAssert.AreEquivalent(idsEsperados, LeerIdsDeUnidades(activo.Id));
     }
 
+    [TestMethod]
+    public void AgregarPrestamo_PrestamoRechazado_OtroContextoLeeEstadoEvaluadorYMotivo()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        prestamo.Rechazar(CrearEvaluador(), MotivoDelRechazo);
+
+        GuardarConOtroContexto(prestamo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo leido = contextoQueLee.Prestamos
+            .Include(guardado => guardado.Solicitante)
+            .Include(guardado => guardado.Evaluador)
+            .Single(guardado => guardado.Id == prestamo.Id);
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, leido.Estado);
+        Assert.IsNotNull(leido.Evaluador);
+        Assert.AreEqual(DniEvaluador, leido.Evaluador.Dni);
+        Assert.AreEqual(DniSolicitante, leido.Solicitante.Dni);
+        Assert.AreEqual(MotivoDelRechazo, leido.MotivoRechazo);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -116,6 +139,20 @@ public sealed class RepositorioPrestamoSqlTests
             contrasena: "VivalaOrt2026");
 
         usuario.AsignarTipo(TipoUsuario.Docente);
+
+        return usuario;
+    }
+
+    private static Usuario CrearEvaluador()
+    {
+        Usuario usuario = new Usuario(
+            dni: DniEvaluador,
+            nombre: "Sofia",
+            apellido: "Martinez",
+            correo: "sofia.martinez@ejemplo.com",
+            contrasena: "VivalaOrt2026");
+
+        usuario.AsignarTipo(TipoUsuario.Supervisor);
 
         return usuario;
     }
