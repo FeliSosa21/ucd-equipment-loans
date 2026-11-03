@@ -7,8 +7,8 @@ public class Prestamo
 
     public Guid Id { get; private set; } = Guid.NewGuid();
     public EstadoPrestamo Estado { get; private set; } = EstadoPrestamo.Solicitado;
-    public Usuario Solicitante { get; }
-    public TipoEquipamiento TipoEquipamiento { get; }
+    public Usuario Solicitante { get; private set; }
+    public TipoEquipamiento TipoEquipamiento { get; private set; }
     public int CantidadSolicitada { get; private set; }
     public DateTime FechaHoraPrestamo { get; private set; }
     public DateTime FechaEsperadaDevolucion { get; private set; }
