@@ -122,11 +122,6 @@ public class TipoUsuario
         presentacion = presentacionNueva;
     }
 
-    public void ModificarPresentacion(string descripcion, string imagen)
-    {
-        presentacion = new PresentacionTipoUsuario(Nombre, descripcion, imagen);
-    }
-
     public void ModificarDescripcion(string descripcion)
     {
         presentacion.ModificarDescripcion(descripcion);
