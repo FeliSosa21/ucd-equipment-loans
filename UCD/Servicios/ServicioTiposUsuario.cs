@@ -25,7 +25,13 @@ public class ServicioTiposUsuario
 
     public void ModificarTipo(TipoUsuarioDto dto, string dniResponsable)
     {
-        TipoUsuario tipo = _repositorioTipos.ObtenerTipoPorNombre(dto.Nombre)!;
+        TipoUsuario? tipo = _repositorioTipos.ObtenerTipoPorNombre(dto.Nombre);
+
+        if (tipo is null)
+        {
+            throw new ServicioException("El tipo de usuario no existe");
+        }
+
         tipo.ModificarDescripcion(dto.Descripcion);
         tipo.ModificarImagen(dto.Imagen);
 
