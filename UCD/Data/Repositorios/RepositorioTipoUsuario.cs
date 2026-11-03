@@ -20,4 +20,9 @@ public class RepositorioTipoUsuario
     {
         return _memoria.TiposDeUsuario.FirstOrDefault(tipo => tipo.Nombre == nombre);
     }
+
+    public IReadOnlyList<TipoUsuario> ObtenerTodos()
+    {
+        return _memoria.TiposDeUsuario.ToList().AsReadOnly();
+    }
 }
