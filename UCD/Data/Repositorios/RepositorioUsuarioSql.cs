@@ -28,4 +28,9 @@ public class RepositorioUsuarioSql
         return _contexto.Usuarios.FirstOrDefault(usuario => usuario.Correo.ToLower() == buscado);
     }
 
+    public IReadOnlyList<Usuario> ObtenerPaginaDeUsuarios(string? filtro, int pagina, int tamanoPagina)
+    {
+        return _contexto.Usuarios.OrderBy(usuario => usuario.Apellido).ToList();
+    }
+
 }
