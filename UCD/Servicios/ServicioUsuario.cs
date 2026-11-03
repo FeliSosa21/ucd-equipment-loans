@@ -23,6 +23,7 @@ public class ServicioUsuario
     internal Usuario Agregar(UsuarioDto dto)
     {
         Usuario usuario = CrearUsuario(dto);
+        usuario.AsignarTipo(_repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.SinPermisos().Nombre)!);
 
         if (_repositorio.ObtenerUsuarioPorDni(usuario.Dni) != null)
         {
