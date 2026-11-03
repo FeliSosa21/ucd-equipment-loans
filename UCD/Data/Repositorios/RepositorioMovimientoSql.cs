@@ -20,7 +20,15 @@ public class RepositorioMovimientoSql
 
     public IReadOnlyList<Movimiento> ObtenerPaginaDeMovimientos(FiltroMovimientos filtro, int pagina, int tamanoPagina)
     {
-        return _contexto.Movimientos
+        IQueryable<Movimiento> movimientos = _contexto.Movimientos;
+
+        if (filtro.IdCatalogo is not null)
+        {
+            movimientos = movimientos.Where(movimiento =>
+                EF.Property<int>(movimiento.Prestamo.TipoEquipamiento, "CatalogoId") == filtro.IdCatalogo);
+        }
+
+        return movimientos
             .OrderByDescending(movimiento => EF.Property<RegistroDeAccion>(movimiento, "_registro").FechaHora)
             .ThenByDescending(movimiento => movimiento.Id)
             .Skip((pagina - 1) * tamanoPagina)
