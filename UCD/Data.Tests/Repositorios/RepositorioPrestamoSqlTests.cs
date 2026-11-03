@@ -138,7 +138,7 @@ public sealed class RepositorioPrestamoSqlTests
             correo: "renato.alves@ejemplo.com",
             contrasena: "VivalaOrt2026");
 
-        usuario.AsignarTipo(TipoUsuario.Docente);
+        usuario.AsignarTipo(TipoUsuario.Docente());
 
         return usuario;
     }
@@ -152,7 +152,7 @@ public sealed class RepositorioPrestamoSqlTests
             correo: "sofia.martinez@ejemplo.com",
             contrasena: "VivalaOrt2026");
 
-        usuario.AsignarTipo(TipoUsuario.Supervisor);
+        usuario.AsignarTipo(TipoUsuario.Supervisor());
 
         return usuario;
     }

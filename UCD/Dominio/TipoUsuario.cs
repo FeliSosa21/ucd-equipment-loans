@@ -12,12 +12,12 @@ public class TipoUsuario
     public int? MaxUnidadesPorCatalogo => topes?.MaxUnidadesPorCatalogo;
     public int? MaxPrestamosConcurrentes => topes?.MaxPrestamosConcurrentes;
 
-    public static TipoUsuario SinPermisos { get; } = new TipoUsuario(
+    public static TipoUsuario SinPermisos() => new TipoUsuario(
         "Sin permisos",
         topes: new TopesDePrestamo(maxUnidadesPorCatalogo: 0, maxPrestamosConcurrentes: 0),
         new HashSet<Permiso>());
 
-    public static TipoUsuario Estudiante { get; } = new TipoUsuario(
+    public static TipoUsuario Estudiante() => new TipoUsuario(
         "Estudiante",
         topes: new TopesDePrestamo(maxUnidadesPorCatalogo: 2, maxPrestamosConcurrentes: 2),
         new HashSet<Permiso>
@@ -28,7 +28,7 @@ public class TipoUsuario
             Permiso.ConsultarMisSolicitudes
         });
 
-    public static TipoUsuario Docente { get; } = new TipoUsuario(
+    public static TipoUsuario Docente() => new TipoUsuario(
         "Docente",
         topes: new TopesDePrestamo(maxUnidadesPorCatalogo: 40, maxPrestamosConcurrentes: 3),
         new HashSet<Permiso>
@@ -40,7 +40,7 @@ public class TipoUsuario
             Permiso.ConsultarHistorico
         });
 
-    public static TipoUsuario FuncionarioCE { get; } = new TipoUsuario(
+    public static TipoUsuario FuncionarioCE() => new TipoUsuario(
         "Funcionario del centro de equipamiento",
         topes: new TopesDePrestamo(maxUnidadesPorCatalogo: 0, maxPrestamosConcurrentes: 0),
         new HashSet<Permiso>
@@ -51,7 +51,7 @@ public class TipoUsuario
             Permiso.RegistrarDevolucion
         });
 
-    public static TipoUsuario Supervisor { get; } = new TipoUsuario(
+    public static TipoUsuario Supervisor() => new TipoUsuario(
         "Supervisor",
         topes: new TopesDePrestamo(maxUnidadesPorCatalogo: 0, maxPrestamosConcurrentes: 0),
         new HashSet<Permiso>
@@ -65,7 +65,7 @@ public class TipoUsuario
             Permiso.ConsultarPrestamos
         });
 
-    public static TipoUsuario Administrador { get; } = new TipoUsuario(
+    public static TipoUsuario Administrador() => new TipoUsuario(
         "Administrador",
         topes: null,
         new HashSet<Permiso>(Enum.GetValues<Permiso>()));
@@ -74,12 +74,12 @@ public class TipoUsuario
     {
         return new[]
         {
-            SinPermisos,
-            Estudiante,
-            Docente,
-            FuncionarioCE,
-            Supervisor,
-            Administrador
+            SinPermisos(),
+            Estudiante(),
+            Docente(),
+            FuncionarioCE(),
+            Supervisor(),
+            Administrador()
         };
     }
 

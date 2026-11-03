@@ -33,11 +33,11 @@ public class DatosDeEjemploTests
     {
         _datos.Cargar();
 
-        Assert.AreEqual(TipoUsuario.Docente, _usuarios.ObtenerUsuarioPorCorreo(DatosDeEjemplo.CorreoDocente)!.Tipo);
-        Assert.AreEqual(TipoUsuario.Estudiante,
-            _usuarios.ObtenerUsuarioPorCorreo(DatosDeEjemplo.CorreoEstudiante)!.Tipo);
-        Assert.AreEqual(TipoUsuario.FuncionarioCE,
-            _usuarios.ObtenerUsuarioPorCorreo(DatosDeEjemplo.CorreoFuncionario)!.Tipo);
+        Assert.AreEqual(TipoUsuario.Docente().Nombre, _usuarios.ObtenerUsuarioPorCorreo(DatosDeEjemplo.CorreoDocente)!.Tipo.Nombre);
+        Assert.AreEqual(TipoUsuario.Estudiante().Nombre,
+            _usuarios.ObtenerUsuarioPorCorreo(DatosDeEjemplo.CorreoEstudiante)!.Tipo.Nombre);
+        Assert.AreEqual(TipoUsuario.FuncionarioCE().Nombre,
+            _usuarios.ObtenerUsuarioPorCorreo(DatosDeEjemplo.CorreoFuncionario)!.Tipo.Nombre);
     }
 
     [TestMethod]
@@ -45,8 +45,8 @@ public class DatosDeEjemploTests
     {
         _datos.Cargar();
 
-        Assert.AreEqual(TipoUsuario.Supervisor,
-            _usuarios.ObtenerUsuarioPorCorreo(DatosDeEjemplo.CorreoSupervisor)!.Tipo);
+        Assert.AreEqual(TipoUsuario.Supervisor().Nombre,
+            _usuarios.ObtenerUsuarioPorCorreo(DatosDeEjemplo.CorreoSupervisor)!.Tipo.Nombre);
     }
 
     [TestMethod]

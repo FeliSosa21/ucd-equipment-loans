@@ -18,7 +18,7 @@ public class CargaInicialTests
 
         Usuario? root = repositorio.ObtenerUsuarioPorCorreo(CargaInicial.CorreoRoot);
         Assert.IsNotNull(root);
-        Assert.AreEqual(TipoUsuario.Administrador, root.Tipo);
+        Assert.AreEqual(TipoUsuario.Administrador().Nombre, root.Tipo.Nombre);
         Assert.IsFalse(root.DebeCambiarContrasena);
     }
 

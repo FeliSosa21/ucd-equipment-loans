@@ -87,7 +87,7 @@ public class ServicioDevolucionTests
     {
         Memoria memoria = new Memoria();
         ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
-        new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniFuncionario)!.AsignarTipo(TipoUsuario.Supervisor);
+        new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniFuncionario)!.AsignarTipo(TipoUsuario.Supervisor());
 
         servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
 
@@ -319,10 +319,10 @@ public class ServicioDevolucionTests
 
         Usuario funcionario = new Usuario(dni: DniFuncionario, nombre: "Felipe", apellido: "Sosa",
             correo: "felipe@hotmail.com", contrasena: "VivaLaOrt2026");
-        funcionario.AsignarTipo(TipoUsuario.FuncionarioCE);
+        funcionario.AsignarTipo(TipoUsuario.FuncionarioCE());
         Usuario solicitante = new Usuario(dni: DniSolicitante, nombre: "Ana", apellido: "Perez",
             correo: "ana@hotmail.com", contrasena: "VivaLaOrt2026");
-        solicitante.AsignarTipo(TipoUsuario.Docente);
+        solicitante.AsignarTipo(TipoUsuario.Docente());
         usuarios.AgregarUsuario(funcionario);
         usuarios.AgregarUsuario(solicitante);
 

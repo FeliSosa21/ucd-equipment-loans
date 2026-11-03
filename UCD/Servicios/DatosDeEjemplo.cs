@@ -50,13 +50,13 @@ public class DatosDeEjemplo
     private void CargarUsuarios()
     {
         CrearUsuario(dni: "12345672", nombre: "Ana", apellido: "Perez", correo: CorreoDocente,
-            tipo: TipoUsuario.Docente);
+            tipo: TipoUsuario.Docente());
         CrearUsuario(dni: "23456783", nombre: "Juan", apellido: "Gomez", correo: CorreoEstudiante,
-            tipo: TipoUsuario.Estudiante);
+            tipo: TipoUsuario.Estudiante());
         CrearUsuario(dni: "34567894", nombre: "Laura", apellido: "Diaz", correo: CorreoFuncionario,
-            tipo: TipoUsuario.FuncionarioCE);
+            tipo: TipoUsuario.FuncionarioCE());
         CrearUsuario(dni: "61234569", nombre: "Sofia", apellido: "Martinez", correo: CorreoSupervisor,
-            tipo: TipoUsuario.Supervisor);
+            tipo: TipoUsuario.Supervisor());
     }
 
     private static void CargarCatalogo(Catalogo catalogo)

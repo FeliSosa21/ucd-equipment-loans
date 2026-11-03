@@ -84,7 +84,7 @@ public class ServicioSesionTests
     public void IniciarSesion_Administrador_DevuelveElPermisoDeGestionarUsuarios()
     {
         ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out RepositorioUsuario repositorio);
-        repositorio.ObtenerUsuarioPorDni(DniValido)!.AsignarTipo(TipoUsuario.Administrador);
+        repositorio.ObtenerUsuarioPorDni(DniValido)!.AsignarTipo(TipoUsuario.Administrador());
 
         UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, ContrasenaValida);
 
@@ -169,11 +169,11 @@ public class ServicioSesionTests
     public void RenovarSesion_UsuarioActivo_DevuelveLosDatosActuales()
     {
         ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out RepositorioUsuario repositorio);
-        repositorio.ObtenerUsuarioPorDni(DniValido)!.AsignarTipo(TipoUsuario.Docente);
+        repositorio.ObtenerUsuarioPorDni(DniValido)!.AsignarTipo(TipoUsuario.Docente());
 
         UsuarioSesionDto sesion = servicio.RenovarSesion(DniValido);
 
-        Assert.AreEqual(TipoUsuario.Docente.Nombre, sesion.Tipo);
+        Assert.AreEqual(TipoUsuario.Docente().Nombre, sesion.Tipo);
         Assert.IsFalse(sesion.PendienteDeActivacion);
     }
 
