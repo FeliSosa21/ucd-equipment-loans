@@ -117,6 +117,15 @@ public class ServicioTiposUsuarioTests
             _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Administrador().Nombre)!.Descripcion);
     }
 
+    [TestMethod]
+    public void ModificarTipo_TipoInexistente_LanzaExcepcion()
+    {
+        TipoUsuarioDto dto = CrearDtoDocente();
+        dto.Nombre = "Invitado";
+
+        Assert.ThrowsException<ServicioException>(() => _servicio.ModificarTipo(dto, DniAdministrador));
+    }
+
     private static TipoUsuarioDto CrearDtoDocente()
     {
         return new TipoUsuarioDto
