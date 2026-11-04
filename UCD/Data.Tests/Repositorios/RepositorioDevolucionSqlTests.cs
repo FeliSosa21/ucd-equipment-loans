@@ -145,6 +145,15 @@ public sealed class RepositorioDevolucionSqlTests
             repositorio.ObtenerPaginaDeDevoluciones(null!, pagina: 1, tamanoPagina: 10));
     }
 
+    [TestMethod]
+    public void ContarDevoluciones_FiltroNulo_LanzaArgumentNullException()
+    {
+        using SqlContext contexto = new SqlContext(_opciones);
+        RepositorioDevolucionSql repositorio = new RepositorioDevolucionSql(contexto);
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.ContarDevoluciones(null!));
+    }
+
     private IReadOnlyList<Devolucion> LeerPrimeraPagina(FiltroPorCatalogoYFechas filtro)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
