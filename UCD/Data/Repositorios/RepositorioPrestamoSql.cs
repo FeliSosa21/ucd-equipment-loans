@@ -23,6 +23,7 @@ public class RepositorioPrestamoSql
         return _contexto.Prestamos
             .Include(prestamo => prestamo.Solicitante)
             .Include(prestamo => prestamo.TipoEquipamiento)
+            .ThenInclude(tipo => tipo.Unidades)
             .FirstOrDefault(prestamo => prestamo.Id == id);
     }
 }
