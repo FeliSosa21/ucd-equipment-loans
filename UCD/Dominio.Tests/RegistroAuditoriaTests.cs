@@ -104,6 +104,19 @@ public sealed class RegistroAuditoriaTests
         Assert.AreEqual(AccionAuditada.IntentoDeAprobacion, registro.Accion);
     }
 
+    [TestMethod]
+    [DataRow(7)]
+    [DataRow(8)]
+    [DataRow(9)]
+    [DataRow(10)]
+    [DataRow(11)]
+    public void Constructor_AccionesNuevas_SeCrea(int accion)
+    {
+        RegistroAuditoria registro = CrearRegistro(accion: (AccionAuditada)accion);
+
+        Assert.AreEqual((AccionAuditada)accion, registro.Accion);
+    }
+
     private static RegistroAuditoria CrearRegistro(
         AccionAuditada accion = AccionAuditada.SolicitudDePrestamo,
         string detalle = "Prestamo de 2 Notebook")
