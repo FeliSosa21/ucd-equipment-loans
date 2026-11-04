@@ -15,7 +15,7 @@ public class ExportadorCsv : IExportadorDeTabla
 
     public string Extension
     {
-        get { return string.Empty; }
+        get { return ".csv"; }
     }
 
     public string TipoContenido
