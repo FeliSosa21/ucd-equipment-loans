@@ -18,7 +18,7 @@ public class DevolucionConfiguracion : IEntityTypeConfiguration<Devolucion>
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.OwnsOne<RegistroDeAccion>("_registro", registro =>
+        builder.OwnsOne<RegistroDeAccion>(NombresDeMapeo.CampoRegistro, registro =>
         {
             registro.Property(accion => accion.FechaHora).HasColumnName("FechaHora").IsRequired();
 
@@ -31,7 +31,7 @@ public class DevolucionConfiguracion : IEntityTypeConfiguration<Devolucion>
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        builder.Navigation("_registro").IsRequired();
+        builder.Navigation(NombresDeMapeo.CampoRegistro).IsRequired();
 
         builder.OwnsMany<UnidadDevuelta>("_unidades", unidades =>
         {

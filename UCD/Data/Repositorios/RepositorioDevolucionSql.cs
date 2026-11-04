@@ -1,13 +1,12 @@
 using Dominio;
 using Microsoft.EntityFrameworkCore;
+using static Data.Configuraciones.NombresDeMapeo;
 
 namespace Data.Repositorios;
 
 public class RepositorioDevolucionSql
 {
-    private const string CampoRegistro = "_registro";
     private const string CampoUnidades = "_unidades";
-    private const string ColumnaCatalogo = "CatalogoId";
 
     private readonly SqlContext _contexto;
 
