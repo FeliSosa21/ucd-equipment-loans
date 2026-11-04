@@ -26,6 +26,8 @@ public class RepositorioDevolucionSql
         return _contexto.Devoluciones
             .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}")
             .Include($"{CampoUnidades}.{nameof(UnidadDevuelta.Unidad)}")
+            .OrderBy(devolucion => EF.Property<RegistroDeAccion>(devolucion, CampoRegistro).FechaHora)
+            .ThenBy(devolucion => devolucion.Id)
             .ToList();
     }
 }
