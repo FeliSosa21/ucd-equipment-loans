@@ -106,6 +106,22 @@ public sealed class RepositorioDevolucionSqlTests
     }
 
     [TestMethod]
+    public void ObtenerPaginaDeDevoluciones_SegundaPaginaDeUna_DevuelveSoloLaSegunda()
+    {
+        Devolucion delDiaUno = CrearDevolucion(diasDespuesDelPrestamo: 1);
+        Devolucion delDiaDos = CrearDevolucion(diasDespuesDelPrestamo: 2);
+        Devolucion delDiaTres = CrearDevolucion(diasDespuesDelPrestamo: 3);
+        GuardarConOtroContexto(delDiaUno, delDiaDos, delDiaTres);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<Devolucion> leidas = new RepositorioDevolucionSql(contextoQueLee)
+            .ObtenerPaginaDeDevoluciones(new FiltroPorCatalogoYFechas(), pagina: 2, tamanoPagina: 1);
+
+        CollectionAssert.AreEqual(new List<int> { delDiaDos.Id },
+            leidas.Select(devolucion => devolucion.Id).ToList());
+    }
+
+    [TestMethod]
     public void ObtenerDevoluciones_FiltroNulo_LanzaArgumentNullException()
     {
         using SqlContext contexto = new SqlContext(_opciones);

@@ -38,6 +38,12 @@ public class RepositorioDevolucionSql
             .ToList();
     }
 
+    public IReadOnlyList<Devolucion> ObtenerPaginaDeDevoluciones(FiltroPorCatalogoYFechas filtro, int pagina,
+        int tamanoPagina)
+    {
+        return ObtenerDevoluciones(filtro);
+    }
+
     private IQueryable<Devolucion> FiltrarPor(FiltroPorCatalogoYFechas filtro)
     {
         IQueryable<Devolucion> devoluciones = _contexto.Devoluciones;
