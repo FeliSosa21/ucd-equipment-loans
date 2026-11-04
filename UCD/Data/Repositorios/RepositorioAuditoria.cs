@@ -29,4 +29,9 @@ public class RepositorioAuditoria
             .Take(tamanoPagina)
             .ToList();
     }
+
+    public int ContarRegistros(FiltroAuditoria filtro)
+    {
+        return 0;
+    }
 }

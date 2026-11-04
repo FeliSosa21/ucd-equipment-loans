@@ -113,6 +113,18 @@ public sealed class RepositorioAuditoriaTests
         CollectionAssert.AreEqual(new List<RegistroAuditoria> { deLaura }, resultado.ToList());
     }
 
+    [TestMethod]
+    public void ContarRegistros_FiltroDesde_CuentaSoloLosQueCumplenElFiltro()
+    {
+        _repositorio.AgregarRegistro(CrearRegistro(FechaFija.AddMinutes(-1)));
+        _repositorio.AgregarRegistro(CrearRegistro(FechaFija));
+        _repositorio.AgregarRegistro(CrearRegistro(FechaFija.AddHours(1)));
+
+        int resultado = _repositorio.ContarRegistros(new FiltroAuditoria { Desde = FechaFija });
+
+        Assert.AreEqual(2, resultado);
+    }
+
     private static RegistroAuditoria CrearRegistro(DateTime fechaHora)
     {
         return CrearRegistro(RegistroDeAccion.DeUsuario(CrearUsuario(), fechaHora));
