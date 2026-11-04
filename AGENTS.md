@@ -49,7 +49,7 @@ La letra (pág. 6) pide que cada integrante haga **a mano, sin agentes y con TDD
 - Estáticos solo si no tienen estado, no tienen dependencias y no pertenecen al dominio.
 - Errores: el dominio lanza `DominioException(campo, mensaje)`; los servicios la traducen con `TraduccionDeErrores` a `ServicioException`; la UI muestra el error junto al campo (`ErrorDeCampo`).
 - Sin interfaces para los repositorios: los tests usan el repositorio real sobre `Memoria` o sobre el proveedor InMemory de EF (una base con nombre único por test).
-- Repositorios: nada de "traer todo"; paginar y contar (`ObtenerPagina...`, `Contar...`), salvo exportaciones.
+- Repositorios: nada de "traer todo"; paginar y contar (`ObtenerPagina...`, `Contar...`), salvo las consultas de la exportación (ver `UCD/Data/AGENTS.md`).
 - La UI no tiene reglas de negocio: llama a un servicio y muestra el resultado.
 
 ## Tests
