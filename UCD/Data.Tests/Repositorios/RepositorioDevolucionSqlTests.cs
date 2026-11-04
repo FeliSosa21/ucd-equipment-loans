@@ -21,11 +21,11 @@ public sealed class RepositorioDevolucionSqlTests
     }
 
     [TestMethod]
-    public void ObtenerDevoluciones_DevolucionAgregada_OtroContextoLeeQuienLaRegistroYCuando()
+    public void ObtenerPaginaDeDevoluciones_DevolucionAgregada_OtroContextoLeeQuienLaRegistroYCuando()
     {
         GuardarConOtroContexto(CrearDevolucion(diasDespuesDelPrestamo: 1));
 
-        IReadOnlyList<Devolucion> leidas = LeerDevoluciones(new FiltroPorCatalogoYFechas());
+        IReadOnlyList<Devolucion> leidas = LeerPrimeraPagina(new FiltroPorCatalogoYFechas());
 
         Assert.AreEqual(1, leidas.Count);
         Assert.AreEqual(InicioPrestamo.AddDays(1), leidas[0].FechaHoraDevolucion);
@@ -33,12 +33,12 @@ public sealed class RepositorioDevolucionSqlTests
     }
 
     [TestMethod]
-    public void ObtenerDevoluciones_DevolucionAgregada_OtroContextoLeeSusUnidadesConCondicion()
+    public void ObtenerPaginaDeDevoluciones_DevolucionAgregada_OtroContextoLeeSusUnidadesConCondicion()
     {
         GuardarConOtroContexto(CrearDevolucion(diasDespuesDelPrestamo: 1, condicion: CondicionDevolucion.ConFallas,
             observaciones: "No enciende"));
 
-        Devolucion leida = LeerDevoluciones(new FiltroPorCatalogoYFechas()).Single();
+        Devolucion leida = LeerPrimeraPagina(new FiltroPorCatalogoYFechas()).Single();
 
         UnidadDevuelta unidad = leida.Unidades.Single();
         Assert.AreEqual("EQP-0001", unidad.Unidad.IdInstitucional);
@@ -47,21 +47,21 @@ public sealed class RepositorioDevolucionSqlTests
     }
 
     [TestMethod]
-    public void ObtenerDevoluciones_VariasDevoluciones_DeLaMasViejaALaMasRecienteYEnEmpateLaPrimeraRegistrada()
+    public void ObtenerPaginaDeDevoluciones_VariasDevoluciones_DeLaMasViejaALaMasRecienteYEnEmpateLaPrimeraRegistrada()
     {
         Devolucion delDiaDos = CrearDevolucion(diasDespuesDelPrestamo: 2);
         Devolucion delDiaUno = CrearDevolucion(diasDespuesDelPrestamo: 1);
         Devolucion otraDelDiaUno = CrearDevolucion(diasDespuesDelPrestamo: 1);
         GuardarConOtroContexto(delDiaDos, delDiaUno, otraDelDiaUno);
 
-        IReadOnlyList<Devolucion> leidas = LeerDevoluciones(new FiltroPorCatalogoYFechas());
+        IReadOnlyList<Devolucion> leidas = LeerPrimeraPagina(new FiltroPorCatalogoYFechas());
 
         CollectionAssert.AreEqual(new List<int> { delDiaUno.Id, otraDelDiaUno.Id, delDiaDos.Id },
             leidas.Select(devolucion => devolucion.Id).ToList());
     }
 
     [TestMethod]
-    public void ObtenerDevoluciones_FiltroPorFechas_IncluyeDesdeYExcluyeHasta()
+    public void ObtenerPaginaDeDevoluciones_FiltroPorFechas_IncluyeDesdeYExcluyeHasta()
     {
         Devolucion delDiaUno = CrearDevolucion(diasDespuesDelPrestamo: 1);
         Devolucion delDiaDos = CrearDevolucion(diasDespuesDelPrestamo: 2);
@@ -70,14 +70,14 @@ public sealed class RepositorioDevolucionSqlTests
         FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas
             { Desde = InicioPrestamo.AddDays(1), Hasta = InicioPrestamo.AddDays(3) };
 
-        IReadOnlyList<Devolucion> leidas = LeerDevoluciones(filtro);
+        IReadOnlyList<Devolucion> leidas = LeerPrimeraPagina(filtro);
 
         CollectionAssert.AreEqual(new List<int> { delDiaUno.Id, delDiaDos.Id },
             leidas.Select(devolucion => devolucion.Id).ToList());
     }
 
     [TestMethod]
-    public void ObtenerDevoluciones_FiltroPorCatalogo_DevuelveSoloLasDeEseCatalogo()
+    public void ObtenerPaginaDeDevoluciones_FiltroPorCatalogo_DevuelveSoloLasDeEseCatalogo()
     {
         TipoEquipamiento notebook = CrearTipo(nombre: "Notebook Lenovo ThinkPad", categoria: Categoria.Computacion);
         TipoEquipamiento proyector = CrearTipo(nombre: "Proyector Epson", categoria: Categoria.Audiovisual);
@@ -87,18 +87,18 @@ public sealed class RepositorioDevolucionSqlTests
         GuardarCatalogosYDevoluciones(new[] { electronica, audiovisuales }, deNotebook,
             CrearDevolucionDe(tipo: proyector));
 
-        IReadOnlyList<Devolucion> leidas = LeerDevoluciones(new FiltroPorCatalogoYFechas { IdCatalogo = electronica.Id });
+        IReadOnlyList<Devolucion> leidas = LeerPrimeraPagina(new FiltroPorCatalogoYFechas { IdCatalogo = electronica.Id });
 
         CollectionAssert.AreEqual(new List<int> { deNotebook.Id },
             leidas.Select(devolucion => devolucion.Id).ToList());
     }
 
     [TestMethod]
-    public void ObtenerDevoluciones_DevolucionAgregada_TraeElPrestamoConSolicitanteYTipo()
+    public void ObtenerPaginaDeDevoluciones_DevolucionAgregada_TraeElPrestamoConSolicitanteYTipo()
     {
         GuardarConOtroContexto(CrearDevolucion(diasDespuesDelPrestamo: 1));
 
-        Devolucion leida = LeerDevoluciones(new FiltroPorCatalogoYFechas()).Single();
+        Devolucion leida = LeerPrimeraPagina(new FiltroPorCatalogoYFechas()).Single();
 
         Assert.IsNotNull(leida.Prestamo);
         Assert.AreEqual("12345672", leida.Prestamo.Solicitante.Dni);
@@ -122,19 +122,21 @@ public sealed class RepositorioDevolucionSqlTests
     }
 
     [TestMethod]
-    public void ObtenerDevoluciones_FiltroNulo_LanzaArgumentNullException()
+    public void ObtenerPaginaDeDevoluciones_FiltroNulo_LanzaArgumentNullException()
     {
         using SqlContext contexto = new SqlContext(_opciones);
         RepositorioDevolucionSql repositorio = new RepositorioDevolucionSql(contexto);
 
-        Assert.ThrowsException<ArgumentNullException>(() => repositorio.ObtenerDevoluciones(null!));
+        Assert.ThrowsException<ArgumentNullException>(() =>
+            repositorio.ObtenerPaginaDeDevoluciones(null!, pagina: 1, tamanoPagina: 10));
     }
 
-    private IReadOnlyList<Devolucion> LeerDevoluciones(FiltroPorCatalogoYFechas filtro)
+    private IReadOnlyList<Devolucion> LeerPrimeraPagina(FiltroPorCatalogoYFechas filtro)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
 
-        return new RepositorioDevolucionSql(contextoQueLee).ObtenerDevoluciones(filtro);
+        return new RepositorioDevolucionSql(contextoQueLee)
+            .ObtenerPaginaDeDevoluciones(filtro, pagina: 1, tamanoPagina: 10);
     }
 
     private void GuardarConOtroContexto(params Devolucion[] devoluciones)

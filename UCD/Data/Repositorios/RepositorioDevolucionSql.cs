@@ -22,11 +22,6 @@ public class RepositorioDevolucionSql
         _contexto.SaveChanges();
     }
 
-    public IReadOnlyList<Devolucion> ObtenerDevoluciones(FiltroPorCatalogoYFechas filtro)
-    {
-        return ObtenerPaginaDeDevoluciones(filtro, pagina: 1, tamanoPagina: int.MaxValue);
-    }
-
     public IReadOnlyList<Devolucion> ObtenerPaginaDeDevoluciones(FiltroPorCatalogoYFechas filtro, int pagina,
         int tamanoPagina)
     {
