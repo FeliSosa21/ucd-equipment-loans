@@ -43,6 +43,8 @@ public class RepositorioDevolucionSql
 
     public int ContarDevoluciones(FiltroPorCatalogoYFechas filtro)
     {
+        ArgumentNullException.ThrowIfNull(filtro);
+
         return FiltrarPor(filtro).Count();
     }
 
