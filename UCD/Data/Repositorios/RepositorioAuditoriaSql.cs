@@ -23,6 +23,7 @@ public class RepositorioAuditoriaSql
     {
         return _contexto.RegistrosAuditoria
             .OrderByDescending(registro => EF.Property<RegistroDeAccion>(registro, CampoRegistro).FechaHora)
+            .ThenByDescending(registro => registro.Id)
             .ToList();
     }
 }
