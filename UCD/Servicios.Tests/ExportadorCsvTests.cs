@@ -101,6 +101,19 @@ public sealed class ExportadorCsvTests
         Assert.AreEqual("Nombre,Observaciones\r\nAna,\"Primera linea\r\nSegunda linea\"\r\n", LeerTexto(bytes));
     }
 
+    [TestMethod]
+    public void Exportar_CeldasVacias_LasDejaVaciasSinComillas()
+    {
+        ExportadorCsv exportador = new ExportadorCsv();
+        TablaExportableDto tabla = CrearTabla(
+            encabezados: new List<string> { "Nombre", "Edad", "Observaciones" },
+            filas: new List<List<string>> { new List<string> { "Ana", "", "" }, new List<string> { "", "30", "Sin rayones" } });
+
+        byte[] bytes = exportador.Exportar(tabla);
+
+        Assert.AreEqual("Nombre,Edad,Observaciones\r\nAna,,\r\n,30,Sin rayones\r\n", LeerTexto(bytes));
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
