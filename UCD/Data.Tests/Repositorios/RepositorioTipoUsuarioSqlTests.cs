@@ -44,6 +44,18 @@ public sealed class RepositorioTipoUsuarioSqlTests
         Assert.AreEqual(3, leido?.MaxPrestamosConcurrentes);
     }
 
+    [TestMethod]
+    public void ObtenerTipoPorNombre_TipoAgregado_OtroContextoLeeSusPermisos()
+    {
+        GuardarConOtroContexto(CrearDocente());
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        TipoUsuario? leido = new RepositorioTipoUsuarioSql(contextoQueLee).ObtenerTipoPorNombre("Docente");
+
+        Assert.IsTrue(leido!.TienePermiso(Permiso.SolicitarPrestamo));
+        Assert.IsFalse(leido.TienePermiso(Permiso.GestionarUsuarios));
+    }
+
     private void GuardarConOtroContexto(TipoUsuario tipo)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
