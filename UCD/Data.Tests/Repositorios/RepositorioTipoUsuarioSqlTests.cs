@@ -89,6 +89,18 @@ public sealed class RepositorioTipoUsuarioSqlTests
         Assert.AreEqual(10, leido?.MaxUnidadesPorCatalogo);
     }
 
+    [TestMethod]
+    public void ObtenerTodos_BaseRecienCreada_DevuelveLosSeisTiposPredefinidos()
+    {
+        using SqlContext contexto = new SqlContext(_opciones);
+        contexto.Database.EnsureCreated();
+
+        IReadOnlyList<TipoUsuario> tipos = new RepositorioTipoUsuarioSql(contexto).ObtenerTodos();
+
+        CollectionAssert.AreEqual(TipoUsuario.Todos().Select(tipo => tipo.Nombre).ToList(),
+            tipos.Select(tipo => tipo.Nombre).ToList());
+    }
+
     private void GuardarConOtroContexto(TipoUsuario tipo)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
