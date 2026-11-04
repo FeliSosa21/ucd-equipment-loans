@@ -13,10 +13,13 @@ public class RepositorioAuditoria
 
     public void AgregarRegistro(RegistroAuditoria registro)
     {
+        _memoria.RegistrosAuditoria.Add(registro);
     }
 
     public IReadOnlyList<RegistroAuditoria> ObtenerPaginaDeRegistros(FiltroAuditoria filtro, int pagina, int tamanoPagina)
     {
-        return new List<RegistroAuditoria>();
+        return _memoria.RegistrosAuditoria
+            .OrderByDescending(registro => registro.FechaHora)
+            .ToList();
     }
 }
