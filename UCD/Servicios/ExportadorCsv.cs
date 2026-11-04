@@ -20,7 +20,7 @@ public class ExportadorCsv : IExportadorDeTabla
 
     public string TipoContenido
     {
-        get { return string.Empty; }
+        get { return "text/csv"; }
     }
 
     public byte[] Exportar(TablaExportableDto tabla)
