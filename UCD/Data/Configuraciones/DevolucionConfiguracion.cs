@@ -22,12 +22,12 @@ public class DevolucionConfiguracion : IEntityTypeConfiguration<Devolucion>
         {
             registro.Property(accion => accion.FechaHora).HasColumnName("FechaHora").IsRequired();
 
-            registro.Property<int?>("ResponsableId").HasColumnName("RegistradaPorId");
+            registro.Property<int>("ResponsableId").HasColumnName("RegistradaPorId");
 
             registro.HasOne(accion => accion.Responsable)
                 .WithMany()
                 .HasForeignKey("ResponsableId")
-                .IsRequired(false)
+                .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
         });
 

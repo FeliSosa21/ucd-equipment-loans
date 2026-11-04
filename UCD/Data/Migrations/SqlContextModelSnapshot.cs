@@ -49,6 +49,24 @@ namespace Data.Migrations
                     b.ToTable("Catalogos", (string)null);
                 });
 
+            modelBuilder.Entity("Dominio.Devolucion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<Guid>("PrestamoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PrestamoId");
+
+                    b.ToTable("Devoluciones", (string)null);
+                });
+
             modelBuilder.Entity("Dominio.Movimiento", b =>
                 {
                     b.Property<int>("Id")
@@ -326,6 +344,95 @@ namespace Data.Migrations
                     b.HasIndex("UnidadFisicaId");
 
                     b.ToTable("UnidadesAsignadas");
+                });
+
+            modelBuilder.Entity("Dominio.Devolucion", b =>
+                {
+                    b.HasOne("Dominio.Prestamo", "Prestamo")
+                        .WithMany()
+                        .HasForeignKey("PrestamoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.OwnsOne("Dominio.RegistroDeAccion", "_registro", b1 =>
+                        {
+                            b1.Property<int>("DevolucionId")
+                                .HasColumnType("int");
+
+                            b1.Property<DateTime>("FechaHora")
+                                .HasColumnType("datetime2")
+                                .HasColumnName("FechaHora");
+
+                            b1.Property<int>("ResponsableId")
+                                .HasColumnType("int")
+                                .HasColumnName("RegistradaPorId");
+
+                            b1.HasKey("DevolucionId");
+
+                            b1.HasIndex("ResponsableId");
+
+                            b1.ToTable("Devoluciones");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DevolucionId");
+
+                            b1.HasOne("Dominio.Usuario", "Responsable")
+                                .WithMany()
+                                .HasForeignKey("ResponsableId")
+                                .OnDelete(DeleteBehavior.Restrict)
+                                .IsRequired();
+
+                            b1.Navigation("Responsable");
+                        });
+
+                    b.OwnsMany("Dominio.UnidadDevuelta", "_unidades", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("Condicion")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<int>("DevolucionId")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Observaciones")
+                                .HasMaxLength(300)
+                                .HasColumnType("nvarchar(300)");
+
+                            b1.Property<int>("UnidadFisicaId")
+                                .HasColumnType("int");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("DevolucionId");
+
+                            b1.HasIndex("UnidadFisicaId");
+
+                            b1.ToTable("UnidadesDevueltas", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("DevolucionId");
+
+                            b1.HasOne("Dominio.UnidadFisica", "Unidad")
+                                .WithMany()
+                                .HasForeignKey("UnidadFisicaId")
+                                .OnDelete(DeleteBehavior.Restrict)
+                                .IsRequired();
+
+                            b1.Navigation("Unidad");
+                        });
+
+                    b.Navigation("Prestamo");
+
+                    b.Navigation("_registro")
+                        .IsRequired();
+
+                    b.Navigation("_unidades");
                 });
 
             modelBuilder.Entity("Dominio.Movimiento", b =>
