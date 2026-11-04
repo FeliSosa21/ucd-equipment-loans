@@ -29,7 +29,10 @@ public class RepositorioUsuarioSql
     public Usuario? ObtenerUsuarioPorCorreo(string correo)
     {
         string buscado = correo.ToLower();
-        return _contexto.Usuarios.FirstOrDefault(usuario => usuario.Correo.ToLower() == buscado);
+        
+        return _contexto.Usuarios
+            .Include(usuario => usuario.Tipo)
+            .FirstOrDefault(usuario => usuario.Correo.ToLower() == buscado);
     }
 
     public IReadOnlyList<Usuario> ObtenerPaginaDeUsuarios(string? filtro, int pagina, int tamanoPagina)
