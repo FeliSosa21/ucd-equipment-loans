@@ -18,7 +18,11 @@ public class RepositorioDevolucion
 
     public IReadOnlyList<Devolucion> ObtenerDevoluciones(FiltroPorCatalogoYFechas filtro)
     {
-        return _memoria.Devoluciones.OrderBy(devolucion => devolucion.FechaHoraDevolucion).ToList();
+        return _memoria.Devoluciones
+            .Where(devolucion => filtro.Desde is null || devolucion.FechaHoraDevolucion >= filtro.Desde)
+            .Where(devolucion => filtro.Hasta is null || devolucion.FechaHoraDevolucion < filtro.Hasta)
+            .OrderBy(devolucion => devolucion.FechaHoraDevolucion)
+            .ToList();
     }
 
     public IReadOnlyList<Devolucion> ObtenerTodas()
