@@ -105,16 +105,16 @@ public sealed class RegistroAuditoriaTests
     }
 
     [TestMethod]
-    [DataRow(7)]
-    [DataRow(8)]
-    [DataRow(9)]
-    [DataRow(10)]
-    [DataRow(11)]
-    public void Constructor_AccionesNuevas_SeCrea(int accion)
+    [DataRow(AccionAuditada.AprobacionDePrestamo)]
+    [DataRow(AccionAuditada.AltaDeUsuario)]
+    [DataRow(AccionAuditada.CambioDeTipoDeUsuario)]
+    [DataRow(AccionAuditada.DesactivacionDeUsuario)]
+    [DataRow(AccionAuditada.ReactivacionDeUsuario)]
+    public void Constructor_AccionesNuevas_SeCrea(AccionAuditada accion)
     {
-        RegistroAuditoria registro = CrearRegistro(accion: (AccionAuditada)accion);
+        RegistroAuditoria registro = CrearRegistro(accion: accion);
 
-        Assert.AreEqual((AccionAuditada)accion, registro.Accion);
+        Assert.AreEqual(accion, registro.Accion);
     }
 
     private static RegistroAuditoria CrearRegistro(
