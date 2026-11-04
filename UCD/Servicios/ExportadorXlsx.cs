@@ -30,6 +30,13 @@ public class ExportadorXlsx : IExportadorDeTabla
         {
             hoja.Cell(FilaDeEncabezados, columna + 1).Value = tabla.Encabezados[columna];
         }
+        for (int fila = 0; fila < tabla.Filas.Count; fila++)
+        {
+            for (int columna = 0; columna < tabla.Filas[fila].Count; columna++)
+            {
+                hoja.Cell(FilaDeEncabezados + fila + 1, columna + 1).Value = tabla.Filas[fila][columna];
+            }
+        }
         using MemoryStream flujo = new MemoryStream();
         libro.SaveAs(flujo);
         return flujo.ToArray();
