@@ -122,6 +122,23 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.IsNull(obtenido);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamoPorId_PrestamoAgregado_DevuelveSusDatos()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        GuardarConOtroContexto(prestamo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+        Prestamo? obtenido = repositorio.ObtenerPrestamoPorId(prestamo.Id);
+
+        Assert.IsNotNull(obtenido);
+        Assert.AreEqual(prestamo.Id, obtenido.Id);
+        Assert.AreEqual(prestamo.CantidadSolicitada, obtenido.CantidadSolicitada);
+        Assert.AreEqual(prestamo.FechaHoraPrestamo, obtenido.FechaHoraPrestamo);
+        Assert.AreEqual(prestamo.FechaEsperadaDevolucion, obtenido.FechaEsperadaDevolucion);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
