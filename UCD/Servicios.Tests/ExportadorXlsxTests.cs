@@ -70,6 +70,16 @@ public sealed class ExportadorXlsxTests
         Assert.AreEqual("XLSX", formato);
     }
 
+    [TestMethod]
+    public void Extension_ExportadorXlsx_DevuelvePuntoXlsx()
+    {
+        ExportadorXlsx exportador = new ExportadorXlsx();
+
+        string extension = exportador.Extension;
+
+        Assert.AreEqual(".xlsx", extension);
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
