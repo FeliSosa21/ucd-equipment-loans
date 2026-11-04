@@ -46,9 +46,10 @@ public class ExportadorCsv : IExportadorDeTabla
 
     private static string EscribirCampo(string campo)
     {
-        if (campo.Contains(Separador))
+        if (campo.Contains(Separador) || campo.Contains(Comillas))
         {
-            return Comillas + campo + Comillas;
+            string campoConComillasDuplicadas = campo.Replace(Comillas, Comillas + Comillas);
+            return Comillas + campoConComillasDuplicadas + Comillas;
         }
         return campo;
     }
