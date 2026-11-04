@@ -75,6 +75,19 @@ public sealed class ExportadorCsvTests
         Assert.AreEqual("Nombre,Observaciones\r\nAna,\"Rayado, sin tapa\"\r\n", LeerTexto(bytes));
     }
 
+    [TestMethod]
+    public void Exportar_CampoConComillas_DuplicaLasComillasInternas()
+    {
+        ExportadorCsv exportador = new ExportadorCsv();
+        TablaExportableDto tabla = CrearTabla(
+            encabezados: new List<string> { "Nombre", "Observaciones" },
+            filas: new List<List<string>> { new List<string> { "Ana", "Cable \"largo\" roto" } });
+
+        byte[] bytes = exportador.Exportar(tabla);
+
+        Assert.AreEqual("Nombre,Observaciones\r\nAna,\"Cable \"\"largo\"\" roto\"\r\n", LeerTexto(bytes));
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
