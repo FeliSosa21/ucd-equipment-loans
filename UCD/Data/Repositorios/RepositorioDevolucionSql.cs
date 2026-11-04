@@ -7,6 +7,7 @@ public class RepositorioDevolucionSql
 {
     private const string CampoRegistro = "_registro";
     private const string CampoUnidades = "_unidades";
+    private const string ColumnaCatalogo = "CatalogoId";
 
     private readonly SqlContext _contexto;
 
@@ -34,6 +35,12 @@ public class RepositorioDevolucionSql
     private IQueryable<Devolucion> FiltrarPor(FiltroPorCatalogoYFechas filtro)
     {
         IQueryable<Devolucion> devoluciones = _contexto.Devoluciones;
+
+        if (filtro.IdCatalogo is not null)
+        {
+            devoluciones = devoluciones.Where(devolucion =>
+                EF.Property<int>(devolucion.Prestamo.TipoEquipamiento, ColumnaCatalogo) == filtro.IdCatalogo);
+        }
 
         if (filtro.Desde is not null)
         {
