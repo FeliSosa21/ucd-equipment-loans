@@ -43,7 +43,7 @@ public class RepositorioDevolucionSql
 
     public int ContarDevoluciones(FiltroPorCatalogoYFechas filtro)
     {
-        return 0;
+        return FiltrarPor(filtro).Count();
     }
 
     private IQueryable<Devolucion> FiltrarPor(FiltroPorCatalogoYFechas filtro)
