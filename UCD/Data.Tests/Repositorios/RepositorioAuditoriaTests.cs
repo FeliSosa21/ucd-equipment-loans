@@ -33,6 +33,20 @@ public sealed class RepositorioAuditoriaTests
         CollectionAssert.AreEqual(new List<RegistroAuditoria> { reciente, intermedio, viejo }, resultado.ToList());
     }
 
+    [TestMethod]
+    public void ObtenerPaginaDeRegistros_MismaFechaHora_PrimeroElUltimoAgregado()
+    {
+        RegistroAuditoria primero = CrearRegistro(FechaFija);
+        RegistroAuditoria segundo = CrearRegistro(FechaFija);
+        _repositorio.AgregarRegistro(primero);
+        _repositorio.AgregarRegistro(segundo);
+
+        IReadOnlyList<RegistroAuditoria> resultado =
+            _repositorio.ObtenerPaginaDeRegistros(new FiltroAuditoria(), pagina: 1, tamanoPagina: 10);
+
+        CollectionAssert.AreEqual(new List<RegistroAuditoria> { segundo, primero }, resultado.ToList());
+    }
+
     private static RegistroAuditoria CrearRegistro(DateTime fechaHora)
     {
         return new RegistroAuditoria(
