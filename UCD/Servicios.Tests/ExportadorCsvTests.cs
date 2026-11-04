@@ -49,10 +49,27 @@ public sealed class ExportadorCsvTests
         Assert.AreEqual("text/csv", tipoContenido);
     }
 
-    private static TablaExportableDto CrearTabla(List<string> encabezados)
+    [TestMethod]
+    public void Exportar_TablaConUnaFila_EscribeEncabezadoYFila()
+    {
+        ExportadorCsv exportador = new ExportadorCsv();
+        TablaExportableDto tabla = CrearTabla(
+            encabezados: new List<string> { "Nombre", "Edad" },
+            filas: new List<List<string>> { new List<string> { "Ana", "20" } });
+
+        byte[] bytes = exportador.Exportar(tabla);
+
+        Assert.AreEqual("Nombre,Edad\r\nAna,20\r\n", LeerTexto(bytes));
+    }
+
+    private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
         tabla.Encabezados = encabezados;
+        if (filas != null)
+        {
+            tabla.Filas = filas;
+        }
         return tabla;
     }
 
