@@ -21,7 +21,7 @@ public class RepositorioMovimientoSql
         _contexto.SaveChanges();
     }
 
-    public IReadOnlyList<Movimiento> ObtenerPaginaDeMovimientos(FiltroMovimientos filtro, int pagina, int tamanoPagina)
+    public IReadOnlyList<Movimiento> ObtenerPaginaDeMovimientos(FiltroPorCatalogoYFechas filtro, int pagina, int tamanoPagina)
     {
         return FiltrarPor(filtro)
             .Include(movimiento => movimiento.Prestamo)
@@ -36,12 +36,12 @@ public class RepositorioMovimientoSql
             .ToList();
     }
 
-    public int ContarMovimientos(FiltroMovimientos filtro)
+    public int ContarMovimientos(FiltroPorCatalogoYFechas filtro)
     {
         return FiltrarPor(filtro).Count();
     }
 
-    private IQueryable<Movimiento> FiltrarPor(FiltroMovimientos filtro)
+    private IQueryable<Movimiento> FiltrarPor(FiltroPorCatalogoYFechas filtro)
     {
         IQueryable<Movimiento> movimientos = _contexto.Movimientos;
 

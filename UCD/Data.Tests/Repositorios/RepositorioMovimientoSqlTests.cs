@@ -46,7 +46,7 @@ public sealed class RepositorioMovimientoSqlTests
         GuardarTresMovimientos();
 
         IReadOnlyList<Movimiento> resultado =
-            LeerPagina(new FiltroMovimientos(), pagina: 1, tamanoPagina: 10);
+            LeerPagina(new FiltroPorCatalogoYFechas(), pagina: 1, tamanoPagina: 10);
 
         CollectionAssert.AreEqual(
             new List<TipoMovimiento> { TipoMovimiento.Devolucion, TipoMovimiento.Prestamo, TipoMovimiento.Solicitud },
@@ -59,7 +59,7 @@ public sealed class RepositorioMovimientoSqlTests
         GuardarTresMovimientos();
 
         IReadOnlyList<Movimiento> resultado =
-            LeerPagina(new FiltroMovimientos(), pagina: 2, tamanoPagina: 1);
+            LeerPagina(new FiltroPorCatalogoYFechas(), pagina: 2, tamanoPagina: 1);
 
         CollectionAssert.AreEqual(new List<TipoMovimiento> { TipoMovimiento.Prestamo },
             resultado.Select(movimiento => movimiento.Tipo).ToList());
@@ -80,7 +80,7 @@ public sealed class RepositorioMovimientoSqlTests
             Movimiento.DeRechazo(deProyector, RegistroDeAccion.DelSistema(FechaFija)));
 
         IReadOnlyList<Movimiento> resultado =
-            LeerPagina(new FiltroMovimientos { IdCatalogo = electronica.Id }, pagina: 1, tamanoPagina: 10);
+            LeerPagina(new FiltroPorCatalogoYFechas { IdCatalogo = electronica.Id }, pagina: 1, tamanoPagina: 10);
 
         CollectionAssert.AreEqual(new List<TipoMovimiento> { TipoMovimiento.Solicitud },
             resultado.Select(movimiento => movimiento.Tipo).ToList());
@@ -90,7 +90,7 @@ public sealed class RepositorioMovimientoSqlTests
     public void ObtenerPaginaDeMovimientos_FiltroPorFechas_IncluyeDesdeYExcluyeHasta()
     {
         GuardarTresMovimientos();
-        FiltroMovimientos filtro = new FiltroMovimientos { Desde = FechaFija, Hasta = FechaFija.AddDays(1) };
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { Desde = FechaFija, Hasta = FechaFija.AddDays(1) };
 
         IReadOnlyList<Movimiento> resultado = LeerPagina(filtro, pagina: 1, tamanoPagina: 10);
 
@@ -102,7 +102,7 @@ public sealed class RepositorioMovimientoSqlTests
     public void ContarMovimientos_FiltroPorFechas_CuentaSoloLosDelRango()
     {
         GuardarTresMovimientos();
-        FiltroMovimientos filtro = new FiltroMovimientos { Desde = FechaFija, Hasta = FechaFija.AddDays(1) };
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { Desde = FechaFija, Hasta = FechaFija.AddDays(1) };
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         int cantidad = new RepositorioMovimientoSql(contextoQueLee).ContarMovimientos(filtro);
@@ -124,7 +124,7 @@ public sealed class RepositorioMovimientoSqlTests
         GuardarConOtroContexto(
             Movimiento.DeAprobacion(prestamo, RegistroDeAccion.DeUsuario(evaluador, FechaFija), unidad));
 
-        Movimiento leido = LeerPagina(new FiltroMovimientos(), pagina: 1, tamanoPagina: 10).Single();
+        Movimiento leido = LeerPagina(new FiltroPorCatalogoYFechas(), pagina: 1, tamanoPagina: 10).Single();
 
         Assert.IsNotNull(leido.Prestamo);
         Assert.AreEqual("12345672", leido.Solicitante.Dni);
@@ -143,7 +143,7 @@ public sealed class RepositorioMovimientoSqlTests
             Movimiento.DeDevolucion(prestamo, RegistroDeAccion.DelSistema(FechaFija.AddDays(1)), unidad));
     }
 
-    private IReadOnlyList<Movimiento> LeerPagina(FiltroMovimientos filtro, int pagina, int tamanoPagina)
+    private IReadOnlyList<Movimiento> LeerPagina(FiltroPorCatalogoYFechas filtro, int pagina, int tamanoPagina)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioMovimientoSql repositorio = new RepositorioMovimientoSql(contextoQueLee);
