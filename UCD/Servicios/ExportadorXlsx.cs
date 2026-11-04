@@ -10,7 +10,7 @@ public class ExportadorXlsx : IExportadorDeTabla
 
     public string Formato
     {
-        get { return string.Empty; }
+        get { return "XLSX"; }
     }
 
     public string Extension
