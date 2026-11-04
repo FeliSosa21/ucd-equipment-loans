@@ -119,6 +119,22 @@ public sealed class ExportadorXlsxTests
         Assert.ThrowsException<ArgumentException>(() => exportador.Exportar(tabla));
     }
 
+    [TestMethod]
+    public void Exportar_FilaConMenosColumnasQueEncabezados_LaEscribeConLasCeldasQueTiene()
+    {
+        ExportadorXlsx exportador = new ExportadorXlsx();
+        TablaExportableDto tabla = CrearTabla(
+            encabezados: new List<string> { "Nombre", "Edad" },
+            filas: new List<List<string>> { new List<string> { "Ana", "20" }, new List<string> { "Luis" } });
+
+        byte[] bytes = exportador.Exportar(tabla);
+
+        using XLWorkbook libro = AbrirLibro(bytes);
+        IXLWorksheet hoja = libro.Worksheet(1);
+        Assert.AreEqual("Luis", hoja.Cell(3, 1).GetString());
+        Assert.IsTrue(hoja.Cell(3, 2).IsEmpty());
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
