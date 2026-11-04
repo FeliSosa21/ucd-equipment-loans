@@ -47,6 +47,22 @@ public sealed class RepositorioAuditoriaTests
         CollectionAssert.AreEqual(new List<RegistroAuditoria> { segundo, primero }, resultado.ToList());
     }
 
+    [TestMethod]
+    public void ObtenerPaginaDeRegistros_SegundaPaginaDeUno_DevuelveSoloElSegundo()
+    {
+        RegistroAuditoria viejo = CrearRegistro(FechaFija);
+        RegistroAuditoria intermedio = CrearRegistro(FechaFija.AddHours(1));
+        RegistroAuditoria reciente = CrearRegistro(FechaFija.AddHours(2));
+        _repositorio.AgregarRegistro(viejo);
+        _repositorio.AgregarRegistro(intermedio);
+        _repositorio.AgregarRegistro(reciente);
+
+        IReadOnlyList<RegistroAuditoria> resultado =
+            _repositorio.ObtenerPaginaDeRegistros(new FiltroAuditoria(), pagina: 2, tamanoPagina: 1);
+
+        CollectionAssert.AreEqual(new List<RegistroAuditoria> { intermedio }, resultado.ToList());
+    }
+
     private static RegistroAuditoria CrearRegistro(DateTime fechaHora)
     {
         return new RegistroAuditoria(
