@@ -32,6 +32,18 @@ public sealed class RepositorioTipoUsuarioSqlTests
         Assert.AreEqual(ImagenPng, leido.Imagen);
     }
 
+    [TestMethod]
+    public void ObtenerTipoPorNombre_TipoAgregado_OtroContextoLeeSusTopes()
+    {
+        GuardarConOtroContexto(CrearDocente());
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        TipoUsuario? leido = new RepositorioTipoUsuarioSql(contextoQueLee).ObtenerTipoPorNombre("Docente");
+
+        Assert.AreEqual(40, leido?.MaxUnidadesPorCatalogo);
+        Assert.AreEqual(3, leido?.MaxPrestamosConcurrentes);
+    }
+
     private void GuardarConOtroContexto(TipoUsuario tipo)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
