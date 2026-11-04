@@ -5,9 +5,14 @@ public class UnidadDevuelta
 {
     public const int LargoMaximoObservaciones = 300;
 
-    public UnidadFisica Unidad { get; }
-    public CondicionDevolucion Condicion { get; }
-    public string? Observaciones { get; }
+    public UnidadFisica Unidad { get; private set; }
+    public CondicionDevolucion Condicion { get; private set; }
+    public string? Observaciones { get; private set; }
+
+    private UnidadDevuelta()
+    {
+        Unidad = null!;
+    }
 
     public UnidadDevuelta(UnidadFisica unidad, CondicionDevolucion condicion, string? observaciones)
     {

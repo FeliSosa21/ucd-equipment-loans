@@ -32,7 +32,7 @@ public class MovimientoConfiguracion : IEntityTypeConfiguration<Movimiento>
             .IsRequired(false)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.OwnsOne<RegistroDeAccion>("_registro", registro =>
+        builder.OwnsOne<RegistroDeAccion>(NombresDeMapeo.CampoRegistro, registro =>
         {
             registro.Property(accion => accion.FechaHora).HasColumnName("FechaHora").IsRequired();
 
@@ -45,7 +45,7 @@ public class MovimientoConfiguracion : IEntityTypeConfiguration<Movimiento>
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        builder.Navigation("_registro").IsRequired();
+        builder.Navigation(NombresDeMapeo.CampoRegistro).IsRequired();
 
         builder.Ignore(movimiento => movimiento.FechaHora);
         builder.Ignore(movimiento => movimiento.Responsable);
