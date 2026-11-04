@@ -1,0 +1,33 @@
+using System.Text;
+using DTOs;
+
+namespace Servicios.Tests;
+
+[TestClass]
+public sealed class ExportadorCsvTests
+{
+    private const char MarcaDeOrdenDeBytes = '\uFEFF';
+
+    [TestMethod]
+    public void Exportar_TablaSinFilas_EscribeSoloElEncabezado()
+    {
+        ExportadorCsv exportador = new ExportadorCsv();
+        TablaExportableDto tabla = CrearTabla(encabezados: new List<string> { "Nombre", "Edad" });
+
+        byte[] bytes = exportador.Exportar(tabla);
+
+        Assert.AreEqual("Nombre,Edad\r\n", LeerTexto(bytes));
+    }
+
+    private static TablaExportableDto CrearTabla(List<string> encabezados)
+    {
+        TablaExportableDto tabla = new TablaExportableDto();
+        tabla.Encabezados = encabezados;
+        return tabla;
+    }
+
+    private static string LeerTexto(byte[] bytes)
+    {
+        return Encoding.UTF8.GetString(bytes).TrimStart(MarcaDeOrdenDeBytes);
+    }
+}
