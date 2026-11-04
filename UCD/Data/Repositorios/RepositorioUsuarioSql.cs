@@ -1,4 +1,5 @@
 using Dominio;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositorios;
 
@@ -20,7 +21,9 @@ public class RepositorioUsuarioSql
 
     public Usuario? ObtenerUsuarioPorDni(string dni)
     {
-        return _contexto.Usuarios.FirstOrDefault(usuario => usuario.Dni == dni);
+        return _contexto.Usuarios
+            .Include(usuario => usuario.Tipo)
+            .FirstOrDefault(usuario => usuario.Dni == dni);
     }
 
     public Usuario? ObtenerUsuarioPorCorreo(string correo)
