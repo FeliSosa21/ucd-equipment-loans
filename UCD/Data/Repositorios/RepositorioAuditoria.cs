@@ -23,6 +23,7 @@ public class RepositorioAuditoria
             .Reverse()
             .Where(registro => filtro.Desde is null || registro.FechaHora >= filtro.Desde)
             .Where(registro => filtro.Hasta is null || registro.FechaHora < filtro.Hasta)
+            .Where(registro => filtro.DniUsuario is null || registro.Responsable?.Dni == filtro.DniUsuario)
             .OrderByDescending(registro => registro.FechaHora)
             .Skip((pagina - 1) * tamanoPagina)
             .Take(tamanoPagina)
