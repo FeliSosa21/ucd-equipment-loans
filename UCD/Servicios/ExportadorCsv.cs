@@ -28,6 +28,7 @@ public class ExportadorCsv : IExportadorDeTabla
     public byte[] Exportar(TablaExportableDto tabla)
     {
         ArgumentNullException.ThrowIfNull(tabla);
+        ValidarQueNingunaFilaSuperaLosEncabezados(tabla);
         string texto = EscribirRegistro(tabla.Encabezados);
         foreach (List<string> fila in tabla.Filas)
         {
@@ -37,6 +38,18 @@ public class ExportadorCsv : IExportadorDeTabla
         byte[] marcaDeOrdenDeBytes = codificacion.GetPreamble();
         byte[] contenido = codificacion.GetBytes(texto);
         return marcaDeOrdenDeBytes.Concat(contenido).ToArray();
+    }
+
+    private static void ValidarQueNingunaFilaSuperaLosEncabezados(TablaExportableDto tabla)
+    {
+        foreach (List<string> fila in tabla.Filas)
+        {
+            if (fila.Count > tabla.Encabezados.Count)
+            {
+                throw new ArgumentException(
+                    "Una fila tiene " + fila.Count + " columnas y el encabezado solo " + tabla.Encabezados.Count);
+            }
+        }
     }
 
     private static string EscribirRegistro(List<string> campos)
