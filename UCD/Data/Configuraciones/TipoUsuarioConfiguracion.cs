@@ -20,5 +20,11 @@ public class TipoUsuarioConfiguracion : IEntityTypeConfiguration<TipoUsuario>
         });
 
         builder.Navigation("presentacion").IsRequired();
+
+        builder.OwnsOne<TopesDePrestamo>("topes", topes =>
+        {
+            topes.Property(limites => limites.MaxUnidadesPorCatalogo).HasColumnName("MaxUnidadesPorCatalogo");
+            topes.Property(limites => limites.MaxPrestamosConcurrentes).HasColumnName("MaxPrestamosConcurrentes");
+        });
     }
 }
