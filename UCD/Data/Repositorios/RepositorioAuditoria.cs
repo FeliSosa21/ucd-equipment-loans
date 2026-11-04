@@ -21,6 +21,7 @@ public class RepositorioAuditoria
         return _memoria.RegistrosAuditoria
             .AsEnumerable()
             .Reverse()
+            .Where(registro => filtro.Desde is null || registro.FechaHora >= filtro.Desde)
             .OrderByDescending(registro => registro.FechaHora)
             .Skip((pagina - 1) * tamanoPagina)
             .Take(tamanoPagina)
