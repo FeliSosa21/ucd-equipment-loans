@@ -47,7 +47,7 @@ public class RepositorioUsuarioSql
 
     private IQueryable<Usuario> FiltrarPor(string? filtro)
     {
-        IQueryable<Usuario> usuarios = _contexto.Usuarios;
+        IQueryable<Usuario> usuarios = UsuariosConTipo;
 
         if (filtro is not null)
         {
