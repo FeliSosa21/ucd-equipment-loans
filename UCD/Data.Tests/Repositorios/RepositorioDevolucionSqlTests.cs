@@ -122,6 +122,20 @@ public sealed class RepositorioDevolucionSqlTests
     }
 
     [TestMethod]
+    public void ContarDevoluciones_FiltroPorFechas_CuentaSoloLasDelRango()
+    {
+        GuardarConOtroContexto(CrearDevolucion(diasDespuesDelPrestamo: 1), CrearDevolucion(diasDespuesDelPrestamo: 2),
+            CrearDevolucion(diasDespuesDelPrestamo: 3));
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas
+            { Desde = InicioPrestamo.AddDays(1), Hasta = InicioPrestamo.AddDays(3) };
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        int cantidad = new RepositorioDevolucionSql(contextoQueLee).ContarDevoluciones(filtro);
+
+        Assert.AreEqual(2, cantidad);
+    }
+
+    [TestMethod]
     public void ObtenerPaginaDeDevoluciones_FiltroNulo_LanzaArgumentNullException()
     {
         using SqlContext contexto = new SqlContext(_opciones);

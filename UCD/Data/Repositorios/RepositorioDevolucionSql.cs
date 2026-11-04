@@ -41,6 +41,11 @@ public class RepositorioDevolucionSql
             .ToList();
     }
 
+    public int ContarDevoluciones(FiltroPorCatalogoYFechas filtro)
+    {
+        return 0;
+    }
+
     private IQueryable<Devolucion> FiltrarPor(FiltroPorCatalogoYFechas filtro)
     {
         IQueryable<Devolucion> devoluciones = _contexto.Devoluciones;
