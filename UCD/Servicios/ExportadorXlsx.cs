@@ -26,11 +26,24 @@ public class ExportadorXlsx : IExportadorDeTabla
     public byte[] Exportar(TablaExportableDto tabla)
     {
         ArgumentNullException.ThrowIfNull(tabla);
+        ValidarQueNingunaFilaSuperaLosEncabezados(tabla);
         using XLWorkbook libro = new XLWorkbook();
         IXLWorksheet hoja = libro.Worksheets.Add(NombreDeHoja);
         EscribirEncabezados(hoja, tabla);
         EscribirFilas(hoja, tabla);
         return GuardarComoBytes(libro);
+    }
+
+    private static void ValidarQueNingunaFilaSuperaLosEncabezados(TablaExportableDto tabla)
+    {
+        foreach (List<string> fila in tabla.Filas)
+        {
+            if (fila.Count > tabla.Encabezados.Count)
+            {
+                throw new ArgumentException(
+                    "Una fila tiene " + fila.Count + " columnas y el encabezado solo " + tabla.Encabezados.Count);
+            }
+        }
     }
 
     private static void EscribirEncabezados(IXLWorksheet hoja, TablaExportableDto tabla)
