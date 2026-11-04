@@ -49,6 +49,27 @@ public sealed class RepositorioDevolucionSqlTests
         Assert.AreEqual("No enciende", unidad.Observaciones);
     }
 
+    [TestMethod]
+    public void ObtenerDevoluciones_VariasDevoluciones_DeLaMasViejaALaMasRecienteYEnEmpateLaPrimeraRegistrada()
+    {
+        Devolucion delDiaDos = CrearDevolucion(diasDespuesDelPrestamo: 2);
+        Devolucion delDiaUno = CrearDevolucion(diasDespuesDelPrestamo: 1);
+        Devolucion otraDelDiaUno = CrearDevolucion(diasDespuesDelPrestamo: 1);
+        GuardarConOtroContexto(delDiaDos, delDiaUno, otraDelDiaUno);
+
+        IReadOnlyList<Devolucion> leidas = LeerDevoluciones(new FiltroPorCatalogoYFechas());
+
+        CollectionAssert.AreEqual(new List<int> { delDiaUno.Id, otraDelDiaUno.Id, delDiaDos.Id },
+            leidas.Select(devolucion => devolucion.Id).ToList());
+    }
+
+    private IReadOnlyList<Devolucion> LeerDevoluciones(FiltroPorCatalogoYFechas filtro)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+
+        return new RepositorioDevolucionSql(contextoQueLee).ObtenerDevoluciones(filtro);
+    }
+
     private void GuardarConOtroContexto(params Devolucion[] devoluciones)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
