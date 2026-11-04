@@ -10,7 +10,7 @@ public class ExportadorCsv : IExportadorDeTabla
 
     public string Formato
     {
-        get { return string.Empty; }
+        get { return "CSV"; }
     }
 
     public string Extension
