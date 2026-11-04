@@ -420,11 +420,11 @@ public class ServicioTiposEquipamientoTests
         repositorioCatalogo.Guardar(catalogo);
 
         RepositorioUsuario repositorioUsuario = new RepositorioUsuario(memoria);
-        repositorioUsuario.AgregarUsuario(CrearUsuario(DniSupervisor, "supervisor@ucd.edu.uy", TipoUsuario.Supervisor));
+        repositorioUsuario.AgregarUsuario(CrearUsuario(DniSupervisor, "supervisor@ucd.edu.uy", TipoUsuario.Supervisor()));
         repositorioUsuario.AgregarUsuario(CrearUsuario(DniFuncionario, "funcionario@ucd.edu.uy",
-            TipoUsuario.FuncionarioCE));
+            TipoUsuario.FuncionarioCE()));
         Usuario desactivado = CrearUsuario(DniSupervisorDesactivado, "desactivado@ucd.edu.uy",
-            TipoUsuario.Supervisor);
+            TipoUsuario.Supervisor());
         desactivado.Desactivar();
         repositorioUsuario.AgregarUsuario(desactivado);
         return new ServicioTiposEquipamiento(repositorioCatalogo, repositorioUsuario);

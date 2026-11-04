@@ -8,21 +8,24 @@ namespace Servicios;
 // cualquier usuario activo puede ver y modificar sus propios datos. Cada operacion valida al responsable
 // (administrador activo, o el mismo usuario activo), asi nadie desactivado con la pantalla abierta puede seguir
 // operando. Como un administrador no puede actuar sobre si mismo, siempre queda al menos uno activo.
-// NombresDeTipos no valida al responsable: solo devuelve los nombres fijos de los tipos, sin datos de usuarios.
+// NombresDeTipos no valida al responsable: solo devuelve los nombres de los tipos guardados, sin datos de usuarios.
 public class ServicioAdministracionUsuarios
 {
     public const string ContrasenaPredeterminada = "Ucd12345";
-    public static readonly string NombreTipoAdministrador = TipoUsuario.Administrador.Nombre;
+    public static readonly string NombreTipoAdministrador = TipoUsuario.Administrador().Nombre;
     public const int TamanoPagina = 50;
     private const string MensajeSoloAdministrador = "Solo un administrador activo puede gestionar usuarios";
 
     private readonly RepositorioUsuario _repositorio;
     private readonly ServicioUsuario _servicioUsuario;
+    private readonly RepositorioTipoUsuario _repositorioTipos;
 
-    public ServicioAdministracionUsuarios(RepositorioUsuario repositorio, ServicioUsuario servicioUsuario)
+    public ServicioAdministracionUsuarios(RepositorioUsuario repositorio, ServicioUsuario servicioUsuario,
+        RepositorioTipoUsuario repositorioTipos)
     {
         _repositorio = repositorio;
         _servicioUsuario = servicioUsuario;
+        _repositorioTipos = repositorioTipos;
     }
 
     public void CrearUsuario(UsuarioDto dto, string nombreTipo, string dniResponsable)
@@ -61,7 +64,7 @@ public class ServicioAdministracionUsuarios
 
     public List<string> NombresDeTipos()
     {
-        return TipoUsuario.Todos().Select(tipo => tipo.Nombre).ToList();
+        return _repositorioTipos.ObtenerTodos().Select(tipo => tipo.Nombre).ToList();
     }
 
     public void AsignarTipo(string dni, string nombreTipo, string dniResponsable)
@@ -152,9 +155,9 @@ public class ServicioAdministracionUsuarios
         return usuario.Estado == EstadoUsuario.Activo && usuario.TienePermiso(Permiso.GestionarUsuarios);
     }
 
-    private static TipoUsuario ObtenerTipo(string nombreTipo)
+    private TipoUsuario ObtenerTipo(string nombreTipo)
     {
-        TipoUsuario? tipo = TipoUsuario.Todos().FirstOrDefault(t => t.Nombre == nombreTipo);
+        TipoUsuario? tipo = _repositorioTipos.ObtenerTipoPorNombre(nombreTipo);
 
         if (tipo is null)
         {

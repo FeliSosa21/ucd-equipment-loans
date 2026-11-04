@@ -25,9 +25,10 @@ public class UsuarioConfiguracion : IEntityTypeConfiguration<Usuario>
         
         builder.Ignore(usuario => usuario.NombreCompleto);
         
-        builder.Property(usuario => usuario.Tipo)
-            .HasConversion(
-                tipo => tipo.Nombre,
-                nombre => TipoUsuario.Todos().First(tipo => tipo.Nombre == nombre));
+        builder.HasOne(usuario => usuario.Tipo)
+            .WithMany()
+            .HasForeignKey("TipoUsuarioId")
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

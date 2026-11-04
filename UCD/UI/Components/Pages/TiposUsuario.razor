@@ -1,0 +1,106 @@
+@page "/tipos-usuario"
+@using DTOs
+@using Servicios
+@inherits PaginaConSesion
+@inject ServicioTiposUsuario ServicioTipos
+
+<PageTitle>UCD · Tipos de usuario</PageTitle>
+
+<div class="page-header">
+    <h1>Tipos de usuario</h1>
+    <p>Modificá la descripción, la imagen y los topes de préstamo de cada tipo.</p>
+</div>
+
+@if (_editando is not null)
+{
+    <div class="card alta">
+        <form class="form-grid" @onsubmit="Guardar" novalidate>
+            <div class="lbl">Editar el tipo <strong>@_editando.Nombre</strong></div>
+            <div>
+                <label class="lbl" for="tipo-descripcion">Descripción</label>
+                <input id="tipo-descripcion" class="field" maxlength="100"
+                       @bind="_editando.Descripcion" @bind:event="oninput" />
+                <div class="hint">Obligatoria, hasta 100 caracteres.</div>
+            </div>
+            <div>
+                <label class="lbl" for="tipo-imagen">Imagen</label>
+                <div class="imagen-edicion">
+                    @if (!string.IsNullOrEmpty(_editando.Imagen))
+                    {
+                        <img class="imagen-tipo" src="@_editando.Imagen" alt="Imagen actual de @_editando.Nombre" />
+                    }
+                    <InputFile id="tipo-imagen" accept="image/png,image/jpeg" OnChange="CargarImagen" />
+                </div>
+                <div class="hint">PNG o JPG, hasta 500 KB.</div>
+            </div>
+            @if (TieneTopes(_editando))
+            {
+                <div class="form-row">
+                    <div>
+                        <label class="lbl" for="tipo-max-unidades">Máximo de unidades por catálogo</label>
+                        <input id="tipo-max-unidades" class="field" type="number" min="0"
+                               @bind="_editando.MaxUnidadesPorCatalogo" />
+                    </div>
+                    <div>
+                        <label class="lbl" for="tipo-max-prestamos">Máximo de préstamos concurrentes</label>
+                        <input id="tipo-max-prestamos" class="field" type="number" min="0"
+                               @bind="_editando.MaxPrestamosConcurrentes" />
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="hint">Este tipo no tiene límites de préstamo.</div>
+            }
+            <div class="acciones">
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                <button type="button" class="btn btn-ghost" @onclick="CancelarEdicion">Cancelar</button>
+            </div>
+        </form>
+    </div>
+}
+
+@if (_exito is not null)
+{
+    <div class="alert alert-success mensaje" role="status">@_exito</div>
+}
+
+@if (_error is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_error</div>
+}
+
+<div class="card table-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Imagen</th>
+                <th>Tipo</th>
+                <th>Descripción</th>
+                <th>Máx. unidades por catálogo</th>
+                <th>Máx. préstamos concurrentes</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (TipoUsuarioDto tipo in _tipos)
+            {
+                <tr>
+                    <td>
+                        @if (!string.IsNullOrEmpty(tipo.Imagen))
+                        {
+                            <img class="imagen-tipo" src="@tipo.Imagen" alt="Imagen de @tipo.Nombre" />
+                        }
+                    </td>
+                    <td>@tipo.Nombre</td>
+                    <td>@tipo.Descripcion</td>
+                    <td>@TextoDeTope(tipo.MaxUnidadesPorCatalogo)</td>
+                    <td>@TextoDeTope(tipo.MaxPrestamosConcurrentes)</td>
+                    <td>
+                        <button class="btn btn-ghost btn-sm" @onclick="() => AbrirEdicion(tipo)">Editar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

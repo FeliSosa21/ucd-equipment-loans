@@ -7,10 +7,12 @@ namespace Servicios;
 public class ServicioUsuario
 {
     private readonly RepositorioUsuario _repositorio;
+    private readonly RepositorioTipoUsuario _repositorioTipos;
 
-    public ServicioUsuario(RepositorioUsuario repositorio)
+    public ServicioUsuario(RepositorioUsuario repositorio, RepositorioTipoUsuario repositorioTipos)
     {
         _repositorio = repositorio;
+        _repositorioTipos = repositorioTipos;
     }
 
     public void Registrar(UsuarioDto dto)
@@ -21,6 +23,7 @@ public class ServicioUsuario
     internal Usuario Agregar(UsuarioDto dto)
     {
         Usuario usuario = CrearUsuario(dto);
+        usuario.AsignarTipo(_repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.SinPermisos().Nombre)!);
 
         if (_repositorio.ObtenerUsuarioPorDni(usuario.Dni) != null)
         {

@@ -3,10 +3,12 @@
 [TestClass]
 public sealed class TipoUsuarioTests
 {
+    private const string ImagenPng = "data:image/png;base64,iVBORw0KGgo=";
+
     [TestMethod]
     public void TienePermiso_SinPermisosYCualquierPermiso_DevuelveFalse()
     {
-        var tipo = TipoUsuario.SinPermisos;
+        var tipo = TipoUsuario.SinPermisos();
 
         foreach (var permiso in Enum.GetValues<Permiso>())
         {
@@ -17,12 +19,12 @@ public sealed class TipoUsuarioTests
     }
 
     [TestMethod]
-    public void Estudiante_AccesosRepetidos_DevuelveLaMismaInstancia()
+    public void Estudiante_LlamadasRepetidas_DevuelveInstanciasDistintas()
     {
-        var primero = TipoUsuario.Estudiante;
-        var segundo = TipoUsuario.Estudiante;
+        var primero = TipoUsuario.Estudiante();
+        var segundo = TipoUsuario.Estudiante();
 
-        Assert.AreSame(primero, segundo);
+        Assert.AreNotSame(primero, segundo);
     }
 
     [TestMethod]
@@ -32,7 +34,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.ConsultarMisSolicitudes)]
     public void TienePermiso_EstudianteYPermisosPropios_DevuelveTrue(Permiso permiso)
     {
-        var tipo = TipoUsuario.Estudiante;
+        var tipo = TipoUsuario.Estudiante();
 
         var resultado = tipo.TienePermiso(permiso);
 
@@ -47,7 +49,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.ConsultarHistorico)]
     public void TienePermiso_DocenteYPermisosPropios_DevuelveTrue(Permiso permiso)
     {
-        var tipo = TipoUsuario.Docente;
+        var tipo = TipoUsuario.Docente();
 
         var resultado = tipo.TienePermiso(permiso);
 
@@ -61,7 +63,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.RegistrarDevolucion)]
     public void TienePermiso_FuncionarioCEYPermisosPropios_DevuelveTrue(Permiso permiso)
     {
-        var tipo = TipoUsuario.FuncionarioCE;
+        var tipo = TipoUsuario.FuncionarioCE();
 
         var resultado = tipo.TienePermiso(permiso);
 
@@ -79,7 +81,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.GestionarUsuarios)]
     public void TienePermiso_FuncionarioCEYPermisosAjenos_DevuelveFalse(Permiso permiso)
     {
-        var tipo = TipoUsuario.FuncionarioCE;
+        var tipo = TipoUsuario.FuncionarioCE();
 
         var resultado = tipo.TienePermiso(permiso);
 
@@ -97,7 +99,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.GestionarUsuarios)]
     public void TienePermiso_EstudianteYPermisosAjenos_DevuelveFalse(Permiso permiso)
     {
-        var tipo = TipoUsuario.Estudiante;
+        var tipo = TipoUsuario.Estudiante();
 
         var resultado = tipo.TienePermiso(permiso);
 
@@ -114,7 +116,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.GestionarUsuarios)]
     public void TienePermiso_DocenteYPermisosAjenos_DevuelveFalse(Permiso permiso)
     {
-        var tipo = TipoUsuario.Docente;
+        var tipo = TipoUsuario.Docente();
 
         var resultado = tipo.TienePermiso(permiso);
 
@@ -131,7 +133,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.ConsultarPrestamos)]
     public void TienePermiso_SupervisorYPermisosPropios_DevuelveTrue(Permiso permiso)
     {
-        var tipo = TipoUsuario.Supervisor;
+        var tipo = TipoUsuario.Supervisor();
 
         var resultado = tipo.TienePermiso(permiso);
 
@@ -146,7 +148,7 @@ public sealed class TipoUsuarioTests
     [DataRow(Permiso.GestionarUsuarios)]
     public void TienePermiso_SupervisorYPermisosAjenos_DevuelveFalse(Permiso permiso)
     {
-        var tipo = TipoUsuario.Supervisor;
+        var tipo = TipoUsuario.Supervisor();
 
         var resultado = tipo.TienePermiso(permiso);
 
@@ -156,7 +158,7 @@ public sealed class TipoUsuarioTests
     [TestMethod]
     public void TienePermiso_AdministradorYCualquierPermiso_DevuelveTrue()
     {
-        var tipo = TipoUsuario.Administrador;
+        var tipo = TipoUsuario.Administrador();
 
         foreach (var permiso in Enum.GetValues<Permiso>())
         {
@@ -169,7 +171,7 @@ public sealed class TipoUsuarioTests
     [TestMethod]
     public void Nombre_Administrador_DevuelveAdministrador()
     {
-        var tipo = TipoUsuario.Administrador;
+        var tipo = TipoUsuario.Administrador();
 
         var nombre = tipo.Nombre;
 
@@ -179,7 +181,7 @@ public sealed class TipoUsuarioTests
     [TestMethod]
     public void Nombre_Docente_DevuelveDocente()
     {
-        var tipo = TipoUsuario.Docente;
+        var tipo = TipoUsuario.Docente();
 
         var nombre = tipo.Nombre;
 
@@ -189,7 +191,7 @@ public sealed class TipoUsuarioTests
     [TestMethod]
     public void Nombre_Estudiante_DevuelveEstudiante()
     {
-        var tipo = TipoUsuario.Estudiante;
+        var tipo = TipoUsuario.Estudiante();
 
         var nombre = tipo.Nombre;
 
@@ -199,7 +201,7 @@ public sealed class TipoUsuarioTests
     [TestMethod]
     public void Nombre_FuncionarioCE_DevuelveFuncionarioDelCentroDeEquipamiento()
     {
-        var tipo = TipoUsuario.FuncionarioCE;
+        var tipo = TipoUsuario.FuncionarioCE();
 
         var nombre = tipo.Nombre;
 
@@ -209,7 +211,7 @@ public sealed class TipoUsuarioTests
     [TestMethod]
     public void Nombre_Supervisor_DevuelveSupervisor()
     {
-        var tipo = TipoUsuario.Supervisor;
+        var tipo = TipoUsuario.Supervisor();
 
         var nombre = tipo.Nombre;
 
@@ -219,7 +221,7 @@ public sealed class TipoUsuarioTests
     [TestMethod]
     public void Nombre_SinPermisos_DevuelveSinPermisos()
     {
-        var tipo = TipoUsuario.SinPermisos;
+        var tipo = TipoUsuario.SinPermisos();
 
         var nombre = tipo.Nombre;
 
@@ -231,15 +233,15 @@ public sealed class TipoUsuarioTests
     {
         var esperados = new[]
         {
-            TipoUsuario.SinPermisos,
-            TipoUsuario.Estudiante,
-            TipoUsuario.Docente,
-            TipoUsuario.FuncionarioCE,
-            TipoUsuario.Supervisor,
-            TipoUsuario.Administrador
+            TipoUsuario.SinPermisos().Nombre,
+            TipoUsuario.Estudiante().Nombre,
+            TipoUsuario.Docente().Nombre,
+            TipoUsuario.FuncionarioCE().Nombre,
+            TipoUsuario.Supervisor().Nombre,
+            TipoUsuario.Administrador().Nombre
         };
 
-        var todos = TipoUsuario.Todos().ToList();
+        var todos = TipoUsuario.Todos().Select(tipo => tipo.Nombre).ToList();
 
         CollectionAssert.AreEquivalent(esperados, todos);
     }
@@ -249,7 +251,7 @@ public sealed class TipoUsuarioTests
     [DataRow(1)]
     public void PuedeAgregarPrestamo_EstudianteDebajoDelMaximo_DevuelveTrue(int prestamosVigentes)
     {
-        var tipo = TipoUsuario.Estudiante;
+        var tipo = TipoUsuario.Estudiante();
 
         var resultado = tipo.PuedeAgregarPrestamo(prestamosVigentes);
 
@@ -261,7 +263,7 @@ public sealed class TipoUsuarioTests
     [DataRow(3)]
     public void PuedeAgregarPrestamo_EstudianteEnElMaximoOMas_DevuelveFalse(int prestamosVigentes)
     {
-        var tipo = TipoUsuario.Estudiante;
+        var tipo = TipoUsuario.Estudiante();
 
         var resultado = tipo.PuedeAgregarPrestamo(prestamosVigentes);
         
@@ -274,7 +276,7 @@ public sealed class TipoUsuarioTests
     [DataRow(2)]
     public void PuedeAgregarPrestamo_DocenteDebajoDelMaximo_DevuelveTrue(int prestamosVigentes)
     {
-        var tipo = TipoUsuario.Docente;
+        var tipo = TipoUsuario.Docente();
 
         var resultado = tipo.PuedeAgregarPrestamo(prestamosVigentes);
 
@@ -286,7 +288,7 @@ public sealed class TipoUsuarioTests
     [DataRow(4)]
     public void PuedeAgregarPrestamo_DocenteEnElMaximoOMas_DevuelveFalse(int prestamosVigentes)
     {
-        var tipo = TipoUsuario.Docente;
+        var tipo = TipoUsuario.Docente();
 
         var resultado = tipo.PuedeAgregarPrestamo(prestamosVigentes);
 
@@ -298,7 +300,7 @@ public sealed class TipoUsuarioTests
     [DataRow(1000)]
     public void PuedeAgregarPrestamo_AdministradorConCualquierCantidad_DevuelveTrue(int prestamosVigentes)
     {
-        var tipo = TipoUsuario.Administrador;
+        var tipo = TipoUsuario.Administrador();
         
         var resultado = tipo.PuedeAgregarPrestamo(prestamosVigentes);
         
@@ -308,7 +310,7 @@ public sealed class TipoUsuarioTests
     [TestMethod]
     public void PuedeAgregarPrestamo_FuncionarioCESinPrestamos_DevuelveFalse()
     {
-        var tipo = TipoUsuario.FuncionarioCE;
+        var tipo = TipoUsuario.FuncionarioCE();
 
         var resultado = tipo.PuedeAgregarPrestamo(0);
 
@@ -318,7 +320,7 @@ public sealed class TipoUsuarioTests
     [TestMethod]
     public void PuedeAgregarPrestamo_SupervisorSinPrestamos_DevuelveFalse()
     {
-        var tipo = TipoUsuario.Supervisor;
+        var tipo = TipoUsuario.Supervisor();
 
         var resultado = tipo.PuedeAgregarPrestamo(0);
 
@@ -328,7 +330,7 @@ public sealed class TipoUsuarioTests
     [TestMethod]
     public void PuedeAgregarPrestamo_SinPermisosSinPrestamos_DevuelveFalse()
     {
-        var tipo = TipoUsuario.SinPermisos;
+        var tipo = TipoUsuario.SinPermisos();
 
         var resultado = tipo.PuedeAgregarPrestamo(0);
 
@@ -340,7 +342,7 @@ public sealed class TipoUsuarioTests
     [DataRow(2)]
     public void PermiteUnidades_EstudianteHastaElMaximo_DevuelveTrue(int cantidadSolicitada)
     {
-        var tipo = TipoUsuario.Estudiante;
+        var tipo = TipoUsuario.Estudiante();
         
         var resultado = tipo.PermiteUnidades(cantidadSolicitada);
         
@@ -352,7 +354,7 @@ public sealed class TipoUsuarioTests
     [DataRow(4)]
     public void PermiteUnidades_EstudianteSobreElMaximo_DevuelveFalse(int cantidadSolicitada)
     {
-        var tipo = TipoUsuario.Estudiante;
+        var tipo = TipoUsuario.Estudiante();
         
         var resultado = tipo.PermiteUnidades(cantidadSolicitada);
         
@@ -364,7 +366,7 @@ public sealed class TipoUsuarioTests
     [DataRow(40)]
     public void PermiteUnidades_DocenteHastaElMaximo_DevuelveTrue(int cantidadSolicitada)
     {
-        var tipo = TipoUsuario.Docente;
+        var tipo = TipoUsuario.Docente();
     
         var resultado = tipo.PermiteUnidades(cantidadSolicitada);
     
@@ -376,7 +378,7 @@ public sealed class TipoUsuarioTests
     [DataRow(42)]
     public void PermiteUnidades_DocenteSobreElMaximo_DevuelveFalse(int cantidadSolicitada)
     {
-        var tipo = TipoUsuario.Docente;
+        var tipo = TipoUsuario.Docente();
     
         var resultado = tipo.PermiteUnidades(cantidadSolicitada);
     
@@ -388,7 +390,7 @@ public sealed class TipoUsuarioTests
     [DataRow(1000)]
     public void PermiteUnidades_AdministradorConCualquierCantidad_DevuelveTrue(int cantidadSolicitada)
     {
-        var tipo = TipoUsuario.Administrador;
+        var tipo = TipoUsuario.Administrador();
     
         var resultado = tipo.PermiteUnidades(cantidadSolicitada);
     
@@ -398,7 +400,7 @@ public sealed class TipoUsuarioTests
     [TestMethod]
     public void PermiteUnidades_FuncionarioCEConUnaUnidad_DevuelveFalse()
     {
-        var tipo = TipoUsuario.FuncionarioCE;
+        var tipo = TipoUsuario.FuncionarioCE();
     
         var resultado = tipo.PermiteUnidades(1);
     
@@ -408,7 +410,7 @@ public sealed class TipoUsuarioTests
     [TestMethod]
     public void PermiteUnidades_SupervisorConUnaUnidad_DevuelveFalse()
     {
-        var tipo = TipoUsuario.Supervisor;
+        var tipo = TipoUsuario.Supervisor();
     
         var resultado = tipo.PermiteUnidades(1);
     
@@ -418,11 +420,300 @@ public sealed class TipoUsuarioTests
     [TestMethod]
     public void PermiteUnidades_SinPermisosConUnaUnidad_DevuelveFalse()
     {
-        var tipo = TipoUsuario.SinPermisos;
+        var tipo = TipoUsuario.SinPermisos();
     
         var resultado = tipo.PermiteUnidades(1);
     
         Assert.IsFalse(resultado);
     }
+
+    [TestMethod]
+    public void Constructor_DatosValidos_AsignaLosDatos()
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        Assert.AreEqual("Estudiante", tipo.Nombre);
+        Assert.AreEqual("Alumnos de grado", tipo.Descripcion);
+        Assert.AreEqual(ImagenPng, tipo.Imagen);
+        Assert.AreEqual(2, tipo.MaxUnidadesPorCatalogo);
+        Assert.AreEqual(3, tipo.MaxPrestamosConcurrentes);
+    }
+
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void Constructor_DescripcionNulaVaciaOEspacios_LanzaExcepcion(string? descripcion)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(descripcion: descripcion!));
+    }
+
+    [TestMethod]
+    public void Constructor_DescripcionCon101Caracteres_LanzaExcepcion()
+    {
+        string descripcion = new string('a', 101);
+
+        Assert.ThrowsException<DominioException>(() => CrearTipo(descripcion: descripcion));
+    }
+
+    [TestMethod]
+    public void Constructor_DescripcionCon100Caracteres_SeCrea()
+    {
+        string descripcion = new string('a', 100);
+
+        TipoUsuario tipo = CrearTipo(descripcion: descripcion);
+
+        Assert.AreEqual(descripcion, tipo.Descripcion);
+    }
+
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void Constructor_ImagenNulaVaciaOEspacios_LanzaExcepcion(string? imagen)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(imagen: imagen!));
+    }
+
+    [TestMethod]
+    [DataRow("data:image/gif;base64,R0lGODlh")]
+    [DataRow("data:image/svg+xml;base64,PHN2Zz4=")]
+    [DataRow("data:text/plain;base64,aG9sYQ==")]
+    [DataRow("iVBORw0KGgo=")]
+    public void Constructor_ImagenConFormatoNoAdmitido_LanzaExcepcion(string imagen)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(imagen: imagen));
+    }
+
+    [TestMethod]
+    public void Constructor_ImagenJpg_SeCrea()
+    {
+        string imagen = "data:image/jpeg;base64,/9j/4AAQ";
+
+        TipoUsuario tipo = CrearTipo(imagen: imagen);
+
+        Assert.AreEqual(imagen, tipo.Imagen);
+    }
+
+    [TestMethod]
+    [DataRow("data:image/png;base64,")]
+    [DataRow("data:image/png;base64,@@@@")]
+    [DataRow("data:image/png;base64,abc")]
+    public void Constructor_ImagenConContenidoInvalido_LanzaExcepcion(string imagen)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(imagen: imagen));
+    }
+
+    [TestMethod]
+    public void Constructor_ImagenDeMasDe500KB_LanzaExcepcion()
+    {
+        string imagen = CrearImagenPng(cantidadDeBytes: 500 * 1024 + 1);
+
+        Assert.ThrowsException<DominioException>(() => CrearTipo(imagen: imagen));
+    }
+
+    [TestMethod]
+    public void Constructor_ImagenDe500KB_SeCrea()
+    {
+        string imagen = CrearImagenPng(cantidadDeBytes: 500 * 1024);
+
+        TipoUsuario tipo = CrearTipo(imagen: imagen);
+
+        Assert.AreEqual(imagen, tipo.Imagen);
+    }
+
+    [TestMethod]
+    [DataRow(-1)]
+    [DataRow(-10)]
+    public void Constructor_MaxUnidadesPorCatalogoNegativo_LanzaExcepcion(int maxUnidadesPorCatalogo)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(maxUnidadesPorCatalogo: maxUnidadesPorCatalogo));
+    }
+
+    [TestMethod]
+    [DataRow(-1)]
+    [DataRow(-10)]
+    public void Constructor_MaxPrestamosConcurrentesNegativo_LanzaExcepcion(int maxPrestamosConcurrentes)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(maxPrestamosConcurrentes: maxPrestamosConcurrentes));
+    }
+
+    [TestMethod]
+    public void ModificarDescripcion_DescripcionValida_LaModifica()
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        tipo.ModificarDescripcion("Alumnos de grado y posgrado");
+
+        Assert.AreEqual("Alumnos de grado y posgrado", tipo.Descripcion);
+    }
+
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void ModificarDescripcion_DescripcionNulaVaciaOEspacios_LanzaExcepcion(string? descripcion)
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        Assert.ThrowsException<DominioException>(() => tipo.ModificarDescripcion(descripcion!));
+    }
+
+    [TestMethod]
+    public void ModificarDescripcion_DescripcionCon101Caracteres_LanzaExcepcion()
+    {
+        TipoUsuario tipo = CrearTipo();
+        string descripcion = new string('a', 101);
+
+        Assert.ThrowsException<DominioException>(() => tipo.ModificarDescripcion(descripcion));
+    }
+
+    [TestMethod]
+    public void ModificarImagen_ImagenValida_LaModifica()
+    {
+        TipoUsuario tipo = CrearTipo();
+        string imagen = "data:image/jpeg;base64,/9j/4AAQ";
+
+        tipo.ModificarImagen(imagen);
+
+        Assert.AreEqual(imagen, tipo.Imagen);
+    }
+
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("data:image/gif;base64,R0lGODlh")]
+    public void ModificarImagen_ImagenInvalida_LanzaExcepcion(string? imagen)
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        Assert.ThrowsException<DominioException>(() => tipo.ModificarImagen(imagen!));
+    }
+
+    [TestMethod]
+    public void ModificarTopes_TopesValidos_LosModifica()
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        tipo.ModificarTopes(maxUnidadesPorCatalogo: 5, maxPrestamosConcurrentes: 4);
+
+        Assert.AreEqual(5, tipo.MaxUnidadesPorCatalogo);
+        Assert.AreEqual(4, tipo.MaxPrestamosConcurrentes);
+    }
+
+    [TestMethod]
+    [DataRow(-1, 2)]
+    [DataRow(2, -1)]
+    public void ModificarTopes_TopeNegativo_LanzaExcepcion(int maxUnidadesPorCatalogo, int maxPrestamosConcurrentes)
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        Assert.ThrowsException<DominioException>(() =>
+            tipo.ModificarTopes(maxUnidadesPorCatalogo, maxPrestamosConcurrentes));
+    }
+
+    [TestMethod]
+    public void ModificarTopes_TipoSinLimites_LanzaExcepcion()
+    {
+        TipoUsuario tipo = CrearTipo(maxUnidadesPorCatalogo: null, maxPrestamosConcurrentes: null);
+
+        Assert.ThrowsException<DominioException>(() =>
+            tipo.ModificarTopes(maxUnidadesPorCatalogo: 2, maxPrestamosConcurrentes: 3));
+    }
+
+    [TestMethod]
+    public void PuedeAgregarPrestamo_TipoConMaximoDeTresYTresVigentes_DevuelveFalse()
+    {
+        TipoUsuario tipo = CrearTipo(maxPrestamosConcurrentes: 3);
+
+        bool resultado = tipo.PuedeAgregarPrestamo(3);
+
+        Assert.IsFalse(resultado);
+    }
+
+    [TestMethod]
+    public void PermiteUnidades_TipoConMaximoDeDosYTresUnidades_DevuelveFalse()
+    {
+        TipoUsuario tipo = CrearTipo(maxUnidadesPorCatalogo: 2);
+
+        bool resultado = tipo.PermiteUnidades(3);
+
+        Assert.IsFalse(resultado);
+    }
+
+    [TestMethod]
+    public void Constructor_DatosValidos_AsignaLosPermisos()
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        bool resultado = tipo.TienePermiso(Permiso.SolicitarPrestamo);
+
+        Assert.IsTrue(resultado);
+    }
+
+    [TestMethod]
+    [DataRow(null)]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void Constructor_NombreNuloVacioOEspacios_LanzaExcepcion(string? nombre)
+    {
+        Assert.ThrowsException<DominioException>(() => CrearTipo(nombre: nombre!));
+    }
+
+    [TestMethod]
+    public void Constructor_DescripcionConEspaciosAlrededor_LaGuardaRecortada()
+    {
+        TipoUsuario tipo = CrearTipo(descripcion: "  Alumnos de grado  ");
+
+        Assert.AreEqual("Alumnos de grado", tipo.Descripcion);
+    }
+
+    [TestMethod]
+    public void ModificarDescripcion_DescripcionConEspaciosAlrededor_LaGuardaRecortada()
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        tipo.ModificarDescripcion("  Alumnos de posgrado  ");
+
+        Assert.AreEqual("Alumnos de posgrado", tipo.Descripcion);
+    }
+
+    [TestMethod]
+    public void Constructor_TopesEnCero_SeCrea()
+    {
+        TipoUsuario tipo = CrearTipo(maxUnidadesPorCatalogo: 0, maxPrestamosConcurrentes: 0);
+
+        Assert.AreEqual(0, tipo.MaxUnidadesPorCatalogo);
+        Assert.AreEqual(0, tipo.MaxPrestamosConcurrentes);
+    }
+
+    [TestMethod]
+    public void ModificarImagen_ImagenInvalida_ConservaLaImagenAnterior()
+    {
+        TipoUsuario tipo = CrearTipo();
+
+        Assert.ThrowsException<DominioException>(() => tipo.ModificarImagen("data:image/gif;base64,R0lGODlh"));
+
+        Assert.AreEqual(ImagenPng, tipo.Imagen);
+    }
+
+    private static string CrearImagenPng(int cantidadDeBytes)
+    {
+        return "data:image/png;base64," + Convert.ToBase64String(new byte[cantidadDeBytes]);
+    }
+
+    private static TipoUsuario CrearTipo(
+        string nombre = "Estudiante",
+        string descripcion = "Alumnos de grado",
+        string imagen = ImagenPng,
+        int? maxUnidadesPorCatalogo = 2,
+        int? maxPrestamosConcurrentes = 3)
+    {
+        PresentacionTipoUsuario presentacion = new PresentacionTipoUsuario(nombre, descripcion, imagen);
+        TopesDePrestamo? topes = maxUnidadesPorCatalogo is null || maxPrestamosConcurrentes is null
+            ? null
+            : new TopesDePrestamo(maxUnidadesPorCatalogo.Value, maxPrestamosConcurrentes.Value);
+
+        return new TipoUsuario(presentacion, topes, new[] { Permiso.SolicitarPrestamo });
+    }
 }
-    

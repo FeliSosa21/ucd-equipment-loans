@@ -521,10 +521,10 @@ public class ServicioUnidadesTests
 
         RepositorioUsuario repositorioUsuario = new RepositorioUsuario(memoria);
         repositorioUsuario.AgregarUsuario(CrearUsuario(DniFuncionario, "funcionario@ucd.edu.uy",
-            TipoUsuario.FuncionarioCE));
-        repositorioUsuario.AgregarUsuario(CrearUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente));
+            TipoUsuario.FuncionarioCE()));
+        repositorioUsuario.AgregarUsuario(CrearUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente()));
         Usuario desactivado = CrearUsuario(DniFuncionarioDesactivado, "desactivado@ucd.edu.uy",
-            TipoUsuario.FuncionarioCE);
+            TipoUsuario.FuncionarioCE());
         desactivado.Desactivar();
         repositorioUsuario.AgregarUsuario(desactivado);
         return new ServicioUnidades(repositorioCatalogo, repositorioUsuario);

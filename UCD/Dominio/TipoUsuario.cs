@@ -2,22 +2,26 @@
 
 public class TipoUsuario
 {
-    private readonly int? maxPrestamosConcurrentes;
-    private readonly int? maxUnidadesPorPrestamo;
-    private readonly HashSet<Permiso> permisos;
+    private PresentacionTipoUsuario presentacion;
+    private TopesDePrestamo? topes;
+    private HashSet<Permiso> permisos;
 
-    public string Nombre { get; }
+    public int Id { get; private set; }
 
-    public static TipoUsuario SinPermisos { get; } = new TipoUsuario(
+    public string Nombre => presentacion.Nombre;
+    public string Descripcion => presentacion.Descripcion;
+    public string Imagen => presentacion.Imagen;
+    public int? MaxUnidadesPorCatalogo => topes?.MaxUnidadesPorCatalogo;
+    public int? MaxPrestamosConcurrentes => topes?.MaxPrestamosConcurrentes;
+
+    public static TipoUsuario SinPermisos() => new TipoUsuario(
         "Sin permisos",
-        maxPrestamosConcurrentes: 0,
-        maxUnidadesPorPrestamo: 0,
+        topes: new TopesDePrestamo(maxUnidadesPorCatalogo: 0, maxPrestamosConcurrentes: 0),
         new HashSet<Permiso>());
 
-    public static TipoUsuario Estudiante { get; } = new TipoUsuario(
+    public static TipoUsuario Estudiante() => new TipoUsuario(
         "Estudiante",
-        maxPrestamosConcurrentes: 2,
-        maxUnidadesPorPrestamo: 2,
+        topes: new TopesDePrestamo(maxUnidadesPorCatalogo: 2, maxPrestamosConcurrentes: 2),
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -26,10 +30,9 @@ public class TipoUsuario
             Permiso.ConsultarMisSolicitudes
         });
 
-    public static TipoUsuario Docente { get; } = new TipoUsuario(
+    public static TipoUsuario Docente() => new TipoUsuario(
         "Docente",
-        maxPrestamosConcurrentes: 3,
-        maxUnidadesPorPrestamo: 40,
+        topes: new TopesDePrestamo(maxUnidadesPorCatalogo: 40, maxPrestamosConcurrentes: 3),
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -39,10 +42,9 @@ public class TipoUsuario
             Permiso.ConsultarHistorico
         });
 
-    public static TipoUsuario FuncionarioCE { get; } = new TipoUsuario(
+    public static TipoUsuario FuncionarioCE() => new TipoUsuario(
         "Funcionario del centro de equipamiento",
-        maxPrestamosConcurrentes: 0,
-        maxUnidadesPorPrestamo: 0,
+        topes: new TopesDePrestamo(maxUnidadesPorCatalogo: 0, maxPrestamosConcurrentes: 0),
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -51,10 +53,9 @@ public class TipoUsuario
             Permiso.RegistrarDevolucion
         });
 
-    public static TipoUsuario Supervisor { get; } = new TipoUsuario(
+    public static TipoUsuario Supervisor() => new TipoUsuario(
         "Supervisor",
-        maxPrestamosConcurrentes: 0,
-        maxUnidadesPorPrestamo: 0,
+        topes: new TopesDePrestamo(maxUnidadesPorCatalogo: 0, maxPrestamosConcurrentes: 0),
         new HashSet<Permiso>
         {
             Permiso.ConsultarCatalogo,
@@ -66,31 +67,79 @@ public class TipoUsuario
             Permiso.ConsultarPrestamos
         });
 
-    public static TipoUsuario Administrador { get; } = new TipoUsuario(
+    public static TipoUsuario Administrador() => new TipoUsuario(
         "Administrador",
-        maxPrestamosConcurrentes: null,
-        maxUnidadesPorPrestamo: null,
+        topes: null,
         new HashSet<Permiso>(Enum.GetValues<Permiso>()));
 
     public static IReadOnlyList<TipoUsuario> Todos()
     {
         return new[]
         {
-            SinPermisos,
-            Estudiante,
-            Docente,
-            FuncionarioCE,
-            Supervisor,
-            Administrador
+            SinPermisos(),
+            Estudiante(),
+            Docente(),
+            FuncionarioCE(),
+            Supervisor(),
+            Administrador()
         };
     }
 
-    private TipoUsuario(string nombre, int? maxPrestamosConcurrentes, int? maxUnidadesPorPrestamo, HashSet<Permiso> permisos)
+    private TipoUsuario()
     {
-        Nombre = nombre;
-        this.maxPrestamosConcurrentes = maxPrestamosConcurrentes;
-        this.maxUnidadesPorPrestamo = maxUnidadesPorPrestamo;
+        presentacion = null!;
+        permisos = new HashSet<Permiso>();
+    }
+
+    public TipoUsuario(PresentacionTipoUsuario presentacion, TopesDePrestamo? topes, IEnumerable<Permiso> permisos)
+    {
+        if (presentacion is null)
+        {
+            throw new DominioException("La presentacion del tipo de usuario no puede ser nula");
+        }
+
+        this.presentacion = presentacion;
+        this.topes = topes;
+        this.permisos = new HashSet<Permiso>(permisos);
+    }
+
+    private TipoUsuario(string nombre, TopesDePrestamo? topes, HashSet<Permiso> permisos)
+    {
+        presentacion = PresentacionTipoUsuario.SoloNombre(nombre);
+        this.topes = topes;
         this.permisos = permisos;
+    }
+
+    public void Modificar(string descripcion, string imagen, TopesDePrestamo? topesNuevos)
+    {
+        PresentacionTipoUsuario presentacionNueva = new PresentacionTipoUsuario(Nombre, descripcion, imagen);
+
+        if (topesNuevos is not null)
+        {
+            ModificarTopes(topesNuevos.MaxUnidadesPorCatalogo, topesNuevos.MaxPrestamosConcurrentes);
+        }
+
+        presentacion = presentacionNueva;
+    }
+
+    public void ModificarDescripcion(string descripcion)
+    {
+        presentacion.ModificarDescripcion(descripcion);
+    }
+
+    public void ModificarImagen(string imagen)
+    {
+        presentacion.ModificarImagen(imagen);
+    }
+
+    public void ModificarTopes(int maxUnidadesPorCatalogo, int maxPrestamosConcurrentes)
+    {
+        if (topes is null)
+        {
+            throw new DominioException("Un tipo de usuario sin limites no admite configurar topes");
+        }
+
+        topes.Modificar(maxUnidadesPorCatalogo, maxPrestamosConcurrentes);
     }
 
     public bool TienePermiso(Permiso permiso)
@@ -105,11 +154,11 @@ public class TipoUsuario
 
     public bool PuedeAgregarPrestamo(int prestamosVigentes)
     {
-        return maxPrestamosConcurrentes is null || prestamosVigentes < maxPrestamosConcurrentes;
+        return topes is null || topes.PuedeAgregarPrestamo(prestamosVigentes);
     }
 
     public bool PermiteUnidades(int cantidadSolicitada)
     {
-        return maxUnidadesPorPrestamo is null || cantidadSolicitada <= maxUnidadesPorPrestamo;
+        return topes is null || topes.PermiteUnidades(cantidadSolicitada);
     }
 }

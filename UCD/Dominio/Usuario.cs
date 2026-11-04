@@ -40,7 +40,7 @@ public class Usuario
         Contrasena = contrasena;
         Estado = EstadoUsuario.Activo;
         DebeCambiarContrasena = false;
-        Tipo = TipoUsuario.SinPermisos;
+        Tipo = TipoUsuario.SinPermisos();
     }
 
     public bool ContrasenaEsCorrecta(string contrasena)

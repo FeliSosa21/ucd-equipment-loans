@@ -156,6 +156,58 @@ public sealed class RepositorioUsuarioSqlTests
         CollectionAssert.AreEqual(new List<Usuario> { ana, lucia }, resultado.ToList());
     }
 
+    [TestMethod]
+    public void AgregarUsuario_ConTipoUsuario_GuardaElTipoUsuarioEnSuTabla()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Docente());
+
+        _repositorio.AgregarUsuario(usuario);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(1, contextoQueLee.Set<TipoUsuario>().Count());
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarioPorDni_ConTipo_OtroContextoLeeSuTipo()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Docente());
+        _repositorio.AgregarUsuario(usuario);
+        
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario? leido = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(usuario.Dni);
+        
+        Assert.AreEqual(usuario.Tipo.Id, leido?.Tipo.Id);
+    }
+    
+    [TestMethod]
+    public void ObtenerUsuarioPorCorreo_ConTipo_OtroContextoLeeSuTipo()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Docente());
+        _repositorio.AgregarUsuario(usuario);
+        
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario? leido = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorCorreo(usuario.Correo);
+        
+        Assert.AreEqual(usuario.Tipo.Id, leido?.Tipo.Id);
+    }
+
+    [TestMethod]
+    public void ObtenerPaginaDeUsuarios_ConTipo_OtroContextoLeeSuTipo()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Docente());
+        _repositorio.AgregarUsuario(usuario);
+        
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<Usuario> leidos =
+            new RepositorioUsuarioSql(contextoQueLee).ObtenerPaginaDeUsuarios(null, pagina: 1, tamanoPagina: 10);
+        
+        Assert.AreEqual(usuario.Tipo.Id, leidos[0].Tipo.Id);
+    }
+    
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
     {
