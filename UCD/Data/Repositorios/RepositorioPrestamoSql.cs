@@ -19,6 +19,6 @@ public class RepositorioPrestamoSql
 
     public Prestamo? ObtenerPrestamoPorId(Guid id)
     {
-        throw new NotImplementedException();
+        return null;
     }
 }
