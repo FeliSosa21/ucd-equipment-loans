@@ -181,6 +181,19 @@ public sealed class RepositorioUsuarioSqlTests
         Assert.AreEqual(usuario.Tipo.Id, leido?.Tipo.Id);
     }
     
+    [TestMethod]
+    public void ObtenerUsuarioPorCorreo_ConTipo_OtroContextoLeeSuTipo()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Docente());
+        _repositorio.AgregarUsuario(usuario);
+        
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario? leido = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorCorreo(usuario.Correo);
+        
+        Assert.AreEqual(usuario.Tipo.Id, leido?.Tipo.Id);
+    }
+    
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
     {
