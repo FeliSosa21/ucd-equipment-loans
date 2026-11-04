@@ -15,7 +15,7 @@ public class ExportadorXlsx : IExportadorDeTabla
 
     public string Extension
     {
-        get { return string.Empty; }
+        get { return ".xlsx"; }
     }
 
     public string TipoContenido
