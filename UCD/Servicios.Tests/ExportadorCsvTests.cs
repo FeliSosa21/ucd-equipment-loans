@@ -134,6 +134,17 @@ public sealed class ExportadorCsvTests
         Assert.ThrowsException<ArgumentNullException>(() => exportador.Exportar(null!));
     }
 
+    [TestMethod]
+    public void Exportar_FilaConMasColumnasQueEncabezados_LanzaArgumentException()
+    {
+        ExportadorCsv exportador = new ExportadorCsv();
+        TablaExportableDto tabla = CrearTabla(
+            encabezados: new List<string> { "Nombre", "Edad" },
+            filas: new List<List<string>> { new List<string> { "Ana", "20" }, new List<string> { "Luis", "30", "Sobrante" } });
+
+        Assert.ThrowsException<ArgumentException>(() => exportador.Exportar(tabla));
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
