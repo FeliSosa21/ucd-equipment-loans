@@ -95,21 +95,44 @@ public sealed class RepositorioAuditoriaTests
         CollectionAssert.AreEqual(new List<RegistroAuditoria> { anterior }, resultado.ToList());
     }
 
+    [TestMethod]
+    public void ObtenerPaginaDeRegistros_FiltroDniUsuario_DevuelveSoloLosDeEseResponsable()
+    {
+        Usuario felipe = CrearUsuario(dni: "12345672", correo: "felipe@hotmail.com");
+        Usuario laura = CrearUsuario(dni: "45678905", correo: "laura.diaz@ejemplo.com");
+        RegistroAuditoria deFelipe = CrearRegistro(RegistroDeAccion.DeUsuario(felipe, FechaFija));
+        RegistroAuditoria deLaura = CrearRegistro(RegistroDeAccion.DeUsuario(laura, FechaFija));
+        RegistroAuditoria delSistema = CrearRegistro(RegistroDeAccion.DelSistema(FechaFija));
+        _repositorio.AgregarRegistro(deFelipe);
+        _repositorio.AgregarRegistro(deLaura);
+        _repositorio.AgregarRegistro(delSistema);
+
+        IReadOnlyList<RegistroAuditoria> resultado = _repositorio.ObtenerPaginaDeRegistros(
+            new FiltroAuditoria { DniUsuario = "45678905" }, pagina: 1, tamanoPagina: 10);
+
+        CollectionAssert.AreEqual(new List<RegistroAuditoria> { deLaura }, resultado.ToList());
+    }
+
     private static RegistroAuditoria CrearRegistro(DateTime fechaHora)
     {
+        return CrearRegistro(RegistroDeAccion.DeUsuario(CrearUsuario(), fechaHora));
+    }
+
+    private static RegistroAuditoria CrearRegistro(RegistroDeAccion registro)
+    {
         return new RegistroAuditoria(
-            registro: RegistroDeAccion.DeUsuario(CrearUsuario(), fechaHora),
+            registro: registro,
             accion: AccionAuditada.SolicitudDePrestamo,
             detalle: "Prestamo de 2 Notebook");
     }
 
-    private static Usuario CrearUsuario()
+    private static Usuario CrearUsuario(string dni = "12345672", string correo = "felipe@hotmail.com")
     {
         return new Usuario(
-            dni: "12345672",
+            dni: dni,
             nombre: "Felipe",
             apellido: "Sosa",
-            correo: "felipe@hotmail.com",
+            correo: correo,
             contrasena: "VivaLaOrt2026");
     }
 }
