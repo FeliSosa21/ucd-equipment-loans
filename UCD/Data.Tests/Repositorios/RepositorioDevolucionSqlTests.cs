@@ -95,6 +95,18 @@ public sealed class RepositorioDevolucionSqlTests
             leidas.Select(devolucion => devolucion.Id).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerDevoluciones_DevolucionAgregada_TraeElPrestamoConSolicitanteYTipo()
+    {
+        GuardarConOtroContexto(CrearDevolucion(diasDespuesDelPrestamo: 1));
+
+        Devolucion leida = LeerDevoluciones(new FiltroPorCatalogoYFechas()).Single();
+
+        Assert.IsNotNull(leida.Prestamo);
+        Assert.AreEqual("12345672", leida.Prestamo.Solicitante.Dni);
+        Assert.AreEqual("Proyector Epson", leida.Prestamo.TipoEquipamiento.Nombre);
+    }
+
     private IReadOnlyList<Devolucion> LeerDevoluciones(FiltroPorCatalogoYFechas filtro)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
