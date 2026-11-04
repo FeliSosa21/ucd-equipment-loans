@@ -33,5 +33,6 @@ public class RepositorioTipoUsuarioSql
 
     public void ActualizarTipo(TipoUsuario tipo)
     {
+        _contexto.SaveChanges();
     }
 }
