@@ -158,6 +158,18 @@ public sealed class ExportadorCsvTests
         Assert.AreEqual("Nombre,Edad\r\nAna,20\r\nLuis\r\n", LeerTexto(bytes));
     }
 
+    [TestMethod]
+    public void Exportar_TextoConEnieYTildes_LoCodificaEnUtf8()
+    {
+        ExportadorCsv exportador = new ExportadorCsv();
+        TablaExportableDto tabla = CrearTabla(encabezados: new List<string> { "Año" });
+        byte[] contenidoEsperado = new byte[] { 0x41, 0xC3, 0xB1, 0x6F, 0x0D, 0x0A };
+
+        byte[] bytes = exportador.Exportar(tabla);
+
+        CollectionAssert.AreEqual(contenidoEsperado, bytes[3..]);
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
