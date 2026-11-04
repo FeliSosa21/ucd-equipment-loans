@@ -171,6 +171,20 @@ public sealed class RepositorioPrestamoSqlTests
         CollectionAssert.AreEquivalent(idsEsperados, idsDelTipo);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamoPorId_PrestamoRechazado_TraeElEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        prestamo.Rechazar(CrearEvaluador(), MotivoDelRechazo);
+        GuardarConOtroContexto(prestamo);
+
+        Prestamo? obtenido = ObtenerConOtroContexto(prestamo.Id);
+
+        Assert.IsNotNull(obtenido);
+        Assert.IsNotNull(obtenido.Evaluador);
+        Assert.AreEqual(DniEvaluador, obtenido.Evaluador.Dni);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
