@@ -114,6 +114,18 @@ public sealed class ExportadorCsvTests
         Assert.AreEqual("Nombre,Edad,Observaciones\r\nAna,,\r\n,30,Sin rayones\r\n", LeerTexto(bytes));
     }
 
+    [TestMethod]
+    public void Exportar_CualquierTabla_EmpiezaConLaMarcaDeOrdenDeBytesUtf8()
+    {
+        ExportadorCsv exportador = new ExportadorCsv();
+        TablaExportableDto tabla = CrearTabla(encabezados: new List<string> { "Nombre", "Edad" });
+        byte[] marcaEsperada = new byte[] { 0xEF, 0xBB, 0xBF };
+
+        byte[] bytes = exportador.Exportar(tabla);
+
+        CollectionAssert.AreEqual(marcaEsperada, bytes[..3]);
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
