@@ -27,6 +27,7 @@ public class ExportadorCsv : IExportadorDeTabla
 
     public byte[] Exportar(TablaExportableDto tabla)
     {
+        ArgumentNullException.ThrowIfNull(tabla);
         string texto = EscribirRegistro(tabla.Encabezados);
         foreach (List<string> fila in tabla.Filas)
         {
