@@ -105,6 +105,15 @@ public sealed class RepositorioDevolucionSqlTests
         Assert.AreEqual("Proyector Epson", leida.Prestamo.TipoEquipamiento.Nombre);
     }
 
+    [TestMethod]
+    public void ObtenerDevoluciones_FiltroNulo_LanzaArgumentNullException()
+    {
+        using SqlContext contexto = new SqlContext(_opciones);
+        RepositorioDevolucionSql repositorio = new RepositorioDevolucionSql(contexto);
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.ObtenerDevoluciones(null!));
+    }
+
     private IReadOnlyList<Devolucion> LeerDevoluciones(FiltroPorCatalogoYFechas filtro)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
