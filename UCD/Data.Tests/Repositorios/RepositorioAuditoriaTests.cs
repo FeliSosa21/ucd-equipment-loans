@@ -125,6 +125,19 @@ public sealed class RepositorioAuditoriaTests
         Assert.AreEqual(2, resultado);
     }
 
+    [TestMethod]
+    public void ObtenerPaginaDeRegistros_FiltroNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() =>
+            _repositorio.ObtenerPaginaDeRegistros(null!, pagina: 1, tamanoPagina: 10));
+    }
+
+    [TestMethod]
+    public void ContarRegistros_FiltroNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ContarRegistros(null!));
+    }
+
     private static RegistroAuditoria CrearRegistro(DateTime fechaHora)
     {
         return CrearRegistro(RegistroDeAccion.DeUsuario(CrearUsuario(), fechaHora));
