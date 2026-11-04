@@ -25,6 +25,10 @@ public class RepositorioDevolucionSql
     public IReadOnlyList<Devolucion> ObtenerDevoluciones(FiltroPorCatalogoYFechas filtro)
     {
         return FiltrarPor(filtro)
+            .Include(devolucion => devolucion.Prestamo)
+            .ThenInclude(prestamo => prestamo.Solicitante)
+            .Include(devolucion => devolucion.Prestamo)
+            .ThenInclude(prestamo => prestamo.TipoEquipamiento)
             .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}")
             .Include($"{CampoUnidades}.{nameof(UnidadDevuelta.Unidad)}")
             .OrderBy(devolucion => EF.Property<RegistroDeAccion>(devolucion, CampoRegistro).FechaHora)
