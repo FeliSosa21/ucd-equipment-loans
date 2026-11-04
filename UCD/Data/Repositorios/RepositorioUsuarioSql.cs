@@ -6,12 +6,14 @@ namespace Data.Repositorios;
 public class RepositorioUsuarioSql
 {
     private readonly SqlContext _contexto;
-    
-    
+
     public RepositorioUsuarioSql(SqlContext contexto)
     {
         _contexto = contexto;
     }
+
+    private IQueryable<Usuario> UsuariosConTipo =>
+        _contexto.Usuarios.Include(usuario => usuario.Tipo);
 
     public void AgregarUsuario(Usuario usuario)
     {
@@ -21,17 +23,14 @@ public class RepositorioUsuarioSql
 
     public Usuario? ObtenerUsuarioPorDni(string dni)
     {
-        return _contexto.Usuarios
-            .Include(usuario => usuario.Tipo)
-            .FirstOrDefault(usuario => usuario.Dni == dni);
+        return UsuariosConTipo.FirstOrDefault(usuario => usuario.Dni == dni);
     }
 
     public Usuario? ObtenerUsuarioPorCorreo(string correo)
     {
         string buscado = correo.ToLower();
-        
-        return _contexto.Usuarios
-            .Include(usuario => usuario.Tipo)
+
+        return UsuariosConTipo
             .FirstOrDefault(usuario => usuario.Correo.ToLower() == buscado);
     }
 
@@ -45,6 +44,7 @@ public class RepositorioUsuarioSql
             .Take(tamanoPagina)
             .ToList();
     }
+
     private IQueryable<Usuario> FiltrarPor(string? filtro)
     {
         IQueryable<Usuario> usuarios = _contexto.Usuarios;
@@ -60,12 +60,12 @@ public class RepositorioUsuarioSql
 
         return usuarios;
     }
-    
+
     public int ContarUsuarios(string? filtro)
     {
         return FiltrarPor(filtro).Count();
     }
-    
+
     public void ActualizarUsuario(Usuario usuario)
     {
         _contexto.SaveChanges();
