@@ -19,6 +19,6 @@ public class RepositorioPrestamoSql
 
     public Prestamo? ObtenerPrestamoPorId(Guid id)
     {
-        return null;
+        return _contexto.Prestamos.FirstOrDefault(prestamo => prestamo.Id == id);
     }
 }
