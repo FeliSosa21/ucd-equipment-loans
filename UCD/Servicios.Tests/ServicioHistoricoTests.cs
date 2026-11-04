@@ -141,7 +141,7 @@ public sealed class ServicioHistoricoTests
     {
         Usuario usuario = new Usuario(dni: "12345672", nombre: "Ana", apellido: "Perez",
             correo: "ana@hotmail.com", contrasena: "VivaLaOrt2026");
-        usuario.AsignarTipo(TipoUsuario.Docente);
+        usuario.AsignarTipo(TipoUsuario.Docente());
 
         return usuario;
     }
@@ -150,7 +150,7 @@ public sealed class ServicioHistoricoTests
     {
         Usuario usuario = new Usuario(dni: "67890127", nombre: "Felipe", apellido: "Sosa",
             correo: "felipe@hotmail.com", contrasena: "VivaLaOrt2026");
-        usuario.AsignarTipo(TipoUsuario.Supervisor);
+        usuario.AsignarTipo(TipoUsuario.Supervisor());
 
         return usuario;
     }

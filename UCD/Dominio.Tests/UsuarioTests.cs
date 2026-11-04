@@ -410,7 +410,7 @@ public sealed class UsuarioTests
     {
         Usuario usuario = CrearUsuario();
 
-        Assert.AreEqual(TipoUsuario.SinPermisos, usuario.Tipo);
+        Assert.AreEqual(TipoUsuario.SinPermisos().Nombre, usuario.Tipo.Nombre);
     }
 
     [TestMethod]
@@ -516,9 +516,9 @@ public sealed class UsuarioTests
     {
         Usuario usuario = CrearUsuario();
 
-        usuario.AsignarTipo(TipoUsuario.Administrador);
+        usuario.AsignarTipo(TipoUsuario.Administrador());
 
-        Assert.AreEqual(TipoUsuario.Administrador, usuario.Tipo);
+        Assert.AreEqual(TipoUsuario.Administrador().Nombre, usuario.Tipo.Nombre);
     }
 
     [TestMethod]
@@ -527,7 +527,7 @@ public sealed class UsuarioTests
         Usuario usuario = CrearUsuario();
 
         Assert.ThrowsException<DominioException>(() => usuario.AsignarTipo(null!));
-        Assert.AreEqual(TipoUsuario.SinPermisos, usuario.Tipo);
+        Assert.AreEqual(TipoUsuario.SinPermisos().Nombre, usuario.Tipo.Nombre);
     }
 
     [TestMethod]
@@ -634,7 +634,7 @@ public sealed class UsuarioTests
     public void EstaPendienteDeActivacion_ConTipoAsignado_DevuelveFalse()
     {
         Usuario usuario = CrearUsuario();
-        usuario.AsignarTipo(TipoUsuario.Estudiante);
+        usuario.AsignarTipo(TipoUsuario.Estudiante());
 
         Assert.IsFalse(usuario.EstaPendienteDeActivacion());
     }
@@ -659,7 +659,7 @@ public sealed class UsuarioTests
     public void TienePermiso_PermisoDeSuTipo_DevuelveTrue()
     {
         Usuario usuario = CrearUsuario();
-        usuario.AsignarTipo(TipoUsuario.Administrador);
+        usuario.AsignarTipo(TipoUsuario.Administrador());
 
         Assert.IsTrue(usuario.TienePermiso(Permiso.GestionarUsuarios));
     }

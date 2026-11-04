@@ -20,6 +20,7 @@ builder.Services.AddSingleton<Memoria>();
 
 // Repositorios y servicios: uno por conexion; no guardan estado propio.
 builder.Services.AddScoped<RepositorioUsuario>();
+builder.Services.AddScoped<RepositorioTipoUsuario>();
 builder.Services.AddScoped<RepositorioPrestamo>();
 builder.Services.AddScoped<RepositorioDevolucion>();
 builder.Services.AddScoped<RepositorioMovimiento>();
@@ -29,6 +30,7 @@ builder.Services.AddScoped<ServicioSesion>();
 builder.Services.AddScoped<CargaInicial>();
 builder.Services.AddScoped<DatosDeEjemplo>();
 builder.Services.AddScoped<ServicioAdministracionUsuarios>();
+builder.Services.AddScoped<ServicioTiposUsuario>();
 builder.Services.AddScoped<ServicioDevolucion>();
 builder.Services.AddScoped<ServicioPrestamo>();
 builder.Services.AddScoped<ServicioCatalogo>();
@@ -53,6 +55,7 @@ using (IServiceScope scope = app.Services.CreateScope())
     SqlContext contexto = scope.ServiceProvider.GetRequiredService<SqlContext>();
     contexto.Database.Migrate();
     CargaInicial cargaInicial = scope.ServiceProvider.GetRequiredService<CargaInicial>();
+    cargaInicial.CargarTiposDeUsuario();
     cargaInicial.CargarRoot();
     cargaInicial.CargarCatalogo();
     scope.ServiceProvider.GetRequiredService<DatosDeEjemplo>().Cargar();

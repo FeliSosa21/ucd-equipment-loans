@@ -156,7 +156,7 @@ public sealed class MovimientoTests
             correo: "renato.alves@ejemplo.com",
             contrasena: "VivalaOrt2026");
 
-        usuario.AsignarTipo(TipoUsuario.Docente);
+        usuario.AsignarTipo(TipoUsuario.Docente());
 
         return usuario;
     }
@@ -170,7 +170,7 @@ public sealed class MovimientoTests
             correo: "ana.perez@ejemplo.com",
             contrasena: "VivalaOrt2026");
 
-        usuario.AsignarTipo(TipoUsuario.Supervisor);
+        usuario.AsignarTipo(TipoUsuario.Supervisor());
 
         return usuario;
     }
@@ -184,7 +184,7 @@ public sealed class MovimientoTests
             correo: "laura.diaz@ejemplo.com",
             contrasena: "VivalaOrt2026");
 
-        usuario.AsignarTipo(TipoUsuario.FuncionarioCE);
+        usuario.AsignarTipo(TipoUsuario.FuncionarioCE());
 
         return usuario;
     }

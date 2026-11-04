@@ -1022,19 +1022,19 @@ public sealed class ServicioPrestamoTests
     {
         RepositorioUsuario usuarios = new RepositorioUsuario(memoria);
 
-        usuarios.AgregarUsuario(CrearUsuario(dni: DniDocente, tipoUsuario: TipoUsuario.Docente));
-        usuarios.AgregarUsuario(CrearUsuario(dni: DniEstudiante, tipoUsuario: TipoUsuario.Estudiante));
-        usuarios.AgregarUsuario(CrearUsuario(dni: DniFuncionario, tipoUsuario: TipoUsuario.FuncionarioCE));
-        usuarios.AgregarUsuario(CrearUsuario(dni: DniSupervisor, tipoUsuario: TipoUsuario.Supervisor,
+        usuarios.AgregarUsuario(CrearUsuario(dni: DniDocente, tipoUsuario: TipoUsuario.Docente()));
+        usuarios.AgregarUsuario(CrearUsuario(dni: DniEstudiante, tipoUsuario: TipoUsuario.Estudiante()));
+        usuarios.AgregarUsuario(CrearUsuario(dni: DniFuncionario, tipoUsuario: TipoUsuario.FuncionarioCE()));
+        usuarios.AgregarUsuario(CrearUsuario(dni: DniSupervisor, tipoUsuario: TipoUsuario.Supervisor(),
             nombre: "Sofia", apellido: "Martinez"));
-        usuarios.AgregarUsuario(CrearUsuario(dni: DniAdministrador, tipoUsuario: TipoUsuario.Administrador,
+        usuarios.AgregarUsuario(CrearUsuario(dni: DniAdministrador, tipoUsuario: TipoUsuario.Administrador(),
             nombre: "Lucia", apellido: "Fernandez"));
 
-        Usuario desactivado = CrearUsuario(dni: DniDocenteDesactivado, tipoUsuario: TipoUsuario.Docente);
+        Usuario desactivado = CrearUsuario(dni: DniDocenteDesactivado, tipoUsuario: TipoUsuario.Docente());
         desactivado.Desactivar();
         usuarios.AgregarUsuario(desactivado);
 
-        Usuario supervisorDesactivado = CrearUsuario(dni: DniSupervisorDesactivado, tipoUsuario: TipoUsuario.Supervisor,
+        Usuario supervisorDesactivado = CrearUsuario(dni: DniSupervisorDesactivado, tipoUsuario: TipoUsuario.Supervisor(),
             nombre: "Diego", apellido: "Rodriguez");
         supervisorDesactivado.Desactivar();
         usuarios.AgregarUsuario(supervisorDesactivado);

@@ -23,10 +23,13 @@ public class DatosDeEjemplo
     private readonly RepositorioCatalogo _repositorioCatalogo;
     private readonly RepositorioMovimiento _movimientos;
     private readonly TimeProvider _reloj;
+    private readonly RepositorioTipoUsuario _repositorioTipos;
 
     public DatosDeEjemplo(RepositorioUsuario usuarios, RepositorioPrestamo prestamos,
-        RepositorioCatalogo repositorioCatalogo, RepositorioMovimiento movimientos, TimeProvider reloj)
+        RepositorioCatalogo repositorioCatalogo, RepositorioMovimiento movimientos, TimeProvider reloj,
+        RepositorioTipoUsuario repositorioTipos)
     {
+        _repositorioTipos = repositorioTipos;
         _usuarios = usuarios;
         _prestamos = prestamos;
         _repositorioCatalogo = repositorioCatalogo;
@@ -50,13 +53,13 @@ public class DatosDeEjemplo
     private void CargarUsuarios()
     {
         CrearUsuario(dni: "12345672", nombre: "Ana", apellido: "Perez", correo: CorreoDocente,
-            tipo: TipoUsuario.Docente);
+            nombreTipo: TipoUsuario.Docente().Nombre);
         CrearUsuario(dni: "23456783", nombre: "Juan", apellido: "Gomez", correo: CorreoEstudiante,
-            tipo: TipoUsuario.Estudiante);
+            nombreTipo: TipoUsuario.Estudiante().Nombre);
         CrearUsuario(dni: "34567894", nombre: "Laura", apellido: "Diaz", correo: CorreoFuncionario,
-            tipo: TipoUsuario.FuncionarioCE);
+            nombreTipo: TipoUsuario.FuncionarioCE().Nombre);
         CrearUsuario(dni: "61234569", nombre: "Sofia", apellido: "Martinez", correo: CorreoSupervisor,
-            tipo: TipoUsuario.Supervisor);
+            nombreTipo: TipoUsuario.Supervisor().Nombre);
     }
 
     private static void CargarCatalogo(Catalogo catalogo)
@@ -106,11 +109,11 @@ public class DatosDeEjemplo
         return catalogo;
     }
 
-    private void CrearUsuario(string dni, string nombre, string apellido, string correo, TipoUsuario tipo)
+    private void CrearUsuario(string dni, string nombre, string apellido, string correo, string nombreTipo)
     {
         Usuario usuario = new Usuario(dni: dni, nombre: nombre, apellido: apellido, correo: correo,
             contrasena: ContrasenaEjemplo);
-        usuario.AsignarTipo(tipo);
+        usuario.AsignarTipo(_repositorioTipos.ObtenerTipoPorNombre(nombreTipo)!);
         _usuarios.AgregarUsuario(usuario);
     }
 

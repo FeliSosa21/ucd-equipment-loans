@@ -84,7 +84,7 @@ public class ServicioSesionTests
     public void IniciarSesion_Administrador_DevuelveElPermisoDeGestionarUsuarios()
     {
         ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out RepositorioUsuario repositorio);
-        repositorio.ObtenerUsuarioPorDni(DniValido)!.AsignarTipo(TipoUsuario.Administrador);
+        repositorio.ObtenerUsuarioPorDni(DniValido)!.AsignarTipo(TipoUsuario.Administrador());
 
         UsuarioSesionDto sesion = servicio.IniciarSesion(CorreoValido, ContrasenaValida);
 
@@ -169,11 +169,11 @@ public class ServicioSesionTests
     public void RenovarSesion_UsuarioActivo_DevuelveLosDatosActuales()
     {
         ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out RepositorioUsuario repositorio);
-        repositorio.ObtenerUsuarioPorDni(DniValido)!.AsignarTipo(TipoUsuario.Docente);
+        repositorio.ObtenerUsuarioPorDni(DniValido)!.AsignarTipo(TipoUsuario.Docente());
 
         UsuarioSesionDto sesion = servicio.RenovarSesion(DniValido);
 
-        Assert.AreEqual(TipoUsuario.Docente.Nombre, sesion.Tipo);
+        Assert.AreEqual(TipoUsuario.Docente().Nombre, sesion.Tipo);
         Assert.IsFalse(sesion.PendienteDeActivacion);
     }
 
@@ -196,8 +196,9 @@ public class ServicioSesionTests
 
     private static ServicioSesion CrearServicioConUsuarioRegistrado(out RepositorioUsuario repositorio)
     {
-        repositorio = new RepositorioUsuario(new Memoria());
-        new ServicioUsuario(repositorio).Registrar(new UsuarioDto
+        Memoria memoria = new Memoria();
+        repositorio = new RepositorioUsuario(memoria);
+        new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria)).Registrar(new UsuarioDto
         {
             Dni = DniValido,
             Nombre = "Felipe",
