@@ -170,6 +170,17 @@ public sealed class ExportadorCsvTests
         CollectionAssert.AreEqual(contenidoEsperado, bytes[3..]);
     }
 
+    [TestMethod]
+    public void Exportar_EncabezadoConComa_LoEscribeEntreComillas()
+    {
+        ExportadorCsv exportador = new ExportadorCsv();
+        TablaExportableDto tabla = CrearTabla(encabezados: new List<string> { "Nombre", "Fecha, hora" });
+
+        byte[] bytes = exportador.Exportar(tabla);
+
+        Assert.AreEqual("Nombre,\"Fecha, hora\"\r\n", LeerTexto(bytes));
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
