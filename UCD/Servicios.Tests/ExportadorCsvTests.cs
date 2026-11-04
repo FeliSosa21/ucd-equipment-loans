@@ -29,6 +29,16 @@ public sealed class ExportadorCsvTests
         Assert.AreEqual("CSV", formato);
     }
 
+    [TestMethod]
+    public void Extension_ExportadorCsv_DevuelvePuntoCsv()
+    {
+        ExportadorCsv exportador = new ExportadorCsv();
+
+        string extension = exportador.Extension;
+
+        Assert.AreEqual(".csv", extension);
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados)
     {
         TablaExportableDto tabla = new TablaExportableDto();
