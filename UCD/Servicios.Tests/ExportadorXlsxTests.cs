@@ -80,6 +80,16 @@ public sealed class ExportadorXlsxTests
         Assert.AreEqual(".xlsx", extension);
     }
 
+    [TestMethod]
+    public void TipoContenido_ExportadorXlsx_DevuelveElTipoDeExcel()
+    {
+        ExportadorXlsx exportador = new ExportadorXlsx();
+
+        string tipoContenido = exportador.TipoContenido;
+
+        Assert.AreEqual("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", tipoContenido);
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
