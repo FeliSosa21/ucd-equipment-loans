@@ -1,6 +1,6 @@
 namespace Data.Repositorios;
 
-public class FiltroMovimientos
+public class FiltroPorCatalogoYFechas
 {
     public int? IdCatalogo { get; init; }
     public DateTime? Desde { get; init; }
