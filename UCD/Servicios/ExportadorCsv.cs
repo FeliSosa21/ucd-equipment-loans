@@ -8,6 +8,7 @@ public class ExportadorCsv : IExportadorDeTabla
     private const string Separador = ",";
     private const string FinDeRegistro = "\r\n";
     private const string Comillas = "\"";
+    private const string SaltoDeLinea = "\n";
 
     public string Formato
     {
@@ -46,7 +47,7 @@ public class ExportadorCsv : IExportadorDeTabla
 
     private static string EscribirCampo(string campo)
     {
-        if (campo.Contains(Separador) || campo.Contains(Comillas))
+        if (campo.Contains(Separador) || campo.Contains(Comillas) || campo.Contains(SaltoDeLinea))
         {
             string campoConComillasDuplicadas = campo.Replace(Comillas, Comillas + Comillas);
             return Comillas + campoConComillasDuplicadas + Comillas;
