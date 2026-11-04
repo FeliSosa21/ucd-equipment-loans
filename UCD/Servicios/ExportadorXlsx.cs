@@ -28,17 +28,35 @@ public class ExportadorXlsx : IExportadorDeTabla
         ArgumentNullException.ThrowIfNull(tabla);
         using XLWorkbook libro = new XLWorkbook();
         IXLWorksheet hoja = libro.Worksheets.Add(NombreDeHoja);
-        for (int columna = 0; columna < tabla.Encabezados.Count; columna++)
-        {
-            hoja.Cell(FilaDeEncabezados, columna + 1).Value = tabla.Encabezados[columna];
-        }
+        EscribirEncabezados(hoja, tabla);
+        EscribirFilas(hoja, tabla);
+        return GuardarComoBytes(libro);
+    }
+
+    private static void EscribirEncabezados(IXLWorksheet hoja, TablaExportableDto tabla)
+    {
+        EscribirRegistro(hoja, FilaDeEncabezados, tabla.Encabezados);
+    }
+
+    private static void EscribirFilas(IXLWorksheet hoja, TablaExportableDto tabla)
+    {
         for (int fila = 0; fila < tabla.Filas.Count; fila++)
         {
-            for (int columna = 0; columna < tabla.Filas[fila].Count; columna++)
-            {
-                hoja.Cell(FilaDeEncabezados + fila + 1, columna + 1).Value = tabla.Filas[fila][columna];
-            }
+            int numeroDeFila = FilaDeEncabezados + fila + 1;
+            EscribirRegistro(hoja, numeroDeFila, tabla.Filas[fila]);
         }
+    }
+
+    private static void EscribirRegistro(IXLWorksheet hoja, int numeroDeFila, List<string> campos)
+    {
+        for (int columna = 0; columna < campos.Count; columna++)
+        {
+            hoja.Cell(numeroDeFila, columna + 1).Value = campos[columna];
+        }
+    }
+
+    private static byte[] GuardarComoBytes(XLWorkbook libro)
+    {
         using MemoryStream flujo = new MemoryStream();
         libro.SaveAs(flujo);
         return flujo.ToArray();
