@@ -109,6 +109,19 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(MotivoDelRechazo, leido.MotivoRechazo);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamoPorId_IdInexistente_DevuelveNulo()
+    {
+        GuardarConOtroContexto(CrearPrestamo());
+        Guid idInexistente = Guid.NewGuid();
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+        Prestamo? obtenido = repositorio.ObtenerPrestamoPorId(idInexistente);
+
+        Assert.IsNotNull(obtenido);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);

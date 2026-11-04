@@ -16,4 +16,9 @@ public class RepositorioPrestamoSql
         _contexto.Prestamos.Add(prestamo);
         _contexto.SaveChanges();
     }
+
+    public Prestamo? ObtenerPrestamoPorId(Guid id)
+    {
+        throw new NotImplementedException();
+    }
 }
