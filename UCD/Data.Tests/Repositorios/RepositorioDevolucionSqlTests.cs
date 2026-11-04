@@ -63,6 +63,22 @@ public sealed class RepositorioDevolucionSqlTests
             leidas.Select(devolucion => devolucion.Id).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerDevoluciones_FiltroPorFechas_IncluyeDesdeYExcluyeHasta()
+    {
+        Devolucion delDiaUno = CrearDevolucion(diasDespuesDelPrestamo: 1);
+        Devolucion delDiaDos = CrearDevolucion(diasDespuesDelPrestamo: 2);
+        Devolucion delDiaTres = CrearDevolucion(diasDespuesDelPrestamo: 3);
+        GuardarConOtroContexto(delDiaUno, delDiaDos, delDiaTres);
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas
+            { Desde = InicioPrestamo.AddDays(1), Hasta = InicioPrestamo.AddDays(3) };
+
+        IReadOnlyList<Devolucion> leidas = LeerDevoluciones(filtro);
+
+        CollectionAssert.AreEqual(new List<int> { delDiaUno.Id, delDiaDos.Id },
+            leidas.Select(devolucion => devolucion.Id).ToList());
+    }
+
     private IReadOnlyList<Devolucion> LeerDevoluciones(FiltroPorCatalogoYFechas filtro)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
