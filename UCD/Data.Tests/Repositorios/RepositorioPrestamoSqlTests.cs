@@ -150,6 +150,27 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(NombreTipo, obtenido.TipoEquipamiento.Nombre);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamoPorId_TipoConUnidades_TraeLasUnidadesDelTipo()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento();
+        CrearUnidadesDelTipo(tipo);
+
+        Prestamo prestamo = new Prestamo(
+            solicitante: CrearSolicitante(),
+            tipoEquipamiento: tipo,
+            cantidadSolicitada: CantidadSolicitada,
+            fechaHoraPrestamo: FechaFija);
+        GuardarConOtroContexto(prestamo);
+
+        Prestamo? obtenido = ObtenerConOtroContexto(prestamo.Id);
+
+        Assert.IsNotNull(obtenido);
+        List<string> idsEsperados = new List<string> { IdPrimeraUnidad, IdSegundaUnidad };
+        List<string> idsDelTipo = obtenido.TipoEquipamiento.Unidades.Select(unidad => unidad.IdInstitucional).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsDelTipo);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
