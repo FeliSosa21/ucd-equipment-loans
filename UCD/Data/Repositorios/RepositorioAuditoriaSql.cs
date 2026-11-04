@@ -1,4 +1,6 @@
 using Dominio;
+using Microsoft.EntityFrameworkCore;
+using static Data.Configuraciones.NombresDeMapeo;
 
 namespace Data.Repositorios;
 
@@ -19,6 +21,8 @@ public class RepositorioAuditoriaSql
 
     public IReadOnlyList<RegistroAuditoria> ObtenerPaginaDeRegistros(FiltroAuditoria filtro, int pagina, int tamanoPagina)
     {
-        return new List<RegistroAuditoria>();
+        return _contexto.RegistrosAuditoria
+            .OrderByDescending(registro => EF.Property<RegistroDeAccion>(registro, CampoRegistro).FechaHora)
+            .ToList();
     }
 }
