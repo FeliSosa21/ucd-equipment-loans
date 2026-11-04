@@ -40,6 +40,14 @@ public sealed class ExportadorXlsxTests
         Assert.AreEqual(2, hoja.LastRowUsed()!.RowNumber());
     }
 
+    [TestMethod]
+    public void Exportar_TablaNula_LanzaArgumentNullException()
+    {
+        ExportadorXlsx exportador = new ExportadorXlsx();
+
+        Assert.ThrowsException<ArgumentNullException>(() => exportador.Exportar(null!));
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
