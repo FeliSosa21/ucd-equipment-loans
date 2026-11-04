@@ -89,6 +89,22 @@ public sealed class RepositorioAuditoriaSqlTests
             resultado.Select(registro => registro.Detalle).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerPaginaDeRegistros_SegundaPaginaDeUno_DevuelveSoloElSegundo()
+    {
+        Usuario responsable = CrearUsuario(dni: "45678905", correo: "laura.diaz@ejemplo.com");
+        GuardarConOtroContexto(
+            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija), "Viejo"),
+            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija.AddHours(1)), "Intermedio"),
+            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija.AddHours(2)), "Reciente"));
+
+        IReadOnlyList<RegistroAuditoria> resultado =
+            LeerPagina(new FiltroAuditoria(), pagina: 2, tamanoPagina: 1);
+
+        CollectionAssert.AreEqual(new List<string> { "Intermedio" },
+            resultado.Select(registro => registro.Detalle).ToList());
+    }
+
     private void GuardarConOtroContexto(params RegistroAuditoria[] registros)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
