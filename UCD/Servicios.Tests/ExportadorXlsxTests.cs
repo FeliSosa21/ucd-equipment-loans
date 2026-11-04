@@ -60,6 +60,16 @@ public sealed class ExportadorXlsxTests
         Assert.AreEqual("Exportacion", libro.Worksheet(1).Name);
     }
 
+    [TestMethod]
+    public void Formato_ExportadorXlsx_DevuelveXLSX()
+    {
+        ExportadorXlsx exportador = new ExportadorXlsx();
+
+        string formato = exportador.Formato;
+
+        Assert.AreEqual("XLSX", formato);
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
