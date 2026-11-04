@@ -126,6 +126,14 @@ public sealed class ExportadorCsvTests
         CollectionAssert.AreEqual(marcaEsperada, bytes[..3]);
     }
 
+    [TestMethod]
+    public void Exportar_TablaNula_LanzaArgumentNullException()
+    {
+        ExportadorCsv exportador = new ExportadorCsv();
+
+        Assert.ThrowsException<ArgumentNullException>(() => exportador.Exportar(null!));
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
