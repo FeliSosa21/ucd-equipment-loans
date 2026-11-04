@@ -56,6 +56,25 @@ public class RepositorioDevolucionTests
         CollectionAssert.AreEqual(new List<Devolucion> { temprana, tardia }, devoluciones.ToList());
     }
 
+    [TestMethod]
+    public void ObtenerDevoluciones_ConFechas_IncluyeDesdeYExcluyeHasta()
+    {
+        RepositorioDevolucion repositorio = new RepositorioDevolucion(new Memoria());
+        repositorio.AgregarDevolucion(CrearDevolucion(diasDespuesDelPrestamo: 1));
+        Devolucion enDesde = CrearDevolucion(diasDespuesDelPrestamo: 2);
+        repositorio.AgregarDevolucion(enDesde);
+        repositorio.AgregarDevolucion(CrearDevolucion(diasDespuesDelPrestamo: 3));
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas
+        {
+            Desde = InicioPrestamo.AddDays(2),
+            Hasta = InicioPrestamo.AddDays(3)
+        };
+
+        IReadOnlyList<Devolucion> devoluciones = repositorio.ObtenerDevoluciones(filtro);
+
+        CollectionAssert.AreEqual(new List<Devolucion> { enDesde }, devoluciones.ToList());
+    }
+
     private static Devolucion CrearDevolucion(int diasDespuesDelPrestamo = 1)
     {
         Usuario solicitante = new Usuario(dni: "45678905", nombre: "Ana", apellido: "Perez",
