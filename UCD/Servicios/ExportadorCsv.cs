@@ -32,7 +32,10 @@ public class ExportadorCsv : IExportadorDeTabla
         {
             texto += EscribirRegistro(fila);
         }
-        return Encoding.UTF8.GetBytes(texto);
+        UTF8Encoding codificacion = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
+        byte[] marcaDeOrdenDeBytes = codificacion.GetPreamble();
+        byte[] contenido = codificacion.GetBytes(texto);
+        return marcaDeOrdenDeBytes.Concat(contenido).ToArray();
     }
 
     private static string EscribirRegistro(List<string> campos)
