@@ -23,7 +23,7 @@ public class RepositorioDevolucionSql
 
     public IReadOnlyList<Devolucion> ObtenerDevoluciones(FiltroPorCatalogoYFechas filtro)
     {
-        return new List<Devolucion>();
+        return ObtenerPaginaDeDevoluciones(filtro, pagina: 1, tamanoPagina: int.MaxValue);
     }
 
     public IReadOnlyList<Devolucion> ObtenerPaginaDeDevoluciones(FiltroPorCatalogoYFechas filtro, int pagina,
