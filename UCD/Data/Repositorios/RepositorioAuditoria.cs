@@ -19,6 +19,8 @@ public class RepositorioAuditoria
     public IReadOnlyList<RegistroAuditoria> ObtenerPaginaDeRegistros(FiltroAuditoria filtro, int pagina, int tamanoPagina)
     {
         return _memoria.RegistrosAuditoria
+            .AsEnumerable()
+            .Reverse()
             .OrderByDescending(registro => registro.FechaHora)
             .ToList();
     }
