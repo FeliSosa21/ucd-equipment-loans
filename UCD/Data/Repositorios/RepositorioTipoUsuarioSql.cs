@@ -25,4 +25,9 @@ public class RepositorioTipoUsuarioSql
         return _contexto.TiposDeUsuario
             .FirstOrDefault(tipo => EF.Property<PresentacionTipoUsuario>(tipo, CampoPresentacion).Nombre == nombre);
     }
+
+    public IReadOnlyList<TipoUsuario> ObtenerTodos()
+    {
+        return new List<TipoUsuario>();
+    }
 }

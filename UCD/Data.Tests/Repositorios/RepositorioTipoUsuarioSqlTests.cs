@@ -56,6 +56,19 @@ public sealed class RepositorioTipoUsuarioSqlTests
         Assert.IsFalse(leido.TienePermiso(Permiso.GestionarUsuarios));
     }
 
+    [TestMethod]
+    public void ObtenerTodos_DosTiposAgregados_LosDevuelveEnElOrdenEnQueSeAgregaron()
+    {
+        GuardarConOtroContexto(CrearDocente());
+        GuardarConOtroContexto(CrearEstudiante());
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<TipoUsuario> leidos = new RepositorioTipoUsuarioSql(contextoQueLee).ObtenerTodos();
+
+        CollectionAssert.AreEqual(new List<string> { "Docente", "Estudiante" },
+            leidos.Select(tipo => tipo.Nombre).ToList());
+    }
+
     private void GuardarConOtroContexto(TipoUsuario tipo)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -66,6 +79,13 @@ public sealed class RepositorioTipoUsuarioSqlTests
     {
         return new TipoUsuario(new PresentacionTipoUsuario("Docente", "Docentes de la facultad", ImagenPng),
             new TopesDePrestamo(maxUnidadesPorCatalogo: 40, maxPrestamosConcurrentes: 3),
+            new[] { Permiso.ConsultarCatalogo, Permiso.SolicitarPrestamo });
+    }
+
+    private static TipoUsuario CrearEstudiante()
+    {
+        return new TipoUsuario(new PresentacionTipoUsuario("Estudiante", "Estudiantes de la facultad", ImagenPng),
+            new TopesDePrestamo(maxUnidadesPorCatalogo: 2, maxPrestamosConcurrentes: 2),
             new[] { Permiso.ConsultarCatalogo, Permiso.SolicitarPrestamo });
     }
 }
