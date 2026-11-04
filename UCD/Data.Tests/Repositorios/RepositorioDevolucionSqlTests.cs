@@ -25,9 +25,7 @@ public sealed class RepositorioDevolucionSqlTests
     {
         GuardarConOtroContexto(CrearDevolucion(diasDespuesDelPrestamo: 1));
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        IReadOnlyList<Devolucion> leidas =
-            new RepositorioDevolucionSql(contextoQueLee).ObtenerDevoluciones(new FiltroPorCatalogoYFechas());
+        IReadOnlyList<Devolucion> leidas = LeerDevoluciones(new FiltroPorCatalogoYFechas());
 
         Assert.AreEqual(1, leidas.Count);
         Assert.AreEqual(InicioPrestamo.AddDays(1), leidas[0].FechaHoraDevolucion);
@@ -37,11 +35,10 @@ public sealed class RepositorioDevolucionSqlTests
     [TestMethod]
     public void ObtenerDevoluciones_DevolucionAgregada_OtroContextoLeeSusUnidadesConCondicion()
     {
-        GuardarConOtroContexto(CrearDevolucion(diasDespuesDelPrestamo: 1, CondicionDevolucion.ConFallas, "No enciende"));
+        GuardarConOtroContexto(CrearDevolucion(diasDespuesDelPrestamo: 1, condicion: CondicionDevolucion.ConFallas,
+            observaciones: "No enciende"));
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        Devolucion leida =
-            new RepositorioDevolucionSql(contextoQueLee).ObtenerDevoluciones(new FiltroPorCatalogoYFechas()).Single();
+        Devolucion leida = LeerDevoluciones(new FiltroPorCatalogoYFechas()).Single();
 
         UnidadDevuelta unidad = leida.Unidades.Single();
         Assert.AreEqual("EQP-0001", unidad.Unidad.IdInstitucional);
@@ -82,12 +79,13 @@ public sealed class RepositorioDevolucionSqlTests
     [TestMethod]
     public void ObtenerDevoluciones_FiltroPorCatalogo_DevuelveSoloLasDeEseCatalogo()
     {
-        TipoEquipamiento notebook = CrearTipo("Notebook Lenovo ThinkPad", Categoria.Computacion);
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson", Categoria.Audiovisual);
-        Catalogo electronica = CrearCatalogoCon("Electronica", notebook);
-        Catalogo audiovisuales = CrearCatalogoCon("Audiovisuales", proyector);
-        Devolucion deNotebook = CrearDevolucionDe(notebook);
-        GuardarCatalogosYDevoluciones(new[] { electronica, audiovisuales }, deNotebook, CrearDevolucionDe(proyector));
+        TipoEquipamiento notebook = CrearTipo(nombre: "Notebook Lenovo ThinkPad", categoria: Categoria.Computacion);
+        TipoEquipamiento proyector = CrearTipo(nombre: "Proyector Epson", categoria: Categoria.Audiovisual);
+        Catalogo electronica = CrearCatalogoCon(nombre: "Electronica", tipo: notebook);
+        Catalogo audiovisuales = CrearCatalogoCon(nombre: "Audiovisuales", tipo: proyector);
+        Devolucion deNotebook = CrearDevolucionDe(tipo: notebook);
+        GuardarCatalogosYDevoluciones(new[] { electronica, audiovisuales }, deNotebook,
+            CrearDevolucionDe(tipo: proyector));
 
         IReadOnlyList<Devolucion> leidas = LeerDevoluciones(new FiltroPorCatalogoYFechas { IdCatalogo = electronica.Id });
 
@@ -116,13 +114,7 @@ public sealed class RepositorioDevolucionSqlTests
 
     private void GuardarConOtroContexto(params Devolucion[] devoluciones)
     {
-        using SqlContext contextoQueGuarda = new SqlContext(_opciones);
-        RepositorioDevolucionSql repositorio = new RepositorioDevolucionSql(contextoQueGuarda);
-
-        foreach (Devolucion devolucion in devoluciones)
-        {
-            repositorio.AgregarDevolucion(devolucion);
-        }
+        GuardarCatalogosYDevoluciones(Array.Empty<Catalogo>(), devoluciones);
     }
 
     private void GuardarCatalogosYDevoluciones(IEnumerable<Catalogo> catalogos, params Devolucion[] devoluciones)
@@ -141,7 +133,7 @@ public sealed class RepositorioDevolucionSqlTests
     private static Devolucion CrearDevolucion(int diasDespuesDelPrestamo,
         CondicionDevolucion condicion = CondicionDevolucion.SinObservaciones, string? observaciones = null)
     {
-        Prestamo prestamo = CrearPrestamoActivo(CrearTipo("Proyector Epson", Categoria.Audiovisual));
+        Prestamo prestamo = CrearPrestamoActivo(CrearTipo(nombre: "Proyector Epson", categoria: Categoria.Audiovisual));
 
         return Devolver(prestamo, diasDespuesDelPrestamo,
             new UnidadDevuelta(prestamo.UnidadesAsignadas[0], condicion, observaciones));
@@ -157,7 +149,8 @@ public sealed class RepositorioDevolucionSqlTests
 
     private static Devolucion Devolver(Prestamo prestamo, int diasDespuesDelPrestamo, UnidadDevuelta unidad)
     {
-        RegistroDeAccion registro = RegistroDeAccion.DeUsuario(CrearUsuario(DniFuncionario, "laura.diaz@ejemplo.com"),
+        RegistroDeAccion registro = RegistroDeAccion.DeUsuario(
+            CrearUsuario(dni: DniFuncionario, correo: "laura.diaz@ejemplo.com"),
             InicioPrestamo.AddDays(diasDespuesDelPrestamo));
 
         return new Devolucion(prestamo, registro, new List<UnidadDevuelta> { unidad });
@@ -167,7 +160,7 @@ public sealed class RepositorioDevolucionSqlTests
     {
         UnidadFisica unidad = new UnidadFisica(idInstitucional: "EQP-0001", ubiFisica: "Deposito A", numSerie: null);
         tipo.AgregarUnidad(unidad);
-        Prestamo prestamo = new Prestamo(CrearUsuario("12345672", "ana.perez@ejemplo.com"), tipo,
+        Prestamo prestamo = new Prestamo(CrearUsuario(dni: "12345672", correo: "ana.perez@ejemplo.com"), tipo,
             cantidadSolicitada: 1, fechaHoraPrestamo: InicioPrestamo);
         prestamo.Activar(new List<UnidadFisica> { unidad });
 
