@@ -3,13 +3,21 @@ namespace Dominio;
 // Devolucion total de un prestamo activo: todas sus unidades en un mismo acto, cada una con su condicion.
 public class Devolucion
 {
-    private readonly List<UnidadDevuelta> _unidades;
-    private readonly RegistroDeAccion _registro;
+    private List<UnidadDevuelta> _unidades;
+    private RegistroDeAccion _registro;
 
-    public Prestamo Prestamo { get; }
+    public int Id { get; private set; }
+    public Prestamo Prestamo { get; private set; }
     public Usuario RegistradaPor => _registro.Responsable!;
     public DateTime FechaHoraDevolucion => _registro.FechaHora;
     public IReadOnlyList<UnidadDevuelta> Unidades => _unidades.AsReadOnly();
+
+    private Devolucion()
+    {
+        _unidades = new List<UnidadDevuelta>();
+        _registro = null!;
+        Prestamo = null!;
+    }
 
     public Devolucion(Prestamo prestamo, RegistroDeAccion registro, IReadOnlyList<UnidadDevuelta> unidades)
     {
