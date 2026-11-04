@@ -23,11 +23,30 @@ public class RepositorioDevolucionSql
 
     public IReadOnlyList<Devolucion> ObtenerDevoluciones(FiltroPorCatalogoYFechas filtro)
     {
-        return _contexto.Devoluciones
+        return FiltrarPor(filtro)
             .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}")
             .Include($"{CampoUnidades}.{nameof(UnidadDevuelta.Unidad)}")
             .OrderBy(devolucion => EF.Property<RegistroDeAccion>(devolucion, CampoRegistro).FechaHora)
             .ThenBy(devolucion => devolucion.Id)
             .ToList();
+    }
+
+    private IQueryable<Devolucion> FiltrarPor(FiltroPorCatalogoYFechas filtro)
+    {
+        IQueryable<Devolucion> devoluciones = _contexto.Devoluciones;
+
+        if (filtro.Desde is not null)
+        {
+            devoluciones = devoluciones.Where(devolucion =>
+                EF.Property<RegistroDeAccion>(devolucion, CampoRegistro).FechaHora >= filtro.Desde);
+        }
+
+        if (filtro.Hasta is not null)
+        {
+            devoluciones = devoluciones.Where(devolucion =>
+                EF.Property<RegistroDeAccion>(devolucion, CampoRegistro).FechaHora < filtro.Hasta);
+        }
+
+        return devoluciones;
     }
 }
