@@ -24,6 +24,7 @@ public class ExportadorXlsx : IExportadorDeTabla
 
     public byte[] Exportar(TablaExportableDto tabla)
     {
+        ArgumentNullException.ThrowIfNull(tabla);
         using XLWorkbook libro = new XLWorkbook();
         IXLWorksheet hoja = libro.Worksheets.Add("Hoja");
         for (int columna = 0; columna < tabla.Encabezados.Count; columna++)
