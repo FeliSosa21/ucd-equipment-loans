@@ -13,6 +13,7 @@ public class RepositorioAuditoria
 
     public void AgregarRegistro(RegistroAuditoria registro)
     {
+        ArgumentNullException.ThrowIfNull(registro);
         _memoria.RegistrosAuditoria.Add(registro);
     }
 
