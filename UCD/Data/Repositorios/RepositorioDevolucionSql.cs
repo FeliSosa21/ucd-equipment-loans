@@ -24,6 +24,8 @@ public class RepositorioDevolucionSql
 
     public IReadOnlyList<Devolucion> ObtenerDevoluciones(FiltroPorCatalogoYFechas filtro)
     {
+        ArgumentNullException.ThrowIfNull(filtro);
+
         return FiltrarPor(filtro)
             .Include(devolucion => devolucion.Prestamo)
             .ThenInclude(prestamo => prestamo.Solicitante)
