@@ -90,6 +90,17 @@ public sealed class ExportadorXlsxTests
         Assert.AreEqual("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", tipoContenido);
     }
 
+    [TestMethod]
+    public void Exportar_FilaConMasColumnasQueEncabezados_LanzaArgumentException()
+    {
+        ExportadorXlsx exportador = new ExportadorXlsx();
+        TablaExportableDto tabla = CrearTabla(
+            encabezados: new List<string> { "Nombre", "Edad" },
+            filas: new List<List<string>> { new List<string> { "Ana", "20" }, new List<string> { "Luis", "30", "Sobrante" } });
+
+        Assert.ThrowsException<ArgumentException>(() => exportador.Exportar(tabla));
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
