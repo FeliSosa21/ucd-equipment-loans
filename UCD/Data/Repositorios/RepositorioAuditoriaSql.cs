@@ -16,4 +16,9 @@ public class RepositorioAuditoriaSql
         _contexto.RegistrosAuditoria.Add(registro);
         _contexto.SaveChanges();
     }
+
+    public IReadOnlyList<RegistroAuditoria> ObtenerPaginaDeRegistros(FiltroAuditoria filtro, int pagina, int tamanoPagina)
+    {
+        return new List<RegistroAuditoria>();
+    }
 }
