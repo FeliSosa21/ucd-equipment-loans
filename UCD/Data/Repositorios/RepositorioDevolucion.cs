@@ -16,6 +16,11 @@ public class RepositorioDevolucion
         _memoria.Devoluciones.Add(devolucion);
     }
 
+    public IReadOnlyList<Devolucion> ObtenerDevoluciones(FiltroPorCatalogoYFechas filtro)
+    {
+        return new List<Devolucion>();
+    }
+
     public IReadOnlyList<Devolucion> ObtenerTodas()
     {
         return _memoria.Devoluciones.AsReadOnly();

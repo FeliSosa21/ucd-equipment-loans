@@ -42,7 +42,21 @@ public class RepositorioDevolucionTests
         Assert.AreSame(devolucion, devoluciones[0]);
     }
 
-    private static Devolucion CrearDevolucion()
+    [TestMethod]
+    public void ObtenerDevoluciones_SinFiltro_LasDevuelveDeLaMasViejaALaMasNueva()
+    {
+        RepositorioDevolucion repositorio = new RepositorioDevolucion(new Memoria());
+        Devolucion tardia = CrearDevolucion(diasDespuesDelPrestamo: 3);
+        Devolucion temprana = CrearDevolucion(diasDespuesDelPrestamo: 1);
+        repositorio.AgregarDevolucion(tardia);
+        repositorio.AgregarDevolucion(temprana);
+
+        IReadOnlyList<Devolucion> devoluciones = repositorio.ObtenerDevoluciones(new FiltroPorCatalogoYFechas());
+
+        CollectionAssert.AreEqual(new List<Devolucion> { temprana, tardia }, devoluciones.ToList());
+    }
+
+    private static Devolucion CrearDevolucion(int diasDespuesDelPrestamo = 1)
     {
         Usuario solicitante = new Usuario(dni: "45678905", nombre: "Ana", apellido: "Perez",
             correo: "ana@hotmail.com", contrasena: "VivaLaOrt2026");
@@ -55,7 +69,7 @@ public class RepositorioDevolucionTests
         Usuario funcionario = new Usuario(dni: "12345672", nombre: "Felipe", apellido: "Sosa",
             correo: "felipe@hotmail.com", contrasena: "VivaLaOrt2026");
 
-        return new Devolucion(prestamo, RegistroDeAccion.DeUsuario(funcionario, InicioPrestamo.AddDays(1)),
+        return new Devolucion(prestamo, RegistroDeAccion.DeUsuario(funcionario, InicioPrestamo.AddDays(diasDespuesDelPrestamo)),
             new List<UnidadDevuelta> { new UnidadDevuelta(unidad, CondicionDevolucion.SinObservaciones, null) });
     }
 }
