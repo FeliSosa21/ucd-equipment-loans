@@ -5,6 +5,7 @@ namespace Servicios;
 
 public class ExportadorXlsx : IExportadorDeTabla
 {
+    private const string NombreDeHoja = "Exportacion";
     private const int FilaDeEncabezados = 1;
 
     public string Formato
@@ -26,7 +27,7 @@ public class ExportadorXlsx : IExportadorDeTabla
     {
         ArgumentNullException.ThrowIfNull(tabla);
         using XLWorkbook libro = new XLWorkbook();
-        IXLWorksheet hoja = libro.Worksheets.Add("Hoja");
+        IXLWorksheet hoja = libro.Worksheets.Add(NombreDeHoja);
         for (int columna = 0; columna < tabla.Encabezados.Count; columna++)
         {
             hoja.Cell(FilaDeEncabezados, columna + 1).Value = tabla.Encabezados[columna];
