@@ -115,9 +115,7 @@ public sealed class RepositorioPrestamoSqlTests
         GuardarConOtroContexto(CrearPrestamo());
         Guid idInexistente = Guid.NewGuid();
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        Prestamo? obtenido = repositorio.ObtenerPrestamoPorId(idInexistente);
+        Prestamo? obtenido = ObtenerConOtroContexto(idInexistente);
 
         Assert.IsNull(obtenido);
     }
@@ -128,9 +126,7 @@ public sealed class RepositorioPrestamoSqlTests
         Prestamo prestamo = CrearPrestamo();
         GuardarConOtroContexto(prestamo);
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        Prestamo? obtenido = repositorio.ObtenerPrestamoPorId(prestamo.Id);
+        Prestamo? obtenido = ObtenerConOtroContexto(prestamo.Id);
 
         Assert.IsNotNull(obtenido);
         Assert.AreEqual(prestamo.Id, obtenido.Id);
@@ -145,9 +141,7 @@ public sealed class RepositorioPrestamoSqlTests
         Prestamo prestamo = CrearPrestamo();
         GuardarConOtroContexto(prestamo);
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        Prestamo? obtenido =  repositorio.ObtenerPrestamoPorId(prestamo.Id);
+        Prestamo? obtenido = ObtenerConOtroContexto(prestamo.Id);
 
         Assert.IsNotNull(obtenido);
         Assert.IsNotNull(obtenido.Solicitante);
@@ -165,6 +159,14 @@ public sealed class RepositorioPrestamoSqlTests
         {
             repositorio.AgregarPrestamo(prestamo);
         }
+    }
+
+    private Prestamo? ObtenerConOtroContexto(Guid idPrestamo)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+
+        return repositorio.ObtenerPrestamoPorId(idPrestamo);
     }
 
     private static Prestamo CrearPrestamo()
