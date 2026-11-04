@@ -34,6 +34,21 @@ public sealed class RepositorioDevolucionSqlTests
         Assert.AreEqual(DniFuncionario, leidas[0].RegistradaPor.Dni);
     }
 
+    [TestMethod]
+    public void ObtenerDevoluciones_DevolucionAgregada_OtroContextoLeeSusUnidadesConCondicion()
+    {
+        GuardarConOtroContexto(CrearDevolucion(diasDespuesDelPrestamo: 1, CondicionDevolucion.ConFallas, "No enciende"));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Devolucion leida =
+            new RepositorioDevolucionSql(contextoQueLee).ObtenerDevoluciones(new FiltroPorCatalogoYFechas()).Single();
+
+        UnidadDevuelta unidad = leida.Unidades.Single();
+        Assert.AreEqual("EQP-0001", unidad.Unidad.IdInstitucional);
+        Assert.AreEqual(CondicionDevolucion.ConFallas, unidad.Condicion);
+        Assert.AreEqual("No enciende", unidad.Observaciones);
+    }
+
     private void GuardarConOtroContexto(params Devolucion[] devoluciones)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -45,7 +60,8 @@ public sealed class RepositorioDevolucionSqlTests
         }
     }
 
-    private static Devolucion CrearDevolucion(int diasDespuesDelPrestamo)
+    private static Devolucion CrearDevolucion(int diasDespuesDelPrestamo,
+        CondicionDevolucion condicion = CondicionDevolucion.SinObservaciones, string? observaciones = null)
     {
         TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",
             duracionMaxPrestamo: 5, requiereAprobacion: false, categoria: Categoria.Audiovisual);
@@ -58,7 +74,7 @@ public sealed class RepositorioDevolucionSqlTests
             InicioPrestamo.AddDays(diasDespuesDelPrestamo));
 
         return new Devolucion(prestamo, registro,
-            new List<UnidadDevuelta> { new UnidadDevuelta(unidad, CondicionDevolucion.SinObservaciones, null) });
+            new List<UnidadDevuelta> { new UnidadDevuelta(unidad, condicion, observaciones) });
     }
 
     private static Usuario CrearUsuario(string dni, string correo)
