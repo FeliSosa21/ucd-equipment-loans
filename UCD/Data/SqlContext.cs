@@ -10,6 +10,7 @@ public class SqlContext : DbContext
     public DbSet<Prestamo> Prestamos { get; set; }
     public DbSet<Movimiento> Movimientos { get; set; }
     public DbSet<TipoUsuario> TiposDeUsuario { get; set; }
+    public DbSet<Devolucion> Devoluciones { get; set; }
 
     public SqlContext(DbContextOptions<SqlContext> options) : base(options)
     {

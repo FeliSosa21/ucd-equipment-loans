@@ -1,9 +1,12 @@
 using Dominio;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositorios;
 
 public class RepositorioDevolucionSql
 {
+    private const string CampoRegistro = "_registro";
+
     private readonly SqlContext _contexto;
 
     public RepositorioDevolucionSql(SqlContext contexto)
@@ -13,10 +16,14 @@ public class RepositorioDevolucionSql
 
     public void AgregarDevolucion(Devolucion devolucion)
     {
+        _contexto.Devoluciones.Add(devolucion);
+        _contexto.SaveChanges();
     }
 
     public IReadOnlyList<Devolucion> ObtenerDevoluciones(FiltroPorCatalogoYFechas filtro)
     {
-        return new List<Devolucion>();
+        return _contexto.Devoluciones
+            .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}")
+            .ToList();
     }
 }
