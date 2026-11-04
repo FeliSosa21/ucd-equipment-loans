@@ -8,6 +8,7 @@ namespace Data.Configuraciones;
 public class TipoUsuarioConfiguracion : IEntityTypeConfiguration<TipoUsuario>
 {
     private const char SeparadorPermisos = ',';
+    private const int LargoMaximoNombre = 50;
 
     private sealed record TipoPredefinido(int Id, TipoUsuario Tipo);
 
@@ -23,9 +24,12 @@ public class TipoUsuarioConfiguracion : IEntityTypeConfiguration<TipoUsuario>
 
         builder.OwnsOne<PresentacionTipoUsuario>("presentacion", presentacion =>
         {
-            presentacion.Property(datos => datos.Nombre).HasColumnName("Nombre").IsRequired();
-            presentacion.Property(datos => datos.Descripcion).HasColumnName("Descripcion").IsRequired();
+            presentacion.Property(datos => datos.Nombre).HasColumnName("Nombre").IsRequired()
+                .HasMaxLength(LargoMaximoNombre);
+            presentacion.Property(datos => datos.Descripcion).HasColumnName("Descripcion").IsRequired()
+                .HasMaxLength(PresentacionTipoUsuario.LargoMaximoDescripcion);
             presentacion.Property(datos => datos.Imagen).HasColumnName("Imagen").IsRequired();
+            presentacion.HasIndex(datos => datos.Nombre).IsUnique();
 
             presentacion.HasData(predefinidos.Select(predefinido => new
             {

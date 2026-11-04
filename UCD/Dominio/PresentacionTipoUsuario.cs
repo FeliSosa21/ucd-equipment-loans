@@ -2,7 +2,7 @@ namespace Dominio;
 
 public class PresentacionTipoUsuario
 {
-    private const int LargoMaximoDescripcion = 100;
+    public const int LargoMaximoDescripcion = 100;
     private const int KilobytesMaximosImagen = 500;
     private static readonly string[] PrefijosDeImagenAdmitidos =
     {
