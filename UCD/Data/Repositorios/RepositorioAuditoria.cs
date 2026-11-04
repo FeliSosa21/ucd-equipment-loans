@@ -33,6 +33,8 @@ public class RepositorioAuditoria
 
     private IEnumerable<RegistroAuditoria> Filtrar(FiltroAuditoria filtro)
     {
+        ArgumentNullException.ThrowIfNull(filtro);
+
         return _memoria.RegistrosAuditoria
             .Where(registro => filtro.Desde is null || registro.FechaHora >= filtro.Desde)
             .Where(registro => filtro.Hasta is null || registro.FechaHora < filtro.Hasta)
