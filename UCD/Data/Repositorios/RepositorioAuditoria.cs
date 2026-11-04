@@ -22,6 +22,8 @@ public class RepositorioAuditoria
             .AsEnumerable()
             .Reverse()
             .OrderByDescending(registro => registro.FechaHora)
+            .Skip((pagina - 1) * tamanoPagina)
+            .Take(tamanoPagina)
             .ToList();
     }
 }
