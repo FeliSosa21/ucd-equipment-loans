@@ -119,7 +119,7 @@ public sealed class RepositorioPrestamoSqlTests
         RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
         Prestamo? obtenido = repositorio.ObtenerPrestamoPorId(idInexistente);
 
-        Assert.IsNotNull(obtenido);
+        Assert.IsNull(obtenido);
     }
 
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
