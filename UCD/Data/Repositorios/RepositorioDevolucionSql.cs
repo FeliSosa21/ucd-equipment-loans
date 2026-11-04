@@ -24,6 +24,12 @@ public class RepositorioDevolucionSql
 
     public IReadOnlyList<Devolucion> ObtenerDevoluciones(FiltroPorCatalogoYFechas filtro)
     {
+        return ObtenerPaginaDeDevoluciones(filtro, pagina: 1, tamanoPagina: int.MaxValue);
+    }
+
+    public IReadOnlyList<Devolucion> ObtenerPaginaDeDevoluciones(FiltroPorCatalogoYFechas filtro, int pagina,
+        int tamanoPagina)
+    {
         ArgumentNullException.ThrowIfNull(filtro);
 
         return FiltrarPor(filtro)
@@ -35,13 +41,9 @@ public class RepositorioDevolucionSql
             .Include($"{CampoUnidades}.{nameof(UnidadDevuelta.Unidad)}")
             .OrderBy(devolucion => EF.Property<RegistroDeAccion>(devolucion, CampoRegistro).FechaHora)
             .ThenBy(devolucion => devolucion.Id)
+            .Skip((pagina - 1) * tamanoPagina)
+            .Take(tamanoPagina)
             .ToList();
-    }
-
-    public IReadOnlyList<Devolucion> ObtenerPaginaDeDevoluciones(FiltroPorCatalogoYFechas filtro, int pagina,
-        int tamanoPagina)
-    {
-        return ObtenerDevoluciones(filtro);
     }
 
     private IQueryable<Devolucion> FiltrarPor(FiltroPorCatalogoYFechas filtro)
