@@ -6,6 +6,7 @@ namespace Data.Repositorios;
 public class RepositorioDevolucionSql
 {
     private const string CampoRegistro = "_registro";
+    private const string CampoUnidades = "_unidades";
 
     private readonly SqlContext _contexto;
 
@@ -24,6 +25,7 @@ public class RepositorioDevolucionSql
     {
         return _contexto.Devoluciones
             .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}")
+            .Include($"{CampoUnidades}.{nameof(UnidadDevuelta.Unidad)}")
             .ToList();
     }
 }
