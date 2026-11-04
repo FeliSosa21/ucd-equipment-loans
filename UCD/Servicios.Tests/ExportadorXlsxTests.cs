@@ -48,6 +48,18 @@ public sealed class ExportadorXlsxTests
         Assert.ThrowsException<ArgumentNullException>(() => exportador.Exportar(null!));
     }
 
+    [TestMethod]
+    public void Exportar_CualquierTabla_NombraExportacionALaPrimeraHoja()
+    {
+        ExportadorXlsx exportador = new ExportadorXlsx();
+        TablaExportableDto tabla = CrearTabla(encabezados: new List<string> { "Nombre", "Edad" });
+
+        byte[] bytes = exportador.Exportar(tabla);
+
+        using XLWorkbook libro = AbrirLibro(bytes);
+        Assert.AreEqual("Exportacion", libro.Worksheet(1).Name);
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados, List<List<string>>? filas = null)
     {
         TablaExportableDto tabla = new TablaExportableDto();
