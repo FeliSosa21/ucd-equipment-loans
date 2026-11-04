@@ -28,6 +28,6 @@ public class RepositorioTipoUsuarioSql
 
     public IReadOnlyList<TipoUsuario> ObtenerTodos()
     {
-        return new List<TipoUsuario>();
+        return _contexto.TiposDeUsuario.OrderBy(tipo => tipo.Id).ToList();
     }
 }
