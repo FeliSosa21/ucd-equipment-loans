@@ -41,6 +41,24 @@ public sealed class ExportadorXlsxTests
     }
 
     [TestMethod]
+    public void Exportar_TablaConDosFilas_EscribeCadaFilaEnSuPropiaFila()
+    {
+        ExportadorXlsx exportador = new ExportadorXlsx();
+        TablaExportableDto tabla = CrearTabla(
+            encabezados: new List<string> { "Nombre", "Edad" },
+            filas: new List<List<string>> { new List<string> { "Ana", "20" }, new List<string> { "Luis", "30" } });
+
+        byte[] bytes = exportador.Exportar(tabla);
+
+        using XLWorkbook libro = AbrirLibro(bytes);
+        IXLWorksheet hoja = libro.Worksheet(1);
+        Assert.AreEqual("Ana", hoja.Cell(2, 1).GetString());
+        Assert.AreEqual("Luis", hoja.Cell(3, 1).GetString());
+        Assert.AreEqual("30", hoja.Cell(3, 2).GetString());
+        Assert.AreEqual(3, hoja.LastRowUsed()!.RowNumber());
+    }
+
+    [TestMethod]
     public void Exportar_TablaNula_LanzaArgumentNullException()
     {
         ExportadorXlsx exportador = new ExportadorXlsx();
