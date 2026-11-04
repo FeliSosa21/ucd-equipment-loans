@@ -21,6 +21,11 @@ public class RepositorioDevolucionSql
         _contexto.SaveChanges();
     }
 
+    public IReadOnlyList<Devolucion> ObtenerDevoluciones(FiltroPorCatalogoYFechas filtro)
+    {
+        return new List<Devolucion>();
+    }
+
     public IReadOnlyList<Devolucion> ObtenerPaginaDeDevoluciones(FiltroPorCatalogoYFechas filtro, int pagina,
         int tamanoPagina)
     {
