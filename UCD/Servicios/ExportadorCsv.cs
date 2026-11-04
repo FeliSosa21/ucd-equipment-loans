@@ -26,6 +26,10 @@ public class ExportadorCsv : IExportadorDeTabla
     public byte[] Exportar(TablaExportableDto tabla)
     {
         string texto = string.Join(Separador, tabla.Encabezados) + FinDeRegistro;
+        foreach (List<string> fila in tabla.Filas)
+        {
+            texto += string.Join(Separador, fila) + FinDeRegistro;
+        }
         return Encoding.UTF8.GetBytes(texto);
     }
 }
