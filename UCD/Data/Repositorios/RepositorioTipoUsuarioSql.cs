@@ -30,4 +30,8 @@ public class RepositorioTipoUsuarioSql
     {
         return _contexto.TiposDeUsuario.OrderBy(tipo => tipo.Id).ToList();
     }
+
+    public void ActualizarTipo(TipoUsuario tipo)
+    {
+    }
 }

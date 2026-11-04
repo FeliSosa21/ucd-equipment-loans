@@ -69,6 +69,26 @@ public sealed class RepositorioTipoUsuarioSqlTests
             leidos.Select(tipo => tipo.Nombre).ToList());
     }
 
+    [TestMethod]
+    public void ActualizarTipo_TipoModificado_OtroContextoLeeLosCambios()
+    {
+        using (SqlContext contextoQueModifica = new SqlContext(_opciones))
+        {
+            RepositorioTipoUsuarioSql repositorio = new RepositorioTipoUsuarioSql(contextoQueModifica);
+            TipoUsuario docente = CrearDocente();
+            repositorio.AgregarTipo(docente);
+
+            docente.Modificar("Docentes y ayudantes", ImagenPng, new TopesDePrestamo(10, 2));
+            repositorio.ActualizarTipo(docente);
+        }
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        TipoUsuario? leido = new RepositorioTipoUsuarioSql(contextoQueLee).ObtenerTipoPorNombre("Docente");
+
+        Assert.AreEqual("Docentes y ayudantes", leido?.Descripcion);
+        Assert.AreEqual(10, leido?.MaxUnidadesPorCatalogo);
+    }
+
     private void GuardarConOtroContexto(TipoUsuario tipo)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
