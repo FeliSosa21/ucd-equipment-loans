@@ -1,9 +1,13 @@
+using System.Text;
 using DTOs;
 
 namespace Servicios;
 
 public class ExportadorCsv : IExportadorDeTabla
 {
+    private const string Separador = ",";
+    private const string FinDeRegistro = "\r\n";
+
     public string Formato
     {
         get { return string.Empty; }
@@ -21,6 +25,7 @@ public class ExportadorCsv : IExportadorDeTabla
 
     public byte[] Exportar(TablaExportableDto tabla)
     {
-        return Array.Empty<byte>();
+        string texto = string.Join(Separador, tabla.Encabezados) + FinDeRegistro;
+        return Encoding.UTF8.GetBytes(texto);
     }
 }
