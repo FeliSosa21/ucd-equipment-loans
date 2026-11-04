@@ -1,4 +1,5 @@
 ﻿using Dominio;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositorios;
 
@@ -19,6 +20,9 @@ public class RepositorioPrestamoSql
 
     public Prestamo? ObtenerPrestamoPorId(Guid id)
     {
-        return _contexto.Prestamos.FirstOrDefault(prestamo => prestamo.Id == id);
+        return _contexto.Prestamos
+            .Include(prestamo => prestamo.Solicitante)
+            .Include(prestamo => prestamo.TipoEquipamiento)
+            .FirstOrDefault(prestamo => prestamo.Id == id);
     }
 }
