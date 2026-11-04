@@ -20,7 +20,7 @@ public class ExportadorXlsx : IExportadorDeTabla
 
     public string TipoContenido
     {
-        get { return string.Empty; }
+        get { return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"; }
     }
 
     public byte[] Exportar(TablaExportableDto tabla)
