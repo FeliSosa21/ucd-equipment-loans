@@ -19,6 +19,16 @@ public sealed class ExportadorCsvTests
         Assert.AreEqual("Nombre,Edad\r\n", LeerTexto(bytes));
     }
 
+    [TestMethod]
+    public void Formato_ExportadorCsv_DevuelveCSV()
+    {
+        ExportadorCsv exportador = new ExportadorCsv();
+
+        string formato = exportador.Formato;
+
+        Assert.AreEqual("CSV", formato);
+    }
+
     private static TablaExportableDto CrearTabla(List<string> encabezados)
     {
         TablaExportableDto tabla = new TablaExportableDto();
