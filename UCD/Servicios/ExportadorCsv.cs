@@ -29,15 +29,30 @@ public class ExportadorCsv : IExportadorDeTabla
     {
         ArgumentNullException.ThrowIfNull(tabla);
         ValidarQueNingunaFilaSuperaLosEncabezados(tabla);
-        string texto = EscribirRegistro(tabla.Encabezados);
+        string texto = EscribirTabla(tabla);
+        return CodificarConMarcaDeOrdenDeBytes(texto);
+    }
+
+    private static string EscribirTabla(TablaExportableDto tabla)
+    {
+        StringBuilder texto = new StringBuilder();
+        texto.Append(EscribirRegistro(tabla.Encabezados));
         foreach (List<string> fila in tabla.Filas)
         {
-            texto += EscribirRegistro(fila);
+            texto.Append(EscribirRegistro(fila));
         }
+        return texto.ToString();
+    }
+
+    private static byte[] CodificarConMarcaDeOrdenDeBytes(string texto)
+    {
         UTF8Encoding codificacion = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true);
         byte[] marcaDeOrdenDeBytes = codificacion.GetPreamble();
         byte[] contenido = codificacion.GetBytes(texto);
-        return marcaDeOrdenDeBytes.Concat(contenido).ToArray();
+        byte[] archivo = new byte[marcaDeOrdenDeBytes.Length + contenido.Length];
+        Array.Copy(marcaDeOrdenDeBytes, 0, archivo, 0, marcaDeOrdenDeBytes.Length);
+        Array.Copy(contenido, 0, archivo, marcaDeOrdenDeBytes.Length, contenido.Length);
+        return archivo;
     }
 
     private static void ValidarQueNingunaFilaSuperaLosEncabezados(TablaExportableDto tabla)
