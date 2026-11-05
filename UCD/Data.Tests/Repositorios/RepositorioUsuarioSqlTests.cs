@@ -261,6 +261,21 @@ public sealed class RepositorioUsuarioSqlTests
             new List<string> { "12345672" },
             usuarios.Select(usuario => usuario.Dni).ToList());
     }
+    
+    [TestMethod]
+    [DataRow("lucia")]
+    [DataRow("fernandez")]
+    [DataRow("4715")]
+    [DataRow("ucd.edu")]
+    public void ObtenerUsuarios_TextoDeUnCampo_LoEncuentra(string texto)
+    {
+        _repositorio.AgregarUsuario(CrearUsuario(correo: "lf2026@ucd.edu.uy"));
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = texto });
+
+        CollectionAssert.AreEqual(new List<string> { "47153923" },
+            usuarios.Select(usuario => usuario.Dni).ToList());
+    }
 
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
