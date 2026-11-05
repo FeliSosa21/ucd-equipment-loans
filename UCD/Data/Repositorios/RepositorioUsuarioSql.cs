@@ -52,6 +52,8 @@ public class RepositorioUsuarioSql
 
     public IReadOnlyList<Usuario> ObtenerUsuarios(FiltroUsuarios filtro)
     {
+        ArgumentNullException.ThrowIfNull(filtro);
+        
         throw new NotImplementedException();
     }
 
