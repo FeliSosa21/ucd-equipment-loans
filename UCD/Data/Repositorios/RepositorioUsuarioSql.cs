@@ -28,25 +28,10 @@ public class RepositorioUsuarioSql
 
     public Usuario? ObtenerUsuarioPorCorreo(string correo)
     {
-        string buscado = correo.ToLower();
+        string correoEnMinusculas = correo.ToLower();
 
         return UsuariosConTipo
-            .FirstOrDefault(usuario => usuario.Correo.ToLower() == buscado);
-    }
-
-    private IQueryable<Usuario> FiltrarPor(string? filtro)
-    {
-        IQueryable<Usuario> usuarios = UsuariosConTipo;
-
-        if (filtro is not null)
-        {
-            string buscado = filtro.Trim().ToLower();
-            usuarios = usuarios.Where(usuario => usuario.Nombre.ToLower().Contains(buscado)
-                                                 || usuario.Apellido.ToLower().Contains(buscado)
-                                                 || usuario.Dni.Contains(buscado)
-                                                 || usuario.Correo.ToLower().Contains(buscado));
-        }
-        return usuarios;
+            .FirstOrDefault(usuario => usuario.Correo.ToLower() == correoEnMinusculas);
     }
 
     public IReadOnlyList<Usuario> ObtenerUsuarios(FiltroUsuarios filtro)
@@ -58,20 +43,43 @@ public class RepositorioUsuarioSql
             return new List<Usuario>();
         }
 
-        IQueryable<Usuario> usuarios = FiltrarPor(filtro.Texto);
+        IQueryable<Usuario> usuarios = FiltrarPorTexto(UsuariosConTipo, filtro.Texto);
+        usuarios = FiltrarPorTipo(usuarios, filtro.Tipo);
 
-        if (filtro.Tipo is not null)
-        {
-            usuarios = usuarios.Where(usuario => usuario.Tipo == filtro.Tipo);
-        }
         return usuarios
-            .OrderBy(usuario=> usuario.Apellido)
+            .OrderBy(usuario => usuario.Apellido)
             .ThenBy(usuario => usuario.Nombre)
             .ThenBy(usuario => usuario.Dni)
             .ToList();
     }
+
     public void ActualizarUsuario(Usuario usuario)
     {
         _contexto.SaveChanges();
+    }
+
+    private IQueryable<Usuario> FiltrarPorTexto(IQueryable<Usuario> usuarios, string? texto)
+    {
+        if (string.IsNullOrWhiteSpace(texto))
+        {
+            return usuarios;
+        }
+
+        string textoEnMinusculas = texto.Trim().ToLower();
+
+        return usuarios.Where(usuario => usuario.Nombre.ToLower().Contains(textoEnMinusculas)
+                                         || usuario.Apellido.ToLower().Contains(textoEnMinusculas)
+                                         || usuario.Dni.Contains(textoEnMinusculas)
+                                         || usuario.Correo.ToLower().Contains(textoEnMinusculas));
+    }
+
+    private IQueryable<Usuario> FiltrarPorTipo(IQueryable<Usuario> usuarios, TipoUsuario? tipo)
+    {
+        if (tipo is null)
+        {
+            return usuarios;
+        }
+
+        return usuarios.Where(usuario => usuario.Tipo == tipo);
     }
 }
