@@ -1,3 +1,5 @@
+using Dominio;
+
 namespace Data.Tests.Repositorios;
 using Data.Repositorios;
 
@@ -34,6 +36,16 @@ public sealed class FiltroUsuariosTests
         bool tieneCriterios = filtro.TieneCriterios();
         
         Assert.IsFalse(tieneCriterios);
+    }
+
+    [TestMethod]
+    public void TieneCriterios_ConTipo_DevuelveTrue()
+    {
+        FiltroUsuarios filtro = new FiltroUsuarios{ Tipo = TipoUsuario.SinPermisos()};
+        
+        bool tieneCriterios = filtro.TieneCriterios();
+        
+        Assert.IsTrue(tieneCriterios);
     }
     
 }
