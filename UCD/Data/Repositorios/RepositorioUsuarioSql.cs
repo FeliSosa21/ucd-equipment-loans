@@ -21,6 +21,12 @@ public class RepositorioUsuarioSql
         {
             throw new InvalidOperationException($"Ya existe un usuario con el DNI {usuario.Dni}");
         }
+        string correoEnMinusculas = usuario.Correo.ToLower();
+        
+        if (_contexto.Usuarios.Any(existente => existente.Correo.ToLower() == correoEnMinusculas))
+        {
+            throw new InvalidOperationException($"Ya existe un usuario con el correo {usuario.Correo}");
+        }
         
         _contexto.Usuarios.Add(usuario);
         _contexto.SaveChanges();
