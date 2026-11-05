@@ -236,6 +236,31 @@ public sealed class RepositorioUsuarioSqlTests
         CollectionAssert.AreEqual(new List<string> { "12345672" },
             usuarios.Select(usuario => usuario.Dni).ToList());
     }
+    
+    [TestMethod]
+    public void ObtenerUsuarios_TextoYTipo_DevuelveSoloLosQueCumplenAmbos()
+    {
+        TipoUsuario docente = TipoUsuario.Docente();
+        Usuario lucia = CrearUsuario(dni: "12345672", nombre: "Lucia",
+            apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy");
+        lucia.AsignarTipo(docente);
+        Usuario martin = CrearUsuario(dni: "45678905", nombre: "Martin",
+            apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy");
+        martin.AsignarTipo(TipoUsuario.Estudiante());
+        Usuario sofia = CrearUsuario(dni: "67890127", nombre: "Sofia",
+            apellido: "Gomez", correo: "sofia.gomez@ucd.edu.uy");
+        sofia.AsignarTipo(docente);
+        _repositorio.AgregarUsuario(lucia);
+        _repositorio.AgregarUsuario(martin);
+        _repositorio.AgregarUsuario(sofia);
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(
+            new FiltroUsuarios { Texto = "fernandez", Tipo = docente });
+
+        CollectionAssert.AreEqual(
+            new List<string> { "12345672" },
+            usuarios.Select(usuario => usuario.Dni).ToList());
+    }
 
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
