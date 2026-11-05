@@ -223,6 +223,33 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(DniEvaluador, leido.Evaluador.Dni);
     }
 
+    [TestMethod]
+    public void ActualizarPrestamo_PrestamoObtenidoYAprobado_OtroContextoLoVeActivoConSusUnidadesPrestadas()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento(requiereAprobacion: true);
+        CrearUnidadesDelTipo(tipo);
+        Prestamo prestamo = CrearPrestamoDelTipo(tipo);
+        GuardarConOtroContexto(prestamo);
+        GuardarUsuarioConOtroContexto(CrearEvaluador());
+
+        using SqlContext contextoQueModifica = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueModifica);
+        Prestamo obtenido = repositorio.ObtenerPrestamoPorId(prestamo.Id)!;
+        Usuario evaluador = contextoQueModifica.Usuarios.Single(usuario => usuario.Dni == DniEvaluador);
+        List<UnidadFisica> unidades = obtenido.TipoEquipamiento.UnidadesDisponibles().Take(obtenido.CantidadSolicitada).ToList();
+        obtenido.Aprobar(evaluador, unidades);
+
+        repositorio.ActualizarPrestamo(obtenido);
+
+        Prestamo? leido = ObtenerConOtroContexto(prestamo.Id);
+        Assert.IsNotNull(leido);
+        Assert.AreEqual(EstadoPrestamo.Activo, leido.Estado);
+        List<string> idsEsperados = new List<string> { IdPrimeraUnidad, IdSegundaUnidad };
+        List<string> idsAsignados = leido.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsAsignados);
+        Assert.AreEqual(0, leido.TipoEquipamiento.CantidadDisponibles());
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -292,13 +319,13 @@ public sealed class RepositorioPrestamoSqlTests
         return usuario;
     }
 
-    private static TipoEquipamiento CrearTipoEquipamiento()
+    private static TipoEquipamiento CrearTipoEquipamiento(bool requiereAprobacion = false)
     {
         TipoEquipamiento tipo = new TipoEquipamiento(
             nombre: NombreTipo,
             descripcion: "Computadora para laboratorio",
             duracionMaxPrestamo: 5,
-            requiereAprobacion: false,
+            requiereAprobacion: requiereAprobacion,
             categoria: Categoria.Computacion);
 
         return tipo;
