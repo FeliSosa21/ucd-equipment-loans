@@ -57,7 +57,14 @@ public class RepositorioUsuarioSql
         {
             return new List<Usuario>();
         }
-        return FiltrarPor(filtro.Texto)
+
+        IQueryable<Usuario> usuarios = FiltrarPor(filtro.Texto);
+
+        if (filtro.Tipo is not null)
+        {
+            usuarios = usuarios.Where(usuario => usuario.Tipo == filtro.Tipo);
+        }
+        return usuarios
             .OrderBy(usuario=> usuario.Apellido)
             .ThenBy(usuario => usuario.Nombre)
             .ThenBy(usuario => usuario.Dni)
