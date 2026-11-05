@@ -25,6 +25,7 @@ public class RepositorioPrestamoSql
             .Include(prestamo => prestamo.Evaluador)
             .Include(prestamo => prestamo.TipoEquipamiento)
             .ThenInclude(tipo => tipo.Unidades)
+            .Include(prestamo => prestamo.UnidadesAsignadas)
             .FirstOrDefault(prestamo => prestamo.Id == id);
     }
 }
