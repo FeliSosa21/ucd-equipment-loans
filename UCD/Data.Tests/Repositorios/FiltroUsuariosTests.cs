@@ -8,7 +8,6 @@ public sealed class FiltroUsuariosTests
     public void TieneCriterios_SinTextoNiTipo_DevuelveFalse()
     {
         FiltroUsuarios filtro = new FiltroUsuarios();
-
         
         bool tieneCriterios = filtro.TieneCriterios();
         
@@ -24,4 +23,17 @@ public sealed class FiltroUsuariosTests
         
         Assert.IsTrue(tieneCriterios);
     }
+
+    [TestMethod]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void TieneCriterios_TextoEnBlanco_DevuelveFalse(string textoEnBlanco)
+    {
+        FiltroUsuarios filtro = new FiltroUsuarios{ Texto = textoEnBlanco };
+        
+        bool tieneCriterios = filtro.TieneCriterios();
+        
+        Assert.IsFalse(tieneCriterios);
+    }
+    
 }
