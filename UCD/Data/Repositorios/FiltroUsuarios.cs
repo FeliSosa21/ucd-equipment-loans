@@ -8,6 +8,6 @@ public class FiltroUsuarios
 
     public bool TieneCriterios()
     {
-        return false;
+        return Texto is not null;
     }
 }
