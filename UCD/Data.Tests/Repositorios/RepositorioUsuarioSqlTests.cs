@@ -136,7 +136,7 @@ public sealed class RepositorioUsuarioSqlTests
     }
 
     [TestMethod]
-    public void ObtenerProductos_FiltroSinCriterios_DevuelveListaVacia()
+    public void ObtenerUsuarios_FiltroSinCriterios_DevuelveListaVacia()
     {
         _repositorio.AgregarUsuario(CrearUsuario());
         
