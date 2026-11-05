@@ -60,6 +60,7 @@ public class RepositorioUsuarioSql
         return FiltrarPor(filtro.Texto)
             .OrderBy(usuario=> usuario.Apellido)
             .ThenBy(usuario => usuario.Nombre)
+            .ThenBy(usuario => usuario.Dni)
             .ToList();
     }
     public void ActualizarUsuario(Usuario usuario)
