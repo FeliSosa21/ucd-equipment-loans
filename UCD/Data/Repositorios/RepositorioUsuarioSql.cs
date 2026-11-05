@@ -17,20 +17,12 @@ public class RepositorioUsuarioSql
 
     public void AgregarUsuario(Usuario usuario)
     {
-        if (_contexto.Usuarios.Any(existente => existente.Dni == usuario.Dni))
-        {
-            throw new InvalidOperationException($"Ya existe un usuario con el DNI {usuario.Dni}");
-        }
-        string correoEnMinusculas = usuario.Correo.ToLower();
-        
-        if (_contexto.Usuarios.Any(existente => existente.Correo.ToLower() == correoEnMinusculas))
-        {
-            throw new InvalidOperationException($"Ya existe un usuario con el correo {usuario.Correo}");
-        }
-        
+        ValidarQueNoExista(usuario);
+
         _contexto.Usuarios.Add(usuario);
         _contexto.SaveChanges();
     }
+    
 
     public Usuario? ObtenerUsuarioPorDni(string dni)
     {
@@ -92,5 +84,20 @@ public class RepositorioUsuarioSql
         }
 
         return usuarios.Where(usuario => usuario.Tipo == tipo);
+    }
+    
+    private void ValidarQueNoExista(Usuario usuario)
+    {
+        if (_contexto.Usuarios.Any(existente => existente.Dni == usuario.Dni))
+        {
+            throw new InvalidOperationException($"Ya existe un usuario con el DNI {usuario.Dni}");
+        }
+
+        string correoEnMinusculas = usuario.Correo.ToLower();
+
+        if (_contexto.Usuarios.Any(existente => existente.Correo.ToLower() == correoEnMinusculas))
+        {
+            throw new InvalidOperationException($"Ya existe un usuario con el correo {usuario.Correo}");
+        }
     }
 }
