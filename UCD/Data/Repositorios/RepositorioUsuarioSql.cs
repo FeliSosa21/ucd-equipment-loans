@@ -46,7 +46,6 @@ public class RepositorioUsuarioSql
                                                  || usuario.Dni.Contains(buscado)
                                                  || usuario.Correo.ToLower().Contains(buscado));
         }
-
         return usuarios;
     }
 
@@ -58,8 +57,11 @@ public class RepositorioUsuarioSql
         {
             return new List<Usuario>();
         }
-        return FiltrarPor(filtro.Texto).ToList();
+        return FiltrarPor(filtro.Texto)
+            .OrderBy(usuario=> usuario.Apellido)
+            .ToList();
     }
+    
 
     public void ActualizarUsuario(Usuario usuario)
     {
