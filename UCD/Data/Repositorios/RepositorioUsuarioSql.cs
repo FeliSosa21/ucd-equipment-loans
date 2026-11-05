@@ -17,6 +17,11 @@ public class RepositorioUsuarioSql
 
     public void AgregarUsuario(Usuario usuario)
     {
+        if (_contexto.Usuarios.Any(existente => existente.Dni == usuario.Dni))
+        {
+            throw new InvalidOperationException($"Ya existe un usuario con el DNI {usuario.Dni}");
+        }
+        
         _contexto.Usuarios.Add(usuario);
         _contexto.SaveChanges();
     }
