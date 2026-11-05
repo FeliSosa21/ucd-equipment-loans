@@ -129,6 +129,12 @@ public sealed class RepositorioUsuarioSqlTests
         Assert.AreEqual(usuario.Tipo.Id, leido?.Tipo.Id);
     }
 
+    [TestMethod]
+    public void ObtenerUsuarios_FiltroNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ObtenerUsuarios(null!));
+    }
+
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
     {

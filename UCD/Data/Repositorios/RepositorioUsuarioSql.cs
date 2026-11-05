@@ -50,6 +50,11 @@ public class RepositorioUsuarioSql
         return usuarios;
     }
 
+    public IReadOnlyList<Usuario> ObtenerUsuarios(FiltroUsuarios filtro)
+    {
+        throw new NotImplementedException();
+    }
+
     public void ActualizarUsuario(Usuario usuario)
     {
         _contexto.SaveChanges();
