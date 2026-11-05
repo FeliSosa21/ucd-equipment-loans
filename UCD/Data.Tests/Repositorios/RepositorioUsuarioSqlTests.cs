@@ -71,9 +71,9 @@ public sealed class RepositorioUsuarioSqlTests
     {
         Usuario usuario = CrearUsuario();
         _repositorio.AgregarUsuario(usuario);
-        
+
         Usuario? resultado = _repositorio.ObtenerUsuarioPorCorreo("LUCIA.Fernandez@UCD.edu.uy");
-        
+
         Assert.AreSame(usuario, resultado);
     }
 
@@ -90,7 +90,7 @@ public sealed class RepositorioUsuarioSqlTests
         Usuario? leido = new RepositorioUsuarioSql(otroContexto).ObtenerUsuarioPorDni(fernandez.Dni);
         Assert.AreEqual(EstadoUsuario.Desactivado, leido?.Estado);
     }
-    
+
     [TestMethod]
     public void AgregarUsuario_ConTipoUsuario_GuardaElTipoUsuarioEnSuTabla()
     {
@@ -109,23 +109,23 @@ public sealed class RepositorioUsuarioSqlTests
         Usuario usuario = CrearUsuario();
         usuario.AsignarTipo(TipoUsuario.Docente());
         _repositorio.AgregarUsuario(usuario);
-        
+
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         Usuario? leido = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(usuario.Dni);
-        
+
         Assert.AreEqual(usuario.Tipo.Id, leido?.Tipo.Id);
     }
-    
+
     [TestMethod]
     public void ObtenerUsuarioPorCorreo_ConTipo_OtroContextoLeeSuTipo()
     {
         Usuario usuario = CrearUsuario();
         usuario.AsignarTipo(TipoUsuario.Docente());
         _repositorio.AgregarUsuario(usuario);
-        
+
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         Usuario? leido = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorCorreo(usuario.Correo);
-        
+
         Assert.AreEqual(usuario.Tipo.Id, leido?.Tipo.Id);
     }
 
@@ -139,9 +139,9 @@ public sealed class RepositorioUsuarioSqlTests
     public void ObtenerUsuarios_FiltroSinCriterios_DevuelveListaVacia()
     {
         _repositorio.AgregarUsuario(CrearUsuario());
-        
+
         IReadOnlyList<Usuario> usuarios = _repositorio.ObtenerUsuarios(new FiltroUsuarios());
-        
+
         Assert.AreEqual(0, usuarios.Count);
     }
 
@@ -170,10 +170,10 @@ public sealed class RepositorioUsuarioSqlTests
             dni: "12345672", nombre: "Lucia", apellido: "Alvarez", correo: "lucia.alvarez@ucd.edu.uy"));
         _repositorio.AgregarUsuario(CrearUsuario(
             dni: "45678905", nombre: "Martin", apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy"));
-        
+
         IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = "ucd" });
-        
-        CollectionAssert.AreEqual(new List<string> { "Alvarez", "Fernandez","Gomez" },
+
+        CollectionAssert.AreEqual(new List<string> { "Alvarez", "Fernandez", "Gomez" },
             usuarios.Select(usuario => usuario.Apellido).ToList());
     }
 
@@ -184,9 +184,9 @@ public sealed class RepositorioUsuarioSqlTests
             dni: "45678905", nombre: "Martin", apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy"));
         _repositorio.AgregarUsuario(CrearUsuario(
             dni: "12345672", nombre: "Lucia", apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy"));
-        
+
         IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = "Fernandez" });
-        
+
         CollectionAssert.AreEqual(new List<string> { "Lucia", "Martin" },
             usuarios.Select(usuario => usuario.Nombre).ToList());
     }
@@ -195,12 +195,12 @@ public sealed class RepositorioUsuarioSqlTests
     public void ObtenerUsuarios_MismoNombreYApellido_LosOrdenaPorDni()
     {
         _repositorio.AgregarUsuario(CrearUsuario(
-            dni: "45678905", nombre: "Lucia", apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy"));
+            dni: "45678905", nombre: "Lucia", apellido: "Fernandez", correo: "lucia.fernandez2@ucd.edu.uy"));
         _repositorio.AgregarUsuario(CrearUsuario(
             dni: "12345672", nombre: "Lucia", apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy"));
-        
+
         IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = "Fernandez" });
-        
+
         CollectionAssert.AreEqual(new List<string> { "12345672", "45678905" },
             usuarios.Select(usuario => usuario.Dni).ToList());
     }
@@ -210,9 +210,9 @@ public sealed class RepositorioUsuarioSqlTests
     {
         _repositorio.AgregarUsuario(CrearUsuario(
             dni: "47153923", nombre: "Lucia", apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy"));
-        
+
         IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = " Fernandez " });
-        
+
         CollectionAssert.AreEqual(new List<string> { "47153923" },
             usuarios.Select(usuario => usuario.Dni).ToList());
     }
@@ -230,13 +230,13 @@ public sealed class RepositorioUsuarioSqlTests
         martin.AsignarTipo(estudiante);
         _repositorio.AgregarUsuario(lucia);
         _repositorio.AgregarUsuario(martin);
-        
+
         IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Tipo = docente });
-        
+
         CollectionAssert.AreEqual(new List<string> { "12345672" },
             usuarios.Select(usuario => usuario.Dni).ToList());
     }
-    
+
     [TestMethod]
     public void ObtenerUsuarios_TextoYTipo_DevuelveSoloLosQueCumplenAmbos()
     {
@@ -261,7 +261,7 @@ public sealed class RepositorioUsuarioSqlTests
             new List<string> { "12345672" },
             usuarios.Select(usuario => usuario.Dni).ToList());
     }
-    
+
     [TestMethod]
     [DataRow("lucia")]
     [DataRow("fernandez")]
@@ -276,7 +276,7 @@ public sealed class RepositorioUsuarioSqlTests
         CollectionAssert.AreEqual(new List<string> { "47153923" },
             usuarios.Select(usuario => usuario.Dni).ToList());
     }
-    
+
     [TestMethod]
     public void ObtenerUsuarios_NingunoCoincide_DevuelveListaVacia()
     {
@@ -286,7 +286,7 @@ public sealed class RepositorioUsuarioSqlTests
 
         Assert.AreEqual(0, usuarios.Count);
     }
-    
+
     [TestMethod]
     public void ObtenerUsuarios_ConTipo_OtroContextoLeeSuTipo()
     {
@@ -298,7 +298,7 @@ public sealed class RepositorioUsuarioSqlTests
 
         Assert.AreEqual(usuario.Tipo.Id, usuarios[0].Tipo.Id);
     }
-    
+
     [TestMethod]
     public void AgregarUsuario_DniRepetido_LanzaInvalidOperationException()
     {
@@ -307,7 +307,7 @@ public sealed class RepositorioUsuarioSqlTests
 
         Assert.ThrowsException<InvalidOperationException>(() => _repositorio.AgregarUsuario(repetido));
     }
-    
+
     [TestMethod]
     public void AgregarUsuario_CorreoRepetidoConOtrasMayusculas_LanzaInvalidOperationException()
     {

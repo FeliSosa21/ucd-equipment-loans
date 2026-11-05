@@ -1,5 +1,6 @@
-namespace Data.Repositorios;
 using Dominio;
+
+namespace Data.Repositorios;
 
 public class FiltroUsuarios
 {

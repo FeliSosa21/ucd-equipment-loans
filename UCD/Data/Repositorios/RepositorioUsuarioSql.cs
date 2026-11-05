@@ -22,7 +22,6 @@ public class RepositorioUsuarioSql
         _contexto.Usuarios.Add(usuario);
         _contexto.SaveChanges();
     }
-    
 
     public Usuario? ObtenerUsuarioPorDni(string dni)
     {
@@ -85,7 +84,7 @@ public class RepositorioUsuarioSql
 
         return usuarios.Where(usuario => usuario.Tipo == tipo);
     }
-    
+
     private void ValidarQueNoExista(Usuario usuario)
     {
         if (_contexto.Usuarios.Any(existente => existente.Dni == usuario.Dni))
