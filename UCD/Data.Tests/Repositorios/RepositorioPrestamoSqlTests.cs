@@ -217,7 +217,6 @@ public sealed class RepositorioPrestamoSqlTests
         Prestamo? leido = ObtenerConOtroContexto(prestamo.Id);
         Assert.IsNotNull(leido);
         Assert.AreEqual(EstadoPrestamo.Rechazado, leido.Estado);
-
         Assert.AreEqual(MotivoDelRechazo, leido.MotivoRechazo);
         Assert.IsNotNull(leido.Evaluador);
         Assert.AreEqual(DniEvaluador, leido.Evaluador.Dni);
@@ -261,7 +260,7 @@ public sealed class RepositorioPrestamoSqlTests
         }
     }
 
-    private void GuardarUsuarioConOtroContexto(Usuario usuario) 
+    private void GuardarUsuarioConOtroContexto(Usuario usuario)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
 
