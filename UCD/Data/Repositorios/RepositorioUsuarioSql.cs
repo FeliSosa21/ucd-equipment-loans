@@ -53,8 +53,8 @@ public class RepositorioUsuarioSql
     public IReadOnlyList<Usuario> ObtenerUsuarios(FiltroUsuarios filtro)
     {
         ArgumentNullException.ThrowIfNull(filtro);
-        
-        throw new NotImplementedException();
+
+        return new List<Usuario>();
     }
 
     public void ActualizarUsuario(Usuario usuario)
