@@ -298,6 +298,15 @@ public sealed class RepositorioUsuarioSqlTests
 
         Assert.AreEqual(usuario.Tipo.Id, usuarios[0].Tipo.Id);
     }
+    
+    [TestMethod]
+    public void AgregarUsuario_DniRepetido_LanzaInvalidOperationException()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario());
+        Usuario repetido = CrearUsuario(correo: "otro.correo@ucd.edu.uy");
+
+        Assert.ThrowsException<InvalidOperationException>(() => _repositorio.AgregarUsuario(repetido));
+    }
 
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
