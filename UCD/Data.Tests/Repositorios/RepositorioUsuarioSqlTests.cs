@@ -276,6 +276,16 @@ public sealed class RepositorioUsuarioSqlTests
         CollectionAssert.AreEqual(new List<string> { "47153923" },
             usuarios.Select(usuario => usuario.Dni).ToList());
     }
+    
+    [TestMethod]
+    public void ObtenerUsuarios_NingunoCoincide_DevuelveListaVacia()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario());
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = "gomez" });
+
+        Assert.AreEqual(0, usuarios.Count);
+    }
 
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
