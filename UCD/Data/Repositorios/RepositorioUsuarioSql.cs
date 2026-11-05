@@ -59,10 +59,9 @@ public class RepositorioUsuarioSql
         }
         return FiltrarPor(filtro.Texto)
             .OrderBy(usuario=> usuario.Apellido)
+            .ThenBy(usuario => usuario.Nombre)
             .ToList();
     }
-    
-
     public void ActualizarUsuario(Usuario usuario)
     {
         _contexto.SaveChanges();
