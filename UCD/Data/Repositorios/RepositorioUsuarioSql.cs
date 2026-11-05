@@ -54,7 +54,11 @@ public class RepositorioUsuarioSql
     {
         ArgumentNullException.ThrowIfNull(filtro);
 
-        return new List<Usuario>();
+        if (!filtro.TieneCriterios())
+        {
+            return new List<Usuario>();
+        }
+        return FiltrarPor(filtro.Texto).ToList();
     }
 
     public void ActualizarUsuario(Usuario usuario)
