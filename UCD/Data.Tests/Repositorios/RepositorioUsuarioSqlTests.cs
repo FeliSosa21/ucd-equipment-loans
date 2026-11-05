@@ -145,9 +145,31 @@ public sealed class RepositorioUsuarioSqlTests
         Assert.AreEqual(0, usuarios.Count);
     }
 
+    [TestMethod]
+    public void ObtenerUsuarios_TextoQueCoincideConVarios_DevuelveSoloEsos()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "12345672", nombre: "Lucia", apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy"));
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "45678905", nombre: "Martin", apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy"));
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "67890127", nombre: "Sofia", apellido: "Gomez", correo: "sofia.gomez@ucd.edu.uy"));
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = "fernandez" });
+
+        CollectionAssert.AreEquivalent(new List<string> { "12345672", "45678905" },
+            usuarios.Select(usuario => usuario.Dni).ToList());
+    }
+
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
     {
         return new Usuario(dni: dni, nombre: nombre, apellido: apellido, correo: correo, contrasena: "Prueba2026");
+    }
+
+    private IReadOnlyList<Usuario> LeerConOtroContexto(FiltroUsuarios filtro)
+    {
+        using SqlContext contexto = new SqlContext(_opciones);
+        return new RepositorioUsuarioSql(contexto).ObtenerUsuarios(filtro);
     }
 }
