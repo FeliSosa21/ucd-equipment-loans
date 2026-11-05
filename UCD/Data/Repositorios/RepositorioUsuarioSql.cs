@@ -40,7 +40,7 @@ public class RepositorioUsuarioSql
 
         if (filtro is not null)
         {
-            string buscado = filtro.ToLower();
+            string buscado = filtro.Trim().ToLower();
             usuarios = usuarios.Where(usuario => usuario.Nombre.ToLower().Contains(buscado)
                                                  || usuario.Apellido.ToLower().Contains(buscado)
                                                  || usuario.Dni.Contains(buscado)
