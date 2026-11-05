@@ -156,11 +156,7 @@ public sealed class RepositorioPrestamoSqlTests
         TipoEquipamiento tipo = CrearTipoEquipamiento();
         CrearUnidadesDelTipo(tipo);
 
-        Prestamo prestamo = new Prestamo(
-            solicitante: CrearSolicitante(),
-            tipoEquipamiento: tipo,
-            cantidadSolicitada: CantidadSolicitada,
-            fechaHoraPrestamo: FechaFija);
+        Prestamo prestamo = CrearPrestamoDelTipo(tipo);
         GuardarConOtroContexto(prestamo);
 
         Prestamo? obtenido = ObtenerConOtroContexto(prestamo.Id);
@@ -191,11 +187,7 @@ public sealed class RepositorioPrestamoSqlTests
         TipoEquipamiento tipo = CrearTipoEquipamiento();
         List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo);
 
-        Prestamo prestamo = new Prestamo(
-            solicitante: CrearSolicitante(),
-            tipoEquipamiento: tipo,
-            cantidadSolicitada: CantidadSolicitada,
-            fechaHoraPrestamo: FechaFija);
+        Prestamo prestamo = CrearPrestamoDelTipo(tipo);
         prestamo.Activar(unidades);
         GuardarConOtroContexto(prestamo);
 
@@ -228,9 +220,14 @@ public sealed class RepositorioPrestamoSqlTests
 
     private static Prestamo CrearPrestamo()
     {
+        return CrearPrestamoDelTipo(CrearTipoEquipamiento());
+    }
+
+    private static Prestamo CrearPrestamoDelTipo(TipoEquipamiento tipo)
+    {
         return new Prestamo(
             solicitante: CrearSolicitante(),
-            tipoEquipamiento: CrearTipoEquipamiento(),
+            tipoEquipamiento: tipo,
             cantidadSolicitada: CantidadSolicitada,
             fechaHoraPrestamo: FechaFija);
     }
