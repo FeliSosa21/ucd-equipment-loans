@@ -31,5 +31,6 @@ public class RepositorioPrestamoSql
 
     public void ActualizarPrestamo(Prestamo prestamo)
     {
+        _contexto.SaveChanges();
     }
 }
