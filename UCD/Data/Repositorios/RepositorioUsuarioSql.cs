@@ -34,17 +34,6 @@ public class RepositorioUsuarioSql
             .FirstOrDefault(usuario => usuario.Correo.ToLower() == buscado);
     }
 
-    public IReadOnlyList<Usuario> ObtenerPaginaDeUsuarios(string? filtro, int pagina, int tamanoPagina)
-    {
-        return FiltrarPor(filtro)
-            .OrderBy(usuario => usuario.Apellido)
-            .ThenBy(usuario => usuario.Nombre)
-            .ThenBy(usuario => usuario.Dni)
-            .Skip((pagina - 1) * tamanoPagina)
-            .Take(tamanoPagina)
-            .ToList();
-    }
-
     private IQueryable<Usuario> FiltrarPor(string? filtro)
     {
         IQueryable<Usuario> usuarios = UsuariosConTipo;
@@ -59,11 +48,6 @@ public class RepositorioUsuarioSql
         }
 
         return usuarios;
-    }
-
-    public int ContarUsuarios(string? filtro)
-    {
-        return FiltrarPor(filtro).Count();
     }
 
     public void ActualizarUsuario(Usuario usuario)
