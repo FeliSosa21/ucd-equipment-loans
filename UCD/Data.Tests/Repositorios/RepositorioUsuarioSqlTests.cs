@@ -161,6 +161,22 @@ public sealed class RepositorioUsuarioSqlTests
             usuarios.Select(usuario => usuario.Dni).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerUsuarios_VariosCoinciden_LosDevuelveOrdenadosPorApellido()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "67890127", nombre: "Sofia", apellido: "Gomez", correo: "sofia.gomez@ucd.edu.uy"));
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "12345672", nombre: "Lucia", apellido: "Alvarez", correo: "lucia.alvarez@ucd.edu.uy"));
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "45678905", nombre: "Martin", apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy"));
+        
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = "ucd" });
+        
+        CollectionAssert.AreEqual(new List<string> { "Alvarez", "Fernandez","Gomez" },
+            usuarios.Select(usuario => usuario.Apellido).ToList());
+    }
+
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
     {
