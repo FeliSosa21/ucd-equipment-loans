@@ -28,4 +28,8 @@ public class RepositorioPrestamoSql
             .Include(prestamo => prestamo.UnidadesAsignadas)
             .FirstOrDefault(prestamo => prestamo.Id == id);
     }
+
+    public void ActualizarPrestamo(Prestamo prestamo)
+    {
+    }
 }

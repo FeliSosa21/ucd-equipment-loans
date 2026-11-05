@@ -199,6 +199,30 @@ public sealed class RepositorioPrestamoSqlTests
         CollectionAssert.AreEquivalent(idsEsperados, idsAsignados);
     }
 
+    [TestMethod]
+    public void ActualizarPrestamo_PrestamoObtenidoYRechazado_OtroContextoVeElRechazo()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        GuardarConOtroContexto(prestamo);
+        GuardarUsuarioConOtroContexto(CrearEvaluador());
+
+        using SqlContext contextoQueModifica = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueModifica);
+        Prestamo obtenido = repositorio.ObtenerPrestamoPorId(prestamo.Id)!;
+        Usuario evaluador = contextoQueModifica.Usuarios.Single(usuario => usuario.Dni == DniEvaluador);
+        obtenido.Rechazar(evaluador, MotivoDelRechazo);
+
+        repositorio.ActualizarPrestamo(obtenido);
+
+        Prestamo? leido = ObtenerConOtroContexto(prestamo.Id);
+        Assert.IsNotNull(leido);
+        Assert.AreEqual(EstadoPrestamo.Rechazado, leido.Estado);
+
+        Assert.AreEqual(MotivoDelRechazo, leido.MotivoRechazo);
+        Assert.IsNotNull(leido.Evaluador);
+        Assert.AreEqual(DniEvaluador, leido.Evaluador.Dni);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -208,6 +232,14 @@ public sealed class RepositorioPrestamoSqlTests
         {
             repositorio.AgregarPrestamo(prestamo);
         }
+    }
+
+    private void GuardarUsuarioConOtroContexto(Usuario usuario) 
+    {
+        using SqlContext contextoQueGuarda = new SqlContext(_opciones);
+
+        contextoQueGuarda.Usuarios.Add(usuario);
+        contextoQueGuarda.SaveChanges();
     }
 
     private Prestamo? ObtenerConOtroContexto(Guid idPrestamo)
