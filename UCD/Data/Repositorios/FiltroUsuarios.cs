@@ -8,6 +8,6 @@ public class FiltroUsuarios
 
     public bool TieneCriterios()
     {
-        return !string.IsNullOrWhiteSpace(Texto);
+        return !string.IsNullOrWhiteSpace(Texto) || Tipo is not null;
     }
 }
