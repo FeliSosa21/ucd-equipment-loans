@@ -135,6 +135,16 @@ public sealed class RepositorioUsuarioSqlTests
         Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ObtenerUsuarios(null!));
     }
 
+    [TestMethod]
+    public void ObtenerProductos_FiltroSinCriterios_DevuelveListaVacia()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario());
+        
+        IReadOnlyList<Usuario> usuarios = _repositorio.ObtenerUsuarios(new FiltroUsuarios());
+        
+        Assert.AreEqual(0, usuarios.Count);
+    }
+
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
     {
