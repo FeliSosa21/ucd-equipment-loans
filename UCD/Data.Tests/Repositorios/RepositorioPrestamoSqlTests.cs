@@ -109,6 +109,146 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(MotivoDelRechazo, leido.MotivoRechazo);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamoPorId_IdInexistente_DevuelveNulo()
+    {
+        GuardarConOtroContexto(CrearPrestamo());
+        Guid idInexistente = Guid.NewGuid();
+
+        Prestamo? obtenido = ObtenerConOtroContexto(idInexistente);
+
+        Assert.IsNull(obtenido);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamoPorId_PrestamoAgregado_DevuelveSusDatos()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        GuardarConOtroContexto(prestamo);
+
+        Prestamo? obtenido = ObtenerConOtroContexto(prestamo.Id);
+
+        Assert.IsNotNull(obtenido);
+        Assert.AreEqual(prestamo.Id, obtenido.Id);
+        Assert.AreEqual(prestamo.CantidadSolicitada, obtenido.CantidadSolicitada);
+        Assert.AreEqual(prestamo.FechaHoraPrestamo, obtenido.FechaHoraPrestamo);
+        Assert.AreEqual(prestamo.FechaEsperadaDevolucion, obtenido.FechaEsperadaDevolucion);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamoPorId_PrestamoAgregado_TraeSolicitanteYTipo()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        GuardarConOtroContexto(prestamo);
+
+        Prestamo? obtenido = ObtenerConOtroContexto(prestamo.Id);
+
+        Assert.IsNotNull(obtenido);
+        Assert.IsNotNull(obtenido.Solicitante);
+        Assert.AreEqual(DniSolicitante, obtenido.Solicitante.Dni);
+        Assert.IsNotNull(obtenido.TipoEquipamiento);
+        Assert.AreEqual(NombreTipo, obtenido.TipoEquipamiento.Nombre);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamoPorId_TipoConUnidades_TraeLasUnidadesDelTipo()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento();
+        CrearUnidadesDelTipo(tipo);
+
+        Prestamo prestamo = CrearPrestamoDelTipo(tipo);
+        GuardarConOtroContexto(prestamo);
+
+        Prestamo? obtenido = ObtenerConOtroContexto(prestamo.Id);
+
+        Assert.IsNotNull(obtenido);
+        List<string> idsEsperados = new List<string> { IdPrimeraUnidad, IdSegundaUnidad };
+        List<string> idsDelTipo = obtenido.TipoEquipamiento.Unidades.Select(unidad => unidad.IdInstitucional).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsDelTipo);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamoPorId_PrestamoRechazado_TraeElEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        prestamo.Rechazar(CrearEvaluador(), MotivoDelRechazo);
+        GuardarConOtroContexto(prestamo);
+
+        Prestamo? obtenido = ObtenerConOtroContexto(prestamo.Id);
+
+        Assert.IsNotNull(obtenido);
+        Assert.IsNotNull(obtenido.Evaluador);
+        Assert.AreEqual(DniEvaluador, obtenido.Evaluador.Dni);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamoPorId_PrestamoActivo_TraeSusUnidadesAsignadas()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento();
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo);
+
+        Prestamo prestamo = CrearPrestamoDelTipo(tipo);
+        prestamo.Activar(unidades);
+        GuardarConOtroContexto(prestamo);
+
+        Prestamo? obtenido = ObtenerConOtroContexto(prestamo.Id);
+
+        Assert.IsNotNull(obtenido);
+        List<string> idsEsperados = new List<string> { IdPrimeraUnidad, IdSegundaUnidad };
+        List<string> idsAsignados = obtenido.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsAsignados);
+    }
+
+    [TestMethod]
+    public void ActualizarPrestamo_PrestamoObtenidoYRechazado_OtroContextoVeElRechazo()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        GuardarConOtroContexto(prestamo);
+        GuardarUsuarioConOtroContexto(CrearEvaluador());
+
+        using SqlContext contextoQueModifica = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueModifica);
+        Prestamo obtenido = repositorio.ObtenerPrestamoPorId(prestamo.Id)!;
+        Usuario evaluador = contextoQueModifica.Usuarios.Single(usuario => usuario.Dni == DniEvaluador);
+        obtenido.Rechazar(evaluador, MotivoDelRechazo);
+
+        repositorio.ActualizarPrestamo(obtenido);
+
+        Prestamo? leido = ObtenerConOtroContexto(prestamo.Id);
+        Assert.IsNotNull(leido);
+        Assert.AreEqual(EstadoPrestamo.Rechazado, leido.Estado);
+        Assert.AreEqual(MotivoDelRechazo, leido.MotivoRechazo);
+        Assert.IsNotNull(leido.Evaluador);
+        Assert.AreEqual(DniEvaluador, leido.Evaluador.Dni);
+    }
+
+    [TestMethod]
+    public void ActualizarPrestamo_PrestamoObtenidoYAprobado_OtroContextoLoVeActivoConSusUnidadesPrestadas()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento(requiereAprobacion: true);
+        CrearUnidadesDelTipo(tipo);
+        Prestamo prestamo = CrearPrestamoDelTipo(tipo);
+        GuardarConOtroContexto(prestamo);
+        GuardarUsuarioConOtroContexto(CrearEvaluador());
+
+        using SqlContext contextoQueModifica = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueModifica);
+        Prestamo obtenido = repositorio.ObtenerPrestamoPorId(prestamo.Id)!;
+        Usuario evaluador = contextoQueModifica.Usuarios.Single(usuario => usuario.Dni == DniEvaluador);
+        List<UnidadFisica> unidades = obtenido.TipoEquipamiento.UnidadesDisponibles().Take(obtenido.CantidadSolicitada).ToList();
+        obtenido.Aprobar(evaluador, unidades);
+
+        repositorio.ActualizarPrestamo(obtenido);
+
+        Prestamo? leido = ObtenerConOtroContexto(prestamo.Id);
+        Assert.IsNotNull(leido);
+        Assert.AreEqual(EstadoPrestamo.Activo, leido.Estado);
+        List<string> idsEsperados = new List<string> { IdPrimeraUnidad, IdSegundaUnidad };
+        List<string> idsAsignados = leido.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsAsignados);
+        Assert.AreEqual(0, leido.TipoEquipamiento.CantidadDisponibles());
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -120,11 +260,32 @@ public sealed class RepositorioPrestamoSqlTests
         }
     }
 
+    private void GuardarUsuarioConOtroContexto(Usuario usuario)
+    {
+        using SqlContext contextoQueGuarda = new SqlContext(_opciones);
+
+        contextoQueGuarda.Usuarios.Add(usuario);
+        contextoQueGuarda.SaveChanges();
+    }
+
+    private Prestamo? ObtenerConOtroContexto(Guid idPrestamo)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+
+        return repositorio.ObtenerPrestamoPorId(idPrestamo);
+    }
+
     private static Prestamo CrearPrestamo()
+    {
+        return CrearPrestamoDelTipo(CrearTipoEquipamiento());
+    }
+
+    private static Prestamo CrearPrestamoDelTipo(TipoEquipamiento tipo)
     {
         return new Prestamo(
             solicitante: CrearSolicitante(),
-            tipoEquipamiento: CrearTipoEquipamiento(),
+            tipoEquipamiento: tipo,
             cantidadSolicitada: CantidadSolicitada,
             fechaHoraPrestamo: FechaFija);
     }
@@ -157,13 +318,13 @@ public sealed class RepositorioPrestamoSqlTests
         return usuario;
     }
 
-    private static TipoEquipamiento CrearTipoEquipamiento()
+    private static TipoEquipamiento CrearTipoEquipamiento(bool requiereAprobacion = false)
     {
         TipoEquipamiento tipo = new TipoEquipamiento(
             nombre: NombreTipo,
             descripcion: "Computadora para laboratorio",
             duracionMaxPrestamo: 5,
-            requiereAprobacion: false,
+            requiereAprobacion: requiereAprobacion,
             categoria: Categoria.Computacion);
 
         return tipo;
