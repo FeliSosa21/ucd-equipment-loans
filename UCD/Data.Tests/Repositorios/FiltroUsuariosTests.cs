@@ -57,4 +57,16 @@ public sealed class FiltroUsuariosTests
 
         Assert.AreEqual("fernandez", textoNormalizado);
     }
+    
+    [TestMethod]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void TextoNormalizado_TextoEnBlanco_DevuelveNull(string textoEnBlanco)
+    {
+        FiltroUsuarios filtro = new FiltroUsuarios { Texto = textoEnBlanco };
+
+        string? textoNormalizado = filtro.TextoNormalizado;
+
+        Assert.IsNull(textoNormalizado);
+    }
 }
