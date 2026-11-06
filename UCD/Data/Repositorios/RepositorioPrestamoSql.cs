@@ -36,6 +36,10 @@ public class RepositorioPrestamoSql
 
     public IReadOnlyList<Prestamo> ObtenerPrestamos(FiltroPorCatalogoYFechas filtro)
     {
-        return _contexto.Prestamos.ToList();
+        return _contexto.Prestamos
+            .Include(prestamo => prestamo.Solicitante)
+            .Include(prestamo => prestamo.TipoEquipamiento)
+            .Include(prestamo => prestamo.UnidadesAsignadas)
+            .ToList();
     }
 }
