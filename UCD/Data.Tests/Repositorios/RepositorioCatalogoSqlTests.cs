@@ -8,6 +8,7 @@ namespace Data.Tests.Repositorios;
 public sealed class RepositorioCatalogoSqlTests
 {
     private const string NombreCatalogo = "Aparatos Electronicos";
+    private const string NombreSegundoCatalogo = "Camaras de foto";
 
     private DbContextOptions<SqlContext> _opciones = null!;
 
@@ -47,11 +48,33 @@ public sealed class RepositorioCatalogoSqlTests
     }
 
     [TestMethod]
-    public void AgregarCatalogo_CatalogoNull_LanzarArgumentNullException()
+    public void AgregarCatalogo_CatalogoNull_LanzaArgumentNullException()
     {
         using SqlContext contexto = new SqlContext(_opciones);
         RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contexto);
 
         Assert.ThrowsException<ArgumentNullException>(() => repositorio.AgregarCatalogo(null!));
+    }
+
+    [TestMethod]
+    public void ObtenerCatalogoActivoPorId_IdExistente_DevuelveElCatalogo()
+    {
+        Catalogo primero = new Catalogo(NombreCatalogo);
+        Catalogo segundo = new Catalogo(NombreSegundoCatalogo);
+
+        using (SqlContext contextoQueGuarda = new SqlContext(_opciones))
+        {
+            RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueGuarda);
+            repositorio.AgregarCatalogo(primero);
+            repositorio.AgregarCatalogo(segundo);
+        }
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        Catalogo? resultado = repositorioQueLee.ObtenerCatalogoPorId(segundo.Id);
+
+        Assert.IsNotNull(resultado);
+        Assert.AreEqual(segundo.Id, resultado.Id);
+        Assert.AreEqual(NombreSegundoCatalogo, resultado.Nombre);
     }
 }
