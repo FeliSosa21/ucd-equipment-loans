@@ -298,6 +298,22 @@ public sealed class RepositorioPrestamoSqlTests
         CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamos_FiltroHasta_ExcluyeElDeEsaFechaYLosPosteriores()
+    {
+        Prestamo anterior = CrearPrestamoEnLaFecha(FechaFija.AddDays(-1));
+        Prestamo enElLimite = CrearPrestamoEnLaFecha(FechaFija);
+        Prestamo posterior = CrearPrestamoEnLaFecha(FechaFija.AddDays(1));
+        GuardarConOtroContexto(anterior, enElLimite, posterior);
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { Hasta = FechaFija };
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosConOtroContexto(filtro);
+
+        List<Guid> idsEsperados = new List<Guid> { anterior.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
