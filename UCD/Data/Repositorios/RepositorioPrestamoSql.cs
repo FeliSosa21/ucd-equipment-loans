@@ -41,6 +41,7 @@ public class RepositorioPrestamoSql
             .Include(prestamo => prestamo.TipoEquipamiento)
             .Include(prestamo => prestamo.UnidadesAsignadas)
             .Where(prestamo => filtro.Desde == null || prestamo.FechaHoraPrestamo >= filtro.Desde)
+            .Where(prestamo => filtro.Hasta == null || prestamo.FechaHoraPrestamo < filtro.Hasta)
             .ToList();
     }
 }
