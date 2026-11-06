@@ -17,6 +17,8 @@ public class RepositorioUsuarioSql
 
     public void AgregarUsuario(Usuario usuario)
     {
+        ArgumentNullException.ThrowIfNull(usuario);
+        
         ValidarQueNoExista(usuario);
 
         _contexto.Usuarios.Add(usuario);
