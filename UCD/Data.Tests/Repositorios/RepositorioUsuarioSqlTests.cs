@@ -317,6 +317,12 @@ public sealed class RepositorioUsuarioSqlTests
 
         Assert.ThrowsException<InvalidOperationException>(() => _repositorio.AgregarUsuario(repetido));
     }
+    
+    [TestMethod]
+    public void AgregarUsuario_UsuarioNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => _repositorio.AgregarUsuario(null!));
+    }
 
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
