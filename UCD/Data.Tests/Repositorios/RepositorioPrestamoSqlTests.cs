@@ -314,9 +314,44 @@ public sealed class RepositorioPrestamoSqlTests
         CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamos_FiltroPorCatalogo_DevuelveSoloLosDeEseCatalogo()
+    {
+        TipoEquipamiento tipoDelElegido = CrearTipoEquipamiento();
+        TipoEquipamiento tipoDelOtro = CrearTipoEquipamiento();
+        Catalogo catalogoElegido = new Catalogo("Laboratorio de Informatica");
+        catalogoElegido.AgregarTipo(tipoDelElegido);
+        Catalogo otroCatalogo = new Catalogo("Audiovisuales");
+        otroCatalogo.AgregarTipo(tipoDelOtro);
+
+        Prestamo delElegido = CrearPrestamoDelTipo(tipoDelElegido);
+        Prestamo delOtro = CrearPrestamoDelTipo(tipoDelOtro);
+        GuardarCatalogosYPrestamos(new List<Catalogo> { catalogoElegido, otroCatalogo }, delElegido, delOtro);
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { IdCatalogo = catalogoElegido.Id };
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosConOtroContexto(filtro);
+
+        List<Guid> idsEsperados = new List<Guid> { delElegido.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueGuarda);
+
+        foreach (Prestamo prestamo in prestamos)
+        {
+            repositorio.AgregarPrestamo(prestamo);
+        }
+    }
+
+    private void GuardarCatalogosYPrestamos(IEnumerable<Catalogo> catalogos, params Prestamo[] prestamos)
+    {
+        using SqlContext contextoQueGuarda = new SqlContext(_opciones);
+        contextoQueGuarda.Catalogos.AddRange(catalogos);
+        contextoQueGuarda.SaveChanges();
         RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueGuarda);
 
         foreach (Prestamo prestamo in prestamos)
