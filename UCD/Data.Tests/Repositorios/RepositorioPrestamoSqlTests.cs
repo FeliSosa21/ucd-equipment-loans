@@ -250,7 +250,7 @@ public sealed class RepositorioPrestamoSqlTests
     }
 
     [TestMethod]
-    public void ObtenerPrestamos_SinFiltros_DevuelveElPrestamoAgregado() 
+    public void ObtenerPrestamos_SinFiltros_DevuelveElPrestamoAgregado()
     {
         Prestamo prestamo = CrearPrestamo();
         GuardarConOtroContexto(prestamo);
