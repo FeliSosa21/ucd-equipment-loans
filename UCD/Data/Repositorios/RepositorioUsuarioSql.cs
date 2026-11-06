@@ -51,7 +51,7 @@ public class RepositorioUsuarioSql
             return new List<Usuario>();
         }
 
-        IQueryable<Usuario> usuarios = FiltrarPorTexto(UsuariosConTipo, filtro.Texto);
+        IQueryable<Usuario> usuarios = FiltrarPorTexto(UsuariosConTipo, filtro.TextoNormalizado);
         usuarios = FiltrarPorTipo(usuarios, filtro.Tipo);
 
         return usuarios
@@ -68,19 +68,17 @@ public class RepositorioUsuarioSql
         _contexto.SaveChanges();
     }
 
-    private IQueryable<Usuario> FiltrarPorTexto(IQueryable<Usuario> usuarios, string? texto)
+    private IQueryable<Usuario> FiltrarPorTexto(IQueryable<Usuario> usuarios, string? textoNormalizado)
     {
-        if (string.IsNullOrWhiteSpace(texto))
+        if (textoNormalizado is null)
         {
             return usuarios;
         }
 
-        string textoEnMinusculas = texto.Trim().ToLower();
-
-        return usuarios.Where(usuario => usuario.Nombre.ToLower().Contains(textoEnMinusculas)
-                                         || usuario.Apellido.ToLower().Contains(textoEnMinusculas)
-                                         || usuario.Dni.Contains(textoEnMinusculas)
-                                         || usuario.Correo.ToLower().Contains(textoEnMinusculas));
+        return usuarios.Where(usuario => usuario.Nombre.ToLower().Contains(textoNormalizado)
+                                         || usuario.Apellido.ToLower().Contains(textoNormalizado)
+                                         || usuario.Dni.Contains(textoNormalizado)
+                                         || usuario.Correo.ToLower().Contains(textoNormalizado));
     }
 
     private IQueryable<Usuario> FiltrarPorTipo(IQueryable<Usuario> usuarios, TipoUsuario? tipo)

@@ -10,6 +10,6 @@ public class FiltroUsuarios
         string.IsNullOrWhiteSpace(Texto)? null : Texto.Trim().ToLower();
     public bool TieneCriterios()
     {
-        return !string.IsNullOrWhiteSpace(Texto) || Tipo is not null;
+        return TextoNormalizado is not null || Tipo is not null;
     }
 }
