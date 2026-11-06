@@ -86,6 +86,26 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.IsNull(resultado);
     }
 
+    [TestMethod]
+    public void ObtenerCatalogoActivoPorId_CatalogoEliminado_DevuelveNull()
+    {
+        Catalogo catalogo = new Catalogo(NombreCatalogo);
+        GuardarConOtroContexto(catalogo);
+
+        using (SqlContext contextoQueModifica = new SqlContext(_opciones))
+        {
+            Catalogo guardado = contextoQueModifica.Catalogos.Find(catalogo.Id)!;
+            guardado.DarDeBaja();
+            contextoQueModifica.SaveChanges();
+        }
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        Catalogo? resultado = repositorioQueLee.ObtenerCatalogoActivoPorId(catalogo.Id);
+
+        Assert.IsNull(resultado);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
