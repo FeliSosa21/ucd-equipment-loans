@@ -249,6 +249,20 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(0, leido.TipoEquipamiento.CantidadDisponibles());
     }
 
+    [TestMethod]
+    public void ObtenerPrestamos_SinFiltros_DevuelveElPrestamoAgregado() 
+    {
+        Prestamo prestamo = CrearPrestamo();
+        GuardarConOtroContexto(prestamo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+        IReadOnlyList<Prestamo> obtenidos = repositorio.ObtenerPrestamos(new FiltroPorCatalogoYFechas());
+
+        Assert.AreEqual(1, obtenidos.Count);
+        Assert.AreEqual(prestamo.Id, obtenidos[0].Id);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);

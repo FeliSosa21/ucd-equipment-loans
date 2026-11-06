@@ -33,4 +33,9 @@ public class RepositorioPrestamoSql
     {
         _contexto.SaveChanges();
     }
+
+    public IReadOnlyList<Prestamo> ObtenerPrestamos(FiltroPorCatalogoYFechas filtro)
+    {
+        return new List<Prestamo>();
+    }
 }
