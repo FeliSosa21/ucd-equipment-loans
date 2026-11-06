@@ -512,6 +512,16 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void Eliminar_UsuarioActivo_QuedaEliminado()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.Eliminar();
+
+        Assert.IsTrue(usuario.Eliminado);
+    }
+
+    [TestMethod]
     public void AsignarTipo_Administrador_TieneTipoAdministrador()
     {
         Usuario usuario = CrearUsuario();

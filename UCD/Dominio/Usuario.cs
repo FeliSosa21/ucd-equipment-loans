@@ -17,6 +17,7 @@ public class Usuario
     public string Correo { get; private set; }
     private string Contrasena { get; set; }
     public EstadoUsuario Estado { get; private set; }
+    public bool Eliminado { get; private set; }
     public bool DebeCambiarContrasena { get; private set; }
     public TipoUsuario Tipo { get; private set; }
     public string NombreCompleto => $"{Nombre} {Apellido}";
@@ -80,6 +81,10 @@ public class Usuario
     public void Reactivar()
     {
         Estado = EstadoUsuario.Activo;
+    }
+
+    public void Eliminar()
+    {
     }
 
     public void AsignarTipo(TipoUsuario tipo)
