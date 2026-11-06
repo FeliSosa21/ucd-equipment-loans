@@ -336,6 +336,21 @@ public sealed class RepositorioPrestamoSqlTests
         CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamos_SinFiltros_DelMasViejoAlMasNuevo()
+    {
+        Prestamo masNuevo = CrearPrestamoEnLaFecha(FechaFija.AddDays(2));
+        Prestamo masViejo = CrearPrestamoEnLaFecha(FechaFija);
+        Prestamo intermedio = CrearPrestamoEnLaFecha(FechaFija.AddDays(1));
+        GuardarConOtroContexto(masNuevo, masViejo, intermedio);
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosConOtroContexto(new FiltroPorCatalogoYFechas());
+
+        List<Guid> idsEsperados = new List<Guid> { masViejo.Id, intermedio.Id, masNuevo.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEqual(idsEsperados, idsObtenidos);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
