@@ -62,13 +62,7 @@ public sealed class RepositorioCatalogoSqlTests
     {
         Catalogo primero = new Catalogo(NombreCatalogo);
         Catalogo segundo = new Catalogo(NombreSegundoCatalogo);
-
-        using (SqlContext contextoQueGuarda = new SqlContext(_opciones))
-        {
-            RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueGuarda);
-            repositorio.AgregarCatalogo(primero);
-            repositorio.AgregarCatalogo(segundo);
-        }
+        GuardarConOtroContexto(primero, segundo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
@@ -83,17 +77,23 @@ public sealed class RepositorioCatalogoSqlTests
     public void ObtenerCatalogoActivoPorId_IdInexistente_DevuelveNull()
     {
         Catalogo catalogo = new Catalogo(NombreCatalogo);
-
-        using (SqlContext contextoQueGuarda = new SqlContext(_opciones))
-        {
-            RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueGuarda);
-            repositorio.AgregarCatalogo(catalogo);
-        }
+        GuardarConOtroContexto(catalogo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
         Catalogo? resultado = repositorioQueLee.ObtenerCatalogoActivoPorId(IdInexistente);
 
         Assert.IsNull(resultado);
+    }
+
+    private void GuardarConOtroContexto(params Catalogo[] catalogos)
+    {
+        using SqlContext contextoQueGuarda = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueGuarda);
+
+        foreach (Catalogo catalogo in catalogos)
+        {
+            repositorio.AgregarCatalogo(catalogo);
+        }
     }
 }
