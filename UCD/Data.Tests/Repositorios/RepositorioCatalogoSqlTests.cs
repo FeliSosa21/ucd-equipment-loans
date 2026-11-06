@@ -9,6 +9,7 @@ public sealed class RepositorioCatalogoSqlTests
 {
     private const string NombreCatalogo = "Aparatos Electronicos";
     private const string NombreSegundoCatalogo = "Camaras de foto";
+    private const int IdInexistente = 999;
 
     private DbContextOptions<SqlContext> _opciones = null!;
 
@@ -76,5 +77,23 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.IsNotNull(resultado);
         Assert.AreEqual(segundo.Id, resultado.Id);
         Assert.AreEqual(NombreSegundoCatalogo, resultado.Nombre);
+    }
+
+    [TestMethod]
+    public void ObtenerCatalogoActivoPorId_IdInexistente_DevuelveNull()
+    {
+        Catalogo catalogo = new Catalogo(NombreCatalogo);
+
+        using (SqlContext contextoQueGuarda = new SqlContext(_opciones))
+        {
+            RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueGuarda);
+            repositorio.AgregarCatalogo(catalogo);
+        }
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        Catalogo? resultado = repositorioQueLee.ObtenerCatalogoActivoPorId(IdInexistente);
+
+        Assert.IsNull(resultado);
     }
 }
