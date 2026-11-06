@@ -8,13 +8,19 @@ public class RepositorioCatalogoSql
 {
     private readonly SqlContext _contexto;
 
-    public RepositorioCatalogoSql(SqlContext context)
+    public RepositorioCatalogoSql(SqlContext contexto)
     {
-        _contexto = context;
+        _contexto = contexto;
     }
 
     public IReadOnlyList<Catalogo> ObtenerCatalogosActivos()
     {
         return _contexto.Catalogos.ToList();
+    }
+
+    public void AgregarCatalogo(Catalogo catalogo)
+    {
+        _contexto.Catalogos.Add(catalogo);
+        _contexto.SaveChanges();
     }
 }
