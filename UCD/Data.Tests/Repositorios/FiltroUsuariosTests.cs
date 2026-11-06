@@ -69,4 +69,14 @@ public sealed class FiltroUsuariosTests
 
         Assert.IsNull(textoNormalizado);
     }
+    
+    [TestMethod]
+    public void TieneCriterios_TextoEnBlancoConTipo_DevuelveTrue()
+    {
+        FiltroUsuarios filtro = new FiltroUsuarios { Texto = "   ", Tipo = TipoUsuario.SinPermisos() };
+
+        bool tieneCriterios = filtro.TieneCriterios();
+
+        Assert.IsTrue(tieneCriterios);
+    }
 }
