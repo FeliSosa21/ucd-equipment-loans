@@ -63,6 +63,8 @@ public class RepositorioUsuarioSql
 
     public void ActualizarUsuario(Usuario usuario)
     {
+        _contexto.Usuarios.Update(usuario);
+        
         _contexto.SaveChanges();
     }
 
