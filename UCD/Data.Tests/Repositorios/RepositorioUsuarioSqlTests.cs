@@ -33,7 +33,8 @@ public sealed class RepositorioUsuarioSqlTests
 
         _repositorio.AgregarUsuario(usuario);
 
-        Assert.AreEqual(1, _contexto.Usuarios.Count());
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(1, contextoQueLee.Usuarios.Count());
     }
 
     [TestMethod]
@@ -42,9 +43,10 @@ public sealed class RepositorioUsuarioSqlTests
         Usuario usuario = CrearUsuario();
         _repositorio.AgregarUsuario(usuario);
 
-        Usuario? resultado = _repositorio.ObtenerUsuarioPorDni(usuario.Dni);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario? resultado = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(usuario.Dni);
 
-        Assert.AreSame(usuario, resultado);
+        Assert.AreEqual(usuario.Dni, resultado?.Dni);
     }
 
     [TestMethod]
@@ -61,9 +63,10 @@ public sealed class RepositorioUsuarioSqlTests
         Usuario usuario = CrearUsuario();
         _repositorio.AgregarUsuario(usuario);
 
-        Usuario? resultado = _repositorio.ObtenerUsuarioPorCorreo(usuario.Correo);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario? resultado = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorCorreo(usuario.Correo);
 
-        Assert.AreSame(usuario, resultado);
+        Assert.AreEqual(usuario.Dni, resultado?.Dni);
     }
 
     [TestMethod]
@@ -72,9 +75,11 @@ public sealed class RepositorioUsuarioSqlTests
         Usuario usuario = CrearUsuario();
         _repositorio.AgregarUsuario(usuario);
 
-        Usuario? resultado = _repositorio.ObtenerUsuarioPorCorreo("LUCIA.Fernandez@UCD.edu.uy");
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario? resultado = new RepositorioUsuarioSql(contextoQueLee)
+            .ObtenerUsuarioPorCorreo("LUCIA.Fernandez@UCD.edu.uy");
 
-        Assert.AreSame(usuario, resultado);
+        Assert.AreEqual(usuario.Dni, resultado?.Dni);
     }
 
     [TestMethod]
@@ -296,6 +301,7 @@ public sealed class RepositorioUsuarioSqlTests
 
         IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = "fernandez" });
 
+        Assert.AreEqual(1, usuarios.Count);
         Assert.AreEqual(usuario.Tipo.Id, usuarios[0].Tipo.Id);
     }
 
@@ -317,25 +323,25 @@ public sealed class RepositorioUsuarioSqlTests
 
         Assert.ThrowsException<InvalidOperationException>(() => _repositorio.AgregarUsuario(repetido));
     }
-    
+
     [TestMethod]
     public void AgregarUsuario_UsuarioNulo_LanzaArgumentNullException()
     {
         Assert.ThrowsException<ArgumentNullException>(() => _repositorio.AgregarUsuario(null!));
     }
-    
+
     [TestMethod]
     public void ObtenerUsuarioPorCorreo_CorreoNulo_LanzaArgumentNullException()
     {
         Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ObtenerUsuarioPorCorreo(null!));
     }
-    
+
     [TestMethod]
     public void ObtenerUsuarioPorDni_DniNulo_LanzaArgumentNullException()
     {
         Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ObtenerUsuarioPorDni(null!));
     }
-    
+
     [TestMethod]
     public void ActualizarUsuario_UsuarioLeidoConOtroContexto_GuardaElCambio()
     {
