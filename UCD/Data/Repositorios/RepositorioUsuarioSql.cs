@@ -27,6 +27,8 @@ public class RepositorioUsuarioSql
 
     public Usuario? ObtenerUsuarioPorDni(string dni)
     {
+        ArgumentNullException.ThrowIfNull(dni);
+        
         return UsuariosConTipo.FirstOrDefault(usuario => usuario.Dni == dni);
     }
 
