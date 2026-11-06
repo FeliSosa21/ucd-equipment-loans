@@ -47,4 +47,14 @@ public sealed class FiltroUsuariosTests
 
         Assert.IsTrue(tieneCriterios);
     }
+    
+    [TestMethod]
+    public void TextoNormalizado_TextoConEspaciosYMayusculas_LoDevuelveRecortadoYEnMinusculas()
+    {
+        FiltroUsuarios filtro = new FiltroUsuarios { Texto = "  FeRnAnDeZ  " };
+
+        string? textoNormalizado = filtro.TextoNormalizado;
+
+        Assert.AreEqual("fernandez", textoNormalizado);
+    }
 }
