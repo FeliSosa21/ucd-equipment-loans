@@ -7,7 +7,7 @@ namespace Data.Tests.Repositorios;
 [TestClass]
 public sealed class RepositorioCatalogoSqlTests
 {
-    private const string NombreTipoCatalogo = "Aparatos Electronicos";
+    private const string NombreCatalogo = "Aparatos Electronicos";
 
     private DbContextOptions<SqlContext> _opciones = null!;
 
@@ -31,7 +31,7 @@ public sealed class RepositorioCatalogoSqlTests
     [TestMethod]
     public void AgregarCatalogo_CatalogoValido_OtroContextoLoEncuentra()
     {
-        Catalogo catalogo = new Catalogo(NombreTipoCatalogo);
+        Catalogo catalogo = new Catalogo(NombreCatalogo);
 
         using (SqlContext contextoQueGuarda = new SqlContext(_opciones))
         {
@@ -43,6 +43,15 @@ public sealed class RepositorioCatalogoSqlTests
         Catalogo? leido = contextoQueLee.Catalogos.Find(catalogo.Id);
 
         Assert.IsNotNull(leido);
-        Assert.AreEqual(NombreTipoCatalogo, leido.Nombre);
+        Assert.AreEqual(NombreCatalogo, leido.Nombre);
+    }
+
+    [TestMethod]
+    public void AgregarCatalogo_CatalogoNull_LanzarArgumentNullException()
+    {
+        using SqlContext contexto = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contexto);
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.AgregarCatalogo(null!));
     }
 }
