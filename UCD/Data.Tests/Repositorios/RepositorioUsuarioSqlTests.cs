@@ -329,6 +329,12 @@ public sealed class RepositorioUsuarioSqlTests
     {
         Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ObtenerUsuarioPorCorreo(null!));
     }
+    
+    [TestMethod]
+    public void ObtenerUsuarioPorDni_DniNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ObtenerUsuarioPorDni(null!));
+    }
 
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
