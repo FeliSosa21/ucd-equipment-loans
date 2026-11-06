@@ -1,6 +1,5 @@
 ﻿using Dominio;
 using Microsoft.EntityFrameworkCore;
-using Data.Repositorios;
 
 namespace Data.Repositorios;
 
@@ -20,6 +19,8 @@ public class RepositorioCatalogoSql
 
     public void AgregarCatalogo(Catalogo catalogo)
     {
+        ArgumentNullException.ThrowIfNull(catalogo);
+
         _contexto.Catalogos.Add(catalogo);
         _contexto.SaveChanges();
     }
