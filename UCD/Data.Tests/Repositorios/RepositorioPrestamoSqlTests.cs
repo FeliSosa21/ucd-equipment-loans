@@ -255,9 +255,7 @@ public sealed class RepositorioPrestamoSqlTests
         Prestamo prestamo = CrearPrestamo();
         GuardarConOtroContexto(prestamo);
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        IReadOnlyList<Prestamo> obtenidos = repositorio.ObtenerPrestamos(new FiltroPorCatalogoYFechas());
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosConOtroContexto(new FiltroPorCatalogoYFechas());
 
         Assert.AreEqual(1, obtenidos.Count);
         Assert.AreEqual(prestamo.Id, obtenidos[0].Id);
@@ -273,9 +271,7 @@ public sealed class RepositorioPrestamoSqlTests
         prestamo.Activar(unidades);
         GuardarConOtroContexto(prestamo);
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        Prestamo obtenido = repositorio.ObtenerPrestamos(new FiltroPorCatalogoYFechas()).Single();
+        Prestamo obtenido = ObtenerPrestamosConOtroContexto(new FiltroPorCatalogoYFechas()).Single();
 
         Assert.IsNotNull(obtenido.Solicitante);
         Assert.AreEqual(DniSolicitante, obtenido.Solicitante.Dni);
@@ -311,6 +307,14 @@ public sealed class RepositorioPrestamoSqlTests
         RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
 
         return repositorio.ObtenerPrestamoPorId(idPrestamo);
+    }
+
+    private IReadOnlyList<Prestamo> ObtenerPrestamosConOtroContexto(FiltroPorCatalogoYFechas filtro)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+
+        return repositorio.ObtenerPrestamos(filtro);
     }
 
     private static Prestamo CrearPrestamo()
