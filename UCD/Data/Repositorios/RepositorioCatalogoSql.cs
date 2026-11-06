@@ -24,4 +24,9 @@ public class RepositorioCatalogoSql
         _contexto.Catalogos.Add(catalogo);
         _contexto.SaveChanges();
     }
+
+    public Catalogo? ObtenerCatalogoPorId(int id)
+    {
+        return _contexto.Catalogos.FirstOrDefault(catalogo => catalogo.Id == id);
+    }
 }
