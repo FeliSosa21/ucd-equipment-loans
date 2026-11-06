@@ -1,5 +1,6 @@
 ﻿using Dominio;
 using Microsoft.EntityFrameworkCore;
+using static Data.Configuraciones.NombresDeMapeo;
 
 namespace Data.Repositorios;
 
@@ -42,6 +43,8 @@ public class RepositorioPrestamoSql
             .Include(prestamo => prestamo.UnidadesAsignadas)
             .Where(prestamo => filtro.Desde == null || prestamo.FechaHoraPrestamo >= filtro.Desde)
             .Where(prestamo => filtro.Hasta == null || prestamo.FechaHoraPrestamo < filtro.Hasta)
+            .Where(prestamo => filtro.IdCatalogo ==
+                null || EF.Property<int>(prestamo.TipoEquipamiento, ColumnaCatalogo) == filtro.IdCatalogo)
             .ToList();
     }
 }
