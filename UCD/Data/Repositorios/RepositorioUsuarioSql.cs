@@ -32,6 +32,8 @@ public class RepositorioUsuarioSql
 
     public Usuario? ObtenerUsuarioPorCorreo(string correo)
     {
+        ArgumentNullException.ThrowIfNull(correo);
+        
         string correoEnMinusculas = correo.ToLower();
 
         return UsuariosConTipo
