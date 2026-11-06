@@ -335,6 +335,27 @@ public sealed class RepositorioUsuarioSqlTests
     {
         Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ObtenerUsuarioPorDni(null!));
     }
+    
+    [TestMethod]
+    public void ActualizarUsuario_UsuarioLeidoConOtroContexto_GuardaElCambio()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario());
+        Usuario leido;
+        using (SqlContext contextoQueLee = new SqlContext(_opciones))
+        {
+            leido = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni("47153923")!;
+        }
+        leido.Desactivar();
+
+        using (SqlContext contextoQueActualiza = new SqlContext(_opciones))
+        {
+            new RepositorioUsuarioSql(contextoQueActualiza).ActualizarUsuario(leido);
+        }
+
+        using SqlContext contextoQueVerifica = new SqlContext(_opciones);
+        Assert.AreEqual(EstadoUsuario.Desactivado,
+            new RepositorioUsuarioSql(contextoQueVerifica).ObtenerUsuarioPorDni("47153923")?.Estado);
+    }
 
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
