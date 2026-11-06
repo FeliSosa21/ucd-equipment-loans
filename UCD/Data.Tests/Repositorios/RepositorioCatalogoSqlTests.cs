@@ -71,7 +71,7 @@ public sealed class RepositorioCatalogoSqlTests
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
-        Catalogo? resultado = repositorioQueLee.ObtenerCatalogoPorId(segundo.Id);
+        Catalogo? resultado = repositorioQueLee.ObtenerCatalogoActivoPorId(segundo.Id);
 
         Assert.IsNotNull(resultado);
         Assert.AreEqual(segundo.Id, resultado.Id);
