@@ -67,7 +67,12 @@ public class RepositorioUsuarioSql
         
         _contexto.SaveChanges();
     }
-
+    
+    public void EliminarUsuario(Usuario usuario)
+    {
+        throw new NotImplementedException();
+    }
+    
     private IQueryable<Usuario> FiltrarPorTexto(IQueryable<Usuario> usuarios, string? textoNormalizado)
     {
         if (textoNormalizado is null)

@@ -363,6 +363,18 @@ public sealed class RepositorioUsuarioSqlTests
             new RepositorioUsuarioSql(contextoQueVerifica).ObtenerUsuarioPorDni("47153923")?.Estado);
     }
 
+    [TestMethod]
+    public void EliminarUsuario_UsuarioAgregado_OtroContextoNoLoTrae()
+    {
+        Usuario usuario = CrearUsuario();
+        _repositorio.AgregarUsuario(usuario);
+        
+        _repositorio.EliminarUsuario(usuario);
+        
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.IsNull(new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(usuario.Dni));
+    }
+    
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
     {
