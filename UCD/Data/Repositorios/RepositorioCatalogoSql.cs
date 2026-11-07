@@ -39,6 +39,8 @@ public class RepositorioCatalogoSql
 
     public bool ExisteActivoConNombre(string nombre, int? idExcluido)
     {
+        ArgumentNullException.ThrowIfNull(nombre);
+
         string nombreBuscado = nombre.Trim().ToLower();
 
         return CatalogosActivos
