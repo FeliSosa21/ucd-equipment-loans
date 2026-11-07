@@ -522,6 +522,16 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void Eliminar_UsuarioActivo_QuedaDesactivado()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.Eliminar();
+
+        Assert.AreEqual(EstadoUsuario.Desactivado, usuario.Estado);
+    }
+
+    [TestMethod]
     public void AsignarTipo_Administrador_TieneTipoAdministrador()
     {
         Usuario usuario = CrearUsuario();
