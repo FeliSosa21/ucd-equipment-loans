@@ -47,4 +47,12 @@ public class RepositorioCatalogoSql
             .Any(catalogo => catalogo.Nombre.Trim().ToLower() == nombreBuscado
                              && catalogo.Id != idExcluido);
     }
+
+    public bool ExisteUnidadConIdInstitucional(string IdUnidad)
+    {
+        return _contexto.Catalogos
+            .SelectMany(catalogo => catalogo.Tipos)
+            .SelectMany(tipos => tipos.Unidades)
+            .Any(unidad => unidad.IdInstitucional == IdUnidad);
+    }
 }
