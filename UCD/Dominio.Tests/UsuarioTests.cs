@@ -532,6 +532,17 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void Reactivar_UsuarioEliminado_LanzaDominioExceptionConCampoEstado()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.Eliminar();
+
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => usuario.Reactivar());
+
+        Assert.AreEqual(nameof(Usuario.Estado), excepcion.Campo);
+    }
+
+    [TestMethod]
     public void AsignarTipo_Administrador_TieneTipoAdministrador()
     {
         Usuario usuario = CrearUsuario();
