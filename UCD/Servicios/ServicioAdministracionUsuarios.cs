@@ -64,6 +64,7 @@ public class ServicioAdministracionUsuarios
 
     public List<UsuarioResumenDto> ListarUsuarios(FiltroUsuariosDto filtro, string dniResponsable)
     {
+        ArgumentNullException.ThrowIfNull(filtro);
         FiltroUsuarios filtroDelRepositorio = new FiltroUsuarios
         {
             Texto = filtro.Texto,
