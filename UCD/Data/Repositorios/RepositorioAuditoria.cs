@@ -36,7 +36,12 @@ public class RepositorioAuditoria
     {
         ArgumentNullException.ThrowIfNull(filtro);
 
-        return new List<RegistroAuditoria>();
+        if (!filtro.TieneCriterios())
+        {
+            return new List<RegistroAuditoria>();
+        }
+
+        return Filtrar(filtro).ToList();
     }
 
     private IEnumerable<RegistroAuditoria> Filtrar(FiltroAuditoria filtro)
