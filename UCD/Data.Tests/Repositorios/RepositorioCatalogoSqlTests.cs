@@ -1,4 +1,5 @@
-﻿using Dominio;
+﻿using System.Data;
+using Dominio;
 using Microsoft.EntityFrameworkCore;
 using Data.Repositorios;
 
@@ -185,6 +186,21 @@ public sealed class RepositorioCatalogoSqlTests
 
         Catalogo encontrado = resultado.Single();
         Assert.AreEqual(0, encontrado.Tipos.Count);
+    }
+
+    [TestMethod]
+    [DataRow(NombreCatalogo)]
+    [DataRow("APARATOS ELECTRONICOS")]
+    [DataRow(" Aparatos Electronicos ")]
+    public void ExisteActivoConNombre_NombreEquivalente_DevuelveTrue(string nombreBuscado)
+    {
+        GuardarConOtroContexto(new Catalogo(NombreCatalogo));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        bool existe = repositorioQueLee.ExisteActivoConNombre(nombreBuscado, idExcluido: null);
+
+        Assert.IsTrue(existe);
     }
 
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
