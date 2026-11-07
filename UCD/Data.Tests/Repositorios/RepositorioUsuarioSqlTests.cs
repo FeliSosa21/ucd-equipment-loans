@@ -447,6 +447,18 @@ public sealed class RepositorioUsuarioSqlTests
 
         Assert.IsNull(resultado);
     }
+    
+    [TestMethod]
+    public void AgregarUsuario_DniDeUsuarioEliminado_LanzaInvalidOperationException()
+    {
+        Usuario eliminado = CrearUsuario();
+        _repositorio.AgregarUsuario(eliminado);
+        _repositorio.EliminarUsuario(eliminado);
+        Usuario nuevo = CrearUsuario(dni: "47153923",
+            correo: "otro.correo@ucd.edu.uy");
+
+        Assert.ThrowsException<InvalidOperationException>(() => _repositorio.AgregarUsuario(nuevo));
+    }
 
     private IReadOnlyList<Usuario> LeerConOtroContexto(FiltroUsuarios filtro)
     {
