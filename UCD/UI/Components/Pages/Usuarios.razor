@@ -143,6 +143,6 @@
     </table>
     @if (!_usuarios.Any())
     {
-        <EstadoVacio Titulo="@(HayCriterios ? "No hay usuarios que coincidan" : "Ingresá un texto o elegí un tipo")" />
+        <EstadoVacio Titulo="@(_filtroConCriterios ? "No hay usuarios que coincidan" : "Ingresá un texto o elegí un tipo")" />
     }
 </div>

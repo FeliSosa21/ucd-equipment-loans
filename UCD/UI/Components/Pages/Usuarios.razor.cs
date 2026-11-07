@@ -12,6 +12,7 @@ public partial class Usuarios
     private List<string> _tipos = new List<string>();
     private string _busqueda = string.Empty;
     private string _tipoFiltro = string.Empty;
+    private bool _filtroConCriterios;
     private string? _error;
     private readonly ErroresDeFormulario _erroresFormulario = new ErroresDeFormulario(
         CampoDni, nameof(UsuarioDto.Nombre), nameof(UsuarioDto.Apellido), nameof(UsuarioDto.Correo));
@@ -27,8 +28,6 @@ public partial class Usuarios
 
     // Accion delicada que espera que el administrador la confirme antes de ejecutarse.
     private sealed record Confirmacion(string Pregunta, string TextoBoton, Action Accion);
-
-    private bool HayCriterios => !string.IsNullOrWhiteSpace(_busqueda) || !string.IsNullOrEmpty(_tipoFiltro);
 
     private bool AltaCompleta =>
         !string.IsNullOrWhiteSpace(_nuevo.Dni) &&
@@ -249,6 +248,7 @@ public partial class Usuarios
 
         try
         {
+            _filtroConCriterios = ServicioAdministracion.TieneCriterios(filtro);
             _usuarios = ServicioAdministracion.ListarUsuarios(filtro, DniUsuario);
         }
         catch (ServicioException ex)
