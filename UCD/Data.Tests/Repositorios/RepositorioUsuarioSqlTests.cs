@@ -374,7 +374,13 @@ public sealed class RepositorioUsuarioSqlTests
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         Assert.IsNull(new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(usuario.Dni));
     }
-    
+
+    [TestMethod]
+    public void EliminarUsuario_UsuarioNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => _repositorio.EliminarUsuario(null!));
+    }
+        
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
     {
