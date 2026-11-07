@@ -62,7 +62,7 @@ public class ServicioAdministracionUsuarios
 
     public bool TieneCriterios(FiltroUsuariosDto filtro)
     {
-        throw new NotImplementedException();
+        return true;
     }
 
     public List<string> NombresDeTipos()
