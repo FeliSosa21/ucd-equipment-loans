@@ -434,6 +434,19 @@ public sealed class RepositorioUsuarioSqlTests
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         Assert.IsTrue(contextoQueLee.Usuarios.Single().EstaEliminado);
     }
+    
+    [TestMethod]
+    public void ObtenerUsuarioPorCorreo_UsuarioEliminado_DevuelveNull()
+    {
+        Usuario usuario = CrearUsuario();
+        _repositorio.AgregarUsuario(usuario);
+        _repositorio.EliminarUsuario(usuario);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario? resultado = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorCorreo(usuario.Correo);
+
+        Assert.IsNull(resultado);
+    }
 
     private IReadOnlyList<Usuario> LeerConOtroContexto(FiltroUsuarios filtro)
     {
