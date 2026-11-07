@@ -52,11 +52,23 @@ public class RepositorioUsuario
             return new List<Usuario>();
         }
 
-        return _memoria.Usuarios
-            .Where(usuario => usuario.Nombre.Contains(filtro.TextoNormalizado!, StringComparison.OrdinalIgnoreCase)
-                              || usuario.Apellido.Contains(filtro.TextoNormalizado!, StringComparison.OrdinalIgnoreCase)
-                              || usuario.Dni.Contains(filtro.TextoNormalizado!)
-                              || usuario.Correo.Contains(filtro.TextoNormalizado!, StringComparison.OrdinalIgnoreCase))
+        IEnumerable<Usuario> usuarios = _memoria.Usuarios;
+        string? texto = filtro.TextoNormalizado;
+
+        if (texto is not null)
+        {
+            usuarios = usuarios.Where(usuario => usuario.Nombre.Contains(texto, StringComparison.OrdinalIgnoreCase)
+                                                 || usuario.Apellido.Contains(texto, StringComparison.OrdinalIgnoreCase)
+                                                 || usuario.Dni.Contains(texto)
+                                                 || usuario.Correo.Contains(texto, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (filtro.Tipo is not null)
+        {
+            usuarios = usuarios.Where(usuario => usuario.Tipo == filtro.Tipo);
+        }
+
+        return usuarios
             .OrderBy(usuario => usuario.Apellido)
             .ThenBy(usuario => usuario.Nombre)
             .ThenBy(usuario => usuario.Dni)
