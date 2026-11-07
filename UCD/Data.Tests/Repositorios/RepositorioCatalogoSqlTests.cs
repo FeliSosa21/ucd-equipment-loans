@@ -115,7 +115,7 @@ public sealed class RepositorioCatalogoSqlTests
     public void ObtenerCatalogoActivoPorId_CatalogoConTiposYUnidades_LosTraeCargados()
     {
         Catalogo catalogo = new Catalogo(NombreCatalogo);
-        TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo,DescripcionTipo,DuracionMaxPrestamo,false,Categoria.Computacion);
+        TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo,DescripcionTipo,DuracionMaxPrestamo,requiereAprobacion: false, Categoria.Computacion);
         UnidadFisica unidad = new UnidadFisica(IdUnidad,UbicacionUnidad, null);
         tipo.AgregarUnidad(unidad);
         catalogo.AgregarTipo(tipo);
@@ -129,6 +129,28 @@ public sealed class RepositorioCatalogoSqlTests
         TipoEquipamiento tipoLeido = resultado.Tipos.Single();
         Assert.AreEqual(NombreTipo, tipoLeido.Nombre);
         Assert.AreEqual(IdUnidad, tipoLeido.Unidades.Single().IdInstitucional);
+    }
+
+    [TestMethod]
+    public void ObtenerCatalogosActivos_CatalogoEliminado_NoLoDevuelve()
+    {
+        Catalogo primerCatalogo = new Catalogo(NombreCatalogo);
+        Catalogo segundoCatalogo = new Catalogo(NombreSegundoCatalogo);
+        GuardarConOtroContexto(primerCatalogo,segundoCatalogo);
+
+        using (SqlContext contextoQueModifica = new SqlContext(_opciones))
+        {
+            Catalogo guardado = contextoQueModifica.Catalogos.Find(primerCatalogo.Id)!;
+            guardado.DarDeBaja();
+            contextoQueModifica.SaveChanges();
+        }
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        IReadOnlyList<Catalogo> resultado = repositorioQueLee.ObtenerCatalogosActivos();
+
+        Catalogo encontrado = resultado.Single();
+        Assert.AreEqual(NombreSegundoCatalogo, encontrado.Nombre);
     }
 
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
