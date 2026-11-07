@@ -64,6 +64,8 @@ public class RepositorioUsuarioSql
 
     public void ActualizarUsuario(Usuario usuario)
     {
+        ArgumentNullException.ThrowIfNull(usuario);
+        
         _contexto.Usuarios.Update(usuario);
         _contexto.SaveChanges();
     }
