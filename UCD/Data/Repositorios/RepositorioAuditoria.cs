@@ -41,7 +41,9 @@ public class RepositorioAuditoria
             return new List<RegistroAuditoria>();
         }
 
-        return Filtrar(filtro).ToList();
+        return Filtrar(filtro)
+            .OrderByDescending(registro => registro.FechaHora)
+            .ToList();
     }
 
     private IEnumerable<RegistroAuditoria> Filtrar(FiltroAuditoria filtro)
