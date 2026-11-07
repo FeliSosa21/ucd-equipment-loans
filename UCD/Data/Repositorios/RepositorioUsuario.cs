@@ -75,6 +75,11 @@ public class RepositorioUsuario
             .ToList();
     }
 
+    public void EliminarUsuario(Usuario usuario)
+    {
+        throw new NotImplementedException();
+    }
+
     // Busca el texto en nombre, apellido, cedula o correo; sin texto no filtra.
     private IEnumerable<Usuario> FiltrarPor(string? filtro)
     {

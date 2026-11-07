@@ -281,6 +281,18 @@ public class RepositorioUsuarioTests
         Assert.AreEqual(0, usuarios.Count);
     }
 
+    [TestMethod]
+    public void EliminarUsuario_UsuarioAgregado_ObtenerUsuarioPorDniNoLoTrae()
+    {
+        RepositorioUsuario repositorio = new RepositorioUsuario(new Memoria());
+        Usuario usuario = CrearUsuario();
+        repositorio.AgregarUsuario(usuario);
+
+        repositorio.EliminarUsuario(usuario);
+
+        Assert.IsNull(repositorio.ObtenerUsuarioPorDni(usuario.Dni));
+    }
+
     // Se agregan desordenados para comprobar que la pagina sale ordenada por apellido.
     private static RepositorioUsuario CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno,
         out Usuario carla)
