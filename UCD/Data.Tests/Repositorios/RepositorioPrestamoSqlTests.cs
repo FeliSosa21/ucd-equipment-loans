@@ -427,6 +427,25 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(NombreTipo, obtenido.TipoEquipamiento.Nombre);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamosDeSolicitante_DosSolicitantes_DevuelveSoloLosDelSolicitante()
+    {
+        Usuario solicitante = CrearSolicitante();
+        Prestamo solicitado = CrearPrestamoDelSolicitante(solicitante);
+        Prestamo rechazado = CrearPrestamoDelSolicitante(solicitante);
+        rechazado.Rechazar(CrearEvaluador(), MotivoDelRechazo);
+        Prestamo deOtroSolicitante = CrearPrestamoDelSolicitante(CrearOtroSolicitante());
+        GuardarConOtroContexto(solicitado, rechazado, deOtroSolicitante);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+        IReadOnlyList<Prestamo> obtenidos = repositorio.ObtenerPrestamosDeSolicitante(DniSolicitante);
+
+        List<Guid> idsEsperados = new List<Guid> { solicitado.Id, rechazado.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -505,6 +524,15 @@ public sealed class RepositorioPrestamoSqlTests
             fechaHoraPrestamo: FechaFija);
     }
 
+    private static Prestamo CrearPrestamoDelSolicitante(Usuario solicitante)
+    {
+        return new Prestamo(
+            solicitante: solicitante,
+            tipoEquipamiento: CrearTipoEquipamiento(),
+            cantidadSolicitada: CantidadSolicitada,
+            fechaHoraPrestamo: FechaFija);
+    }
+
     private static Prestamo CrearPrestamoEnLaFecha(DateTime fechaHoraPrestamo)
     {
         return new Prestamo(
@@ -521,6 +549,20 @@ public sealed class RepositorioPrestamoSqlTests
             nombre: "Renato",
             apellido: "Alves",
             correo: "renato.alves@ejemplo.com",
+            contrasena: "VivalaOrt2026");
+
+        usuario.AsignarTipo(TipoUsuario.Docente());
+
+        return usuario;
+    }
+
+    private static Usuario CrearOtroSolicitante()
+    {
+        Usuario usuario = new Usuario(
+            dni: "31415921",
+            nombre: "Lucia",
+            apellido: "Fernandez",
+            correo: "lucia.fernandez@ejemplo.com",
             contrasena: "VivalaOrt2026");
 
         usuario.AsignarTipo(TipoUsuario.Docente());

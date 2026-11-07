@@ -65,4 +65,8 @@ public class RepositorioPrestamoSql
             .Where(prestamo => prestamo.Estado == EstadoPrestamo.Solicitado)
             .ToList();
     }
+    public IReadOnlyList<Prestamo> ObtenerPrestamosDeSolicitante(string dni)
+    {
+        return new List<Prestamo>();
+    }
 }
