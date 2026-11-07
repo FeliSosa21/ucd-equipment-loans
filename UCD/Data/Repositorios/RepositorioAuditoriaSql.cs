@@ -31,6 +31,8 @@ public class RepositorioAuditoriaSql
 
     public IReadOnlyList<RegistroAuditoria> ObtenerRegistros(FiltroAuditoria filtro)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(filtro);
+
+        return new List<RegistroAuditoria>();
     }
 }
