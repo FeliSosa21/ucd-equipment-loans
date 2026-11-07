@@ -518,7 +518,7 @@ public sealed class UsuarioTests
 
         usuario.Eliminar();
 
-        Assert.IsTrue(usuario.Eliminado);
+        Assert.IsTrue(usuario.EstaEliminado);
     }
 
     [TestMethod]
@@ -539,7 +539,7 @@ public sealed class UsuarioTests
 
         usuario.Eliminar();
 
-        Assert.IsTrue(usuario.Eliminado);
+        Assert.IsTrue(usuario.EstaEliminado);
     }
 
     [TestMethod]
@@ -551,6 +551,7 @@ public sealed class UsuarioTests
         DominioException excepcion = Assert.ThrowsException<DominioException>(() => usuario.Reactivar());
 
         Assert.AreEqual(nameof(Usuario.Estado), excepcion.Campo);
+        Assert.AreEqual(EstadoUsuario.Desactivado, usuario.Estado);
     }
 
     [TestMethod]
@@ -657,7 +658,7 @@ public sealed class UsuarioTests
     {
         Usuario usuario = CrearUsuario();
 
-        Assert.IsFalse(usuario.Eliminado);
+        Assert.IsFalse(usuario.EstaEliminado);
     }
 
     [TestMethod]

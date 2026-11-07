@@ -17,7 +17,7 @@ public class Usuario
     public string Correo { get; private set; }
     private string Contrasena { get; set; }
     public EstadoUsuario Estado { get; private set; }
-    public bool Eliminado { get; private set; }
+    public bool EstaEliminado { get; private set; }
     public bool DebeCambiarContrasena { get; private set; }
     public TipoUsuario Tipo { get; private set; }
     public string NombreCompleto => $"{Nombre} {Apellido}";
@@ -80,7 +80,7 @@ public class Usuario
 
     public void Reactivar()
     {
-        if (Eliminado)
+        if (EstaEliminado)
         {
             throw new DominioException(nameof(Estado), "Un usuario eliminado no se puede reactivar");
         }
@@ -90,7 +90,7 @@ public class Usuario
 
     public void Eliminar()
     {
-        Eliminado = true;
+        EstaEliminado = true;
         Desactivar();
     }
 
