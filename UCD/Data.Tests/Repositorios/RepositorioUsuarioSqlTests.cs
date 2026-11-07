@@ -422,6 +422,18 @@ public sealed class RepositorioUsuarioSqlTests
     {
         return new Usuario(dni: dni, nombre: nombre, apellido: apellido, correo: correo, contrasena: "Prueba2026");
     }
+    
+    [TestMethod]
+    public void EliminarUsuario_UsuarioAgregado_LaFilaSigueEnLaBaseMarcadaComoEliminada()
+    {
+        Usuario usuario = CrearUsuario();
+        _repositorio.AgregarUsuario(usuario);
+
+        _repositorio.EliminarUsuario(usuario);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.IsTrue(contextoQueLee.Usuarios.Single().EstaEliminado);
+    }
 
     private IReadOnlyList<Usuario> LeerConOtroContexto(FiltroUsuarios filtro)
     {
