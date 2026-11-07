@@ -64,7 +64,11 @@ public class ServicioAdministracionUsuarios
 
     public List<UsuarioResumenDto> ListarUsuarios(FiltroUsuariosDto filtro, string dniResponsable)
     {
-        FiltroUsuarios filtroDelRepositorio = new FiltroUsuarios { Texto = filtro.Texto };
+        FiltroUsuarios filtroDelRepositorio = new FiltroUsuarios
+        {
+            Texto = filtro.Texto,
+            Tipo = filtro.NombreTipo is null ? null : ObtenerTipo(filtro.NombreTipo)
+        };
 
         return _repositorio.ObtenerUsuarios(filtroDelRepositorio).Select(CrearResumen).ToList();
     }
