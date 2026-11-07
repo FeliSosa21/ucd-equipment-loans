@@ -13,6 +13,7 @@ public class ServicioAdministracionUsuarios
 {
     public const string ContrasenaPredeterminada = "Ucd12345";
     public static readonly string NombreTipoAdministrador = TipoUsuario.Administrador().Nombre;
+    public static readonly string NombreTipoPendiente = TipoUsuario.SinPermisos().Nombre;
     public const int TamanoPagina = 50;
     private const string MensajeSoloAdministrador = "Solo un administrador activo puede gestionar usuarios";
 

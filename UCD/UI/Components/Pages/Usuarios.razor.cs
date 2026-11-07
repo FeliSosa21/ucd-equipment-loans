@@ -8,10 +8,10 @@ namespace UI.Components.Pages;
 
 public partial class Usuarios
 {
-    private PaginaDto<UsuarioResumenDto> _pagina = new PaginaDto<UsuarioResumenDto>();
-    private int _numeroPagina = 1;
+    private List<UsuarioResumenDto> _usuarios = new List<UsuarioResumenDto>();
     private List<string> _tipos = new List<string>();
     private string _busqueda = string.Empty;
+    private string _tipoFiltro = string.Empty;
     private string? _error;
     private readonly ErroresDeFormulario _erroresFormulario = new ErroresDeFormulario(
         CampoDni, nameof(UsuarioDto.Nombre), nameof(UsuarioDto.Apellido), nameof(UsuarioDto.Correo));
@@ -28,7 +28,7 @@ public partial class Usuarios
     // Accion delicada que espera que el administrador la confirme antes de ejecutarse.
     private sealed record Confirmacion(string Pregunta, string TextoBoton, Action Accion);
 
-    private List<UsuarioResumenDto> UsuariosDeLaPagina => _pagina.Elementos;
+    private bool HayCriterios => !string.IsNullOrWhiteSpace(_busqueda) || !string.IsNullOrEmpty(_tipoFiltro);
 
     private bool AltaCompleta =>
         !string.IsNullOrWhiteSpace(_nuevo.Dni) &&
@@ -47,6 +47,7 @@ public partial class Usuarios
 
         _tipos = ServicioAdministracion.NombresDeTipos();
         _tipoNuevo = _tipos.First();
+        _tipoFiltro = ServicioAdministracionUsuarios.NombreTipoPendiente;
         Recargar();
     }
 
@@ -244,29 +245,18 @@ public partial class Usuarios
     // Si quien mira la lista dejo de ser administrador, el servicio la niega y se muestra el motivo.
     private void Recargar()
     {
+        FiltroUsuariosDto filtro = new FiltroUsuariosDto { Texto = _busqueda, NombreTipo = _tipoFiltro };
+
         try
         {
-            _pagina = ServicioAdministracion.ListarUsuarios(DniUsuario, _busqueda, _numeroPagina);
+            _usuarios = ServicioAdministracion.ListarUsuarios(filtro, DniUsuario);
         }
         catch (ServicioException ex)
         {
-            _pagina = new PaginaDto<UsuarioResumenDto>();
+            _usuarios = new List<UsuarioResumenDto>();
             _error = ex.Message;
         }
 
         _recargas++;
-    }
-
-    // Una busqueda nueva arranca desde la primera pagina.
-    private void Buscar()
-    {
-        _numeroPagina = 1;
-        Recargar();
-    }
-
-    private void IrAPagina(int numero)
-    {
-        _numeroPagina = numero;
-        Recargar();
     }
 }
