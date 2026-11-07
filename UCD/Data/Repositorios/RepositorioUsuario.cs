@@ -53,10 +53,10 @@ public class RepositorioUsuario
         }
 
         return _memoria.Usuarios
-            .Where(usuario => usuario.Nombre.Contains(filtro.Texto!, StringComparison.OrdinalIgnoreCase)
-                              || usuario.Apellido.Contains(filtro.Texto!, StringComparison.OrdinalIgnoreCase)
-                              || usuario.Dni.Contains(filtro.Texto!)
-                              || usuario.Correo.Contains(filtro.Texto!, StringComparison.OrdinalIgnoreCase))
+            .Where(usuario => usuario.Nombre.Contains(filtro.TextoNormalizado!, StringComparison.OrdinalIgnoreCase)
+                              || usuario.Apellido.Contains(filtro.TextoNormalizado!, StringComparison.OrdinalIgnoreCase)
+                              || usuario.Dni.Contains(filtro.TextoNormalizado!)
+                              || usuario.Correo.Contains(filtro.TextoNormalizado!, StringComparison.OrdinalIgnoreCase))
             .OrderBy(usuario => usuario.Apellido)
             .ThenBy(usuario => usuario.Nombre)
             .ThenBy(usuario => usuario.Dni)
