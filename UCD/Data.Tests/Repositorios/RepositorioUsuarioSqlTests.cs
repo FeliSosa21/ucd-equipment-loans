@@ -368,9 +368,9 @@ public sealed class RepositorioUsuarioSqlTests
     {
         Usuario usuario = CrearUsuario();
         _repositorio.AgregarUsuario(usuario);
-        
+
         _repositorio.EliminarUsuario(usuario);
-        
+
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         Assert.IsNull(new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(usuario.Dni));
     }
@@ -387,13 +387,13 @@ public sealed class RepositorioUsuarioSqlTests
         Usuario usuario = CrearUsuario();
         _repositorio.AgregarUsuario(usuario);
         _repositorio.EliminarUsuario(usuario);
-        
+
         _repositorio.EliminarUsuario(usuario);
-        
+
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         Assert.IsNull(new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(usuario.Dni));
     }
-    
+
     [TestMethod]
     public void ObtenerUsuarios_UsuarioEliminado_NoLoTrae()
     {
@@ -410,7 +410,7 @@ public sealed class RepositorioUsuarioSqlTests
         CollectionAssert.AreEqual(new List<string> { "12345672" },
             usuarios.Select(usuario => usuario.Dni).ToList());
     }
-    
+
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
     {

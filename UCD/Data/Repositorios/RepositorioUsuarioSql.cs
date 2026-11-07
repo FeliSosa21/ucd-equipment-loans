@@ -19,7 +19,7 @@ public class RepositorioUsuarioSql
     public void AgregarUsuario(Usuario usuario)
     {
         ArgumentNullException.ThrowIfNull(usuario);
-        
+
         ValidarQueNoExista(usuario);
 
         _contexto.Usuarios.Add(usuario);
@@ -29,14 +29,14 @@ public class RepositorioUsuarioSql
     public Usuario? ObtenerUsuarioPorDni(string dni)
     {
         ArgumentNullException.ThrowIfNull(dni);
-        
+
         return UsuariosConTipo.FirstOrDefault(usuario => usuario.Dni == dni);
     }
 
     public Usuario? ObtenerUsuarioPorCorreo(string correo)
     {
         ArgumentNullException.ThrowIfNull(correo);
-        
+
         string correoEnMinusculas = correo.ToLower();
 
         return UsuariosConTipo
@@ -65,19 +65,18 @@ public class RepositorioUsuarioSql
     public void ActualizarUsuario(Usuario usuario)
     {
         _contexto.Usuarios.Update(usuario);
-        
         _contexto.SaveChanges();
     }
-    
+
     public void EliminarUsuario(Usuario usuario)
     {
         ArgumentNullException.ThrowIfNull(usuario);
-        
+
         usuario.Eliminar();
         _contexto.Usuarios.Update(usuario);
         _contexto.SaveChanges();
     }
-    
+
     private IQueryable<Usuario> FiltrarPorTexto(IQueryable<Usuario> usuarios, string? textoNormalizado)
     {
         if (textoNormalizado is null)

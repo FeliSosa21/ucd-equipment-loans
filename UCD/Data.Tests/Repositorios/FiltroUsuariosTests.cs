@@ -47,7 +47,7 @@ public sealed class FiltroUsuariosTests
 
         Assert.IsTrue(tieneCriterios);
     }
-    
+
     [TestMethod]
     public void TextoNormalizado_TextoConEspaciosYMayusculas_LoDevuelveRecortadoYEnMinusculas()
     {
@@ -57,7 +57,7 @@ public sealed class FiltroUsuariosTests
 
         Assert.AreEqual("fernandez", textoNormalizado);
     }
-    
+
     [TestMethod]
     [DataRow("")]
     [DataRow("   ")]
@@ -69,7 +69,7 @@ public sealed class FiltroUsuariosTests
 
         Assert.IsNull(textoNormalizado);
     }
-    
+
     [TestMethod]
     public void TieneCriterios_TextoEnBlancoConTipo_DevuelveTrue()
     {
