@@ -85,6 +85,7 @@ public class Usuario
 
     public void Eliminar()
     {
+        Eliminado = true;
     }
 
     public void AsignarTipo(TipoUsuario tipo)
