@@ -10,6 +10,11 @@ public sealed class RepositorioCatalogoSqlTests
     private const string NombreCatalogo = "Aparatos Electronicos";
     private const string NombreSegundoCatalogo = "Camaras de foto";
     private const int IdInexistente = 999;
+    private const string NombreTipo = "Laptop";
+    private const string DescripcionTipo = "Laptop lenovo";
+    private const int DuracionMaxPrestamo = 7;
+    private const string IdUnidad = "EQP-0001";
+    private const string UbicacionUnidad = "Laboratorio";
 
     private DbContextOptions<SqlContext> _opciones = null!;
 
@@ -104,6 +109,26 @@ public sealed class RepositorioCatalogoSqlTests
         Catalogo? resultado = repositorioQueLee.ObtenerCatalogoActivoPorId(catalogo.Id);
 
         Assert.IsNull(resultado);
+    }
+
+    [TestMethod]
+    public void ObtenerCatalogoActivoPorId_CatalogoConTiposYUnidades_LosTraeCargados()
+    {
+        Catalogo catalogo = new Catalogo(NombreCatalogo);
+        TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo,DescripcionTipo,DuracionMaxPrestamo,false,Categoria.Computacion);
+        UnidadFisica unidad = new UnidadFisica(IdUnidad,UbicacionUnidad, null);
+        tipo.AgregarUnidad(unidad);
+        catalogo.AgregarTipo(tipo);
+        GuardarConOtroContexto(catalogo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        Catalogo? resultado = repositorioQueLee.ObtenerCatalogoActivoPorId(catalogo.Id);
+
+        Assert.IsNotNull(resultado);
+        TipoEquipamiento tipoLeido = resultado.Tipos.Single();
+        Assert.AreEqual(NombreTipo, tipoLeido.Nombre);
+        Assert.AreEqual(IdUnidad, tipoLeido.Unidades.Single().IdInstitucional);
     }
 
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
