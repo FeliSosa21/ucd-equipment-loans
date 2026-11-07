@@ -67,7 +67,7 @@ public class ServicioAdministracionUsuarios
         FiltroUsuarios filtroDelRepositorio = new FiltroUsuarios
         {
             Texto = filtro.Texto,
-            Tipo = filtro.NombreTipo is null ? null : ObtenerTipo(filtro.NombreTipo)
+            Tipo = string.IsNullOrWhiteSpace(filtro.NombreTipo) ? null : ObtenerTipo(filtro.NombreTipo)
         };
 
         return _repositorio.ObtenerUsuarios(filtroDelRepositorio).Select(CrearResumen).ToList();
