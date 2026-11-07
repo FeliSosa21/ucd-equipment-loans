@@ -76,6 +76,16 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void ListarUsuarios_FiltroSinCriterios_DevuelveListaVacia()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        List<UsuarioResumenDto> usuarios = servicio.ListarUsuarios(new FiltroUsuariosDto(), DniResponsable);
+
+        Assert.AreEqual(0, usuarios.Count);
+    }
+
+    [TestMethod]
     public void ListarUsuarios_PocosUsuarios_DevuelveUnaSolaPagina()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
