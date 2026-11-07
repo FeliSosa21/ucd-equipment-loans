@@ -64,6 +64,18 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void ListarUsuarios_TextoYNombreDeTipoVacio_FiltraSoloPorTexto()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        List<UsuarioResumenDto> usuarios = servicio.ListarUsuarios(
+            new FiltroUsuariosDto { Texto = "sosa", NombreTipo = string.Empty }, DniResponsable);
+
+        CollectionAssert.AreEqual(new List<string> { DniValido },
+            usuarios.Select(usuario => usuario.Dni).ToList());
+    }
+
+    [TestMethod]
     public void ListarUsuarios_PocosUsuarios_DevuelveUnaSolaPagina()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
