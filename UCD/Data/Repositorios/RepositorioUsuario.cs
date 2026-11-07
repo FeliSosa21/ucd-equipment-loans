@@ -52,7 +52,7 @@ public class RepositorioUsuario
             return new List<Usuario>();
         }
 
-        IEnumerable<Usuario> usuarios = _memoria.Usuarios;
+        IEnumerable<Usuario> usuarios = _memoria.Usuarios.Where(usuario => !usuario.EstaEliminado);
         string? texto = filtro.TextoNormalizado;
 
         if (texto is not null)
