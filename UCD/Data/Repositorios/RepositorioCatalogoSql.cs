@@ -16,6 +16,7 @@ public class RepositorioCatalogoSql
     {
         return _contexto.Catalogos
             .Where(catalogo => catalogo.Activo)
+            .OrderBy(catalogo => catalogo.Nombre)
             .ToList();
     }
 
