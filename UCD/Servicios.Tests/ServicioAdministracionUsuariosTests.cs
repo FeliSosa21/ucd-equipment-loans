@@ -53,6 +53,17 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void ListarUsuarios_TipoInexistente_LanzaServicioException()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarUsuarios(new FiltroUsuariosDto { NombreTipo = "Rector" }, DniResponsable));
+
+        Assert.AreEqual("El tipo de usuario no existe", excepcion.Message);
+    }
+
+    [TestMethod]
     public void ListarUsuarios_PocosUsuarios_DevuelveUnaSolaPagina()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
