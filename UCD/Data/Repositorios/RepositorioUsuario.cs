@@ -47,7 +47,14 @@ public class RepositorioUsuario
     {
         ArgumentNullException.ThrowIfNull(filtro);
 
-        return new List<Usuario>();
+        if (!filtro.TieneCriterios())
+        {
+            return new List<Usuario>();
+        }
+
+        return _memoria.Usuarios
+            .Where(usuario => usuario.Apellido.Contains(filtro.Texto!, StringComparison.OrdinalIgnoreCase))
+            .ToList();
     }
 
     // Busca el texto en nombre, apellido, cedula o correo; sin texto no filtra.
