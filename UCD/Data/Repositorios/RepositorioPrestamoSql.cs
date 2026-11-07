@@ -61,6 +61,8 @@ public class RepositorioPrestamoSql
 
     public IReadOnlyList<Prestamo> ObtenerPrestamosPendientes()
     {
-        return new List<Prestamo>();
+        return _contexto.Prestamos
+            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Solicitado)
+            .ToList();
     }
 }
