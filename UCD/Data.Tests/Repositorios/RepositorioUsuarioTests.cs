@@ -301,6 +301,19 @@ public class RepositorioUsuarioTests
         Assert.ThrowsException<ArgumentNullException>(() => repositorio.EliminarUsuario(null!));
     }
 
+    [TestMethod]
+    public void ObtenerUsuarioPorCorreo_UsuarioEliminado_DevuelveNull()
+    {
+        RepositorioUsuario repositorio = new RepositorioUsuario(new Memoria());
+        Usuario usuario = CrearUsuario();
+        repositorio.AgregarUsuario(usuario);
+        repositorio.EliminarUsuario(usuario);
+
+        Usuario? resultado = repositorio.ObtenerUsuarioPorCorreo(usuario.Correo);
+
+        Assert.IsNull(resultado);
+    }
+
     // Se agregan desordenados para comprobar que la pagina sale ordenada por apellido.
     private static RepositorioUsuario CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno,
         out Usuario carla)
