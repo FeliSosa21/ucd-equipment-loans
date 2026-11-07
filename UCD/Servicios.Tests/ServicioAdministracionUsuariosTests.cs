@@ -51,12 +51,14 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
-    public void ListarUsuarios_TextoYNombreDeTipoVacio_FiltraSoloPorTexto()
+    [DataRow("")]
+    [DataRow("   ")]
+    public void ListarUsuarios_TextoYNombreDeTipoVacio_FiltraSoloPorTexto(string nombreTipo)
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
         List<UsuarioResumenDto> usuarios = servicio.ListarUsuarios(
-            new FiltroUsuariosDto { Texto = "sosa", NombreTipo = string.Empty }, DniResponsable);
+            new FiltroUsuariosDto { Texto = "sosa", NombreTipo = nombreTipo }, DniResponsable);
 
         CollectionAssert.AreEqual(new List<string> { DniValido },
             usuarios.Select(usuario => usuario.Dni).ToList());
