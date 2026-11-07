@@ -13,6 +13,12 @@ public class RepositorioPrestamoSql
         _contexto = contexto;
     }
 
+    private IQueryable<Prestamo> PrestamosConSolicitanteTipoYAsignadas =>
+        _contexto.Prestamos
+            .Include(prestamo => prestamo.Solicitante)
+            .Include(prestamo => prestamo.TipoEquipamiento)
+            .Include(prestamo => prestamo.UnidadesAsignadas);
+
     public void AgregarPrestamo(Prestamo prestamo)
     {
         _contexto.Prestamos.Add(prestamo);
@@ -37,24 +43,18 @@ public class RepositorioPrestamoSql
 
     public IReadOnlyList<Prestamo> ObtenerPrestamos(FiltroPorCatalogoYFechas filtro)
     {
-        return _contexto.Prestamos
-            .Include(prestamo => prestamo.Solicitante)
-            .Include(prestamo => prestamo.TipoEquipamiento)
-            .Include(prestamo => prestamo.UnidadesAsignadas)
+        return PrestamosConSolicitanteTipoYAsignadas
             .Where(prestamo => filtro.Desde == null || prestamo.FechaHoraPrestamo >= filtro.Desde)
             .Where(prestamo => filtro.Hasta == null || prestamo.FechaHoraPrestamo < filtro.Hasta)
             .Where(prestamo => filtro.IdCatalogo == null
-                || EF.Property<int>(prestamo.TipoEquipamiento, ColumnaCatalogo) == filtro.IdCatalogo)
+                               || EF.Property<int>(prestamo.TipoEquipamiento, ColumnaCatalogo) == filtro.IdCatalogo)
             .OrderBy(prestamo => prestamo.FechaHoraPrestamo)
             .ToList();
     }
 
     public IReadOnlyList<Prestamo> ObtenerPrestamosActivos()
     {
-        return _contexto.Prestamos
-            .Include(prestamo => prestamo.Solicitante)
-            .Include(prestamo => prestamo.TipoEquipamiento)
-            .Include(prestamo => prestamo.UnidadesAsignadas)
+        return PrestamosConSolicitanteTipoYAsignadas
             .Where(prestamo => prestamo.Estado == EstadoPrestamo.Activo)
             .ToList();
     }
