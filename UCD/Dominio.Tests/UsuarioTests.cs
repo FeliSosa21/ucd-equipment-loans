@@ -532,6 +532,17 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void Eliminar_UsuarioYaEliminado_SigueEliminado()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.Eliminar();
+
+        usuario.Eliminar();
+
+        Assert.IsTrue(usuario.Eliminado);
+    }
+
+    [TestMethod]
     public void Reactivar_UsuarioEliminado_LanzaDominioExceptionConCampoEstado()
     {
         Usuario usuario = CrearUsuario();
