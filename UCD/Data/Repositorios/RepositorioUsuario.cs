@@ -18,7 +18,7 @@ public class RepositorioUsuario
 
     public Usuario? ObtenerUsuarioPorDni(string dni)
     {
-        return _memoria.Usuarios.FirstOrDefault(usuario => usuario.Dni == dni);
+        return _memoria.Usuarios.FirstOrDefault(usuario => !usuario.EstaEliminado && usuario.Dni == dni);
     }
 
     public Usuario? ObtenerUsuarioPorCorreo(string correo)
@@ -77,7 +77,7 @@ public class RepositorioUsuario
 
     public void EliminarUsuario(Usuario usuario)
     {
-        throw new NotImplementedException();
+        usuario.Eliminar();
     }
 
     // Busca el texto en nombre, apellido, cedula o correo; sin texto no filtra.
