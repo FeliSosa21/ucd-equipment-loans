@@ -255,6 +255,20 @@ public class RepositorioUsuarioTests
     }
 
     [TestMethod]
+    public void EliminarUsuario_UsuarioAgregado_SigueEnMemoriaMarcadoComoEliminado()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        Usuario usuario = CrearUsuario();
+        repositorio.AgregarUsuario(usuario);
+
+        repositorio.EliminarUsuario(usuario);
+
+        CollectionAssert.Contains(memoria.Usuarios, usuario);
+        Assert.IsTrue(usuario.EstaEliminado);
+    }
+
+    [TestMethod]
     public void EliminarUsuario_UsuarioNulo_LanzaArgumentNullException()
     {
         RepositorioUsuario repositorio = new RepositorioUsuario(new Memoria());
