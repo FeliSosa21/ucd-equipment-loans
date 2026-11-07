@@ -60,6 +60,11 @@ public class ServicioAdministracionUsuarios
         return _repositorio.ObtenerUsuarios(filtroDelRepositorio).Select(CrearResumen).ToList();
     }
 
+    public bool TieneCriterios(FiltroUsuariosDto filtro)
+    {
+        throw new NotImplementedException();
+    }
+
     public List<string> NombresDeTipos()
     {
         return _repositorioTipos.ObtenerTodos().Select(tipo => tipo.Nombre).ToList();

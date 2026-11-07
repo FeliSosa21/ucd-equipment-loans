@@ -92,6 +92,16 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void TieneCriterios_ConTexto_DevuelveTrue()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        bool tieneCriterios = servicio.TieneCriterios(new FiltroUsuariosDto { Texto = "sosa" });
+
+        Assert.IsTrue(tieneCriterios);
+    }
+
+    [TestMethod]
     public void NombresDeTipos_ConNombreTipoAdministrador_LoIncluyeEntreLosAsignables()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
