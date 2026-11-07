@@ -27,6 +27,20 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void ListarUsuarios_FiltroConTexto_DevuelveLosQueCoincidenConSuTipoYEstado()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        List<UsuarioResumenDto> usuarios =
+            servicio.ListarUsuarios(new FiltroUsuariosDto { Texto = "sosa" }, DniResponsable);
+
+        UsuarioResumenDto registrado = usuarios.Single();
+        Assert.AreEqual(DniValido, registrado.Dni);
+        Assert.AreEqual(TipoUsuario.SinPermisos().Nombre, registrado.Tipo);
+        Assert.IsTrue(registrado.Activo);
+    }
+
+    [TestMethod]
     public void ListarUsuarios_PocosUsuarios_DevuelveUnaSolaPagina()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);

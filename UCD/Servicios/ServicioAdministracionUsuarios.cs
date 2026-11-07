@@ -62,6 +62,11 @@ public class ServicioAdministracionUsuarios
         };
     }
 
+    public List<UsuarioResumenDto> ListarUsuarios(FiltroUsuariosDto filtro, string dniResponsable)
+    {
+        throw new NotImplementedException();
+    }
+
     public List<string> NombresDeTipos()
     {
         return _repositorioTipos.ObtenerTodos().Select(tipo => tipo.Nombre).ToList();
