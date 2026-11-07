@@ -53,7 +53,10 @@ public class RepositorioUsuario
         }
 
         return _memoria.Usuarios
-            .Where(usuario => usuario.Apellido.Contains(filtro.Texto!, StringComparison.OrdinalIgnoreCase))
+            .Where(usuario => usuario.Nombre.Contains(filtro.Texto!, StringComparison.OrdinalIgnoreCase)
+                              || usuario.Apellido.Contains(filtro.Texto!, StringComparison.OrdinalIgnoreCase)
+                              || usuario.Dni.Contains(filtro.Texto!)
+                              || usuario.Correo.Contains(filtro.Texto!, StringComparison.OrdinalIgnoreCase))
             .ToList();
     }
 
