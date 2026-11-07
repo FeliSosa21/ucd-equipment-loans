@@ -129,6 +129,23 @@ public class RepositorioUsuarioTests
         Assert.AreEqual(0, usuarios.Count);
     }
 
+    [TestMethod]
+    public void ObtenerUsuarios_TextoQueCoincideConVarios_DevuelveSoloEsos()
+    {
+        RepositorioUsuario repositorio = new RepositorioUsuario(new Memoria());
+        repositorio.AgregarUsuario(CrearUsuario(
+            dni: "12345672", nombre: "Lucia", apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy"));
+        repositorio.AgregarUsuario(CrearUsuario(
+            dni: "45678905", nombre: "Martin", apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy"));
+        repositorio.AgregarUsuario(CrearUsuario(
+            dni: "67890127", nombre: "Sofia", apellido: "Gomez", correo: "sofia.gomez@ucd.edu.uy"));
+
+        IReadOnlyList<Usuario> usuarios = repositorio.ObtenerUsuarios(new FiltroUsuarios { Texto = "fernandez" });
+
+        CollectionAssert.AreEquivalent(new List<string> { "12345672", "45678905" },
+            usuarios.Select(usuario => usuario.Dni).ToList());
+    }
+
     // Se agregan desordenados para comprobar que la pagina sale ordenada por apellido.
     private static RepositorioUsuario CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno,
         out Usuario carla)
