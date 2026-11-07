@@ -163,6 +163,23 @@ public class RepositorioUsuarioTests
             usuarios.Select(usuario => usuario.Dni).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerUsuarios_VariosCoinciden_LosDevuelveOrdenadosPorApellido()
+    {
+        RepositorioUsuario repositorio = new RepositorioUsuario(new Memoria());
+        repositorio.AgregarUsuario(CrearUsuario(
+            dni: "67890127", nombre: "Sofia", apellido: "Gomez", correo: "sofia.gomez@ucd.edu.uy"));
+        repositorio.AgregarUsuario(CrearUsuario(
+            dni: "12345672", nombre: "Lucia", apellido: "Alvarez", correo: "lucia.alvarez@ucd.edu.uy"));
+        repositorio.AgregarUsuario(CrearUsuario(
+            dni: "45678905", nombre: "Martin", apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy"));
+
+        IReadOnlyList<Usuario> usuarios = repositorio.ObtenerUsuarios(new FiltroUsuarios { Texto = "ucd" });
+
+        CollectionAssert.AreEqual(new List<string> { "Alvarez", "Fernandez", "Gomez" },
+            usuarios.Select(usuario => usuario.Apellido).ToList());
+    }
+
     // Se agregan desordenados para comprobar que la pagina sale ordenada por apellido.
     private static RepositorioUsuario CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno,
         out Usuario carla)
