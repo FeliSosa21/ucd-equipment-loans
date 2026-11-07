@@ -244,6 +244,20 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.IsTrue(existe);
     }
 
+    [TestMethod]
+    public void ExisteUnidadConIdInstitucional_UnidadEnCatalogoEliminado_DevuelveTrue()
+    {
+        Catalogo catalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreCatalogo);
+        GuardarConOtroContexto(catalogo);
+        DarDeBajaConOtroContexto(catalogo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        bool existe = repositorioQueLee.ExisteUnidadConIdInstitucional(IdUnidad);
+
+        Assert.IsTrue(existe);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
