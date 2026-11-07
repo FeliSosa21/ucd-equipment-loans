@@ -153,6 +153,22 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.AreEqual(NombreSegundoCatalogo, encontrado.Nombre);
     }
 
+    [TestMethod]
+    public void ObtenerCatalogosActivos_VariosCatalogos_DevuelveOrdenadosPorNombre()
+    {
+        Catalogo primerCatalogo = new Catalogo(NombreCatalogo);
+        Catalogo segundoCatalogo = new Catalogo(NombreSegundoCatalogo);
+        GuardarConOtroContexto(segundoCatalogo, primerCatalogo);
+        List<string> nombresEsperados = new List<string> { NombreCatalogo, NombreSegundoCatalogo };
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        IReadOnlyList<Catalogo> resultado = repositorioQueLee.ObtenerCatalogosActivos();
+
+        List<string> nombresObtenidos = resultado.Select(catalogo => catalogo.Nombre).ToList();
+        CollectionAssert.AreEqual(nombresEsperados, nombresObtenidos);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
