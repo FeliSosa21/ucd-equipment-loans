@@ -238,6 +238,24 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.ThrowsException<ArgumentNullException>(() => repositorio.ExisteActivoConNombre(null!, idExcluido: null));
     }
 
+    [TestMethod]
+    public void ExisteUnidadConIdInstitucional_UnidadEnOtroCatalogo_DevuelveTrue()
+    {
+        Catalogo primerCatalogo = new Catalogo(NombreCatalogo);
+        Catalogo segundoCatalogo = new Catalogo(NombreSegundoCatalogo);
+        TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo,DescripcionTipo,DuracionMaxPrestamo,requiereAprobacion: false, Categoria.Computacion);
+        UnidadFisica unidad = new UnidadFisica(IdUnidad, UbicacionUnidad, null);
+        tipo.AgregarUnidad(unidad);
+        segundoCatalogo.AgregarTipo(tipo);
+        GuardarConOtroContexto(primerCatalogo, segundoCatalogo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        bool existe = repositorioQueLee.ExisteUnidadConIdInstitucional(IdUnidad);
+
+        Assert.IsTrue(existe);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
