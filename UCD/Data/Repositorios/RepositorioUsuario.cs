@@ -77,6 +77,8 @@ public class RepositorioUsuario
 
     public void EliminarUsuario(Usuario usuario)
     {
+        ArgumentNullException.ThrowIfNull(usuario);
+
         usuario.Eliminar();
     }
 
