@@ -1,5 +1,6 @@
 ﻿using Dominio;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.SqlServer.Server;
 
 namespace Data.Repositorios;
 
@@ -40,6 +41,6 @@ public class RepositorioCatalogoSql
     {
         string nombreBuscado = nombre.Trim().ToLower();
 
-        return _contexto.Catalogos.Any(catalogo => catalogo.Nombre.Trim().ToLower() == nombreBuscado);
+        return _contexto.Catalogos.Any(catalogo => catalogo.Nombre.Trim().ToLower() == nombreBuscado && catalogo.Id != idExcluido);
     }
 }
