@@ -62,7 +62,13 @@ public class ServicioAdministracionUsuarios
 
     public bool TieneCriterios(FiltroUsuariosDto filtro)
     {
-        return true;
+        FiltroUsuarios filtroDelRepositorio = new FiltroUsuarios
+        {
+            Texto = filtro.Texto,
+            Tipo = string.IsNullOrWhiteSpace(filtro.NombreTipo) ? null : ObtenerTipo(filtro.NombreTipo)
+        };
+
+        return filtroDelRepositorio.TieneCriterios();
     }
 
     public List<string> NombresDeTipos()
