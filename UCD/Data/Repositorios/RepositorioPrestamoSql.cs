@@ -47,7 +47,7 @@ public class RepositorioPrestamoSql
             .Where(prestamo => filtro.Desde == null || prestamo.FechaHoraPrestamo >= filtro.Desde)
             .Where(prestamo => filtro.Hasta == null || prestamo.FechaHoraPrestamo < filtro.Hasta)
             .Where(prestamo => filtro.IdCatalogo == null
-                               || EF.Property<int>(prestamo.TipoEquipamiento, ColumnaCatalogo) == filtro.IdCatalogo)
+                || EF.Property<int>(prestamo.TipoEquipamiento, ColumnaCatalogo) == filtro.IdCatalogo)
             .OrderBy(prestamo => prestamo.FechaHoraPrestamo)
             .ToList();
     }
@@ -65,6 +65,7 @@ public class RepositorioPrestamoSql
             .Where(prestamo => prestamo.Estado == EstadoPrestamo.Solicitado)
             .ToList();
     }
+
     public IReadOnlyList<Prestamo> ObtenerPrestamosDeSolicitante(string dni)
     {
         return _contexto.Prestamos
