@@ -64,7 +64,9 @@ public class ServicioAdministracionUsuarios
 
     public List<UsuarioResumenDto> ListarUsuarios(FiltroUsuariosDto filtro, string dniResponsable)
     {
-        throw new NotImplementedException();
+        FiltroUsuarios filtroDelRepositorio = new FiltroUsuarios { Texto = filtro.Texto };
+
+        return _repositorio.ObtenerUsuarios(filtroDelRepositorio).Select(CrearResumen).ToList();
     }
 
     public List<string> NombresDeTipos()
