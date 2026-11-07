@@ -249,9 +249,124 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(0, leido.TipoEquipamiento.CantidadDisponibles());
     }
 
+    [TestMethod]
+    public void ObtenerPrestamos_SinFiltros_DevuelveElPrestamoAgregado()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        GuardarConOtroContexto(prestamo);
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosConOtroContexto(new FiltroPorCatalogoYFechas());
+
+        Assert.AreEqual(1, obtenidos.Count);
+        Assert.AreEqual(prestamo.Id, obtenidos[0].Id);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamos_PrestamoActivo_TraeSolicitanteTipoYUnidadesAsignadas()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento();
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo);
+
+        Prestamo prestamo = CrearPrestamoDelTipo(tipo);
+        prestamo.Activar(unidades);
+        GuardarConOtroContexto(prestamo);
+
+        Prestamo obtenido = ObtenerPrestamosConOtroContexto(new FiltroPorCatalogoYFechas()).Single();
+
+        Assert.IsNotNull(obtenido.Solicitante);
+        Assert.AreEqual(DniSolicitante, obtenido.Solicitante.Dni);
+        Assert.IsNotNull(obtenido.TipoEquipamiento);
+        Assert.AreEqual(NombreTipo, obtenido.TipoEquipamiento.Nombre);
+        List<string> idsEsperados = new List<string> { IdPrimeraUnidad, IdSegundaUnidad };
+        List<string> idsAsignados = obtenido.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsAsignados);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamos_FiltroDesde_IncluyeElDeEsaFechaYExcluyeLosAnteriores()
+    {
+        Prestamo anterior = CrearPrestamoEnLaFecha(FechaFija.AddDays(-1));
+        Prestamo enElLimite = CrearPrestamoEnLaFecha(FechaFija);
+        Prestamo posterior = CrearPrestamoEnLaFecha(FechaFija.AddDays(1));
+        GuardarConOtroContexto(anterior, enElLimite, posterior);
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { Desde = FechaFija };
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosConOtroContexto(filtro);
+
+        List<Guid> idsEsperados = new List<Guid> { enElLimite.Id, posterior.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamos_FiltroHasta_ExcluyeElDeEsaFechaYLosPosteriores()
+    {
+        Prestamo anterior = CrearPrestamoEnLaFecha(FechaFija.AddDays(-1));
+        Prestamo enElLimite = CrearPrestamoEnLaFecha(FechaFija);
+        Prestamo posterior = CrearPrestamoEnLaFecha(FechaFija.AddDays(1));
+        GuardarConOtroContexto(anterior, enElLimite, posterior);
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { Hasta = FechaFija };
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosConOtroContexto(filtro);
+
+        List<Guid> idsEsperados = new List<Guid> { anterior.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamos_FiltroPorCatalogo_DevuelveSoloLosDeEseCatalogo()
+    {
+        TipoEquipamiento tipoDelElegido = CrearTipoEquipamiento();
+        TipoEquipamiento tipoDelOtro = CrearTipoEquipamiento();
+        Catalogo catalogoElegido = new Catalogo("Laboratorio de Informatica");
+        catalogoElegido.AgregarTipo(tipoDelElegido);
+        Catalogo otroCatalogo = new Catalogo("Audiovisuales");
+        otroCatalogo.AgregarTipo(tipoDelOtro);
+
+        Prestamo delElegido = CrearPrestamoDelTipo(tipoDelElegido);
+        Prestamo delOtro = CrearPrestamoDelTipo(tipoDelOtro);
+        GuardarCatalogosYPrestamos(new List<Catalogo> { catalogoElegido, otroCatalogo }, delElegido, delOtro);
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { IdCatalogo = catalogoElegido.Id };
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosConOtroContexto(filtro);
+
+        List<Guid> idsEsperados = new List<Guid> { delElegido.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamos_SinFiltros_DelMasViejoAlMasNuevo()
+    {
+        Prestamo masNuevo = CrearPrestamoEnLaFecha(FechaFija.AddDays(2));
+        Prestamo masViejo = CrearPrestamoEnLaFecha(FechaFija);
+        Prestamo intermedio = CrearPrestamoEnLaFecha(FechaFija.AddDays(1));
+        GuardarConOtroContexto(masNuevo, masViejo, intermedio);
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosConOtroContexto(new FiltroPorCatalogoYFechas());
+
+        List<Guid> idsEsperados = new List<Guid> { masViejo.Id, intermedio.Id, masNuevo.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEqual(idsEsperados, idsObtenidos);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueGuarda);
+
+        foreach (Prestamo prestamo in prestamos)
+        {
+            repositorio.AgregarPrestamo(prestamo);
+        }
+    }
+
+    private void GuardarCatalogosYPrestamos(IEnumerable<Catalogo> catalogos, params Prestamo[] prestamos)
+    {
+        using SqlContext contextoQueGuarda = new SqlContext(_opciones);
+        contextoQueGuarda.Catalogos.AddRange(catalogos);
+        contextoQueGuarda.SaveChanges();
         RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueGuarda);
 
         foreach (Prestamo prestamo in prestamos)
@@ -276,6 +391,14 @@ public sealed class RepositorioPrestamoSqlTests
         return repositorio.ObtenerPrestamoPorId(idPrestamo);
     }
 
+    private IReadOnlyList<Prestamo> ObtenerPrestamosConOtroContexto(FiltroPorCatalogoYFechas filtro)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+
+        return repositorio.ObtenerPrestamos(filtro);
+    }
+
     private static Prestamo CrearPrestamo()
     {
         return CrearPrestamoDelTipo(CrearTipoEquipamiento());
@@ -288,6 +411,15 @@ public sealed class RepositorioPrestamoSqlTests
             tipoEquipamiento: tipo,
             cantidadSolicitada: CantidadSolicitada,
             fechaHoraPrestamo: FechaFija);
+    }
+
+    private static Prestamo CrearPrestamoEnLaFecha(DateTime fechaHoraPrestamo)
+    {
+        return new Prestamo(
+            solicitante: CrearSolicitante(),
+            tipoEquipamiento: CrearTipoEquipamiento(),
+            cantidadSolicitada: CantidadSolicitada,
+            fechaHoraPrestamo: fechaHoraPrestamo);
     }
 
     private static Usuario CrearSolicitante()
