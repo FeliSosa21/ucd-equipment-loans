@@ -70,6 +70,8 @@ public class RepositorioUsuarioSql
     
     public void EliminarUsuario(Usuario usuario)
     {
+        ArgumentNullException.ThrowIfNull(usuario);
+        
         usuario.Eliminar();
         _contexto.Usuarios.Update(usuario);
         _contexto.SaveChanges();
