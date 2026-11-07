@@ -34,7 +34,9 @@ public class RepositorioAuditoria
 
     public IReadOnlyList<RegistroAuditoria> ObtenerRegistros(FiltroAuditoria filtro)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(filtro);
+
+        return new List<RegistroAuditoria>();
     }
 
     private IEnumerable<RegistroAuditoria> Filtrar(FiltroAuditoria filtro)
