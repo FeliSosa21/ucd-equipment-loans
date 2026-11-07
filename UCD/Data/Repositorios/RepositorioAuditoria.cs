@@ -42,6 +42,7 @@ public class RepositorioAuditoria
         }
 
         return Filtrar(filtro)
+            .Reverse()
             .OrderByDescending(registro => registro.FechaHora)
             .ToList();
     }
