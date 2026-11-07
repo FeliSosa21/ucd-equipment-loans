@@ -302,6 +302,19 @@ public class RepositorioUsuarioTests
     }
 
     [TestMethod]
+    public void EliminarUsuario_DosVeces_NoFallaYSigueEliminado()
+    {
+        RepositorioUsuario repositorio = new RepositorioUsuario(new Memoria());
+        Usuario usuario = CrearUsuario();
+        repositorio.AgregarUsuario(usuario);
+        repositorio.EliminarUsuario(usuario);
+
+        repositorio.EliminarUsuario(usuario);
+
+        Assert.IsNull(repositorio.ObtenerUsuarioPorDni(usuario.Dni));
+    }
+
+    [TestMethod]
     public void ObtenerUsuarioPorCorreo_UsuarioEliminado_DevuelveNull()
     {
         RepositorioUsuario repositorio = new RepositorioUsuario(new Memoria());
