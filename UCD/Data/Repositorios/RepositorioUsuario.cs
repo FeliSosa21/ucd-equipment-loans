@@ -43,6 +43,11 @@ public class RepositorioUsuario
         return FiltrarPor(filtro).Count();
     }
 
+    public IReadOnlyList<Usuario> ObtenerUsuarios(FiltroUsuarios filtro)
+    {
+        throw new NotImplementedException();
+    }
+
     // Busca el texto en nombre, apellido, cedula o correo; sin texto no filtra.
     private IEnumerable<Usuario> FiltrarPor(string? filtro)
     {

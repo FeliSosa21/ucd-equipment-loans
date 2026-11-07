@@ -110,6 +110,14 @@ public class RepositorioUsuarioTests
         Assert.AreEqual(1, repositorio.ContarUsuarios("bruno"));
     }
 
+    [TestMethod]
+    public void ObtenerUsuarios_FiltroNulo_LanzaArgumentNullException()
+    {
+        RepositorioUsuario repositorio = new RepositorioUsuario(new Memoria());
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.ObtenerUsuarios(null!));
+    }
+
     // Se agregan desordenados para comprobar que la pagina sale ordenada por apellido.
     private static RepositorioUsuario CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno,
         out Usuario carla)
