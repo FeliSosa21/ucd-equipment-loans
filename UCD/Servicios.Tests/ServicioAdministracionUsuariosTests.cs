@@ -159,6 +159,16 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void NombresDeTipos_ConNombreTipoPendiente_LoIncluyeEntreLosAsignables()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        List<string> nombres = servicio.NombresDeTipos();
+
+        CollectionAssert.Contains(nombres, ServicioAdministracionUsuarios.NombreTipoPendiente);
+    }
+
+    [TestMethod]
     public void NombresDeTipos_SinFiltro_DevuelveLosSeisTipos()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
