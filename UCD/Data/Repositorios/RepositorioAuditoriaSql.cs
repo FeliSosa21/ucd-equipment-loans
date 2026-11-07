@@ -28,4 +28,9 @@ public class RepositorioAuditoriaSql
             .Take(tamanoPagina)
             .ToList();
     }
+
+    public IReadOnlyList<RegistroAuditoria> ObtenerRegistros(FiltroAuditoria filtro)
+    {
+        throw new NotImplementedException();
+    }
 }

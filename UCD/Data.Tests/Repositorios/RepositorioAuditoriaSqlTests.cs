@@ -105,6 +105,12 @@ public sealed class RepositorioAuditoriaSqlTests
             resultado.Select(registro => registro.Detalle).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerRegistros_FiltroNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => LeerRegistros(null!));
+    }
+
     private void GuardarConOtroContexto(params RegistroAuditoria[] registros)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -122,6 +128,14 @@ public sealed class RepositorioAuditoriaSqlTests
         RepositorioAuditoriaSql repositorio = new RepositorioAuditoriaSql(contextoQueLee);
 
         return repositorio.ObtenerPaginaDeRegistros(filtro, pagina, tamanoPagina);
+    }
+
+    private IReadOnlyList<RegistroAuditoria> LeerRegistros(FiltroAuditoria filtro)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioAuditoriaSql repositorio = new RepositorioAuditoriaSql(contextoQueLee);
+
+        return repositorio.ObtenerRegistros(filtro);
     }
 
     private static RegistroAuditoria CrearRegistro(RegistroDeAccion registro, string detalle)
