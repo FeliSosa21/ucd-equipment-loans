@@ -86,6 +86,14 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void ListarUsuarios_FiltroNulo_LanzaArgumentNullException()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        Assert.ThrowsException<ArgumentNullException>(() => servicio.ListarUsuarios(null!, DniResponsable));
+    }
+
+    [TestMethod]
     public void ListarUsuarios_PocosUsuarios_DevuelveUnaSolaPagina()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
