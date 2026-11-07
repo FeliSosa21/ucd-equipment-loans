@@ -394,6 +394,21 @@ public sealed class RepositorioPrestamoSqlTests
     }
 
     [TestMethod]
+    public void ObtenerPrestamosActivos_VariosActivos_DelMasViejoAlMasNuevo()
+    {
+        Prestamo masNuevo = CrearPrestamoActivoEnLaFecha(FechaFija.AddDays(2));
+        Prestamo masViejo = CrearPrestamoActivoEnLaFecha(FechaFija);
+        Prestamo intermedio = CrearPrestamoActivoEnLaFecha(FechaFija.AddDays(1));
+        GuardarConOtroContexto(masNuevo, masViejo, intermedio);
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosActivosConOtroContexto();
+
+        List<Guid> idsEsperados = new List<Guid> { masViejo.Id, intermedio.Id, masNuevo.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEqual(idsEsperados, idsObtenidos);
+    }
+
+    [TestMethod]
     public void ObtenerPrestamosPendientes_VariosEstados_DevuelveSoloLosSolicitados()
     {
         TipoEquipamiento tipo = CrearTipoEquipamiento();
@@ -567,6 +582,14 @@ public sealed class RepositorioPrestamoSqlTests
             tipoEquipamiento: CrearTipoEquipamiento(),
             cantidadSolicitada: CantidadSolicitada,
             fechaHoraPrestamo: fechaHoraPrestamo);
+    }
+
+    private static Prestamo CrearPrestamoActivoEnLaFecha(DateTime fechaHoraPrestamo)
+    {
+        Prestamo prestamo = CrearPrestamoEnLaFecha(fechaHoraPrestamo);
+        prestamo.Activar(CrearUnidadesDelTipo(prestamo.TipoEquipamiento));
+
+        return prestamo;
     }
 
     private static Usuario CrearSolicitante()
