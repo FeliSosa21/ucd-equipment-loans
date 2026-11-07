@@ -112,6 +112,27 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void TieneCriterios_ConNombreDeTipo_DevuelveTrue()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        bool tieneCriterios = servicio.TieneCriterios(
+            new FiltroUsuariosDto { NombreTipo = ServicioAdministracionUsuarios.NombreTipoPendiente });
+
+        Assert.IsTrue(tieneCriterios);
+    }
+
+    [TestMethod]
+    public void TieneCriterios_TextoYTipoEnBlanco_DevuelveFalse()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        bool tieneCriterios = servicio.TieneCriterios(new FiltroUsuariosDto { Texto = "   ", NombreTipo = "" });
+
+        Assert.IsFalse(tieneCriterios);
+    }
+
+    [TestMethod]
     public void NombresDeTipos_ConNombreTipoAdministrador_LoIncluyeEntreLosAsignables()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
