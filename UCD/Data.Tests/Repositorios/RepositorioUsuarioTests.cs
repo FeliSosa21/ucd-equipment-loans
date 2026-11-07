@@ -314,6 +314,24 @@ public class RepositorioUsuarioTests
         Assert.IsNull(resultado);
     }
 
+    [TestMethod]
+    public void ObtenerUsuarios_UsuarioEliminado_NoLoTrae()
+    {
+        RepositorioUsuario repositorio = new RepositorioUsuario(new Memoria());
+        Usuario lucia = CrearUsuario(dni: "12345672", nombre: "Lucia",
+            apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy");
+        Usuario martin = CrearUsuario(dni: "45678905", nombre: "Martin",
+            apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy");
+        repositorio.AgregarUsuario(lucia);
+        repositorio.AgregarUsuario(martin);
+        repositorio.EliminarUsuario(martin);
+
+        IReadOnlyList<Usuario> usuarios = repositorio.ObtenerUsuarios(new FiltroUsuarios { Texto = "fernandez" });
+
+        CollectionAssert.AreEqual(new List<string> { "12345672" },
+            usuarios.Select(usuario => usuario.Dni).ToList());
+    }
+
     // Se agregan desordenados para comprobar que la pagina sale ordenada por apellido.
     private static RepositorioUsuario CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno,
         out Usuario carla)
