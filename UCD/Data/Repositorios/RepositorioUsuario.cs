@@ -30,22 +30,6 @@ public class RepositorioUsuario
             string.Equals(usuario.Correo, correo, StringComparison.OrdinalIgnoreCase));
     }
 
-    public IReadOnlyList<Usuario> ObtenerPaginaDeUsuarios(string? filtro, int pagina, int tamanoPagina)
-    {
-        return FiltrarPor(filtro)
-            .OrderBy(usuario => usuario.Apellido)
-            .ThenBy(usuario => usuario.Nombre)
-            .ThenBy(usuario => usuario.Dni)
-            .Skip((pagina - 1) * tamanoPagina)
-            .Take(tamanoPagina)
-            .ToList();
-    }
-
-    public int ContarUsuarios(string? filtro)
-    {
-        return FiltrarPor(filtro).Count();
-    }
-
     public IReadOnlyList<Usuario> ObtenerUsuarios(FiltroUsuarios filtro)
     {
         ArgumentNullException.ThrowIfNull(filtro);
@@ -94,14 +78,5 @@ public class RepositorioUsuario
         }
 
         return usuarios.Where(usuario => usuario.Tipo == tipo);
-    }
-
-    // Busca el texto en nombre, apellido, cedula o correo; sin texto no filtra.
-    private IEnumerable<Usuario> FiltrarPor(string? filtro)
-    {
-        string busqueda = filtro?.Trim() ?? string.Empty;
-
-        return _memoria.Usuarios.Where(usuario => $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
-            .Contains(busqueda, StringComparison.OrdinalIgnoreCase));
     }
 }
