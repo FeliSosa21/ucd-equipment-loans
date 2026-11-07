@@ -331,6 +331,18 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void Reactivar_UsuarioEliminado_LanzaServicioExceptionConCampoEstado()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
+        repositorio.ObtenerUsuarioPorDni(DniValido)!.Eliminar();
+
+        ServicioException excepcion =
+            Assert.ThrowsException<ServicioException>(() => servicio.Reactivar(DniValido, DniResponsable));
+
+        Assert.AreEqual(nameof(Usuario.Estado), excepcion.Campo);
+    }
+
+    [TestMethod]
     public void ObtenerResumen_UsuarioInexistente_LanzaExcepcion()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
