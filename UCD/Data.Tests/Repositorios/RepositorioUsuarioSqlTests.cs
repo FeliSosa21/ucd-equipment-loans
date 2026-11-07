@@ -380,6 +380,19 @@ public sealed class RepositorioUsuarioSqlTests
     {
         Assert.ThrowsException<ArgumentNullException>(() => _repositorio.EliminarUsuario(null!));
     }
+
+    [TestMethod]
+    public void EliminarUsuario_DosVeces_NoFallaYSigueEliminado()
+    {
+        Usuario usuario = CrearUsuario();
+        _repositorio.AgregarUsuario(usuario);
+        _repositorio.EliminarUsuario(usuario);
+        
+        _repositorio.EliminarUsuario(usuario);
+        
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.IsNull(new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(usuario.Dni));
+    }
         
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
