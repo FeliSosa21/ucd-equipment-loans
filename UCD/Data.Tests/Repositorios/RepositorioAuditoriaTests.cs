@@ -222,6 +222,24 @@ public sealed class RepositorioAuditoriaTests
         CollectionAssert.AreEqual(new List<RegistroAuditoria> { anterior }, resultado.ToList());
     }
 
+    [TestMethod]
+    public void ObtenerRegistros_FiltroDniUsuario_DevuelveSoloLosDeEseResponsable()
+    {
+        Usuario felipe = CrearUsuario(dni: "12345672", correo: "felipe@hotmail.com");
+        Usuario laura = CrearUsuario(dni: "45678905", correo: "laura.diaz@ejemplo.com");
+        RegistroAuditoria deFelipe = CrearRegistro(RegistroDeAccion.DeUsuario(felipe, FechaFija));
+        RegistroAuditoria deLaura = CrearRegistro(RegistroDeAccion.DeUsuario(laura, FechaFija));
+        RegistroAuditoria delSistema = CrearRegistro(RegistroDeAccion.DelSistema(FechaFija));
+        _repositorio.AgregarRegistro(deFelipe);
+        _repositorio.AgregarRegistro(deLaura);
+        _repositorio.AgregarRegistro(delSistema);
+
+        IReadOnlyList<RegistroAuditoria> resultado =
+            _repositorio.ObtenerRegistros(new FiltroAuditoria { DniUsuario = "45678905" });
+
+        CollectionAssert.AreEqual(new List<RegistroAuditoria> { deLaura }, resultado.ToList());
+    }
+
     private static RegistroAuditoria CrearRegistro(DateTime fechaHora)
     {
         return CrearRegistro(RegistroDeAccion.DeUsuario(CrearUsuario(), fechaHora));
