@@ -410,6 +410,12 @@ public sealed class RepositorioUsuarioSqlTests
         CollectionAssert.AreEqual(new List<string> { "12345672" },
             usuarios.Select(usuario => usuario.Dni).ToList());
     }
+    
+    [TestMethod]
+    public void ActualizarUsuario_UsuarioNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ActualizarUsuario(null!));
+    }
 
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
