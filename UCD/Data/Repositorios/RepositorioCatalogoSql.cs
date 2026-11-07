@@ -14,7 +14,9 @@ public class RepositorioCatalogoSql
 
     public IReadOnlyList<Catalogo> ObtenerCatalogosActivos()
     {
-        return _contexto.Catalogos.ToList();
+        return _contexto.Catalogos
+            .Where(catalogo => catalogo.Activo)
+            .ToList();
     }
 
     public void AgregarCatalogo(Catalogo catalogo)
