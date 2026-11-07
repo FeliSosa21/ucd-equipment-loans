@@ -108,11 +108,7 @@ public sealed class RepositorioCatalogoSqlTests
     [TestMethod]
     public void ObtenerCatalogoActivoPorId_CatalogoConTiposYUnidades_LosTraeCargados()
     {
-        Catalogo catalogo = new Catalogo(NombreCatalogo);
-        TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo,DescripcionTipo,DuracionMaxPrestamo,requiereAprobacion: false, Categoria.Computacion);
-        UnidadFisica unidad = new UnidadFisica(IdUnidad, UbicacionUnidad, null);
-        tipo.AgregarUnidad(unidad);
-        catalogo.AgregarTipo(tipo);
+        Catalogo catalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreCatalogo);
         GuardarConOtroContexto(catalogo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
@@ -160,11 +156,7 @@ public sealed class RepositorioCatalogoSqlTests
     [TestMethod]
     public void ObtenerCatalogosActivos_CatalogoConTipo_NoLosCarga()
     {
-        Catalogo catalogo = new Catalogo(NombreCatalogo);
-        TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo,DescripcionTipo,DuracionMaxPrestamo,requiereAprobacion: false, Categoria.Computacion);
-        UnidadFisica unidad = new UnidadFisica(IdUnidad, UbicacionUnidad, null);
-        tipo.AgregarUnidad(unidad);
-        catalogo.AgregarTipo(tipo);
+        Catalogo catalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreCatalogo);
         GuardarConOtroContexto(catalogo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
@@ -242,11 +234,7 @@ public sealed class RepositorioCatalogoSqlTests
     public void ExisteUnidadConIdInstitucional_UnidadEnOtroCatalogo_DevuelveTrue()
     {
         Catalogo primerCatalogo = new Catalogo(NombreCatalogo);
-        Catalogo segundoCatalogo = new Catalogo(NombreSegundoCatalogo);
-        TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo,DescripcionTipo,DuracionMaxPrestamo,requiereAprobacion: false, Categoria.Computacion);
-        UnidadFisica unidad = new UnidadFisica(IdUnidad, UbicacionUnidad, null);
-        tipo.AgregarUnidad(unidad);
-        segundoCatalogo.AgregarTipo(tipo);
+        Catalogo segundoCatalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreSegundoCatalogo);
         GuardarConOtroContexto(primerCatalogo, segundoCatalogo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
@@ -273,5 +261,16 @@ public sealed class RepositorioCatalogoSqlTests
         Catalogo guardado = contextoQueModifica.Catalogos.Find(catalogo.Id)!;
         guardado.DarDeBaja();
         contextoQueModifica.SaveChanges();
+    }
+
+    private static Catalogo CrearCatalogoConTipoEquipamientoYUnidad(string nombreCatalogo)
+    {
+        Catalogo catalogo = new Catalogo(nombreCatalogo);
+        TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo,DescripcionTipo,DuracionMaxPrestamo,requiereAprobacion: false, Categoria.Computacion);
+        UnidadFisica unidad = new UnidadFisica(IdUnidad, UbicacionUnidad, null);
+        tipo.AgregarUnidad(unidad);
+        catalogo.AgregarTipo(tipo);
+
+        return catalogo;
     }
 }

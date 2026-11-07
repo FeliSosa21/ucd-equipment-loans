@@ -48,11 +48,11 @@ public class RepositorioCatalogoSql
                              && catalogo.Id != idExcluido);
     }
 
-    public bool ExisteUnidadConIdInstitucional(string IdUnidad)
+    public bool ExisteUnidadConIdInstitucional(string idInstitucional)
     {
         return _contexto.Catalogos
             .SelectMany(catalogo => catalogo.Tipos)
-            .SelectMany(tipos => tipos.Unidades)
-            .Any(unidad => unidad.IdInstitucional == IdUnidad);
+            .SelectMany(tipo => tipo.Unidades)
+            .Any(unidad => unidad.IdInstitucional == idInstitucional);
     }
 }
