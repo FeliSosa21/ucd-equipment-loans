@@ -14,7 +14,6 @@ public class ServicioAdministracionUsuarios
     public const string ContrasenaPredeterminada = "Ucd12345";
     public static readonly string NombreTipoAdministrador = TipoUsuario.Administrador().Nombre;
     public static readonly string NombreTipoPendiente = TipoUsuario.SinPermisos().Nombre;
-    public const int TamanoPagina = 50;
     private const string MensajeSoloAdministrador = "Solo un administrador activo puede gestionar usuarios";
 
     private readonly RepositorioUsuario _repositorio;
@@ -46,21 +45,6 @@ public class ServicioAdministracionUsuarios
 
         creado.AsignarTipo(tipo);
         creado.ExigirCambioDeContrasena();
-    }
-
-    public PaginaDto<UsuarioResumenDto> ListarUsuarios(string dniResponsable, string? busqueda, int pagina)
-    {
-        ArgumentOutOfRangeException.ThrowIfLessThan(pagina, 1);
-        ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
-        int total = _repositorio.ContarUsuarios(busqueda);
-
-        return new PaginaDto<UsuarioResumenDto>
-        {
-            Elementos = _repositorio.ObtenerPaginaDeUsuarios(busqueda, pagina, TamanoPagina).Select(CrearResumen).ToList(),
-            Pagina = pagina,
-            HayPaginaAnterior = pagina > 1,
-            HayPaginaSiguiente = pagina * TamanoPagina < total
-        };
     }
 
     public List<UsuarioResumenDto> ListarUsuarios(FiltroUsuariosDto filtro, string dniResponsable)
