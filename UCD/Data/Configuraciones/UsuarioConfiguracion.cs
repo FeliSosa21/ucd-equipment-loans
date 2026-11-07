@@ -32,7 +32,5 @@ public class UsuarioConfiguracion : IEntityTypeConfiguration<Usuario>
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(usuario => usuario.EstaEliminado).IsRequired();
-        
-        builder.HasQueryFilter(usuario => !usuario.EstaEliminado);
     }
 }

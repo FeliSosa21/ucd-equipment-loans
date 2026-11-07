@@ -13,7 +13,8 @@ public class RepositorioUsuarioSql
     }
 
     private IQueryable<Usuario> UsuariosConTipo =>
-        _contexto.Usuarios.Include(usuario => usuario.Tipo);
+        _contexto.Usuarios.Include(usuario => usuario.Tipo)
+            .Where(usuario => !usuario.EstaEliminado);
 
     public void AgregarUsuario(Usuario usuario)
     {
