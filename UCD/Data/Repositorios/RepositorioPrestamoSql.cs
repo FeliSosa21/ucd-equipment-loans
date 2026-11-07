@@ -56,6 +56,7 @@ public class RepositorioPrestamoSql
     {
         return PrestamosConSolicitanteTipoYAsignadas
             .Where(prestamo => prestamo.Estado == EstadoPrestamo.Activo)
+            .OrderBy(prestamo => prestamo.FechaHoraPrestamo)
             .ToList();
     }
 
