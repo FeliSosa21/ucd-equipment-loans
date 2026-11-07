@@ -17,21 +17,6 @@ public class RepositorioAuditoria
         _memoria.RegistrosAuditoria.Add(registro);
     }
 
-    public IReadOnlyList<RegistroAuditoria> ObtenerPaginaDeRegistros(FiltroAuditoria filtro, int pagina, int tamanoPagina)
-    {
-        return Filtrar(filtro)
-            .Reverse()
-            .OrderByDescending(registro => registro.FechaHora)
-            .Skip((pagina - 1) * tamanoPagina)
-            .Take(tamanoPagina)
-            .ToList();
-    }
-
-    public int ContarRegistros(FiltroAuditoria filtro)
-    {
-        return Filtrar(filtro).Count();
-    }
-
     public IReadOnlyList<RegistroAuditoria> ObtenerRegistros(FiltroAuditoria filtro)
     {
         ArgumentNullException.ThrowIfNull(filtro);
@@ -49,8 +34,6 @@ public class RepositorioAuditoria
 
     private IEnumerable<RegistroAuditoria> Filtrar(FiltroAuditoria filtro)
     {
-        ArgumentNullException.ThrowIfNull(filtro);
-
         return _memoria.RegistrosAuditoria
             .Where(registro => filtro.Desde is null || registro.FechaHora >= filtro.Desde)
             .Where(registro => filtro.Hasta is null || registro.FechaHora < filtro.Hasta)
