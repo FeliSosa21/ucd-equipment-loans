@@ -269,6 +269,18 @@ public class RepositorioUsuarioTests
             usuarios.Select(usuario => usuario.Dni).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerUsuarios_NingunoCoincide_DevuelveListaVacia()
+    {
+        RepositorioUsuario repositorio = new RepositorioUsuario(new Memoria());
+        repositorio.AgregarUsuario(CrearUsuario(
+            dni: "47153923", nombre: "Lucia", apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy"));
+
+        IReadOnlyList<Usuario> usuarios = repositorio.ObtenerUsuarios(new FiltroUsuarios { Texto = "gomez" });
+
+        Assert.AreEqual(0, usuarios.Count);
+    }
+
     // Se agregan desordenados para comprobar que la pagina sale ordenada por apellido.
     private static RepositorioUsuario CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno,
         out Usuario carla)
