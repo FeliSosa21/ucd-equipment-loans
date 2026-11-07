@@ -86,6 +86,7 @@ public class Usuario
     public void Eliminar()
     {
         Eliminado = true;
+        Estado = EstadoUsuario.Desactivado;
     }
 
     public void AsignarTipo(TipoUsuario tipo)
