@@ -51,6 +51,8 @@ public class RepositorioPrestamoSql
 
     public IReadOnlyList<Prestamo> ObtenerPrestamosActivos()
     {
-        return new List<Prestamo>();
+        return _contexto.Prestamos
+            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Activo)
+            .ToList();
     }
 }
