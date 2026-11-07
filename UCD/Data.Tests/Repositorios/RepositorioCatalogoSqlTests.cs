@@ -169,6 +169,24 @@ public sealed class RepositorioCatalogoSqlTests
         CollectionAssert.AreEqual(nombresEsperados, nombresObtenidos);
     }
 
+    [TestMethod]
+    public void ObtenerCatalogosActivos_CatalogoConTipo_NoLosCarga()
+    {
+        Catalogo catalogo = new Catalogo(NombreCatalogo);
+        TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo,DescripcionTipo,DuracionMaxPrestamo,requiereAprobacion: false, Categoria.Computacion);
+        UnidadFisica unidad = new UnidadFisica(IdUnidad,UbicacionUnidad, null);
+        tipo.AgregarUnidad(unidad);
+        catalogo.AgregarTipo(tipo);
+        GuardarConOtroContexto(catalogo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        IReadOnlyList<Catalogo> resultado = repositorioQueLee.ObtenerCatalogosActivos();
+
+        Catalogo encontrado = resultado.Single();
+        Assert.AreEqual(0, encontrado.Tipos.Count);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
