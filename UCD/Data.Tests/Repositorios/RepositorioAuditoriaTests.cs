@@ -150,6 +150,16 @@ public sealed class RepositorioAuditoriaTests
         Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ObtenerRegistros(null!));
     }
 
+    [TestMethod]
+    public void ObtenerRegistros_FiltroSinCriterios_DevuelveListaVacia()
+    {
+        _repositorio.AgregarRegistro(CrearRegistro(FechaFija));
+
+        IReadOnlyList<RegistroAuditoria> resultado = _repositorio.ObtenerRegistros(new FiltroAuditoria());
+
+        Assert.AreEqual(0, resultado.Count);
+    }
+
     private static RegistroAuditoria CrearRegistro(DateTime fechaHora)
     {
         return CrearRegistro(RegistroDeAccion.DeUsuario(CrearUsuario(), fechaHora));
