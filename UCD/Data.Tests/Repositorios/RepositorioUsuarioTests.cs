@@ -293,6 +293,14 @@ public class RepositorioUsuarioTests
         Assert.IsNull(repositorio.ObtenerUsuarioPorDni(usuario.Dni));
     }
 
+    [TestMethod]
+    public void EliminarUsuario_UsuarioNulo_LanzaArgumentNullException()
+    {
+        RepositorioUsuario repositorio = new RepositorioUsuario(new Memoria());
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.EliminarUsuario(null!));
+    }
+
     // Se agregan desordenados para comprobar que la pagina sale ordenada por apellido.
     private static RepositorioUsuario CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno,
         out Usuario carla)
