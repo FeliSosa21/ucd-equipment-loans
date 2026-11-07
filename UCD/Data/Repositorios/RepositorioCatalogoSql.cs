@@ -35,4 +35,11 @@ public class RepositorioCatalogoSql
             .ThenInclude(equipamiento => equipamiento.Unidades)
             .FirstOrDefault(catalogo => catalogo.Id == id && catalogo.Activo);
     }
+
+    public bool ExisteActivoConNombre(string nombre, int? idExcluido)
+    {
+        string nombreBuscado = nombre.Trim().ToLower();
+
+        return _contexto.Catalogos.Any(catalogo => catalogo.Nombre.Trim().ToLower() == nombreBuscado);
+    }
 }
