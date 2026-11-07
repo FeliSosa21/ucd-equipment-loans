@@ -642,6 +642,14 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void Constructor_DatosValidos_NoQuedaEliminado()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.IsFalse(usuario.Eliminado);
+    }
+
+    [TestMethod]
     public void ModificarDatos_DatosConEspaciosAlrededor_LosGuardaRecortados()
     {
         Usuario usuario = CrearUsuario();
