@@ -437,9 +437,7 @@ public sealed class RepositorioPrestamoSqlTests
         Prestamo deOtroSolicitante = CrearPrestamoDelSolicitante(CrearOtroSolicitante());
         GuardarConOtroContexto(solicitado, rechazado, deOtroSolicitante);
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        IReadOnlyList<Prestamo> obtenidos = repositorio.ObtenerPrestamosDeSolicitante(DniSolicitante);
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosDeSolicitanteConOtroContexto(DniSolicitante);
 
         List<Guid> idsEsperados = new List<Guid> { solicitado.Id, rechazado.Id };
         List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
@@ -456,9 +454,7 @@ public sealed class RepositorioPrestamoSqlTests
         prestamo.Activar(unidades);
         GuardarConOtroContexto(prestamo);
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        Prestamo obtenido = repositorio.ObtenerPrestamosDeSolicitante(DniSolicitante).Single();
+        Prestamo obtenido = ObtenerPrestamosDeSolicitanteConOtroContexto(DniSolicitante).Single();
 
         Assert.IsNotNull(obtenido.Solicitante);
         Assert.AreEqual(DniSolicitante, obtenido.Solicitante.Dni);
@@ -531,6 +527,14 @@ public sealed class RepositorioPrestamoSqlTests
         RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
 
         return repositorio.ObtenerPrestamosPendientes();
+    }
+
+    private IReadOnlyList<Prestamo> ObtenerPrestamosDeSolicitanteConOtroContexto(string dni)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+
+        return repositorio.ObtenerPrestamosDeSolicitante(dni);
     }
 
     private static Prestamo CrearPrestamo()
