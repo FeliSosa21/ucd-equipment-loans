@@ -203,6 +203,19 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.IsTrue(existe);
     }
 
+    [TestMethod]
+    public void ExisteActivoConNombre_MismoCatalogo_DevuelveFalse()
+    {
+        Catalogo catalogo = new Catalogo(NombreCatalogo);
+        GuardarConOtroContexto(catalogo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        bool existe = repositorioQueLee.ExisteActivoConNombre(NombreCatalogo, idExcluido: catalogo.Id);
+
+        Assert.IsFalse(existe);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
