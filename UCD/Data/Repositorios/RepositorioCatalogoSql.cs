@@ -41,6 +41,9 @@ public class RepositorioCatalogoSql
     {
         string nombreBuscado = nombre.Trim().ToLower();
 
-        return _contexto.Catalogos.Any(catalogo => catalogo.Nombre.Trim().ToLower() == nombreBuscado && catalogo.Id != idExcluido);
+        return _contexto.Catalogos
+            .Any(catalogo => catalogo.Nombre.Trim().ToLower() == nombreBuscado
+                             && catalogo.Id != idExcluido
+                             && catalogo.Activo);
     }
 }
