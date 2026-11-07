@@ -14,62 +14,122 @@ public class ServicioAdministracionUsuariosTests
     private const string DniNuevo = "45678905";
 
     [TestMethod]
-    public void ListarUsuarios_ConUnRegistradoYElAdministrador_LosDevuelveConSuTipoYEstado()
+    public void ListarUsuarios_FiltroConTexto_DevuelveLosQueCoincidenConSuTipoYEstado()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
-        List<UsuarioResumenDto> usuarios = servicio.ListarUsuarios(DniResponsable, null, 1).Elementos;
+        List<UsuarioResumenDto> usuarios =
+            servicio.ListarUsuarios(new FiltroUsuariosDto { Texto = "sosa" }, DniResponsable);
 
-        UsuarioResumenDto registrado = usuarios.Single(usuario => usuario.Dni == DniValido);
-        Assert.AreEqual(2, usuarios.Count);
+        UsuarioResumenDto registrado = usuarios.Single();
+        Assert.AreEqual(DniValido, registrado.Dni);
         Assert.AreEqual(TipoUsuario.SinPermisos().Nombre, registrado.Tipo);
         Assert.IsTrue(registrado.Activo);
     }
 
     [TestMethod]
-    public void ListarUsuarios_PocosUsuarios_DevuelveUnaSolaPagina()
+    public void ListarUsuarios_FiltroConNombreDeTipo_DevuelveSoloLosDeEseTipo()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
-        PaginaDto<UsuarioResumenDto> pagina = servicio.ListarUsuarios(DniResponsable, null, 1);
+        List<UsuarioResumenDto> usuarios = servicio.ListarUsuarios(
+            new FiltroUsuariosDto { NombreTipo = TipoUsuario.SinPermisos().Nombre }, DniResponsable);
 
-        Assert.AreEqual(2, pagina.Elementos.Count);
-        Assert.IsFalse(pagina.HayPaginaAnterior);
-        Assert.IsFalse(pagina.HayPaginaSiguiente);
+        CollectionAssert.AreEqual(new List<string> { DniValido },
+            usuarios.Select(usuario => usuario.Dni).ToList());
     }
 
     [TestMethod]
-    public void ListarUsuarios_MasUsuariosQueUnaPagina_LaPrimeraIndicaQueHaySiguiente()
-    {
-        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
-        AgregarUsuarios(repositorio, ServicioAdministracionUsuarios.TamanoPagina);
-
-        PaginaDto<UsuarioResumenDto> pagina = servicio.ListarUsuarios(DniResponsable, null, 1);
-
-        Assert.AreEqual(ServicioAdministracionUsuarios.TamanoPagina, pagina.Elementos.Count);
-        Assert.IsTrue(pagina.HayPaginaSiguiente);
-    }
-
-    [TestMethod]
-    public void ListarUsuarios_UltimaPagina_IndicaQueHayAnteriorYNoSiguiente()
-    {
-        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
-        AgregarUsuarios(repositorio, ServicioAdministracionUsuarios.TamanoPagina);
-
-        PaginaDto<UsuarioResumenDto> pagina = servicio.ListarUsuarios(DniResponsable, null, 2);
-
-        Assert.AreEqual(2, pagina.Elementos.Count);
-        Assert.IsTrue(pagina.HayPaginaAnterior);
-        Assert.IsFalse(pagina.HayPaginaSiguiente);
-    }
-
-    [TestMethod]
-    public void ListarUsuarios_PaginaMenorAUno_LanzaExcepcion()
+    public void ListarUsuarios_TipoInexistente_LanzaServicioException()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() =>
-            servicio.ListarUsuarios(DniResponsable, null, 0));
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarUsuarios(new FiltroUsuariosDto { NombreTipo = "Rector" }, DniResponsable));
+
+        Assert.AreEqual("El tipo de usuario no existe", excepcion.Message);
+    }
+
+    [TestMethod]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void ListarUsuarios_TextoYNombreDeTipoVacio_FiltraSoloPorTexto(string nombreTipo)
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        List<UsuarioResumenDto> usuarios = servicio.ListarUsuarios(
+            new FiltroUsuariosDto { Texto = "sosa", NombreTipo = nombreTipo }, DniResponsable);
+
+        CollectionAssert.AreEqual(new List<string> { DniValido },
+            usuarios.Select(usuario => usuario.Dni).ToList());
+    }
+
+    [TestMethod]
+    public void ListarUsuarios_FiltroSinCriterios_DevuelveListaVacia()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        List<UsuarioResumenDto> usuarios = servicio.ListarUsuarios(new FiltroUsuariosDto(), DniResponsable);
+
+        Assert.AreEqual(0, usuarios.Count);
+    }
+
+    [TestMethod]
+    public void ListarUsuarios_FiltroNulo_LanzaArgumentNullException()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        Assert.ThrowsException<ArgumentNullException>(() => servicio.ListarUsuarios(null!, DniResponsable));
+    }
+
+    [TestMethod]
+    public void ListarUsuarios_ResponsableNoAdministrador_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarUsuarios(new FiltroUsuariosDto { Texto = "sosa" }, DniValido));
+    }
+
+    [TestMethod]
+    public void TieneCriterios_ConTexto_DevuelveTrue()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        bool tieneCriterios = servicio.TieneCriterios(new FiltroUsuariosDto { Texto = "sosa" });
+
+        Assert.IsTrue(tieneCriterios);
+    }
+
+    [TestMethod]
+    public void TieneCriterios_SinTextoNiTipo_DevuelveFalse()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        bool tieneCriterios = servicio.TieneCriterios(new FiltroUsuariosDto());
+
+        Assert.IsFalse(tieneCriterios);
+    }
+
+    [TestMethod]
+    public void TieneCriterios_ConNombreDeTipo_DevuelveTrue()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        bool tieneCriterios = servicio.TieneCriterios(
+            new FiltroUsuariosDto { NombreTipo = ServicioAdministracionUsuarios.NombreTipoPendiente });
+
+        Assert.IsTrue(tieneCriterios);
+    }
+
+    [TestMethod]
+    public void TieneCriterios_TextoYTipoEnBlanco_DevuelveFalse()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        bool tieneCriterios = servicio.TieneCriterios(new FiltroUsuariosDto { Texto = "   ", NombreTipo = "" });
+
+        Assert.IsFalse(tieneCriterios);
     }
 
     [TestMethod]
@@ -80,6 +140,16 @@ public class ServicioAdministracionUsuariosTests
         List<string> nombres = servicio.NombresDeTipos();
 
         CollectionAssert.Contains(nombres, ServicioAdministracionUsuarios.NombreTipoAdministrador);
+    }
+
+    [TestMethod]
+    public void NombresDeTipos_ConNombreTipoPendiente_LoIncluyeEntreLosAsignables()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        List<string> nombres = servicio.NombresDeTipos();
+
+        CollectionAssert.Contains(nombres, ServicioAdministracionUsuarios.NombreTipoPendiente);
     }
 
     [TestMethod]
@@ -331,6 +401,18 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void Reactivar_UsuarioEliminado_LanzaExcepcionDeUsuarioInexistente()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
+        repositorio.EliminarUsuario(repositorio.ObtenerUsuarioPorDni(DniValido)!);
+
+        ServicioException excepcion =
+            Assert.ThrowsException<ServicioException>(() => servicio.Reactivar(DniValido, DniResponsable));
+
+        Assert.AreEqual("El usuario no existe", excepcion.Message);
+    }
+
+    [TestMethod]
     public void ObtenerResumen_UsuarioInexistente_LanzaExcepcion()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
@@ -483,14 +565,6 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
-    public void ListarUsuarios_ResponsableNoAdministrador_LanzaExcepcion()
-    {
-        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
-
-        Assert.ThrowsException<ServicioException>(() => servicio.ListarUsuarios(DniValido, null, 1));
-    }
-
-    [TestMethod]
     public void ObtenerResumen_OtroUsuarioSinSerAdministrador_LanzaExcepcion()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
@@ -594,24 +668,6 @@ public class ServicioAdministracionUsuariosTests
         {
             Dni = DniNuevo, Nombre = "Ana", Apellido = "Perez", Correo = CorreoNuevo
         };
-    }
-
-    private static void AgregarUsuarios(RepositorioUsuario repositorio, int cantidad)
-    {
-        for (int numero = 0; numero < cantidad; numero++)
-        {
-            repositorio.AgregarUsuario(new Usuario(CedulaValida(3000000 + numero), "Relleno",
-                $"Apellido{numero:D3}", $"relleno{numero}@ucd.edu.uy", "Relleno2026"));
-        }
-    }
-
-    // Arma una cedula con su digito verificador (datos de prueba: 7 digitos + verificador).
-    private static string CedulaValida(int sinVerificador)
-    {
-        int[] pesos = { 2, 9, 8, 7, 6, 3, 4 };
-        string digitos = sinVerificador.ToString("D7");
-        int suma = digitos.Select((digito, i) => (digito - '0') * pesos[i]).Sum();
-        return digitos + (10 - suma % 10) % 10;
     }
 
     private static ServicioAdministracionUsuarios CrearServicioConAdministrador(out RepositorioUsuario repositorio)

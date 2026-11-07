@@ -512,6 +512,49 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void Eliminar_UsuarioActivo_QuedaEliminado()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.Eliminar();
+
+        Assert.IsTrue(usuario.EstaEliminado);
+    }
+
+    [TestMethod]
+    public void Eliminar_UsuarioActivo_QuedaDesactivado()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.Eliminar();
+
+        Assert.AreEqual(EstadoUsuario.Desactivado, usuario.Estado);
+    }
+
+    [TestMethod]
+    public void Eliminar_UsuarioYaEliminado_SigueEliminado()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.Eliminar();
+
+        usuario.Eliminar();
+
+        Assert.IsTrue(usuario.EstaEliminado);
+    }
+
+    [TestMethod]
+    public void Reactivar_UsuarioEliminado_LanzaDominioExceptionConCampoEstado()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.Eliminar();
+
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => usuario.Reactivar());
+
+        Assert.AreEqual(nameof(Usuario.Estado), excepcion.Campo);
+        Assert.AreEqual(EstadoUsuario.Desactivado, usuario.Estado);
+    }
+
+    [TestMethod]
     public void AsignarTipo_Administrador_TieneTipoAdministrador()
     {
         Usuario usuario = CrearUsuario();
@@ -608,6 +651,14 @@ public sealed class UsuarioTests
         Assert.AreEqual(NombreValido, usuario.Nombre);
         Assert.AreEqual(ApellidoValido, usuario.Apellido);
         Assert.AreEqual(CorreoValido, usuario.Correo);
+    }
+
+    [TestMethod]
+    public void Constructor_DatosValidos_NoQuedaEliminado()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.IsFalse(usuario.EstaEliminado);
     }
 
     [TestMethod]

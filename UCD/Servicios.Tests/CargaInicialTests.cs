@@ -34,7 +34,9 @@ public class CargaInicialTests
         carga.CargarRoot();
         carga.CargarRoot();
 
-        Assert.AreEqual(1, repositorio.ContarUsuarios(null));
+        IReadOnlyList<Usuario> usuarios =
+            repositorio.ObtenerUsuarios(new FiltroUsuarios { Texto = CargaInicial.CorreoRoot });
+        Assert.AreEqual(1, usuarios.Count);
     }
 
     [TestMethod]

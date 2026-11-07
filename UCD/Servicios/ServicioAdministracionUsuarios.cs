@@ -13,7 +13,7 @@ public class ServicioAdministracionUsuarios
 {
     public const string ContrasenaPredeterminada = "Ucd12345";
     public static readonly string NombreTipoAdministrador = TipoUsuario.Administrador().Nombre;
-    public const int TamanoPagina = 50;
+    public static readonly string NombreTipoPendiente = TipoUsuario.SinPermisos().Nombre;
     private const string MensajeSoloAdministrador = "Solo un administrador activo puede gestionar usuarios";
 
     private readonly RepositorioUsuario _repositorio;
@@ -47,19 +47,17 @@ public class ServicioAdministracionUsuarios
         creado.ExigirCambioDeContrasena();
     }
 
-    public PaginaDto<UsuarioResumenDto> ListarUsuarios(string dniResponsable, string? busqueda, int pagina)
+    public List<UsuarioResumenDto> ListarUsuarios(FiltroUsuariosDto filtro, string dniResponsable)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(pagina, 1);
+        ArgumentNullException.ThrowIfNull(filtro);
         ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
-        int total = _repositorio.ContarUsuarios(busqueda);
 
-        return new PaginaDto<UsuarioResumenDto>
-        {
-            Elementos = _repositorio.ObtenerPaginaDeUsuarios(busqueda, pagina, TamanoPagina).Select(CrearResumen).ToList(),
-            Pagina = pagina,
-            HayPaginaAnterior = pagina > 1,
-            HayPaginaSiguiente = pagina * TamanoPagina < total
-        };
+        return _repositorio.ObtenerUsuarios(CrearFiltro(filtro)).Select(CrearResumen).ToList();
+    }
+
+    public bool TieneCriterios(FiltroUsuariosDto filtro)
+    {
+        return CrearFiltro(filtro).TieneCriterios();
     }
 
     public List<string> NombresDeTipos()
@@ -106,7 +104,8 @@ public class ServicioAdministracionUsuarios
     public void Reactivar(string dni, string dniResponsable)
     {
         ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
-        ObtenerUsuario(dni).Reactivar();
+        Usuario usuario = ObtenerUsuario(dni);
+        TraduccionDeErrores.Ejecutar(() => usuario.Reactivar());
     }
 
     // El mismo usuario puede ver y modificar sus datos mientras siga activo; a otro, solo un administrador.
@@ -153,6 +152,15 @@ public class ServicioAdministracionUsuarios
     private static bool PuedeGestionarUsuarios(Usuario usuario)
     {
         return usuario.Estado == EstadoUsuario.Activo && usuario.TienePermiso(Permiso.GestionarUsuarios);
+    }
+
+    private FiltroUsuarios CrearFiltro(FiltroUsuariosDto filtro)
+    {
+        return new FiltroUsuarios
+        {
+            Texto = filtro.Texto,
+            Tipo = string.IsNullOrWhiteSpace(filtro.NombreTipo) ? null : ObtenerTipo(filtro.NombreTipo)
+        };
     }
 
     private TipoUsuario ObtenerTipo(string nombreTipo)

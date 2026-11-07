@@ -33,7 +33,8 @@ public sealed class RepositorioUsuarioSqlTests
 
         _repositorio.AgregarUsuario(usuario);
 
-        Assert.AreEqual(1, _contexto.Usuarios.Count());
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(1, contextoQueLee.Usuarios.Count());
     }
 
     [TestMethod]
@@ -42,9 +43,10 @@ public sealed class RepositorioUsuarioSqlTests
         Usuario usuario = CrearUsuario();
         _repositorio.AgregarUsuario(usuario);
 
-        Usuario? resultado = _repositorio.ObtenerUsuarioPorDni(usuario.Dni);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario? resultado = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(usuario.Dni);
 
-        Assert.AreSame(usuario, resultado);
+        Assert.AreEqual(usuario.Dni, resultado?.Dni);
     }
 
     [TestMethod]
@@ -61,9 +63,10 @@ public sealed class RepositorioUsuarioSqlTests
         Usuario usuario = CrearUsuario();
         _repositorio.AgregarUsuario(usuario);
 
-        Usuario? resultado = _repositorio.ObtenerUsuarioPorCorreo(usuario.Correo);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario? resultado = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorCorreo(usuario.Correo);
 
-        Assert.AreSame(usuario, resultado);
+        Assert.AreEqual(usuario.Dni, resultado?.Dni);
     }
 
     [TestMethod]
@@ -71,64 +74,14 @@ public sealed class RepositorioUsuarioSqlTests
     {
         Usuario usuario = CrearUsuario();
         _repositorio.AgregarUsuario(usuario);
-        
-        Usuario? resultado = _repositorio.ObtenerUsuarioPorCorreo("LUCIA.Fernandez@UCD.edu.uy");
-        
-        Assert.AreSame(usuario, resultado);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario? resultado = new RepositorioUsuarioSql(contextoQueLee)
+            .ObtenerUsuarioPorCorreo("LUCIA.Fernandez@UCD.edu.uy");
+
+        Assert.AreEqual(usuario.Dni, resultado?.Dni);
     }
 
-    [TestMethod]
-    public void ObtenerPaginaDeUsuarios_SinFiltro_LosDevuelveOrdenadosPorApellido()
-    {
-        Usuario fernandez = CrearUsuario();
-        Usuario alvarez = CrearUsuario(dni: "12345672", apellido: "Alvarez", correo: "martin.alvarez@ucd.edu.uy");
-        _repositorio.AgregarUsuario(fernandez);
-        _repositorio.AgregarUsuario(alvarez);
-        
-        IReadOnlyList<Usuario> resultado = _repositorio.ObtenerPaginaDeUsuarios(null, pagina: 1, tamanoPagina: 10);
-        
-        CollectionAssert.AreEqual(new List<Usuario> { alvarez, fernandez }, resultado.ToList());
-    }
-
-    [TestMethod]
-    public void ObtenerPaginaDeUsuarios_SegundaPaginaDeUno_DevuelveSoloElSegundo()
-    {
-        Usuario fernandez = CrearUsuario();
-        Usuario alvarez = CrearUsuario(dni: "12345672", apellido: "Alvarez", correo: "martin.alvarez@ucd.edu.uy");
-        _repositorio.AgregarUsuario(fernandez);
-        _repositorio.AgregarUsuario(alvarez);
-        
-        IReadOnlyList<Usuario> resultado = _repositorio.ObtenerPaginaDeUsuarios(null, pagina: 2, tamanoPagina: 1);
-        
-        CollectionAssert.AreEqual(new List<Usuario> { fernandez }, resultado.ToList());
-    }
-
-    [TestMethod]
-    public void ObtenerPaginaDeUsuarios_FiltroConOtrasMayusculas_DevuelveSoloLosQueCoinciden()
-    {
-        Usuario fernandez = CrearUsuario();
-        Usuario alvarez = CrearUsuario(dni: "12345672", apellido: "Alvarez", correo: "martin.alvarez@ucd.edu.uy");
-        _repositorio.AgregarUsuario(fernandez);
-        _repositorio.AgregarUsuario(alvarez);
-        
-        IReadOnlyList<Usuario> resultado = _repositorio.ObtenerPaginaDeUsuarios("FERN", pagina: 1, tamanoPagina: 10);
-        
-        CollectionAssert.AreEqual(new List<Usuario> { fernandez }, resultado.ToList());
-    }
-    
-    [TestMethod]
-    public void ContarUsuarios_FiltroConOtrasMayusculas_CuentaSoloLosQueCoinciden()
-    {
-        Usuario fernandez = CrearUsuario();
-        Usuario alvarez = CrearUsuario(dni: "12345672", apellido: "Alvarez", correo: "martin.alvarez@ucd.edu.uy");
-        _repositorio.AgregarUsuario(fernandez);
-        _repositorio.AgregarUsuario(alvarez);
-
-        int cantidad = _repositorio.ContarUsuarios("FERN");
-
-        Assert.AreEqual(1, cantidad);
-    }
-    
     [TestMethod]
     public void ActualizarUsuario_UsuarioDesactivado_OtroContextoLoLeeDesactivado()
     {
@@ -141,19 +94,6 @@ public sealed class RepositorioUsuarioSqlTests
         using SqlContext otroContexto = new SqlContext(_opciones);
         Usuario? leido = new RepositorioUsuarioSql(otroContexto).ObtenerUsuarioPorDni(fernandez.Dni);
         Assert.AreEqual(EstadoUsuario.Desactivado, leido?.Estado);
-    }
-    
-    [TestMethod]
-    public void ObtenerPaginaDeUsuarios_MismoApellido_LosOrdenaPorNombre()
-    {
-        Usuario lucia = CrearUsuario();
-        Usuario ana = CrearUsuario(dni: "12345672", nombre: "Ana", correo: "ana.fernandez@ucd.edu.uy");
-        _repositorio.AgregarUsuario(lucia);
-        _repositorio.AgregarUsuario(ana);
-
-        IReadOnlyList<Usuario> resultado = _repositorio.ObtenerPaginaDeUsuarios(null, pagina: 1, tamanoPagina: 10);
-
-        CollectionAssert.AreEqual(new List<Usuario> { ana, lucia }, resultado.ToList());
     }
 
     [TestMethod]
@@ -174,43 +114,355 @@ public sealed class RepositorioUsuarioSqlTests
         Usuario usuario = CrearUsuario();
         usuario.AsignarTipo(TipoUsuario.Docente());
         _repositorio.AgregarUsuario(usuario);
-        
+
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         Usuario? leido = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(usuario.Dni);
-        
+
         Assert.AreEqual(usuario.Tipo.Id, leido?.Tipo.Id);
     }
-    
+
     [TestMethod]
     public void ObtenerUsuarioPorCorreo_ConTipo_OtroContextoLeeSuTipo()
     {
         Usuario usuario = CrearUsuario();
         usuario.AsignarTipo(TipoUsuario.Docente());
         _repositorio.AgregarUsuario(usuario);
-        
+
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         Usuario? leido = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorCorreo(usuario.Correo);
-        
+
         Assert.AreEqual(usuario.Tipo.Id, leido?.Tipo.Id);
     }
 
     [TestMethod]
-    public void ObtenerPaginaDeUsuarios_ConTipo_OtroContextoLeeSuTipo()
+    public void ObtenerUsuarios_FiltroNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ObtenerUsuarios(null!));
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarios_FiltroSinCriterios_DevuelveListaVacia()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario());
+
+        IReadOnlyList<Usuario> usuarios = _repositorio.ObtenerUsuarios(new FiltroUsuarios());
+
+        Assert.AreEqual(0, usuarios.Count);
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarios_TextoQueCoincideConVarios_DevuelveSoloEsos()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "12345672", nombre: "Lucia", apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy"));
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "45678905", nombre: "Martin", apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy"));
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "67890127", nombre: "Sofia", apellido: "Gomez", correo: "sofia.gomez@ucd.edu.uy"));
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = "fernandez" });
+
+        CollectionAssert.AreEquivalent(new List<string> { "12345672", "45678905" },
+            usuarios.Select(usuario => usuario.Dni).ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarios_VariosCoinciden_LosDevuelveOrdenadosPorApellido()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "67890127", nombre: "Sofia", apellido: "Gomez", correo: "sofia.gomez@ucd.edu.uy"));
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "12345672", nombre: "Lucia", apellido: "Alvarez", correo: "lucia.alvarez@ucd.edu.uy"));
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "45678905", nombre: "Martin", apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy"));
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = "ucd" });
+
+        CollectionAssert.AreEqual(new List<string> { "Alvarez", "Fernandez", "Gomez" },
+            usuarios.Select(usuario => usuario.Apellido).ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarios_MismoApellido_LosOrdenaPorNombre()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "45678905", nombre: "Martin", apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy"));
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "12345672", nombre: "Lucia", apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy"));
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = "Fernandez" });
+
+        CollectionAssert.AreEqual(new List<string> { "Lucia", "Martin" },
+            usuarios.Select(usuario => usuario.Nombre).ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarios_MismoNombreYApellido_LosOrdenaPorDni()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "45678905", nombre: "Lucia", apellido: "Fernandez", correo: "lucia.fernandez2@ucd.edu.uy"));
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "12345672", nombre: "Lucia", apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy"));
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = "Fernandez" });
+
+        CollectionAssert.AreEqual(new List<string> { "12345672", "45678905" },
+            usuarios.Select(usuario => usuario.Dni).ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarios_TextoConEspaciosAlrededor_LoEncuentra()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario(
+            dni: "47153923", nombre: "Lucia", apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy"));
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = " Fernandez " });
+
+        CollectionAssert.AreEqual(new List<string> { "47153923" },
+            usuarios.Select(usuario => usuario.Dni).ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarios_FiltroPorTipo_DevuelveSoloLosDeEseTipo()
+    {
+        TipoUsuario docente = TipoUsuario.Docente();
+        Usuario lucia = CrearUsuario(
+            dni: "12345672", nombre: "Lucia", apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy");
+        lucia.AsignarTipo(docente);
+        TipoUsuario estudiante = TipoUsuario.Estudiante();
+        Usuario martin = CrearUsuario(
+            dni: "45678905", nombre: "Martin", apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy");
+        martin.AsignarTipo(estudiante);
+        _repositorio.AgregarUsuario(lucia);
+        _repositorio.AgregarUsuario(martin);
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Tipo = docente });
+
+        CollectionAssert.AreEqual(new List<string> { "12345672" },
+            usuarios.Select(usuario => usuario.Dni).ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarios_TextoYTipo_DevuelveSoloLosQueCumplenAmbos()
+    {
+        TipoUsuario docente = TipoUsuario.Docente();
+        Usuario lucia = CrearUsuario(dni: "12345672", nombre: "Lucia",
+            apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy");
+        lucia.AsignarTipo(docente);
+        Usuario martin = CrearUsuario(dni: "45678905", nombre: "Martin",
+            apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy");
+        martin.AsignarTipo(TipoUsuario.Estudiante());
+        Usuario sofia = CrearUsuario(dni: "67890127", nombre: "Sofia",
+            apellido: "Gomez", correo: "sofia.gomez@ucd.edu.uy");
+        sofia.AsignarTipo(docente);
+        _repositorio.AgregarUsuario(lucia);
+        _repositorio.AgregarUsuario(martin);
+        _repositorio.AgregarUsuario(sofia);
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(
+            new FiltroUsuarios { Texto = "fernandez", Tipo = docente });
+
+        CollectionAssert.AreEqual(
+            new List<string> { "12345672" },
+            usuarios.Select(usuario => usuario.Dni).ToList());
+    }
+
+    [TestMethod]
+    [DataRow("lucia")]
+    [DataRow("fernandez")]
+    [DataRow("4715")]
+    [DataRow("ucd.edu")]
+    public void ObtenerUsuarios_TextoDeUnCampo_LoEncuentra(string texto)
+    {
+        _repositorio.AgregarUsuario(CrearUsuario(correo: "lf2026@ucd.edu.uy"));
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = texto });
+
+        CollectionAssert.AreEqual(new List<string> { "47153923" },
+            usuarios.Select(usuario => usuario.Dni).ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarios_NingunoCoincide_DevuelveListaVacia()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario());
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = "gomez" });
+
+        Assert.AreEqual(0, usuarios.Count);
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarios_ConTipo_OtroContextoLeeSuTipo()
     {
         Usuario usuario = CrearUsuario();
         usuario.AsignarTipo(TipoUsuario.Docente());
         _repositorio.AgregarUsuario(usuario);
-        
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = "fernandez" });
+
+        Assert.AreEqual(1, usuarios.Count);
+        Assert.AreEqual(usuario.Tipo.Id, usuarios[0].Tipo.Id);
+    }
+
+    [TestMethod]
+    public void AgregarUsuario_DniRepetido_LanzaInvalidOperationException()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario());
+        Usuario repetido = CrearUsuario(correo: "otro.correo@ucd.edu.uy");
+
+        Assert.ThrowsException<InvalidOperationException>(() => _repositorio.AgregarUsuario(repetido));
+    }
+
+    [TestMethod]
+    public void AgregarUsuario_CorreoRepetidoConOtrasMayusculas_LanzaInvalidOperationException()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario());
+        Usuario repetido = CrearUsuario(dni: "12345672",
+            correo: "LUCIA.FERNANDEZ@ucd.edu.uy");
+
+        Assert.ThrowsException<InvalidOperationException>(() => _repositorio.AgregarUsuario(repetido));
+    }
+
+    [TestMethod]
+    public void AgregarUsuario_UsuarioNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => _repositorio.AgregarUsuario(null!));
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarioPorCorreo_CorreoNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ObtenerUsuarioPorCorreo(null!));
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarioPorDni_DniNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ObtenerUsuarioPorDni(null!));
+    }
+
+    [TestMethod]
+    public void ActualizarUsuario_UsuarioLeidoConOtroContexto_GuardaElCambio()
+    {
+        _repositorio.AgregarUsuario(CrearUsuario());
+        Usuario leido;
+        using (SqlContext contextoQueLee = new SqlContext(_opciones))
+        {
+            leido = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni("47153923")!;
+        }
+        leido.Desactivar();
+
+        using (SqlContext contextoQueActualiza = new SqlContext(_opciones))
+        {
+            new RepositorioUsuarioSql(contextoQueActualiza).ActualizarUsuario(leido);
+        }
+
+        using SqlContext contextoQueVerifica = new SqlContext(_opciones);
+        Assert.AreEqual(EstadoUsuario.Desactivado,
+            new RepositorioUsuarioSql(contextoQueVerifica).ObtenerUsuarioPorDni("47153923")?.Estado);
+    }
+
+    [TestMethod]
+    public void EliminarUsuario_UsuarioAgregado_OtroContextoNoLoTrae()
+    {
+        Usuario usuario = CrearUsuario();
+        _repositorio.AgregarUsuario(usuario);
+
+        _repositorio.EliminarUsuario(usuario);
+
         using SqlContext contextoQueLee = new SqlContext(_opciones);
-        IReadOnlyList<Usuario> leidos =
-            new RepositorioUsuarioSql(contextoQueLee).ObtenerPaginaDeUsuarios(null, pagina: 1, tamanoPagina: 10);
-        
-        Assert.AreEqual(usuario.Tipo.Id, leidos[0].Tipo.Id);
+        Assert.IsNull(new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(usuario.Dni));
+    }
+
+    [TestMethod]
+    public void EliminarUsuario_UsuarioNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => _repositorio.EliminarUsuario(null!));
+    }
+
+    [TestMethod]
+    public void EliminarUsuario_DosVeces_NoFallaYSigueEliminado()
+    {
+        Usuario usuario = CrearUsuario();
+        _repositorio.AgregarUsuario(usuario);
+        _repositorio.EliminarUsuario(usuario);
+
+        _repositorio.EliminarUsuario(usuario);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.IsNull(new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(usuario.Dni));
+    }
+
+    [TestMethod]
+    public void ObtenerUsuarios_UsuarioEliminado_NoLoTrae()
+    {
+        Usuario lucia = CrearUsuario(dni: "12345672", nombre: "Lucia",
+            apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy");
+        Usuario martin = CrearUsuario(dni: "45678905", nombre: "Martin",
+            apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy");
+        _repositorio.AgregarUsuario(lucia);
+        _repositorio.AgregarUsuario(martin);
+        _repositorio.EliminarUsuario(martin);
+
+        IReadOnlyList<Usuario> usuarios = LeerConOtroContexto(new FiltroUsuarios { Texto = "fernandez" });
+
+        CollectionAssert.AreEqual(new List<string> { "12345672" },
+            usuarios.Select(usuario => usuario.Dni).ToList());
     }
     
+    [TestMethod]
+    public void ActualizarUsuario_UsuarioNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ActualizarUsuario(null!));
+    }
+
     private static Usuario CrearUsuario(string dni = "47153923", string nombre = "Lucia",
         string apellido = "Fernandez", string correo = "lucia.fernandez@ucd.edu.uy")
     {
         return new Usuario(dni: dni, nombre: nombre, apellido: apellido, correo: correo, contrasena: "Prueba2026");
+    }
+    
+    [TestMethod]
+    public void EliminarUsuario_UsuarioAgregado_LaFilaSigueEnLaBaseMarcadaComoEliminada()
+    {
+        Usuario usuario = CrearUsuario();
+        _repositorio.AgregarUsuario(usuario);
+
+        _repositorio.EliminarUsuario(usuario);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.IsTrue(contextoQueLee.Usuarios.Single().EstaEliminado);
+    }
+    
+    [TestMethod]
+    public void ObtenerUsuarioPorCorreo_UsuarioEliminado_DevuelveNull()
+    {
+        Usuario usuario = CrearUsuario();
+        _repositorio.AgregarUsuario(usuario);
+        _repositorio.EliminarUsuario(usuario);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario? resultado = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorCorreo(usuario.Correo);
+
+        Assert.IsNull(resultado);
+    }
+    
+    [TestMethod]
+    public void AgregarUsuario_DniDeUsuarioEliminado_LanzaInvalidOperationException()
+    {
+        Usuario eliminado = CrearUsuario();
+        _repositorio.AgregarUsuario(eliminado);
+        _repositorio.EliminarUsuario(eliminado);
+        Usuario nuevo = CrearUsuario(dni: "47153923",
+            correo: "otro.correo@ucd.edu.uy");
+
+        Assert.ThrowsException<InvalidOperationException>(() => _repositorio.AgregarUsuario(nuevo));
+    }
+
+    private IReadOnlyList<Usuario> LeerConOtroContexto(FiltroUsuarios filtro)
+    {
+        using SqlContext contexto = new SqlContext(_opciones);
+        return new RepositorioUsuarioSql(contexto).ObtenerUsuarios(filtro);
     }
 }
