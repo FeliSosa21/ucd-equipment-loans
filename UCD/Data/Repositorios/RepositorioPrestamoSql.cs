@@ -67,6 +67,8 @@ public class RepositorioPrestamoSql
     }
     public IReadOnlyList<Prestamo> ObtenerPrestamosDeSolicitante(string dni)
     {
-        return new List<Prestamo>();
+        return _contexto.Prestamos
+            .Where(prestamo => prestamo.Solicitante.Dni == dni)
+            .ToList();
     }
 }
