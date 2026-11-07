@@ -51,24 +51,13 @@ public class ServicioAdministracionUsuarios
     {
         ArgumentNullException.ThrowIfNull(filtro);
         ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
-        FiltroUsuarios filtroDelRepositorio = new FiltroUsuarios
-        {
-            Texto = filtro.Texto,
-            Tipo = string.IsNullOrWhiteSpace(filtro.NombreTipo) ? null : ObtenerTipo(filtro.NombreTipo)
-        };
 
-        return _repositorio.ObtenerUsuarios(filtroDelRepositorio).Select(CrearResumen).ToList();
+        return _repositorio.ObtenerUsuarios(CrearFiltro(filtro)).Select(CrearResumen).ToList();
     }
 
     public bool TieneCriterios(FiltroUsuariosDto filtro)
     {
-        FiltroUsuarios filtroDelRepositorio = new FiltroUsuarios
-        {
-            Texto = filtro.Texto,
-            Tipo = string.IsNullOrWhiteSpace(filtro.NombreTipo) ? null : ObtenerTipo(filtro.NombreTipo)
-        };
-
-        return filtroDelRepositorio.TieneCriterios();
+        return CrearFiltro(filtro).TieneCriterios();
     }
 
     public List<string> NombresDeTipos()
@@ -163,6 +152,15 @@ public class ServicioAdministracionUsuarios
     private static bool PuedeGestionarUsuarios(Usuario usuario)
     {
         return usuario.Estado == EstadoUsuario.Activo && usuario.TienePermiso(Permiso.GestionarUsuarios);
+    }
+
+    private FiltroUsuarios CrearFiltro(FiltroUsuariosDto filtro)
+    {
+        return new FiltroUsuarios
+        {
+            Texto = filtro.Texto,
+            Tipo = string.IsNullOrWhiteSpace(filtro.NombreTipo) ? null : ObtenerTipo(filtro.NombreTipo)
+        };
     }
 
     private TipoUsuario ObtenerTipo(string nombreTipo)
