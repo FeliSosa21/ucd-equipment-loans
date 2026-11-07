@@ -48,4 +48,9 @@ public class RepositorioPrestamoSql
             .OrderBy(prestamo => prestamo.FechaHoraPrestamo)
             .ToList();
     }
+
+    public IReadOnlyList<Prestamo> ObtenerPrestamosActivos()
+    {
+        return new List<Prestamo>();
+    }
 }

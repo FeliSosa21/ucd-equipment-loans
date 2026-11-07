@@ -351,6 +351,29 @@ public sealed class RepositorioPrestamoSqlTests
         CollectionAssert.AreEqual(idsEsperados, idsObtenidos);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamosActivos_VariosEstados_DevuelveSoloLosActivos()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento();
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo);
+
+        Prestamo devuelto = CrearPrestamoDelTipo(tipo);
+        devuelto.Activar(unidades);
+        Devolver(devuelto);
+        Prestamo activo = CrearPrestamoDelTipo(tipo);
+        activo.Activar(unidades);
+        Prestamo solicitado = CrearPrestamoDelTipo(tipo);
+        GuardarConOtroContexto(devuelto, activo, solicitado);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+        IReadOnlyList<Prestamo> obtenidos = repositorio.ObtenerPrestamosActivos();
+
+        List<Guid> idsEsperados = new List<Guid> { activo.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
