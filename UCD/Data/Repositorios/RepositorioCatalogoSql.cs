@@ -55,4 +55,10 @@ public class RepositorioCatalogoSql
             .SelectMany(tipo => tipo.Unidades)
             .Any(unidad => unidad.IdInstitucional == idInstitucional);
     }
+
+    public void ActualizarCatalogo(Catalogo catalogo)
+    {
+        _contexto.Catalogos.Update(catalogo);
+        _contexto.SaveChanges();
+    }
 }
