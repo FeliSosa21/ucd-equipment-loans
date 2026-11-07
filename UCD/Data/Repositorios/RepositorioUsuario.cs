@@ -23,7 +23,7 @@ public class RepositorioUsuario
 
     public Usuario? ObtenerUsuarioPorCorreo(string correo)
     {
-        return _memoria.Usuarios.FirstOrDefault(usuario =>
+        return _memoria.Usuarios.FirstOrDefault(usuario => !usuario.EstaEliminado &&
             string.Equals(usuario.Correo, correo, StringComparison.OrdinalIgnoreCase));
     }
 
