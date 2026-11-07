@@ -80,6 +80,11 @@ public class Usuario
 
     public void Reactivar()
     {
+        if (Eliminado)
+        {
+            throw new DominioException(nameof(Estado), "Un usuario eliminado no se puede reactivar");
+        }
+
         Estado = EstadoUsuario.Activo;
     }
 
