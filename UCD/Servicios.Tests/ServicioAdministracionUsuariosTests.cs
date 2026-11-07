@@ -94,6 +94,15 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void ListarUsuarios_FiltroYResponsableNoAdministrador_LanzaExcepcion()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarUsuarios(new FiltroUsuariosDto { Texto = "sosa" }, DniValido));
+    }
+
+    [TestMethod]
     public void ListarUsuarios_PocosUsuarios_DevuelveUnaSolaPagina()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
