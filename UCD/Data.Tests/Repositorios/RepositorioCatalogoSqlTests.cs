@@ -271,6 +271,26 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.IsFalse(existe);
     }
 
+    [TestMethod]
+    public void ActualizarCatalogo_NombreModificado_OtroContextoVeElCambio()
+    {
+        Catalogo catalogo = new Catalogo(NombreCatalogo);
+        GuardarConOtroContexto(catalogo);
+
+        using (SqlContext contextoQueModifica = new SqlContext(_opciones))
+        {
+            RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueModifica);
+            Catalogo obtenido = repositorio.ObtenerCatalogoActivoPorId(catalogo.Id)!;
+            obtenido.ModificarNombre(NombreSegundoCatalogo);
+            repositorio.ActualizarCatalogo(obtenido);
+        }
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Catalogo leido = contextoQueLee.Catalogos.Find(catalogo.Id)!;
+
+        Assert.AreEqual(NombreSegundoCatalogo, leido.Nombre);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
