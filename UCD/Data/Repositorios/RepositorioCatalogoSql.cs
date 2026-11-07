@@ -1,12 +1,13 @@
 ﻿using Dominio;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.SqlServer.Server;
 
 namespace Data.Repositorios;
 
 public class RepositorioCatalogoSql
 {
     private readonly SqlContext _contexto;
+
+    private IQueryable<Catalogo> CatalogosActivos => _contexto.Catalogos.Where(catalogo => catalogo.Activo);
 
     public RepositorioCatalogoSql(SqlContext contexto)
     {
@@ -15,8 +16,7 @@ public class RepositorioCatalogoSql
 
     public IReadOnlyList<Catalogo> ObtenerCatalogosActivos()
     {
-        return _contexto.Catalogos
-            .Where(catalogo => catalogo.Activo)
+        return CatalogosActivos
             .OrderBy(catalogo => catalogo.Nombre)
             .ToList();
     }
@@ -31,19 +31,18 @@ public class RepositorioCatalogoSql
 
     public Catalogo? ObtenerCatalogoActivoPorId(int id)
     {
-        return _contexto.Catalogos
+        return CatalogosActivos
             .Include(catalogo => catalogo.Tipos)
-            .ThenInclude(equipamiento => equipamiento.Unidades)
-            .FirstOrDefault(catalogo => catalogo.Id == id && catalogo.Activo);
+            .ThenInclude(tipo => tipo.Unidades)
+            .FirstOrDefault(catalogo => catalogo.Id == id);
     }
 
     public bool ExisteActivoConNombre(string nombre, int? idExcluido)
     {
         string nombreBuscado = nombre.Trim().ToLower();
 
-        return _contexto.Catalogos
+        return CatalogosActivos
             .Any(catalogo => catalogo.Nombre.Trim().ToLower() == nombreBuscado
-                             && catalogo.Id != idExcluido
-                             && catalogo.Activo);
+                             && catalogo.Id != idExcluido);
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Data;
-using Dominio;
+﻿using Dominio;
 using Microsoft.EntityFrameworkCore;
 using Data.Repositorios;
 
@@ -97,13 +96,7 @@ public sealed class RepositorioCatalogoSqlTests
     {
         Catalogo catalogo = new Catalogo(NombreCatalogo);
         GuardarConOtroContexto(catalogo);
-
-        using (SqlContext contextoQueModifica = new SqlContext(_opciones))
-        {
-            Catalogo guardado = contextoQueModifica.Catalogos.Find(catalogo.Id)!;
-            guardado.DarDeBaja();
-            contextoQueModifica.SaveChanges();
-        }
+        DarDeBajaConOtroContexto(catalogo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
@@ -117,7 +110,7 @@ public sealed class RepositorioCatalogoSqlTests
     {
         Catalogo catalogo = new Catalogo(NombreCatalogo);
         TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo,DescripcionTipo,DuracionMaxPrestamo,requiereAprobacion: false, Categoria.Computacion);
-        UnidadFisica unidad = new UnidadFisica(IdUnidad,UbicacionUnidad, null);
+        UnidadFisica unidad = new UnidadFisica(IdUnidad, UbicacionUnidad, null);
         tipo.AgregarUnidad(unidad);
         catalogo.AgregarTipo(tipo);
         GuardarConOtroContexto(catalogo);
@@ -137,14 +130,8 @@ public sealed class RepositorioCatalogoSqlTests
     {
         Catalogo primerCatalogo = new Catalogo(NombreCatalogo);
         Catalogo segundoCatalogo = new Catalogo(NombreSegundoCatalogo);
-        GuardarConOtroContexto(primerCatalogo,segundoCatalogo);
-
-        using (SqlContext contextoQueModifica = new SqlContext(_opciones))
-        {
-            Catalogo guardado = contextoQueModifica.Catalogos.Find(primerCatalogo.Id)!;
-            guardado.DarDeBaja();
-            contextoQueModifica.SaveChanges();
-        }
+        GuardarConOtroContexto(primerCatalogo, segundoCatalogo);
+        DarDeBajaConOtroContexto(primerCatalogo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
@@ -175,7 +162,7 @@ public sealed class RepositorioCatalogoSqlTests
     {
         Catalogo catalogo = new Catalogo(NombreCatalogo);
         TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo,DescripcionTipo,DuracionMaxPrestamo,requiereAprobacion: false, Categoria.Computacion);
-        UnidadFisica unidad = new UnidadFisica(IdUnidad,UbicacionUnidad, null);
+        UnidadFisica unidad = new UnidadFisica(IdUnidad, UbicacionUnidad, null);
         tipo.AgregarUnidad(unidad);
         catalogo.AgregarTipo(tipo);
         GuardarConOtroContexto(catalogo);
@@ -221,12 +208,7 @@ public sealed class RepositorioCatalogoSqlTests
     {
         Catalogo catalogo = new Catalogo(NombreCatalogo);
         GuardarConOtroContexto(catalogo);
-        using (SqlContext contextoQueModifica = new SqlContext(_opciones))
-        {
-            Catalogo guardado = contextoQueModifica.Catalogos.Find(catalogo.Id)!;
-            guardado.DarDeBaja();
-            contextoQueModifica.SaveChanges();
-        }
+        DarDeBajaConOtroContexto(catalogo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
@@ -244,5 +226,13 @@ public sealed class RepositorioCatalogoSqlTests
         {
             repositorio.AgregarCatalogo(catalogo);
         }
+    }
+
+    private void DarDeBajaConOtroContexto(Catalogo catalogo)
+    {
+        using SqlContext contextoQueModifica = new SqlContext(_opciones);
+        Catalogo guardado = contextoQueModifica.Catalogos.Find(catalogo.Id)!;
+        guardado.DarDeBaja();
+        contextoQueModifica.SaveChanges();
     }
 }
