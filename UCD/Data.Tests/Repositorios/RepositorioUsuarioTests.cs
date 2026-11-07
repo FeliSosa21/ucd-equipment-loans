@@ -244,6 +244,31 @@ public class RepositorioUsuarioTests
             usuarios.Select(usuario => usuario.Dni).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerUsuarios_TextoYTipo_DevuelveSoloLosQueCumplenAmbos()
+    {
+        RepositorioUsuario repositorio = new RepositorioUsuario(new Memoria());
+        TipoUsuario docente = TipoUsuario.Docente();
+        Usuario lucia = CrearUsuario(dni: "12345672", nombre: "Lucia",
+            apellido: "Fernandez", correo: "lucia.fernandez@ucd.edu.uy");
+        lucia.AsignarTipo(docente);
+        Usuario martin = CrearUsuario(dni: "45678905", nombre: "Martin",
+            apellido: "Fernandez", correo: "martin.fernandez@ucd.edu.uy");
+        martin.AsignarTipo(TipoUsuario.Estudiante());
+        Usuario sofia = CrearUsuario(dni: "67890127", nombre: "Sofia",
+            apellido: "Gomez", correo: "sofia.gomez@ucd.edu.uy");
+        sofia.AsignarTipo(docente);
+        repositorio.AgregarUsuario(lucia);
+        repositorio.AgregarUsuario(martin);
+        repositorio.AgregarUsuario(sofia);
+
+        IReadOnlyList<Usuario> usuarios = repositorio.ObtenerUsuarios(
+            new FiltroUsuarios { Texto = "fernandez", Tipo = docente });
+
+        CollectionAssert.AreEqual(new List<string> { "12345672" },
+            usuarios.Select(usuario => usuario.Dni).ToList());
+    }
+
     // Se agregan desordenados para comprobar que la pagina sale ordenada por apellido.
     private static RepositorioUsuario CrearRepositorioConTresUsuarios(out Usuario ana, out Usuario bruno,
         out Usuario carla)
