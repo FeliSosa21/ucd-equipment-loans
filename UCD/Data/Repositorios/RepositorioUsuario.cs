@@ -45,7 +45,9 @@ public class RepositorioUsuario
 
     public IReadOnlyList<Usuario> ObtenerUsuarios(FiltroUsuarios filtro)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(filtro);
+
+        return new List<Usuario>();
     }
 
     // Busca el texto en nombre, apellido, cedula o correo; sin texto no filtra.
