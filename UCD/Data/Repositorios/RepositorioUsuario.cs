@@ -57,6 +57,7 @@ public class RepositorioUsuario
                               || usuario.Apellido.Contains(filtro.Texto!, StringComparison.OrdinalIgnoreCase)
                               || usuario.Dni.Contains(filtro.Texto!)
                               || usuario.Correo.Contains(filtro.Texto!, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(usuario => usuario.Apellido)
             .ToList();
     }
 
