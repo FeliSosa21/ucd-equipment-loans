@@ -32,6 +32,11 @@ public class RepositorioAuditoria
         return Filtrar(filtro).Count();
     }
 
+    public IReadOnlyList<RegistroAuditoria> ObtenerRegistros(FiltroAuditoria filtro)
+    {
+        throw new NotImplementedException();
+    }
+
     private IEnumerable<RegistroAuditoria> Filtrar(FiltroAuditoria filtro)
     {
         ArgumentNullException.ThrowIfNull(filtro);

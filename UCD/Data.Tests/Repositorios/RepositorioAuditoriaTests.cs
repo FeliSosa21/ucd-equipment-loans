@@ -144,6 +144,12 @@ public sealed class RepositorioAuditoriaTests
         Assert.ThrowsException<ArgumentNullException>(() => _repositorio.AgregarRegistro(null!));
     }
 
+    [TestMethod]
+    public void ObtenerRegistros_FiltroNulo_LanzaArgumentNullException()
+    {
+        Assert.ThrowsException<ArgumentNullException>(() => _repositorio.ObtenerRegistros(null!));
+    }
+
     private static RegistroAuditoria CrearRegistro(DateTime fechaHora)
     {
         return CrearRegistro(RegistroDeAccion.DeUsuario(CrearUsuario(), fechaHora));
