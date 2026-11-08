@@ -33,6 +33,21 @@ public class RegistradorDeAuditoriaTests
         Assert.AreEqual("Se registro Felipe Sosa", guardado.Detalle);
     }
 
+    [TestMethod]
+    public void Registrar_RegistroDeAccionDado_UsaSuFechaYNoLaDelReloj()
+    {
+        Usuario responsable = CrearUsuario();
+        DateTime otraHora = Ahora.AddMinutes(-5);
+
+        _registrador.Registrar(RegistroDeAccion.DeUsuario(responsable, otraHora),
+            AccionAuditada.DevolucionDePrestamo, "Devolucion");
+
+        RegistroAuditoria guardado = _repositorio.ObtenerRegistros(new FiltroAuditoria { Desde = otraHora }).Single();
+        Assert.AreEqual(otraHora, guardado.FechaHora);
+        Assert.AreSame(responsable, guardado.Responsable);
+        Assert.AreEqual(AccionAuditada.DevolucionDePrestamo, guardado.Accion);
+    }
+
     private static Usuario CrearUsuario()
     {
         return new Usuario(
