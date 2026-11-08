@@ -544,6 +544,20 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.IsFalse(obtenido);
     }
 
+    [TestMethod]
+    public void ExistenPrestamosVigentesDelCatalogo_PrestamoActivoDelCatalogo_DevuelveTrue()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento();
+        Catalogo catalogo = CrearCatalogoConElTipo("Laboratorio de Informatica", tipo);
+        Prestamo activo = CrearPrestamoDelTipo(tipo);
+        activo.Activar(CrearUnidadesDelTipo(tipo));
+        GuardarCatalogosYPrestamos(new List<Catalogo> { catalogo }, activo);
+
+        bool obtenido = ExistenPrestamosVigentesDelCatalogoConOtroContexto(catalogo.Id);
+
+        Assert.IsTrue(obtenido);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
