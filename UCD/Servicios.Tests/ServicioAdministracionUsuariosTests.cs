@@ -490,12 +490,12 @@ public class ServicioAdministracionUsuariosTests
     [TestMethod]
     public void ModificarDatos_DatosValidos_LosActualiza()
     {
-        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuarioSql repositorio);
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
         servicio.ModificarDatos(
             CrearDatos(dni: DniValido, nombre: "Pedro", apellido: "Suarez", correo: "pedro@hotmail.com"), DniValido);
 
-        Usuario usuario = repositorio.ObtenerUsuarioPorDni(DniValido)!;
+        Usuario usuario = LeerUsuarioPorDni(DniValido)!;
         Assert.AreEqual("Pedro", usuario.Nombre);
         Assert.AreEqual("pedro@hotmail.com", usuario.Correo);
     }
@@ -518,12 +518,12 @@ public class ServicioAdministracionUsuariosTests
     [TestMethod]
     public void ModificarDatos_MismoCorreoConOtrasMayusculas_LoPermite()
     {
-        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuarioSql repositorio);
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
         servicio.ModificarDatos(
             CrearDatos(dni: DniValido, nombre: "Felipe", apellido: "Sosa", correo: "FELIPE@hotmail.com"), DniValido);
 
-        Assert.AreEqual("FELIPE@hotmail.com", repositorio.ObtenerUsuarioPorDni(DniValido)!.Correo);
+        Assert.AreEqual("FELIPE@hotmail.com", LeerUsuarioPorDni(DniValido)!.Correo);
     }
 
     [TestMethod]
@@ -551,13 +551,18 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
-    public void ModificarDatos_NombreInvalido_LanzaExcepcion()
+    public void ModificarDatos_NombreInvalido_LanzaExcepcionYConservaLosDatosGuardados()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.ModificarDatos(
-                CrearDatos(dni: DniValido, nombre: "F", apellido: "Sosa", correo: "felipe@hotmail.com"), DniValido));
+                CrearDatos(dni: DniValido, nombre: "F", apellido: "Suarez", correo: "pedro@hotmail.com"), DniValido));
+
+        Usuario guardado = LeerUsuarioPorDni(DniValido)!;
+        Assert.AreEqual("Felipe", guardado.Nombre);
+        Assert.AreEqual("Sosa", guardado.Apellido);
+        Assert.AreEqual("felipe@hotmail.com", guardado.Correo);
     }
 
     [TestMethod]
@@ -650,13 +655,13 @@ public class ServicioAdministracionUsuariosTests
     [TestMethod]
     public void ModificarDatos_AdministradorModificaAOtro_LosActualiza()
     {
-        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuarioSql repositorio);
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
         servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Administrador().Nombre, DniResponsable);
 
         servicio.ModificarDatos(CrearDatos(dni: DniValido, nombre: "Pedro", apellido: "Suarez",
             correo: "pedro@hotmail.com"), DniNuevo);
 
-        Assert.AreEqual("Pedro", repositorio.ObtenerUsuarioPorDni(DniValido)!.Nombre);
+        Assert.AreEqual("Pedro", LeerUsuarioPorDni(DniValido)!.Nombre);
     }
 
     [TestMethod]
@@ -804,12 +809,12 @@ public class ServicioAdministracionUsuariosTests
     [TestMethod]
     public void ModificarDatos_ConEspaciosAlrededor_LosGuardaRecortados()
     {
-        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuarioSql repositorio);
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
 
         servicio.ModificarDatos(CrearDatos(dni: DniValido, nombre: "  Pedro ", apellido: " Suarez  ",
             correo: " pedro@hotmail.com "), DniValido);
 
-        Usuario usuario = repositorio.ObtenerUsuarioPorDni(DniValido)!;
+        Usuario usuario = LeerUsuarioPorDni(DniValido)!;
         Assert.AreEqual("Pedro", usuario.Nombre);
         Assert.AreEqual("Suarez", usuario.Apellido);
         Assert.AreEqual("pedro@hotmail.com", usuario.Correo);
