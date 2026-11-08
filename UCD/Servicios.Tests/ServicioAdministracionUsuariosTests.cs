@@ -391,6 +391,27 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void CrearUsuario_AuditoriaConOtroContexto_PersisteElTipoYElCambioObligatorio()
+    {
+        CrearServicioConAdministrador(out RepositorioUsuarioSql usuarios, out RepositorioTipoUsuarioSql tipos);
+        using SqlContext contextoAuditoria = new SqlContext(_opciones);
+        contextoAuditoria.Attach(usuarios.ObtenerUsuarioPorDni(DniResponsable)!);
+        RegistradorDeAuditoria auditoria = new RegistradorDeAuditoria(
+            new RepositorioAuditoriaSql(contextoAuditoria), new RelojFijo(Ahora));
+        ServicioUsuario servicioUsuario = new ServicioUsuario(usuarios, tipos, auditoria);
+        ServicioAdministracionUsuarios servicio = new ServicioAdministracionUsuarios(
+            usuarios, servicioUsuario, tipos, auditoria);
+
+        servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Estudiante().Nombre, DniResponsable);
+
+        Usuario guardado = LeerUsuarioPorDni(DniNuevo)!;
+        Assert.AreEqual(TipoUsuario.Estudiante().Nombre, guardado.Tipo.Nombre);
+        Assert.IsTrue(guardado.DebeCambiarContrasena);
+        Assert.IsTrue(guardado.ContrasenaEsCorrecta(ServicioAdministracionUsuarios.ContrasenaPredeterminada));
+        Assert.AreEqual(AccionAuditada.AltaDeUsuario, LeerAccionesDelAdministrador().Single().Accion);
+    }
+
+    [TestMethod]
     public void CrearUsuario_DatosValidos_RegistraElAltaConElAdministradorComoResponsable()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _, out _);
