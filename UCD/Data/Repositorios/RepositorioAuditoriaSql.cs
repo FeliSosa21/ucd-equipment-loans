@@ -15,6 +15,7 @@ public class RepositorioAuditoriaSql
 
     public void AgregarRegistro(RegistroAuditoria registro)
     {
+        ArgumentNullException.ThrowIfNull(registro);
         _contexto.RegistrosAuditoria.Add(registro);
         _contexto.SaveChanges();
     }
