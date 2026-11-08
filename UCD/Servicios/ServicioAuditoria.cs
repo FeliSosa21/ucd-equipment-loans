@@ -48,6 +48,7 @@ public class ServicioAuditoria
         {
             FechaHora = registro.FechaHora.ToString(FormatoIso8601, CultureInfo.InvariantCulture),
             Usuario = DescribirResponsable(registro),
+            Accion = registro.Accion.ToString(),
             Detalle = registro.Detalle
         };
     }
