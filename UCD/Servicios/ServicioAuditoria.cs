@@ -34,7 +34,7 @@ public class ServicioAuditoria
         {
             Desde = filtro.Desde?.ToDateTime(TimeOnly.MinValue),
             Hasta = filtro.Hasta?.AddDays(1).ToDateTime(TimeOnly.MinValue),
-            DniUsuario = string.IsNullOrWhiteSpace(filtro.DniUsuario) ? null : filtro.DniUsuario
+            DniUsuario = string.IsNullOrWhiteSpace(filtro.DniUsuario) ? null : filtro.DniUsuario.Trim()
         };
     }
 
