@@ -614,6 +614,25 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(2, obtenido);
     }
 
+    [TestMethod]
+    public void ContarPrestamosVigentesDeSolicitante_RechazadoYDevuelto_NoLosCuenta()
+    {
+        Usuario solicitante = CrearSolicitante();
+        Prestamo solicitado = CrearPrestamoDelSolicitante(solicitante);
+        Prestamo rechazado = CrearPrestamoDelSolicitante(solicitante);
+        rechazado.Rechazar(CrearEvaluador(), MotivoDelRechazo);
+        Prestamo devuelto = CrearPrestamoDelSolicitante(solicitante);
+        devuelto.Activar(CrearUnidadesDelTipo(devuelto.TipoEquipamiento));
+        Devolver(devuelto);
+        GuardarConOtroContexto(solicitado, rechazado, devuelto);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+        int obtenido = repositorio.ContarPrestamosVigentesDeSolicitante(DniSolicitante);
+
+        Assert.AreEqual(1, obtenido);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
