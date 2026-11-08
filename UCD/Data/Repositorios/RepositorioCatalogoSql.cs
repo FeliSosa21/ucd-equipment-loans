@@ -85,4 +85,12 @@ public class RepositorioCatalogoSql
             .Include(catalogo => catalogo.Tipos)
             .ToList();
     }
+
+    public bool ExisteUnidadConNumeroDeSerie(string numeroDeSerie, int? idUnidadExcluida)
+    {
+        return _contexto.Catalogos
+            .SelectMany(catalogo => catalogo.Tipos)
+            .SelectMany(tipo => tipo.Unidades)
+            .Any(unidad => unidad.NumSerie == numeroDeSerie);
+    }
 }
