@@ -74,8 +74,11 @@ public class ServicioAdministracionUsuarios
         ValidarQueNoSeaElMismo(dni, dniResponsable, "Un administrador no puede cambiar su propio tipo");
         Usuario administrador = ObtenerAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         Usuario usuario = ObtenerUsuario(dni);
-        usuario.AsignarTipo(ObtenerTipo(nombreTipo));
-        _auditoria.RegistrarDeUsuario(AccionAuditada.CambioDeTipoDeUsuario, administrador, "Cambio de tipo");
+        string tipoAnterior = usuario.Tipo.Nombre;
+        TipoUsuario tipoNuevo = ObtenerTipo(nombreTipo);
+        usuario.AsignarTipo(tipoNuevo);
+        _auditoria.RegistrarDeUsuario(AccionAuditada.CambioDeTipoDeUsuario, administrador,
+            $"{RegistradorDeAuditoria.Describir(usuario)} paso de {tipoAnterior} a {tipoNuevo.Nombre}");
     }
 
     public UsuarioResumenDto ObtenerResumen(string dni, string dniResponsable)
