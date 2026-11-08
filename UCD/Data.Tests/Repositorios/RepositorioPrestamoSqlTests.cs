@@ -693,6 +693,26 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(0, obtenido);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamosVencidosDeSolicitante_ActivoVencidoDelSolicitante_LoDevuelve()
+    {
+        DateTime pedidoHace60Dias = FechaFija.AddDays(-60);
+        Prestamo vencido = CrearPrestamoDelSolicitanteEnLaFecha(CrearSolicitante(), pedidoHace60Dias);
+        vencido.Activar(CrearUnidadesDelTipo(vencido.TipoEquipamiento));
+        Prestamo deOtroSolicitante = CrearPrestamoDelSolicitanteEnLaFecha(CrearOtroSolicitante(), pedidoHace60Dias);
+        deOtroSolicitante.Activar(CrearUnidadesDelTipo(deOtroSolicitante.TipoEquipamiento));
+        GuardarConOtroContexto(vencido, deOtroSolicitante);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+        IReadOnlyList<Prestamo> obtenidos = repositorio.ObtenerPrestamosVencidosDeSolicitante(
+            DniSolicitante, FechaFija.Date);
+
+        List<Guid> idsEsperados = new List<Guid> { vencido.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -816,6 +836,15 @@ public sealed class RepositorioPrestamoSqlTests
     {
         return new Prestamo(
             solicitante: CrearSolicitante(),
+            tipoEquipamiento: CrearTipoEquipamiento(),
+            cantidadSolicitada: CantidadSolicitada,
+            fechaHoraPrestamo: fechaHoraPrestamo);
+    }
+
+    private static Prestamo CrearPrestamoDelSolicitanteEnLaFecha(Usuario solicitante, DateTime fechaHoraPrestamo)
+    {
+        return new Prestamo(
+            solicitante: solicitante,
             tipoEquipamiento: CrearTipoEquipamiento(),
             cantidadSolicitada: CantidadSolicitada,
             fechaHoraPrestamo: fechaHoraPrestamo);

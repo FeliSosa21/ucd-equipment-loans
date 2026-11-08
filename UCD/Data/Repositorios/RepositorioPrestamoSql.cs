@@ -109,4 +109,9 @@ public class RepositorioPrestamoSql
             .SelectMany(prestamo => prestamo.UnidadesAsignadas)
             .Count();
     }
+
+    public IReadOnlyList<Prestamo> ObtenerPrestamosVencidosDeSolicitante(string dni, DateTime corte)
+    {
+        return new List<Prestamo>();
+    }
 }
