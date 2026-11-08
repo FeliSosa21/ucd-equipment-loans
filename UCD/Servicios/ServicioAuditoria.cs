@@ -29,6 +29,7 @@ public class ServicioAuditoria
 
     public bool TieneCriterios(FiltroAuditoriaDto filtro)
     {
+        ArgumentNullException.ThrowIfNull(filtro);
         return CrearFiltro(filtro).TieneCriterios();
     }
 
