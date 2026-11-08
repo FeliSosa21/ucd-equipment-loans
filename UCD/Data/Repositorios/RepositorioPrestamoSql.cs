@@ -112,7 +112,7 @@ public class RepositorioPrestamoSql
 
     public IReadOnlyList<Prestamo> ObtenerPrestamosVencidosDeSolicitante(string dni, DateTime corte)
     {
-        return _contexto.Prestamos
+        return PrestamosConSolicitanteTipoYAsignadas
             .Where(prestamo => prestamo.Solicitante.Dni == dni)
             .ToList();
     }
