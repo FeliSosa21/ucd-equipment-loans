@@ -373,6 +373,20 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.IsNull(resultado);
     }
 
+    [TestMethod]
+    public void ObtenerTipoPorNombre_CatalogoEliminado_DevuelveNull()
+    {
+        Catalogo catalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreCatalogo);
+        GuardarConOtroContexto(catalogo);
+        DarDeBajaConOtroContexto(catalogo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        TipoEquipamiento? resultado = repositorioQueLee.ObtenerTipoPorNombre(catalogo.Id, NombreTipo);
+
+        Assert.IsNull(resultado);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
