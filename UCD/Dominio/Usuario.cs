@@ -59,6 +59,11 @@ public class Usuario
         return Tipo.Nombre == tipo.Nombre;
     }
 
+    public bool EstaActivo()
+    {
+        throw new NotImplementedException();
+    }
+
     public bool EstaPendienteDeActivacion()
     {
         return Tipo.NoTienePermisos();

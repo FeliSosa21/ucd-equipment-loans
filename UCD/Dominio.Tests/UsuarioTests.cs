@@ -733,6 +733,14 @@ public sealed class UsuarioTests
         Assert.IsFalse(usuario.TieneTipo(TipoUsuario.Estudiante()));
     }
 
+    [TestMethod]
+    public void EstaActivo_UsuarioNuevo_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.IsTrue(usuario.EstaActivo());
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
