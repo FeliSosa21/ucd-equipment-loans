@@ -280,6 +280,16 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void Desactivar_UsuarioInexistente_NoAgregaNadaAlLog()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _, out _, out Memoria memoria);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Desactivar(DniNuevo, DniResponsable));
+
+        Assert.AreEqual(0, LeerAccionesDelAdministrador(memoria).Count);
+    }
+
+    [TestMethod]
     public void Reactivar_UsuarioDesactivado_QuedaActivo()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
