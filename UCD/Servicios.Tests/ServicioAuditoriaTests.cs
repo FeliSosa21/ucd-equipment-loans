@@ -191,6 +191,16 @@ public class ServicioAuditoriaTests
         Assert.IsFalse(tieneCriterios);
     }
 
+    [TestMethod]
+    public void TieneCriterios_SoloDni_DevuelveTrue()
+    {
+        ServicioAuditoria servicio = CrearServicio(new Memoria());
+
+        bool tieneCriterios = servicio.TieneCriterios(new FiltroAuditoriaDto { DniUsuario = DniDocente });
+
+        Assert.IsTrue(tieneCriterios);
+    }
+
     private static void AgregarRegistro(Memoria memoria, Usuario responsable, DateTime fechaHora, string detalle)
     {
         new RepositorioAuditoria(memoria).AgregarRegistro(new RegistroAuditoria(
