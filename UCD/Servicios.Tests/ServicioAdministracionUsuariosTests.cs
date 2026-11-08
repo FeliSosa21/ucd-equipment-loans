@@ -347,6 +347,16 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void Reactivar_UsuarioYaActivo_NoAgregaNadaAlLog()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _, out _, out Memoria memoria);
+
+        servicio.Reactivar(DniValido, DniResponsable);
+
+        Assert.AreEqual(0, LeerAccionesDelAdministrador(memoria).Count);
+    }
+
+    [TestMethod]
     public void CrearUsuario_DatosValidos_QuedaConElTipoYLaContrasenaPredeterminada()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
