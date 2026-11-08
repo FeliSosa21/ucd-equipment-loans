@@ -125,6 +125,27 @@ public class ServicioSesionTests
     }
 
     [TestMethod]
+    public void CambiarContrasena_CambioObligatorio_PersisteLaNuevaYLiberaLaObligacion()
+    {
+        ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
+        using (SqlContext preparacion = new SqlContext(_opciones))
+        {
+            RepositorioUsuarioSql usuarios = new RepositorioUsuarioSql(preparacion);
+            Usuario usuario = usuarios.ObtenerUsuarioPorDni(DniValido)!;
+            usuario.ExigirCambioDeContrasena();
+            usuarios.ActualizarUsuario(usuario);
+        }
+
+        servicio.CambiarContrasena(DniValido, ContrasenaValida, ContrasenaNueva);
+
+        using SqlContext lectura = new SqlContext(_opciones);
+        Usuario guardado = new RepositorioUsuarioSql(lectura).ObtenerUsuarioPorDni(DniValido)!;
+        Assert.IsTrue(guardado.ContrasenaEsCorrecta(ContrasenaNueva));
+        Assert.IsFalse(guardado.ContrasenaEsCorrecta(ContrasenaValida));
+        Assert.IsFalse(guardado.DebeCambiarContrasena);
+    }
+
+    [TestMethod]
     public void CambiarContrasena_CorreoModificado_IdentificaAlUsuarioPorDni()
     {
         ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out RepositorioUsuarioSql repositorio);
