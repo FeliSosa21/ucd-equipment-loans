@@ -79,7 +79,8 @@ public class RepositorioPrestamoSql
     {
         return _contexto.Prestamos
             .Where(prestamo => EF.Property<int>(prestamo.TipoEquipamiento, ColumnaCatalogo) == idCatalogo)
-            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Solicitado)
+            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Solicitado
+                               || prestamo.Estado == EstadoPrestamo.Activo)
             .Any();
     }
 }
