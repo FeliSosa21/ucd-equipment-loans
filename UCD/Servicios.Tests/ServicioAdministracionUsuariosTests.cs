@@ -269,6 +269,17 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void Desactivar_UsuarioActivo_ElDetalleTieneElUsuarioDesactivado()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _, out _, out Memoria memoria);
+
+        servicio.Desactivar(DniValido, DniResponsable);
+
+        Assert.AreEqual("Se desactivo la cuenta de Felipe Sosa (DNI 12345672)",
+            LeerAccionesDelAdministrador(memoria).Single().Detalle);
+    }
+
+    [TestMethod]
     public void Reactivar_UsuarioDesactivado_QuedaActivo()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
