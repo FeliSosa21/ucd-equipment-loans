@@ -19,7 +19,18 @@ public class ServicioAuditoria
     {
         ArgumentNullException.ThrowIfNull(filtro);
         ValidarQueSeaAdministradorActivo(dniResponsable);
-        return new List<RegistroAuditoriaDto>();
+
+        FiltroAuditoria filtroDelRepositorio = new FiltroAuditoria
+        {
+            Desde = filtro.Desde?.ToDateTime(TimeOnly.MinValue)
+        };
+
+        return _registros.ObtenerRegistros(filtroDelRepositorio).Select(CrearDto).ToList();
+    }
+
+    private static RegistroAuditoriaDto CrearDto(RegistroAuditoria registro)
+    {
+        return new RegistroAuditoriaDto { Detalle = registro.Detalle };
     }
 
     private void ValidarQueSeaAdministradorActivo(string dniResponsable)
