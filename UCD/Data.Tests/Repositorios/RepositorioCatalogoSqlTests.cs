@@ -359,6 +359,20 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.AreEqual(IdSegundaUnidad, resultado.Unidades.Single().IdInstitucional);
     }
 
+    [TestMethod]
+    public void ObtenerTipoPorNombre_TipoDeOtroCatalogo_DevulveNull()
+    {
+        Catalogo primerCatalogo = new Catalogo(NombreCatalogo);
+        Catalogo segundoCatalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreSegundoCatalogo);
+        GuardarConOtroContexto(primerCatalogo, segundoCatalogo);
+
+        using  SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        TipoEquipamiento? resultado = repositorioQueLee.ObtenerTipoPorNombre(primerCatalogo.Id, NombreTipo);
+
+        Assert.IsNull(resultado);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
