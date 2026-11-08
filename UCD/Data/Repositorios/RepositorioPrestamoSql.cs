@@ -88,6 +88,8 @@ public class RepositorioPrestamoSql
 
     public int ContarPrestamosVigentesDeSolicitante(string dni)
     {
-        return 0;
+        return _contexto.Prestamos
+            .Where(prestamo => prestamo.Solicitante.Dni == dni)
+            .Count();
     }
 }
