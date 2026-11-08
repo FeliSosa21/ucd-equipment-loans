@@ -64,6 +64,11 @@ public class Usuario
         return Estado == EstadoUsuario.Activo;
     }
 
+    public bool PuedeGestionarUsuarios()
+    {
+        throw new NotImplementedException();
+    }
+
     public bool EstaPendienteDeActivacion()
     {
         return Tipo.NoTienePermisos();
