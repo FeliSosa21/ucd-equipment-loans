@@ -98,6 +98,9 @@ public class RepositorioPrestamoSql
 
     public int ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(string dni, int idTipoEquipamiento)
     {
-        return 0;
+        return _contexto.Prestamos
+            .Where(prestamo => prestamo.Solicitante.Dni == dni)
+            .SelectMany(prestamo => prestamo.UnidadesAsignadas)
+            .Count();
     }
 }
