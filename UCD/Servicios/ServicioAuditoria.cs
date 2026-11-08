@@ -37,7 +37,7 @@ public class ServicioAuditoria
     {
         Usuario? responsable = _usuarios.ObtenerUsuarioPorDni(dniResponsable);
 
-        if (responsable is null || !responsable.EstaActivo() || !responsable.TienePermiso(Permiso.GestionarUsuarios))
+        if (responsable is null || !responsable.PuedeGestionarUsuarios())
         {
             throw new ServicioException("Solo un administrador activo puede consultar el log de auditoria");
         }
