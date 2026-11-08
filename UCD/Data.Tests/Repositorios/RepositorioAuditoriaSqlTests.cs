@@ -208,6 +208,15 @@ public sealed class RepositorioAuditoriaSqlTests
         Assert.AreEqual("45678905", resultado.Single().Responsable?.Dni);
     }
 
+    [TestMethod]
+    public void AgregarRegistro_RegistroNulo_LanzaArgumentNullException()
+    {
+        using SqlContext contexto = new SqlContext(_opciones);
+        RepositorioAuditoriaSql repositorio = new RepositorioAuditoriaSql(contexto);
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.AgregarRegistro(null!));
+    }
+
     private void GuardarConOtroContexto(params RegistroAuditoria[] registros)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
