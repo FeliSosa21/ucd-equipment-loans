@@ -84,6 +84,7 @@ public class ServicioAdministracionUsuarios
         }
 
         usuario.AsignarTipo(tipoNuevo);
+        _repositorio.ActualizarUsuario(usuario);
         _auditoria.RegistrarDeUsuario(AccionAuditada.CambioDeTipoDeUsuario, administrador,
             $"{usuario.NombreCompletoConDni} pasó de {tipoAnterior} a {tipoNuevo.Nombre}");
     }
