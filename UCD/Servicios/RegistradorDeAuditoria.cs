@@ -22,7 +22,7 @@ public class RegistradorDeAuditoria
 
     public void Registrar(RegistroDeAccion registro, AccionAuditada accion, string detalle)
     {
-        throw new NotImplementedException();
+        _repositorio.AgregarRegistro(new RegistroAuditoria(registro, accion, detalle));
     }
 
     internal static string Describir(Usuario usuario)
