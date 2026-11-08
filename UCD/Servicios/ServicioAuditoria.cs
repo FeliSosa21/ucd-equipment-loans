@@ -10,10 +10,10 @@ public class ServicioAuditoria
     private const string FormatoIso8601 = "yyyy-MM-ddTHH:mm:ss";
     private const string UsuarioSistema = "Sistema";
 
-    private readonly RepositorioAuditoria _registros;
-    private readonly RepositorioUsuario _usuarios;
+    private readonly RepositorioAuditoriaSql _registros;
+    private readonly RepositorioUsuarioSql _usuarios;
 
-    public ServicioAuditoria(RepositorioAuditoria registros, RepositorioUsuario usuarios)
+    public ServicioAuditoria(RepositorioAuditoriaSql registros, RepositorioUsuarioSql usuarios)
     {
         _registros = registros;
         _usuarios = usuarios;

@@ -13,6 +13,19 @@ public class ServicioDevolucionTests
     private static readonly DateTime InicioPrestamo = new DateTime(2026, 9, 22, 10, 0, 0);
     private static readonly DateTime MomentoDevolucion = InicioPrestamo.AddDays(2);
 
+    private readonly List<SqlContext> _contextosAuditoria = new();
+
+    [TestCleanup]
+    public void Limpiar()
+    {
+        foreach (SqlContext contexto in _contextosAuditoria)
+        {
+            contexto.Dispose();
+        }
+
+        _contextosAuditoria.Clear();
+    }
+
     [TestMethod]
     public void CondicionesPosibles_DevuelveLasTresCondiciones()
     {
@@ -363,7 +376,7 @@ public class ServicioDevolucionTests
 
     private static IReadOnlyList<RegistroAuditoria> LeerAccionesDelFuncionario(Memoria memoria)
     {
-        return new RepositorioAuditoria(memoria).ObtenerRegistros(
+        return AuditoriaDePrueba.LeerRegistros(memoria,
             new FiltroAuditoria { DniUsuario = DniFuncionario });
     }
 
@@ -380,17 +393,17 @@ public class ServicioDevolucionTests
         };
     }
 
-    private static ServicioDevolucion CrearServicio(out Prestamo prestamo)
+    private ServicioDevolucion CrearServicio(out Prestamo prestamo)
     {
         return CrearServicio(new Memoria(), out prestamo);
     }
 
-    private static ServicioDevolucion CrearServicio(Memoria memoria, out Prestamo prestamo)
+    private ServicioDevolucion CrearServicio(Memoria memoria, out Prestamo prestamo)
     {
         return CrearServicio(memoria, out prestamo, MomentoDevolucion);
     }
 
-    private static ServicioDevolucion CrearServicio(Memoria memoria, out Prestamo prestamo, DateTime ahora)
+    private ServicioDevolucion CrearServicio(Memoria memoria, out Prestamo prestamo, DateTime ahora)
     {
         RepositorioUsuario usuarios = new RepositorioUsuario(memoria);
         RepositorioPrestamo prestamos = new RepositorioPrestamo(memoria);
@@ -419,7 +432,9 @@ public class ServicioDevolucionTests
         prestamo.Activar(unidades);
         prestamos.AgregarPrestamo(prestamo);
 
+        SqlContext contextoAuditoria = AuditoriaDePrueba.CrearContexto(memoria);
+        _contextosAuditoria.Add(contextoAuditoria);
         return new ServicioDevolucion(prestamos, usuarios, new RepositorioDevolucion(memoria),
-            new RepositorioMovimiento(memoria), new RelojFijo(ahora), AuditoriaDePrueba.Registrador(memoria));
+            new RepositorioMovimiento(memoria), new RelojFijo(ahora), AuditoriaDePrueba.Registrador(contextoAuditoria));
     }
 }

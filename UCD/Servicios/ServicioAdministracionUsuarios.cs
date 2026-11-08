@@ -16,13 +16,13 @@ public class ServicioAdministracionUsuarios
     public static readonly string NombreTipoPendiente = TipoUsuario.SinPermisos().Nombre;
     private const string MensajeSoloAdministrador = "Solo un administrador activo puede gestionar usuarios";
 
-    private readonly RepositorioUsuario _repositorio;
+    private readonly RepositorioUsuarioSql _repositorio;
     private readonly ServicioUsuario _servicioUsuario;
-    private readonly RepositorioTipoUsuario _repositorioTipos;
+    private readonly RepositorioTipoUsuarioSql _repositorioTipos;
     private readonly RegistradorDeAuditoria _auditoria;
 
-    public ServicioAdministracionUsuarios(RepositorioUsuario repositorio, ServicioUsuario servicioUsuario,
-        RepositorioTipoUsuario repositorioTipos, RegistradorDeAuditoria auditoria)
+    public ServicioAdministracionUsuarios(RepositorioUsuarioSql repositorio, ServicioUsuario servicioUsuario,
+        RepositorioTipoUsuarioSql repositorioTipos, RegistradorDeAuditoria auditoria)
     {
         _repositorio = repositorio;
         _servicioUsuario = servicioUsuario;
@@ -47,6 +47,7 @@ public class ServicioAdministracionUsuarios
 
         creado.AsignarTipo(tipo);
         creado.ExigirCambioDeContrasena();
+        _repositorio.ActualizarUsuario(creado);
         _auditoria.RegistrarDeUsuario(AccionAuditada.AltaDeUsuario, administrador,
             $"Alta de {creado.NombreCompletoConDni} como {tipo.Nombre}");
     }
@@ -83,6 +84,7 @@ public class ServicioAdministracionUsuarios
         }
 
         usuario.AsignarTipo(tipoNuevo);
+        _repositorio.ActualizarUsuario(usuario);
         _auditoria.RegistrarDeUsuario(AccionAuditada.CambioDeTipoDeUsuario, administrador,
             $"{usuario.NombreCompletoConDni} pasó de {tipoAnterior} a {tipoNuevo.Nombre}");
     }
@@ -106,6 +108,7 @@ public class ServicioAdministracionUsuarios
         }
 
         TraduccionDeErrores.Ejecutar(() => usuario.ModificarDatos(datos.Nombre, datos.Apellido, datos.Correo));
+        _repositorio.ActualizarUsuario(usuario);
     }
 
     public void Desactivar(string dni, string dniResponsable)
@@ -120,6 +123,7 @@ public class ServicioAdministracionUsuarios
         }
 
         usuario.Desactivar();
+        _repositorio.ActualizarUsuario(usuario);
         _auditoria.RegistrarDeUsuario(AccionAuditada.DesactivacionDeUsuario, administrador,
             $"Se desactivó la cuenta de {usuario.NombreCompletoConDni}");
     }
@@ -135,6 +139,7 @@ public class ServicioAdministracionUsuarios
         }
 
         TraduccionDeErrores.Ejecutar(() => usuario.Reactivar());
+        _repositorio.ActualizarUsuario(usuario);
         _auditoria.RegistrarDeUsuario(AccionAuditada.ReactivacionDeUsuario, administrador,
             $"Se reactivó la cuenta de {usuario.NombreCompletoConDni}");
     }
