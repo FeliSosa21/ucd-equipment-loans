@@ -128,6 +128,12 @@ public class ServicioAdministracionUsuarios
     {
         Usuario administrador = ObtenerAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         Usuario usuario = ObtenerUsuario(dni);
+
+        if (usuario.EstaActivo())
+        {
+            return;
+        }
+
         TraduccionDeErrores.Ejecutar(() => usuario.Reactivar());
         _auditoria.RegistrarDeUsuario(AccionAuditada.ReactivacionDeUsuario, administrador,
             $"Se reactivo la cuenta de {RegistradorDeAuditoria.Describir(usuario)}");
