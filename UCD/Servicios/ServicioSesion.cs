@@ -8,9 +8,9 @@ public class ServicioSesion
 {
     public const string CampoContrasenaActual = "ContrasenaActual";
 
-    private readonly RepositorioUsuario _repositorio;
+    private readonly RepositorioUsuarioSql _repositorio;
 
-    public ServicioSesion(RepositorioUsuario repositorio)
+    public ServicioSesion(RepositorioUsuarioSql repositorio)
     {
         _repositorio = repositorio;
     }
