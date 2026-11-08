@@ -68,11 +68,16 @@ public class ServicioDevolucion
             RegistrarMovimientos(nueva, registro);
             _auditoria.Registrar(registro, AccionAuditada.DevolucionDePrestamo,
                 $"Devolucion del prestamo de {RegistradorDeAuditoria.Describir(prestamo.Solicitante)}: " +
-                $"{nueva.Unidades.Count} unidades");
+                DescribirCantidad(nueva.Unidades.Count));
             return nueva;
         });
 
         return CrearDevolucionRegistradaDto(devolucion);
+    }
+
+    private static string DescribirCantidad(int cantidadUnidades)
+    {
+        return cantidadUnidades == 1 ? "1 unidad" : $"{cantidadUnidades} unidades";
     }
 
     // Registro historico (req. 10): un movimiento por unidad, con la fecha efectiva de devolucion.
