@@ -374,6 +374,29 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void Reactivar_AuditoriaConOtroContexto_PersisteElEstadoActivo()
+    {
+        CrearServicioConAdministrador(out RepositorioUsuarioSql usuarios, out RepositorioTipoUsuarioSql tipos);
+        Usuario usuario = usuarios.ObtenerUsuarioPorDni(DniValido)!;
+        usuario.Desactivar();
+        usuarios.ActualizarUsuario(usuario);
+        using SqlContext contextoAuditoria = new SqlContext(_opciones);
+        contextoAuditoria.Attach(usuarios.ObtenerUsuarioPorDni(DniResponsable)!);
+        RegistradorDeAuditoria auditoria = new RegistradorDeAuditoria(
+            new RepositorioAuditoriaSql(contextoAuditoria), new RelojFijo(Ahora));
+        ServicioUsuario servicioUsuario = new ServicioUsuario(usuarios, tipos, auditoria);
+        ServicioAdministracionUsuarios servicio = new ServicioAdministracionUsuarios(
+            usuarios, servicioUsuario, tipos, auditoria);
+
+        servicio.Reactivar(DniValido, DniResponsable);
+
+        using SqlContext lectura = new SqlContext(_opciones);
+        Usuario guardado = new RepositorioUsuarioSql(lectura).ObtenerUsuarioPorDni(DniValido)!;
+        Assert.AreEqual(EstadoUsuario.Activo, guardado.Estado);
+        Assert.AreEqual(AccionAuditada.ReactivacionDeUsuario, LeerAccionesDelAdministrador().Single().Accion);
+    }
+
+    [TestMethod]
     public void Reactivar_UsuarioDesactivado_RegistraLaReactivacionConElAdministradorComoResponsable()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _, out _);
