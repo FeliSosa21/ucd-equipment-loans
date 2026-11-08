@@ -139,6 +139,7 @@ public class ServicioAdministracionUsuarios
         }
 
         TraduccionDeErrores.Ejecutar(() => usuario.Reactivar());
+        _repositorio.ActualizarUsuario(usuario);
         _auditoria.RegistrarDeUsuario(AccionAuditada.ReactivacionDeUsuario, administrador,
             $"Se reactivó la cuenta de {usuario.NombreCompletoConDni}");
     }
