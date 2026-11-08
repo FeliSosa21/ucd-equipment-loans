@@ -18,6 +18,7 @@ public sealed class RepositorioCatalogoSqlTests
     private const string IdSegundaUnidad = "EQP-0002";
     private const string NombreSegundoTipo = "Proyector";
     private const string NumeroDeSerie = "5CG1234ABC";
+    private const string SegundoNumeroDeSerie = "PF2K9X4L";
 
     private DbContextOptions<SqlContext> _opciones = null!;
 
@@ -487,6 +488,21 @@ public sealed class RepositorioCatalogoSqlTests
         bool existe = repositorioQueLee.ExisteUnidadConNumeroDeSerie(numeroDeSerieBuscado, null);
 
         Assert.IsTrue(existe);
+    }
+
+    [TestMethod]
+    public void ExisteUnidadConNumeroDeSerie_HayUnidadesSinNumero_DevuelveFalse()
+    {
+        Catalogo catalogo = new Catalogo(NombreCatalogo);
+        TipoEquipamiento tipo = CrearTipoEquipamientoConUnidad(NombreTipo, IdUnidad, null);
+        catalogo.AgregarTipo(tipo);
+        GuardarConOtroContexto(catalogo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        bool existe = repositorioQueLee.ExisteUnidadConNumeroDeSerie(SegundoNumeroDeSerie, null);
+
+        Assert.IsFalse(existe);
     }
 
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
