@@ -503,9 +503,7 @@ public sealed class RepositorioPrestamoSqlTests
         Prestamo solicitado = CrearPrestamoDelTipo(tipo);
         GuardarCatalogosYPrestamos(new List<Catalogo> { catalogo }, solicitado);
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        bool obtenido = repositorio.ExistenPrestamosVigentesDelCatalogo(catalogo.Id);
+        bool obtenido = ExistenPrestamosVigentesDelCatalogoConOtroContexto(catalogo.Id);
 
         Assert.IsTrue(obtenido);
     }
@@ -523,9 +521,7 @@ public sealed class RepositorioPrestamoSqlTests
         activoDelOtro.Activar(CrearUnidadesDelTipo(tipoDelOtro));
         GuardarCatalogosYPrestamos(new List<Catalogo> { catalogoElegido, otroCatalogo }, solicitadoDelOtro, activoDelOtro);
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        bool obtenido = repositorio.ExistenPrestamosVigentesDelCatalogo(catalogoElegido.Id);
+        bool obtenido = ExistenPrestamosVigentesDelCatalogoConOtroContexto(catalogoElegido.Id);
 
         Assert.IsFalse(obtenido);
     }
@@ -600,6 +596,13 @@ public sealed class RepositorioPrestamoSqlTests
         RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
 
         return repositorio.ObtenerPrestamosDeSolicitante(dni);
+    }
+
+    private bool ExistenPrestamosVigentesDelCatalogoConOtroContexto(int idCatalogo)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+        return repositorio.ExistenPrestamosVigentesDelCatalogo(idCatalogo);
     }
 
     private static Prestamo CrearPrestamo()
