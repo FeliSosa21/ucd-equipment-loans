@@ -111,6 +111,17 @@ public sealed class RepositorioAuditoriaSqlTests
         Assert.ThrowsException<ArgumentNullException>(() => LeerRegistros(null!));
     }
 
+    [TestMethod]
+    public void ObtenerRegistros_FiltroSinCriterios_DevuelveListaVacia()
+    {
+        Usuario responsable = CrearUsuario(dni: "45678905", correo: "laura.diaz@ejemplo.com");
+        GuardarConOtroContexto(CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija), "Guardado"));
+
+        IReadOnlyList<RegistroAuditoria> resultado = LeerRegistros(new FiltroAuditoria());
+
+        Assert.AreEqual(0, resultado.Count);
+    }
+
     private void GuardarConOtroContexto(params RegistroAuditoria[] registros)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
