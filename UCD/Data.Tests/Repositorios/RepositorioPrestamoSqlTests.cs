@@ -629,6 +629,19 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(1, obtenido);
     }
 
+    [TestMethod]
+    public void ContarPrestamosVigentesDeSolicitante_ConPrestamoExcluido_NoLoCuenta()
+    {
+        Usuario solicitante = CrearSolicitante();
+        Prestamo excluido = CrearPrestamoDelSolicitante(solicitante);
+        Prestamo otroSolicitado = CrearPrestamoDelSolicitante(solicitante);
+        GuardarConOtroContexto(excluido, otroSolicitado);
+
+        int obtenido = ContarPrestamosVigentesDeSolicitanteConOtroContexto(DniSolicitante, excluido.Id);
+
+        Assert.AreEqual(1, obtenido);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -709,12 +722,12 @@ public sealed class RepositorioPrestamoSqlTests
         return repositorio.ExistenPrestamosVigentesDelCatalogo(idCatalogo);
     }
 
-    private int ContarPrestamosVigentesDeSolicitanteConOtroContexto(string dni)
+    private int ContarPrestamosVigentesDeSolicitanteConOtroContexto(string dni, Guid? idExcluido = null)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
 
-        return repositorio.ContarPrestamosVigentesDeSolicitante(dni);
+        return repositorio.ContarPrestamosVigentesDeSolicitante(dni, idExcluido);
     }
 
     private static Prestamo CrearPrestamo()

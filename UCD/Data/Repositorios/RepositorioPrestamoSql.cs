@@ -86,7 +86,7 @@ public class RepositorioPrestamoSql
             .Any();
     }
 
-    public int ContarPrestamosVigentesDeSolicitante(string dni)
+    public int ContarPrestamosVigentesDeSolicitante(string dni, Guid? idExcluido = null)
     {
         return _contexto.Prestamos
             .Where(prestamo => prestamo.Solicitante.Dni == dni)
