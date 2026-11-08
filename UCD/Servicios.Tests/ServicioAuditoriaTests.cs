@@ -10,6 +10,7 @@ public class ServicioAuditoriaTests
 {
     private const string DniAdministrador = "11111111";
     private const string DniDocente = "45678905";
+    private static readonly DateOnly Dia = new DateOnly(2026, 11, 5);
 
     [TestMethod]
     public void ListarRegistros_FiltroNulo_LanzaArgumentNullException()
@@ -39,6 +40,28 @@ public class ServicioAuditoriaTests
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.ListarRegistros(new FiltroAuditoriaDto(), DniAdministrador));
+    }
+
+    [TestMethod]
+    public void ListarRegistros_FiltroDesde_DevuelveLosDeEseDiaEnAdelante()
+    {
+        Memoria memoria = new Memoria();
+        Usuario administrador = AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
+        AgregarRegistro(memoria, administrador, Dia.ToDateTime(TimeOnly.MinValue).AddMinutes(-1), "El dia anterior");
+        AgregarRegistro(memoria, administrador, Dia.ToDateTime(TimeOnly.MinValue), "Ese dia");
+        ServicioAuditoria servicio = CrearServicio(memoria);
+
+        List<RegistroAuditoriaDto> registros =
+            servicio.ListarRegistros(new FiltroAuditoriaDto { Desde = Dia }, DniAdministrador);
+
+        CollectionAssert.AreEqual(new List<string> { "Ese dia" },
+            registros.Select(registro => registro.Detalle).ToList());
+    }
+
+    private static void AgregarRegistro(Memoria memoria, Usuario responsable, DateTime fechaHora, string detalle)
+    {
+        new RepositorioAuditoria(memoria).AgregarRegistro(new RegistroAuditoria(
+            RegistroDeAccion.DeUsuario(responsable, fechaHora), AccionAuditada.AltaDeUsuario, detalle));
     }
 
     private static Usuario AgregarUsuario(Memoria memoria, string dni, TipoUsuario tipo)
