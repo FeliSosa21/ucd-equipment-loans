@@ -112,8 +112,10 @@ public class ServicioAdministracionUsuarios
     {
         ValidarQueNoSeaElMismo(dni, dniResponsable, "Un administrador no puede desactivarse a si mismo");
         Usuario administrador = ObtenerAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
-        ObtenerUsuario(dni).Desactivar();
-        _auditoria.RegistrarDeUsuario(AccionAuditada.DesactivacionDeUsuario, administrador, "Desactivacion");
+        Usuario usuario = ObtenerUsuario(dni);
+        usuario.Desactivar();
+        _auditoria.RegistrarDeUsuario(AccionAuditada.DesactivacionDeUsuario, administrador,
+            $"Se desactivo la cuenta de {RegistradorDeAuditoria.Describir(usuario)}");
     }
 
     public void Reactivar(string dni, string dniResponsable)
