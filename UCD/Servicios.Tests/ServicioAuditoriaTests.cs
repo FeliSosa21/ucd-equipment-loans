@@ -76,6 +76,23 @@ public class ServicioAuditoriaTests
             registros.Select(registro => registro.Detalle).ToList());
     }
 
+    [TestMethod]
+    public void ListarRegistros_FiltroDni_DevuelveSoloLosDeEseResponsable()
+    {
+        Memoria memoria = new Memoria();
+        Usuario administrador = AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
+        Usuario docente = AgregarUsuario(memoria, DniDocente, TipoUsuario.Docente());
+        AgregarRegistro(memoria, administrador, Dia.ToDateTime(TimeOnly.MinValue), "Del administrador");
+        AgregarRegistro(memoria, docente, Dia.ToDateTime(TimeOnly.MinValue), "De la docente");
+        ServicioAuditoria servicio = CrearServicio(memoria);
+
+        List<RegistroAuditoriaDto> registros =
+            servicio.ListarRegistros(new FiltroAuditoriaDto { DniUsuario = DniDocente }, DniAdministrador);
+
+        CollectionAssert.AreEqual(new List<string> { "De la docente" },
+            registros.Select(registro => registro.Detalle).ToList());
+    }
+
     private static void AgregarRegistro(Memoria memoria, Usuario responsable, DateTime fechaHora, string detalle)
     {
         new RepositorioAuditoria(memoria).AgregarRegistro(new RegistroAuditoria(
