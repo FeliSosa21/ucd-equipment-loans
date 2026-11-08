@@ -43,6 +43,9 @@ public class RepositorioAuditoriaSql
                                || EF.Property<RegistroDeAccion>(registro, CampoRegistro).FechaHora >= filtro.Desde)
             .Where(registro => filtro.Hasta == null
                                || EF.Property<RegistroDeAccion>(registro, CampoRegistro).FechaHora < filtro.Hasta)
+            .Where(registro => filtro.DniUsuario == null
+                               || EF.Property<RegistroDeAccion>(registro, CampoRegistro).Responsable!.Dni
+                               == filtro.DniUsuario)
             .OrderByDescending(registro => EF.Property<RegistroDeAccion>(registro, CampoRegistro).FechaHora)
             .ThenByDescending(registro => registro.Id)
             .ToList();
