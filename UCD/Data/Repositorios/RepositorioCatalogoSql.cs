@@ -88,6 +88,8 @@ public class RepositorioCatalogoSql
 
     public bool ExisteUnidadConNumeroDeSerie(string numeroDeSerie, int? idUnidadExcluida)
     {
+        ArgumentNullException.ThrowIfNull(numeroDeSerie);
+
         string numeroDeSerieBuscado = numeroDeSerie.Trim().ToLower();
 
         return _contexto.Catalogos
