@@ -178,7 +178,7 @@ public class ServicioUsuarioTests
 
         servicio.Registrar(CrearDto());
 
-        Assert.AreEqual("Se registro Felipe Sosa (DNI 12345672)", LeerLog(memoria).Single().Detalle);
+        Assert.AreEqual("Se registró Felipe Sosa (DNI 12345672)", LeerLog(memoria).Single().Detalle);
     }
 
     [TestMethod]
