@@ -114,6 +114,7 @@ public class RepositorioPrestamoSql
     {
         return PrestamosConSolicitanteTipoYAsignadas
             .Where(prestamo => prestamo.Solicitante.Dni == dni)
+            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Activo)
             .ToList();
     }
 }
