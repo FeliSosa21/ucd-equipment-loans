@@ -808,6 +808,44 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void CrearUsuario_DniDeUsuarioEliminado_LanzaExcepcionGeneralSinAuditar()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuarioSql repositorio);
+        repositorio.EliminarUsuario(repositorio.ObtenerUsuarioPorDni(DniValido)!);
+        UsuarioDto repetido = CrearDtoNuevo();
+        repetido.Dni = DniValido;
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
+            servicio.CrearUsuario(repetido, TipoUsuario.Estudiante().Nombre, DniResponsable));
+
+        Assert.IsNull(excepcion.Campo);
+        Assert.AreEqual("Ya existe un usuario con ese DNI o correo", excepcion.Message);
+        Assert.IsNull(LeerUsuarioPorCorreo(CorreoNuevo));
+        Assert.AreEqual(0, LeerAccionesDelAdministrador().Count);
+        using SqlContext lectura = new SqlContext(_opciones);
+        Assert.IsTrue(lectura.Usuarios.Single(usuario => usuario.Dni == DniValido).EstaEliminado);
+    }
+
+    [TestMethod]
+    public void CrearUsuario_CorreoDeUsuarioEliminado_LanzaExcepcionGeneralSinAuditar()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuarioSql repositorio);
+        repositorio.EliminarUsuario(repositorio.ObtenerUsuarioPorDni(DniValido)!);
+        UsuarioDto repetido = CrearDtoNuevo();
+        repetido.Correo = "Felipe@Hotmail.COM";
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
+            servicio.CrearUsuario(repetido, TipoUsuario.Estudiante().Nombre, DniResponsable));
+
+        Assert.IsNull(excepcion.Campo);
+        Assert.AreEqual("Ya existe un usuario con ese DNI o correo", excepcion.Message);
+        Assert.IsNull(LeerUsuarioPorDni(DniNuevo));
+        Assert.AreEqual(0, LeerAccionesDelAdministrador().Count);
+        using SqlContext lectura = new SqlContext(_opciones);
+        Assert.IsTrue(lectura.Usuarios.Single(usuario => usuario.Dni == DniValido).EstaEliminado);
+    }
+
+    [TestMethod]
     public void AsignarTipo_ResponsableNoAdministrador_NoLoCambia()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuarioSql repositorio);
