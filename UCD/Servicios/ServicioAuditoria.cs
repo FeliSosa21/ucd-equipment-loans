@@ -23,6 +23,7 @@ public class ServicioAuditoria
     {
         ArgumentNullException.ThrowIfNull(filtro);
         ValidarQueSeaAdministradorActivo(dniResponsable);
+        ValidarRango(filtro);
         return _registros.ObtenerRegistros(CrearFiltro(filtro)).Select(CrearDto).ToList();
     }
 
@@ -56,6 +57,15 @@ public class ServicioAuditoria
     private static string DescribirResponsable(RegistroAuditoria registro)
     {
         return registro.EsDelSistema() ? UsuarioSistema : RegistradorDeAuditoria.Describir(registro.Responsable!);
+    }
+
+    private static void ValidarRango(FiltroAuditoriaDto filtro)
+    {
+        if (filtro.Desde > filtro.Hasta)
+        {
+            throw new ServicioException(nameof(FiltroAuditoriaDto.Desde),
+                "La fecha desde no puede ser posterior a la fecha hasta");
+        }
     }
 
     private void ValidarQueSeaAdministradorActivo(string dniResponsable)
