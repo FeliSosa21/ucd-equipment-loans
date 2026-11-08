@@ -61,7 +61,7 @@ public class Usuario
 
     public bool EstaActivo()
     {
-        return true;
+        return Estado == EstadoUsuario.Activo;
     }
 
     public bool EstaPendienteDeActivacion()
