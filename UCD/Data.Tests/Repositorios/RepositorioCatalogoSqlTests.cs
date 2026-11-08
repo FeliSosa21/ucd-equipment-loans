@@ -505,6 +505,26 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.IsFalse(existe);
     }
 
+    [TestMethod]
+    public void ExisteUnidadConNumeroDeSerie_MismaUnidad_DevuelveFalse()
+    {
+        Catalogo catalogo = new Catalogo(NombreCatalogo);
+        TipoEquipamiento tipo = CrearTipoEquipamientoConUnidad(NombreTipo, IdUnidad, NumeroDeSerie);
+        catalogo.AgregarTipo(tipo);
+        GuardarConOtroContexto(catalogo);
+
+        using SqlContext contextoQueObtiene = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueObtiene = new RepositorioCatalogoSql(contextoQueObtiene);
+        Catalogo catalogoGuardado = repositorioQueObtiene.ObtenerCatalogoActivoPorId(catalogo.Id)!;
+        int IdDeLaUnidad = catalogoGuardado.Tipos.Single().Unidades.Single().Id;
+
+        using SqlContext contextoQueLee =  new SqlContext(_opciones);
+        RepositorioCatalogoSql  repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        bool existe = repositorioQueLee.ExisteUnidadConNumeroDeSerie(NumeroDeSerie, IdDeLaUnidad);
+
+        Assert.IsFalse(existe);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
