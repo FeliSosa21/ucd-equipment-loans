@@ -16,8 +16,7 @@ public class RegistradorDeAuditoria
 
     public void RegistrarDeUsuario(AccionAuditada accion, Usuario responsable, string detalle)
     {
-        RegistroDeAccion registro = RegistroDeAccion.DeUsuario(responsable, _reloj.GetLocalNow().DateTime);
-        _repositorio.AgregarRegistro(new RegistroAuditoria(registro, accion, detalle));
+        Registrar(RegistroDeAccion.DeUsuario(responsable, _reloj.GetLocalNow().DateTime), accion, detalle);
     }
 
     public void Registrar(RegistroDeAccion registro, AccionAuditada accion, string detalle)
