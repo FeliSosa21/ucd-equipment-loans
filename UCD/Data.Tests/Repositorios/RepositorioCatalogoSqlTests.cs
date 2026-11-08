@@ -274,6 +274,16 @@ public sealed class RepositorioCatalogoSqlTests
     }
 
     [TestMethod]
+    public void ExisteUnidadConIdInstitucional_IdNull_LanzaArgumentNullException()
+    {
+        using SqlContext contexto = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contexto);
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.ExisteUnidadConIdInstitucional(null!));
+    }
+
+
+    [TestMethod]
     public void ActualizarCatalogo_NombreModificado_OtroContextoVeElCambio()
     {
         Catalogo catalogo = new Catalogo(NombreCatalogo);
