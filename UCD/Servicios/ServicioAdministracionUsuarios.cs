@@ -76,6 +76,12 @@ public class ServicioAdministracionUsuarios
         Usuario usuario = ObtenerUsuario(dni);
         string tipoAnterior = usuario.Tipo.Nombre;
         TipoUsuario tipoNuevo = ObtenerTipo(nombreTipo);
+
+        if (usuario.TieneTipo(tipoNuevo))
+        {
+            return;
+        }
+
         usuario.AsignarTipo(tipoNuevo);
         _auditoria.RegistrarDeUsuario(AccionAuditada.CambioDeTipoDeUsuario, administrador,
             $"{RegistradorDeAuditoria.Describir(usuario)} paso de {tipoAnterior} a {tipoNuevo.Nombre}");
