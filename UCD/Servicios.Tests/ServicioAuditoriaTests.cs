@@ -58,6 +58,24 @@ public class ServicioAuditoriaTests
             registros.Select(registro => registro.Detalle).ToList());
     }
 
+    [TestMethod]
+    public void ListarRegistros_FiltroHasta_IncluyeElDeEseDiaALas2359()
+    {
+        Memoria memoria = new Memoria();
+        Usuario administrador = AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
+        DateTime diaSiguiente = Dia.AddDays(1).ToDateTime(TimeOnly.MinValue);
+        AgregarRegistro(memoria, administrador, diaSiguiente.AddMinutes(-1), "Ese dia a las 23:59");
+        AgregarRegistro(memoria, administrador, diaSiguiente, "El dia siguiente a las 00:00");
+        AgregarRegistro(memoria, administrador, diaSiguiente.AddMinutes(1), "El dia siguiente a las 00:01");
+        ServicioAuditoria servicio = CrearServicio(memoria);
+
+        List<RegistroAuditoriaDto> registros =
+            servicio.ListarRegistros(new FiltroAuditoriaDto { Hasta = Dia }, DniAdministrador);
+
+        CollectionAssert.AreEqual(new List<string> { "Ese dia a las 23:59" },
+            registros.Select(registro => registro.Detalle).ToList());
+    }
+
     private static void AgregarRegistro(Memoria memoria, Usuario responsable, DateTime fechaHora, string detalle)
     {
         new RepositorioAuditoria(memoria).AgregarRegistro(new RegistroAuditoria(
