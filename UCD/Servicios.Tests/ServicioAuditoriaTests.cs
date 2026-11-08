@@ -168,6 +168,20 @@ public class ServicioAuditoriaTests
     }
 
     [TestMethod]
+    public void ListarRegistros_DesdePosteriorAHasta_LanzaServicioExceptionDelCampoDesde()
+    {
+        Memoria memoria = new Memoria();
+        AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
+        ServicioAuditoria servicio = CrearServicio(memoria);
+        FiltroAuditoriaDto filtro = new FiltroAuditoriaDto { Desde = Dia.AddDays(1), Hasta = Dia };
+
+        ServicioException error =
+            Assert.ThrowsException<ServicioException>(() => servicio.ListarRegistros(filtro, DniAdministrador));
+
+        Assert.AreEqual(nameof(FiltroAuditoriaDto.Desde), error.Campo);
+    }
+
+    [TestMethod]
     public void TieneCriterios_SoloDniEnBlanco_DevuelveFalse()
     {
         ServicioAuditoria servicio = CrearServicio(new Memoria());
