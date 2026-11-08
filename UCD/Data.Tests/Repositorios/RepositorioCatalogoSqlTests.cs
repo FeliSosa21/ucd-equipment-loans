@@ -291,6 +291,29 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.AreEqual(NombreSegundoCatalogo, leido.Nombre);
     }
 
+    [TestMethod]
+    public void ActualizarCatalogo_TipoAgregado_OtroContextoLoEncuentra()
+    {
+        Catalogo catalogo = new Catalogo(NombreCatalogo);
+        GuardarConOtroContexto(catalogo);
+
+        using (SqlContext contextoQueModifica = new SqlContext(_opciones))
+        {
+            RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueModifica);
+            Catalogo obtenido = repositorio.ObtenerCatalogoActivoPorId(catalogo.Id)!;
+            TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo,DescripcionTipo,DuracionMaxPrestamo,requiereAprobacion: false, Categoria.Computacion);
+            tipo.AgregarUnidad(new UnidadFisica(IdUnidad, UbicacionUnidad, null));
+            obtenido.AgregarTipo(tipo);
+            repositorio.ActualizarCatalogo(obtenido);
+        }
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        Catalogo leido = repositorioQueLee.ObtenerCatalogoActivoPorId(catalogo.Id)!;
+
+        Assert.AreEqual(NombreTipo, leido.Tipos.Single().Nombre);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
