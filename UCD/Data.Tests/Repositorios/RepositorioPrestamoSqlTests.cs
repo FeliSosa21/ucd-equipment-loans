@@ -352,6 +352,19 @@ public sealed class RepositorioPrestamoSqlTests
     }
 
     [TestMethod]
+    public void ObtenerPrestamos_PrestamoRechazado_TraeElEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        prestamo.Rechazar(CrearEvaluador(), MotivoDelRechazo);
+        GuardarConOtroContexto(prestamo);
+
+        Prestamo obtenido = ObtenerPrestamosConOtroContexto(new FiltroPorCatalogoYFechas()).Single();
+
+        Assert.IsNotNull(obtenido.Evaluador);
+        Assert.AreEqual(DniEvaluador, obtenido.Evaluador.Dni);
+    }
+
+    [TestMethod]
     public void ObtenerPrestamosActivos_VariosEstados_DevuelveSoloLosActivos()
     {
         TipoEquipamiento tipo = CrearTipoEquipamiento();
