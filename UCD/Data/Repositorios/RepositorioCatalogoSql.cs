@@ -88,9 +88,11 @@ public class RepositorioCatalogoSql
 
     public bool ExisteUnidadConNumeroDeSerie(string numeroDeSerie, int? idUnidadExcluida)
     {
+        string numeroDeSerieBuscado = numeroDeSerie.Trim().ToLower();
+
         return _contexto.Catalogos
             .SelectMany(catalogo => catalogo.Tipos)
             .SelectMany(tipo => tipo.Unidades)
-            .Any(unidad => unidad.NumSerie == numeroDeSerie);
+            .Any(unidad => unidad.NumSerie!.Trim().ToLower() == numeroDeSerieBuscado);
     }
 }
