@@ -86,7 +86,7 @@ public class ServicioTiposUsuarioTests
         _servicio.ModificarTipo(dto, DniAdministrador);
 
         Assert.AreEqual("Docentes de la facultad",
-            _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!.Descripcion);
+            LeerTipo(TipoUsuario.Docente().Nombre).Descripcion);
     }
 
     [TestMethod]
@@ -100,8 +100,7 @@ public class ServicioTiposUsuarioTests
 
         _servicio.ModificarTipo(dto, DniAdministrador);
 
-        using SqlContext lectura = new SqlContext(_opciones);
-        TipoUsuario guardado = new RepositorioTipoUsuarioSql(lectura).ObtenerTipoPorNombre(dto.Nombre)!;
+        TipoUsuario guardado = LeerTipo(dto.Nombre);
         Assert.AreEqual(dto.Descripcion, guardado.Descripcion);
         Assert.AreEqual(dto.Imagen, guardado.Imagen);
         Assert.AreEqual(dto.MaxUnidadesPorCatalogo, guardado.MaxUnidadesPorCatalogo);
@@ -116,7 +115,7 @@ public class ServicioTiposUsuarioTests
 
         _servicio.ModificarTipo(dto, DniAdministrador);
 
-        Assert.AreEqual(ImagenJpeg, _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!.Imagen);
+        Assert.AreEqual(ImagenJpeg, LeerTipo(TipoUsuario.Docente().Nombre).Imagen);
     }
 
     [TestMethod]
@@ -128,7 +127,7 @@ public class ServicioTiposUsuarioTests
 
         _servicio.ModificarTipo(dto, DniAdministrador);
 
-        TipoUsuario docente = _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!;
+        TipoUsuario docente = LeerTipo(TipoUsuario.Docente().Nombre);
         Assert.AreEqual(10, docente.MaxUnidadesPorCatalogo);
         Assert.AreEqual(2, docente.MaxPrestamosConcurrentes);
     }
@@ -146,7 +145,7 @@ public class ServicioTiposUsuarioTests
         _servicio.ModificarTipo(dto, DniAdministrador);
 
         Assert.AreEqual("Gestiona usuarios y tipos",
-            _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Administrador().Nombre)!.Descripcion);
+            LeerTipo(TipoUsuario.Administrador().Nombre).Descripcion);
     }
 
     [TestMethod]
@@ -169,48 +168,72 @@ public class ServicioTiposUsuarioTests
     [TestMethod]
     public void ModificarTipo_DescripcionVacia_LanzaServicioException()
     {
+        TipoUsuario anterior = LeerTipo(TipoUsuario.Docente().Nombre);
         TipoUsuarioDto dto = CrearDtoDocente();
         dto.Descripcion = "";
+        dto.Imagen = ImagenJpeg;
+        dto.MaxUnidadesPorCatalogo = 10;
 
         Assert.ThrowsException<ServicioException>(() => _servicio.ModificarTipo(dto, DniAdministrador));
+
+        VerificarQueSeConservo(anterior);
     }
 
     [TestMethod]
     public void ModificarTipo_ImagenInvalida_NoCambiaLaDescripcion()
     {
         _servicio.ModificarTipo(CrearDtoDocente(), DniAdministrador);
+        TipoUsuario anterior = LeerTipo(TipoUsuario.Docente().Nombre);
         TipoUsuarioDto dto = CrearDtoDocente();
         dto.Descripcion = "Docentes de la facultad";
         dto.Imagen = "imagen invalida";
 
         Assert.ThrowsException<ServicioException>(() => _servicio.ModificarTipo(dto, DniAdministrador));
 
-        Assert.AreEqual("Docente", _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!.Descripcion);
+        VerificarQueSeConservo(anterior);
     }
 
     [TestMethod]
     public void ModificarTipo_TopesInvalidos_NoCambiaLaDescripcion()
     {
         _servicio.ModificarTipo(CrearDtoDocente(), DniAdministrador);
+        TipoUsuario anterior = LeerTipo(TipoUsuario.Docente().Nombre);
         TipoUsuarioDto dto = CrearDtoDocente();
         dto.Descripcion = "Docentes de la facultad";
         dto.MaxUnidadesPorCatalogo = -1;
+        dto.Imagen = ImagenJpeg;
 
         Assert.ThrowsException<ServicioException>(() => _servicio.ModificarTipo(dto, DniAdministrador));
 
-        Assert.AreEqual("Docente", _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!.Descripcion);
+        VerificarQueSeConservo(anterior);
     }
 
     [TestMethod]
     public void ModificarTipo_ImagenInvalida_NoCambiaLosTopes()
     {
+        TipoUsuario anterior = LeerTipo(TipoUsuario.Docente().Nombre);
         TipoUsuarioDto dto = CrearDtoDocente();
         dto.MaxUnidadesPorCatalogo = 10;
         dto.Imagen = "imagen invalida";
 
         Assert.ThrowsException<ServicioException>(() => _servicio.ModificarTipo(dto, DniAdministrador));
 
-        Assert.AreEqual(40, _repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!.MaxUnidadesPorCatalogo);
+        VerificarQueSeConservo(anterior);
+    }
+
+    private TipoUsuario LeerTipo(string nombre)
+    {
+        using SqlContext lectura = new SqlContext(_opciones);
+        return new RepositorioTipoUsuarioSql(lectura).ObtenerTipoPorNombre(nombre)!;
+    }
+
+    private void VerificarQueSeConservo(TipoUsuario anterior)
+    {
+        TipoUsuario guardado = LeerTipo(anterior.Nombre);
+        Assert.AreEqual(anterior.Descripcion, guardado.Descripcion);
+        Assert.AreEqual(anterior.Imagen, guardado.Imagen);
+        Assert.AreEqual(anterior.MaxUnidadesPorCatalogo, guardado.MaxUnidadesPorCatalogo);
+        Assert.AreEqual(anterior.MaxPrestamosConcurrentes, guardado.MaxPrestamosConcurrentes);
     }
 
     private void AgregarEstudiante()
