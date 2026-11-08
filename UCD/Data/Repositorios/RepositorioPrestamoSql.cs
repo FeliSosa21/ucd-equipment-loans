@@ -98,8 +98,14 @@ public class RepositorioPrestamoSql
 
     public int ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(string dni, int idTipoEquipamiento)
     {
+        int idCatalogo = _contexto.Set<TipoEquipamiento>()
+            .Where(tipo => tipo.Id == idTipoEquipamiento)
+            .Select(tipo => EF.Property<int>(tipo, ColumnaCatalogo))
+            .Single();
+
         return _contexto.Prestamos
             .Where(prestamo => prestamo.Solicitante.Dni == dni)
+            .Where(prestamo => EF.Property<int>(prestamo.TipoEquipamiento, ColumnaCatalogo) == idCatalogo)
             .SelectMany(prestamo => prestamo.UnidadesAsignadas)
             .Count();
     }
