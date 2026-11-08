@@ -324,6 +324,19 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void Reactivar_UsuarioDesactivado_ElDetalleTieneElUsuarioReactivado()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _, out _, out Memoria memoria);
+        servicio.Desactivar(DniValido, DniResponsable);
+
+        servicio.Reactivar(DniValido, DniResponsable);
+
+        RegistroAuditoria reactivacion = LeerAccionesDelAdministrador(memoria)
+            .Single(registro => registro.Accion == AccionAuditada.ReactivacionDeUsuario);
+        Assert.AreEqual("Se reactivo la cuenta de Felipe Sosa (DNI 12345672)", reactivacion.Detalle);
+    }
+
+    [TestMethod]
     public void CrearUsuario_DatosValidos_QuedaConElTipoYLaContrasenaPredeterminada()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
