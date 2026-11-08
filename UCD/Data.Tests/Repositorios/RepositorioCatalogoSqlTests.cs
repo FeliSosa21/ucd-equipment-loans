@@ -16,6 +16,7 @@ public sealed class RepositorioCatalogoSqlTests
     private const string IdUnidad = "EQP-0001";
     private const string UbicacionUnidad = "Laboratorio";
     private const string IdSegundaUnidad = "EQP-0002";
+    private const string NombreSegundoTipo = "Proyector";
 
     private DbContextOptions<SqlContext> _opciones = null!;
 
@@ -226,7 +227,7 @@ public sealed class RepositorioCatalogoSqlTests
     public void ExisteActivoConNombre_NombreNull_LanzaArgumentNullException()
     {
         using SqlContext contexto = new SqlContext(_opciones);
-        RepositorioCatalogoSql repositorio = new  RepositorioCatalogoSql(contexto);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contexto);
 
         Assert.ThrowsException<ArgumentNullException>(() => repositorio.ExisteActivoConNombre(null!, idExcluido: null));
     }
@@ -338,6 +339,26 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.ThrowsException<ArgumentNullException>(() => repositorio.ActualizarCatalogo(null!));
     }
 
+    [TestMethod]
+    [DataRow(NombreSegundoTipo)]
+    [DataRow("PROYECTOR")]
+    [DataRow(" Proyector ")]
+    public void ObtenerTipoPorNombre_TipoExistente_DevuelveElTipo(string nombreTipo)
+    {
+        Catalogo catalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreCatalogo);
+        TipoEquipamiento tipo = CrearTipoEquipamientoConUnidad(NombreSegundoTipo, IdSegundaUnidad);
+        catalogo.AgregarTipo(tipo);
+        GuardarConOtroContexto(catalogo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        TipoEquipamiento? resultado = repositorioQueLee.ObtenerTipoPorNombre(catalogo.Id, nombreTipo);
+
+        Assert.IsNotNull(resultado);
+        Assert.AreEqual(NombreSegundoTipo, resultado.Nombre);
+        Assert.AreEqual(IdSegundaUnidad, resultado.Unidades.Single().IdInstitucional);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -351,7 +372,8 @@ public sealed class RepositorioCatalogoSqlTests
 
     private static TipoEquipamiento CrearTipoEquipamientoConUnidad(string nombreTipo, string idUnidad)
     {
-        TipoEquipamiento tipo = new TipoEquipamiento(nombreTipo, DescripcionTipo, DuracionMaxPrestamo, requiereAprobacion: false, Categoria.Computacion);
+        TipoEquipamiento tipo = new TipoEquipamiento(nombreTipo, DescripcionTipo, DuracionMaxPrestamo,
+            requiereAprobacion: false, Categoria.Computacion);
         tipo.AgregarUnidad(new UnidadFisica(idUnidad, UbicacionUnidad, null));
 
         return tipo;
