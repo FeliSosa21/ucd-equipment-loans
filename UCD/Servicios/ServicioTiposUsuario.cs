@@ -50,8 +50,7 @@ public class ServicioTiposUsuario
     {
         Usuario? responsable = _repositorioUsuarios.ObtenerUsuarioPorDni(dniResponsable);
 
-        if (responsable is null || responsable.Estado != EstadoUsuario.Activo
-            || !responsable.TienePermiso(Permiso.GestionarUsuarios))
+        if (responsable is null || !responsable.PuedeGestionarUsuarios())
         {
             throw new ServicioException("Solo un administrador activo puede gestionar los tipos de usuario");
         }
