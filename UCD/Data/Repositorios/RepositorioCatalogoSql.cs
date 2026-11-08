@@ -58,7 +58,6 @@ public class RepositorioCatalogoSql
 
     public void ActualizarCatalogo(Catalogo catalogo)
     {
-        _contexto.Catalogos.Update(catalogo);
         _contexto.SaveChanges();
     }
 }
