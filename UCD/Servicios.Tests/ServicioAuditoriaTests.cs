@@ -2,6 +2,7 @@ using Data;
 using Data.Repositorios;
 using Dominio;
 using DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace Servicios.Tests;
 
@@ -12,10 +13,30 @@ public class ServicioAuditoriaTests
     private const string DniDocente = "45678905";
     private static readonly DateOnly Dia = new DateOnly(2026, 11, 5);
 
+    private SqlContext _preparacion = null!;
+    private SqlContext _contexto = null!;
+
+    [TestInitialize]
+    public void Inicializar()
+    {
+        DbContextOptions<SqlContext> opciones = new DbContextOptionsBuilder<SqlContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        _preparacion = new SqlContext(opciones);
+        _preparacion.Database.EnsureCreated();
+        _contexto = new SqlContext(opciones);
+    }
+
+    [TestCleanup]
+    public void Limpiar()
+    {
+        _contexto.Dispose();
+        _preparacion.Dispose();
+    }
+
     [TestMethod]
     public void ListarRegistros_FiltroNulo_LanzaArgumentNullException()
     {
-        ServicioAuditoria servicio = CrearServicio(new Memoria());
+        ServicioAuditoria servicio = CrearServicio();
 
         Assert.ThrowsException<ArgumentNullException>(() => servicio.ListarRegistros(null!, DniAdministrador));
     }
@@ -23,9 +44,8 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void ListarRegistros_ResponsableSinPermiso_LanzaServicioException()
     {
-        Memoria memoria = new Memoria();
-        AgregarUsuario(memoria, DniDocente, TipoUsuario.Docente());
-        ServicioAuditoria servicio = CrearServicio(memoria);
+        AgregarUsuario(DniDocente, TipoUsuario.Docente());
+        ServicioAuditoria servicio = CrearServicio();
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.ListarRegistros(new FiltroAuditoriaDto(), DniDocente));
@@ -34,9 +54,9 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void ListarRegistros_ResponsableDesactivado_LanzaServicioException()
     {
-        Memoria memoria = new Memoria();
-        AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador()).Desactivar();
-        ServicioAuditoria servicio = CrearServicio(memoria);
+        AgregarUsuario(DniAdministrador, TipoUsuario.Administrador()).Desactivar();
+        _preparacion.SaveChanges();
+        ServicioAuditoria servicio = CrearServicio();
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.ListarRegistros(new FiltroAuditoriaDto(), DniAdministrador));
@@ -45,11 +65,10 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void ListarRegistros_FiltroDesde_DevuelveLosDeEseDiaEnAdelante()
     {
-        Memoria memoria = new Memoria();
-        Usuario administrador = AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
-        AgregarRegistro(memoria, administrador, Dia.ToDateTime(TimeOnly.MinValue).AddMinutes(-1), "El dia anterior");
-        AgregarRegistro(memoria, administrador, Dia.ToDateTime(TimeOnly.MinValue), "Ese dia");
-        ServicioAuditoria servicio = CrearServicio(memoria);
+        Usuario administrador = AgregarUsuario(DniAdministrador, TipoUsuario.Administrador());
+        AgregarRegistro(administrador, Dia.ToDateTime(TimeOnly.MinValue).AddMinutes(-1), "El dia anterior");
+        AgregarRegistro(administrador, Dia.ToDateTime(TimeOnly.MinValue), "Ese dia");
+        ServicioAuditoria servicio = CrearServicio();
 
         List<RegistroAuditoriaDto> registros =
             servicio.ListarRegistros(new FiltroAuditoriaDto { Desde = Dia }, DniAdministrador);
@@ -61,13 +80,12 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void ListarRegistros_FiltroHasta_IncluyeElDeEseDiaALas2359()
     {
-        Memoria memoria = new Memoria();
-        Usuario administrador = AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
+        Usuario administrador = AgregarUsuario(DniAdministrador, TipoUsuario.Administrador());
         DateTime diaSiguiente = Dia.AddDays(1).ToDateTime(TimeOnly.MinValue);
-        AgregarRegistro(memoria, administrador, diaSiguiente.AddMinutes(-1), "Ese dia a las 23:59");
-        AgregarRegistro(memoria, administrador, diaSiguiente, "El dia siguiente a las 00:00");
-        AgregarRegistro(memoria, administrador, diaSiguiente.AddMinutes(1), "El dia siguiente a las 00:01");
-        ServicioAuditoria servicio = CrearServicio(memoria);
+        AgregarRegistro(administrador, diaSiguiente.AddMinutes(-1), "Ese dia a las 23:59");
+        AgregarRegistro(administrador, diaSiguiente, "El dia siguiente a las 00:00");
+        AgregarRegistro(administrador, diaSiguiente.AddMinutes(1), "El dia siguiente a las 00:01");
+        ServicioAuditoria servicio = CrearServicio();
 
         List<RegistroAuditoriaDto> registros =
             servicio.ListarRegistros(new FiltroAuditoriaDto { Hasta = Dia }, DniAdministrador);
@@ -79,10 +97,9 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void ListarRegistros_HastaEsLaUltimaFecha_DevuelveLosRegistrosSinLimiteSuperior()
     {
-        Memoria memoria = new Memoria();
-        Usuario administrador = AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
-        AgregarRegistro(memoria, administrador, Dia.ToDateTime(TimeOnly.MinValue), "Ese dia");
-        ServicioAuditoria servicio = CrearServicio(memoria);
+        Usuario administrador = AgregarUsuario(DniAdministrador, TipoUsuario.Administrador());
+        AgregarRegistro(administrador, Dia.ToDateTime(TimeOnly.MinValue), "Ese dia");
+        ServicioAuditoria servicio = CrearServicio();
         FiltroAuditoriaDto filtro = new FiltroAuditoriaDto { Desde = Dia, Hasta = DateOnly.MaxValue };
 
         List<RegistroAuditoriaDto> registros = servicio.ListarRegistros(filtro, DniAdministrador);
@@ -94,12 +111,11 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void ListarRegistros_FiltroDni_DevuelveSoloLosDeEseResponsable()
     {
-        Memoria memoria = new Memoria();
-        Usuario administrador = AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
-        Usuario docente = AgregarUsuario(memoria, DniDocente, TipoUsuario.Docente());
-        AgregarRegistro(memoria, administrador, Dia.ToDateTime(TimeOnly.MinValue), "Del administrador");
-        AgregarRegistro(memoria, docente, Dia.ToDateTime(TimeOnly.MinValue), "De la docente");
-        ServicioAuditoria servicio = CrearServicio(memoria);
+        Usuario administrador = AgregarUsuario(DniAdministrador, TipoUsuario.Administrador());
+        Usuario docente = AgregarUsuario(DniDocente, TipoUsuario.Docente());
+        AgregarRegistro(administrador, Dia.ToDateTime(TimeOnly.MinValue), "Del administrador");
+        AgregarRegistro(docente, Dia.ToDateTime(TimeOnly.MinValue), "De la docente");
+        ServicioAuditoria servicio = CrearServicio();
 
         List<RegistroAuditoriaDto> registros =
             servicio.ListarRegistros(new FiltroAuditoriaDto { DniUsuario = DniDocente }, DniAdministrador);
@@ -111,11 +127,10 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void ListarRegistros_DniConEspacios_LoRecortaAntesDeFiltrar()
     {
-        Memoria memoria = new Memoria();
-        AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
-        Usuario docente = AgregarUsuario(memoria, DniDocente, TipoUsuario.Docente());
-        AgregarRegistro(memoria, docente, Dia.ToDateTime(TimeOnly.MinValue), "De la docente");
-        ServicioAuditoria servicio = CrearServicio(memoria);
+        AgregarUsuario(DniAdministrador, TipoUsuario.Administrador());
+        Usuario docente = AgregarUsuario(DniDocente, TipoUsuario.Docente());
+        AgregarRegistro(docente, Dia.ToDateTime(TimeOnly.MinValue), "De la docente");
+        ServicioAuditoria servicio = CrearServicio();
 
         List<RegistroAuditoriaDto> registros = servicio.ListarRegistros(
             new FiltroAuditoriaDto { DniUsuario = $"  {DniDocente}  " }, DniAdministrador);
@@ -127,10 +142,9 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void ListarRegistros_Registro_FechaHoraEnIso8601()
     {
-        Memoria memoria = new Memoria();
-        Usuario administrador = AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
-        AgregarRegistro(memoria, administrador, Dia.ToDateTime(new TimeOnly(9, 30, 15)), "Alta");
-        ServicioAuditoria servicio = CrearServicio(memoria);
+        Usuario administrador = AgregarUsuario(DniAdministrador, TipoUsuario.Administrador());
+        AgregarRegistro(administrador, Dia.ToDateTime(new TimeOnly(9, 30, 15)), "Alta");
+        ServicioAuditoria servicio = CrearServicio();
 
         RegistroAuditoriaDto registro =
             servicio.ListarRegistros(new FiltroAuditoriaDto { Desde = Dia }, DniAdministrador).Single();
@@ -141,10 +155,9 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void ListarRegistros_Registro_UsuarioConNombreYDni()
     {
-        Memoria memoria = new Memoria();
-        Usuario administrador = AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
-        AgregarRegistro(memoria, administrador, Dia.ToDateTime(TimeOnly.MinValue), "Alta");
-        ServicioAuditoria servicio = CrearServicio(memoria);
+        Usuario administrador = AgregarUsuario(DniAdministrador, TipoUsuario.Administrador());
+        AgregarRegistro(administrador, Dia.ToDateTime(TimeOnly.MinValue), "Alta");
+        ServicioAuditoria servicio = CrearServicio();
 
         RegistroAuditoriaDto registro =
             servicio.ListarRegistros(new FiltroAuditoriaDto { Desde = Dia }, DniAdministrador).Single();
@@ -155,10 +168,9 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void ListarRegistros_Registro_AccionConElNombreDelEnum()
     {
-        Memoria memoria = new Memoria();
-        Usuario administrador = AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
-        AgregarRegistro(memoria, administrador, Dia.ToDateTime(TimeOnly.MinValue), "Alta");
-        ServicioAuditoria servicio = CrearServicio(memoria);
+        Usuario administrador = AgregarUsuario(DniAdministrador, TipoUsuario.Administrador());
+        AgregarRegistro(administrador, Dia.ToDateTime(TimeOnly.MinValue), "Alta");
+        ServicioAuditoria servicio = CrearServicio();
 
         RegistroAuditoriaDto registro =
             servicio.ListarRegistros(new FiltroAuditoriaDto { Desde = Dia }, DniAdministrador).Single();
@@ -169,12 +181,11 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void ListarRegistros_RegistroDelSistema_UsuarioEsSistema()
     {
-        Memoria memoria = new Memoria();
-        AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
-        new RepositorioAuditoria(memoria).AgregarRegistro(new RegistroAuditoria(
+        AgregarUsuario(DniAdministrador, TipoUsuario.Administrador());
+        new RepositorioAuditoriaSql(_preparacion).AgregarRegistro(new RegistroAuditoria(
             RegistroDeAccion.DelSistema(Dia.ToDateTime(TimeOnly.MinValue)), AccionAuditada.RechazoDePrestamo,
             "Rechazo automatico"));
-        ServicioAuditoria servicio = CrearServicio(memoria);
+        ServicioAuditoria servicio = CrearServicio();
 
         RegistroAuditoriaDto registro =
             servicio.ListarRegistros(new FiltroAuditoriaDto { Desde = Dia }, DniAdministrador).Single();
@@ -185,9 +196,8 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void ListarRegistros_DesdePosteriorAHasta_LanzaServicioExceptionDelCampoDesde()
     {
-        Memoria memoria = new Memoria();
-        AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
-        ServicioAuditoria servicio = CrearServicio(memoria);
+        AgregarUsuario(DniAdministrador, TipoUsuario.Administrador());
+        ServicioAuditoria servicio = CrearServicio();
         FiltroAuditoriaDto filtro = new FiltroAuditoriaDto { Desde = Dia.AddDays(1), Hasta = Dia };
 
         ServicioException error =
@@ -199,7 +209,7 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void TieneCriterios_FiltroNulo_LanzaArgumentNullException()
     {
-        ServicioAuditoria servicio = CrearServicio(new Memoria());
+        ServicioAuditoria servicio = CrearServicio();
 
         Assert.ThrowsException<ArgumentNullException>(() => servicio.TieneCriterios(null!));
     }
@@ -207,7 +217,7 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void TieneCriterios_SoloDniEnBlanco_DevuelveFalse()
     {
-        ServicioAuditoria servicio = CrearServicio(new Memoria());
+        ServicioAuditoria servicio = CrearServicio();
 
         bool tieneCriterios = servicio.TieneCriterios(new FiltroAuditoriaDto { DniUsuario = "   " });
 
@@ -217,7 +227,7 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void TieneCriterios_SoloHastaEnLaUltimaFecha_DevuelveFalse()
     {
-        ServicioAuditoria servicio = CrearServicio(new Memoria());
+        ServicioAuditoria servicio = CrearServicio();
 
         bool tieneCriterios = servicio.TieneCriterios(new FiltroAuditoriaDto { Hasta = DateOnly.MaxValue });
 
@@ -227,30 +237,30 @@ public class ServicioAuditoriaTests
     [TestMethod]
     public void TieneCriterios_SoloDni_DevuelveTrue()
     {
-        ServicioAuditoria servicio = CrearServicio(new Memoria());
+        ServicioAuditoria servicio = CrearServicio();
 
         bool tieneCriterios = servicio.TieneCriterios(new FiltroAuditoriaDto { DniUsuario = DniDocente });
 
         Assert.IsTrue(tieneCriterios);
     }
 
-    private static void AgregarRegistro(Memoria memoria, Usuario responsable, DateTime fechaHora, string detalle)
+    private void AgregarRegistro(Usuario responsable, DateTime fechaHora, string detalle)
     {
-        new RepositorioAuditoria(memoria).AgregarRegistro(new RegistroAuditoria(
+        new RepositorioAuditoriaSql(_preparacion).AgregarRegistro(new RegistroAuditoria(
             RegistroDeAccion.DeUsuario(responsable, fechaHora), AccionAuditada.AltaDeUsuario, detalle));
     }
 
-    private static Usuario AgregarUsuario(Memoria memoria, string dni, TipoUsuario tipo)
+    private Usuario AgregarUsuario(string dni, TipoUsuario tipo)
     {
         Usuario usuario = new Usuario(dni: dni, nombre: "Ana", apellido: "Perez", correo: $"{dni}@hotmail.com",
             contrasena: "VivaLaOrt2026");
-        usuario.AsignarTipo(tipo);
-        new RepositorioUsuario(memoria).AgregarUsuario(usuario);
+        usuario.AsignarTipo(new RepositorioTipoUsuarioSql(_preparacion).ObtenerTipoPorNombre(tipo.Nombre)!);
+        new RepositorioUsuarioSql(_preparacion).AgregarUsuario(usuario);
         return usuario;
     }
 
-    private static ServicioAuditoria CrearServicio(Memoria memoria)
+    private ServicioAuditoria CrearServicio()
     {
-        return new ServicioAuditoria(new RepositorioAuditoria(memoria), new RepositorioUsuario(memoria));
+        return new ServicioAuditoria(new RepositorioAuditoriaSql(_contexto), new RepositorioUsuarioSql(_contexto));
     }
 }
