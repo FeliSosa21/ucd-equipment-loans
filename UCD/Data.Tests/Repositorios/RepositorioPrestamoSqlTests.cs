@@ -593,6 +593,182 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.IsTrue(obtenido);
     }
 
+    [TestMethod]
+    public void ContarPrestamosVigentesDeSolicitante_SolicitadoYActivoEnDosCatalogos_CuentaLosDos()
+    {
+        Usuario solicitante = CrearSolicitante();
+        Prestamo solicitado = CrearPrestamoDelSolicitante(solicitante);
+        Prestamo activo = CrearPrestamoDelSolicitante(solicitante);
+        activo.Activar(CrearUnidadesDelTipo(activo.TipoEquipamiento));
+        Prestamo deOtroSolicitante = CrearPrestamoDelSolicitante(CrearOtroSolicitante());
+
+        Catalogo catalogoDelSolicitado = CrearCatalogoConElTipo("Informatica", solicitado.TipoEquipamiento);
+        Catalogo catalogoDelActivo = CrearCatalogoConElTipo("Audiovisuales", activo.TipoEquipamiento);
+        GuardarCatalogosYPrestamos(
+            new List<Catalogo> { catalogoDelSolicitado, catalogoDelActivo }, solicitado, activo, deOtroSolicitante);
+
+        int obtenido = ContarPrestamosVigentesDeSolicitanteConOtroContexto(DniSolicitante);
+
+        Assert.AreEqual(2, obtenido);
+    }
+
+    [TestMethod]
+    public void ContarPrestamosVigentesDeSolicitante_RechazadoYDevuelto_NoLosCuenta()
+    {
+        Usuario solicitante = CrearSolicitante();
+        Prestamo solicitado = CrearPrestamoDelSolicitante(solicitante);
+        Prestamo rechazado = CrearPrestamoDelSolicitante(solicitante);
+        rechazado.Rechazar(CrearEvaluador(), MotivoDelRechazo);
+        Prestamo devuelto = CrearPrestamoDelSolicitante(solicitante);
+        devuelto.Activar(CrearUnidadesDelTipo(devuelto.TipoEquipamiento));
+        Devolver(devuelto);
+        GuardarConOtroContexto(solicitado, rechazado, devuelto);
+
+        int obtenido = ContarPrestamosVigentesDeSolicitanteConOtroContexto(DniSolicitante);
+
+        Assert.AreEqual(1, obtenido);
+    }
+
+    [TestMethod]
+    public void ContarPrestamosVigentesDeSolicitante_ConPrestamoExcluido_NoLoCuenta()
+    {
+        Usuario solicitante = CrearSolicitante();
+        Prestamo excluido = CrearPrestamoDelSolicitante(solicitante);
+        Prestamo otroSolicitado = CrearPrestamoDelSolicitante(solicitante);
+        GuardarConOtroContexto(excluido, otroSolicitado);
+
+        int obtenido = ContarPrestamosVigentesDeSolicitanteConOtroContexto(DniSolicitante, excluido.Id);
+
+        Assert.AreEqual(1, obtenido);
+    }
+
+    [TestMethod]
+    public void ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo_ActivoDelSolicitante_SumaSusUnidades()
+    {
+        Prestamo activo = CrearPrestamoDelSolicitante(CrearSolicitante());
+        activo.Activar(CrearUnidadesDelTipo(activo.TipoEquipamiento));
+        Prestamo deOtroSolicitante = CrearPrestamoDelSolicitante(CrearOtroSolicitante());
+        deOtroSolicitante.Activar(CrearUnidadesDelTipo(deOtroSolicitante.TipoEquipamiento));
+        GuardarConOtroContexto(activo, deOtroSolicitante);
+
+        int obtenido = ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipoConOtroContexto(
+            DniSolicitante, activo.TipoEquipamiento.Id);
+
+        Assert.AreEqual(2, obtenido);
+    }
+
+    [TestMethod]
+    public void ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo_OtroTipoDelMismoCatalogoYOtroCatalogo_SumaSoloLasDelCatalogo()
+    {
+        Usuario solicitante = CrearSolicitante();
+        Prestamo activoDelCatalogo = CrearPrestamoDelSolicitante(solicitante);
+        activoDelCatalogo.Activar(CrearUnidadesDelTipo(activoDelCatalogo.TipoEquipamiento));
+        Prestamo activoDeOtroCatalogo = CrearPrestamoDelSolicitante(solicitante);
+        activoDeOtroCatalogo.Activar(CrearUnidadesDelTipo(activoDeOtroCatalogo.TipoEquipamiento));
+        TipoEquipamiento otroTipoDelCatalogo = CrearTipoEquipamiento(nombre: "Notebook HP ProBook 450");
+
+        Catalogo electronica = CrearCatalogoConElTipo("Electronica", activoDelCatalogo.TipoEquipamiento);
+        electronica.AgregarTipo(otroTipoDelCatalogo);
+        Catalogo biotecnologia = CrearCatalogoConElTipo("Biotecnologia", activoDeOtroCatalogo.TipoEquipamiento);
+        GuardarCatalogosYPrestamos(
+            new List<Catalogo> { electronica, biotecnologia }, activoDelCatalogo, activoDeOtroCatalogo);
+
+        int obtenido = ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipoConOtroContexto(
+            DniSolicitante, otroTipoDelCatalogo.Id);
+
+        Assert.AreEqual(2, obtenido);
+    }
+
+    [TestMethod]
+    public void ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo_PrestamoDevuelto_NoSumaSusUnidades()
+    {
+        Prestamo devuelto = CrearPrestamoDelSolicitante(CrearSolicitante());
+        devuelto.Activar(CrearUnidadesDelTipo(devuelto.TipoEquipamiento));
+        Devolver(devuelto);
+        GuardarConOtroContexto(devuelto);
+
+        int obtenido = ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipoConOtroContexto(
+            DniSolicitante, devuelto.TipoEquipamiento.Id);
+
+        Assert.AreEqual(0, obtenido);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamosVencidosDeSolicitante_ActivoVencidoDelSolicitante_LoDevuelve()
+    {
+        DateTime pedidoHace60Dias = FechaFija.AddDays(-60);
+        Prestamo vencido = CrearPrestamoDelSolicitanteEnLaFecha(CrearSolicitante(), pedidoHace60Dias);
+        vencido.Activar(CrearUnidadesDelTipo(vencido.TipoEquipamiento));
+        Prestamo deOtroSolicitante = CrearPrestamoDelSolicitanteEnLaFecha(CrearOtroSolicitante(), pedidoHace60Dias);
+        deOtroSolicitante.Activar(CrearUnidadesDelTipo(deOtroSolicitante.TipoEquipamiento));
+        GuardarConOtroContexto(vencido, deOtroSolicitante);
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosVencidosDeSolicitanteConOtroContexto(
+            DniSolicitante, FechaFija.Date);
+
+        List<Guid> idsEsperados = new List<Guid> { vencido.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamosVencidosDeSolicitante_ActivoVencido_TraeSolicitanteYTipo()
+    {
+        Prestamo vencido = CrearPrestamoDelSolicitanteEnLaFecha(CrearSolicitante(), FechaFija.AddDays(-60));
+        vencido.Activar(CrearUnidadesDelTipo(vencido.TipoEquipamiento));
+        GuardarConOtroContexto(vencido);
+
+        Prestamo obtenido = ObtenerPrestamosVencidosDeSolicitanteConOtroContexto(
+            DniSolicitante, FechaFija.Date).Single();
+
+        Assert.IsNotNull(obtenido.Solicitante);
+        Assert.AreEqual(DniSolicitante, obtenido.Solicitante.Dni);
+        Assert.IsNotNull(obtenido.TipoEquipamiento);
+        Assert.AreEqual(NombreTipo, obtenido.TipoEquipamiento.Nombre);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamosVencidosDeSolicitante_SolicitadoYDevueltoVencidos_NoLosDevuelve()
+    {
+        Usuario solicitante = CrearSolicitante();
+        DateTime pedidoHace60Dias = FechaFija.AddDays(-60);
+        Prestamo activo = CrearPrestamoDelSolicitanteEnLaFecha(solicitante, pedidoHace60Dias);
+        activo.Activar(CrearUnidadesDelTipo(activo.TipoEquipamiento));
+        Prestamo solicitado = CrearPrestamoDelSolicitanteEnLaFecha(solicitante, pedidoHace60Dias);
+        Prestamo devuelto = CrearPrestamoDelSolicitanteEnLaFecha(solicitante, pedidoHace60Dias);
+        devuelto.Activar(CrearUnidadesDelTipo(devuelto.TipoEquipamiento));
+        Devolver(devuelto);
+        GuardarConOtroContexto(activo, solicitado, devuelto);
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosVencidosDeSolicitanteConOtroContexto(
+            DniSolicitante, FechaFija.Date);
+
+        List<Guid> idsEsperados = new List<Guid> { activo.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
+    }
+
+    [TestMethod]
+    public void ObtenerPrestamosVencidosDeSolicitante_ActivosQueVencenElDiaDelCorteODespues_NoLosDevuelve()
+    {
+        Usuario solicitante = CrearSolicitante();
+        Prestamo vencido = CrearPrestamoDelSolicitanteEnLaFecha(solicitante, FechaFija.AddDays(-60));
+        vencido.Activar(CrearUnidadesDelTipo(vencido.TipoEquipamiento));
+        Prestamo venceElDiaDelCorte = CrearPrestamoDelSolicitanteEnLaFecha(solicitante, FechaFija);
+        venceElDiaDelCorte.Activar(CrearUnidadesDelTipo(venceElDiaDelCorte.TipoEquipamiento));
+        Prestamo venceDespues = CrearPrestamoDelSolicitanteEnLaFecha(solicitante, FechaFija.AddDays(7));
+        venceDespues.Activar(CrearUnidadesDelTipo(venceDespues.TipoEquipamiento));
+        GuardarConOtroContexto(vencido, venceElDiaDelCorte, venceDespues);
+        DateTime corte = venceElDiaDelCorte.FechaEsperadaDevolucion;
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosVencidosDeSolicitanteConOtroContexto(
+            DniSolicitante, corte);
+
+        List<Guid> idsEsperados = new List<Guid> { vencido.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -673,6 +849,30 @@ public sealed class RepositorioPrestamoSqlTests
         return repositorio.ExistenPrestamosVigentesDelCatalogo(idCatalogo);
     }
 
+    private int ContarPrestamosVigentesDeSolicitanteConOtroContexto(string dni, Guid? idExcluido = null)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+
+        return repositorio.ContarPrestamosVigentesDeSolicitante(dni, idExcluido);
+    }
+
+    private int ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipoConOtroContexto(string dni, int idTipoEquipamiento)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+
+        return repositorio.ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(dni, idTipoEquipamiento);
+    }
+
+    private IReadOnlyList<Prestamo> ObtenerPrestamosVencidosDeSolicitanteConOtroContexto(string dni, DateTime corte)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+
+        return repositorio.ObtenerPrestamosVencidosDeSolicitante(dni, corte);
+    }
+
     private static Prestamo CrearPrestamo()
     {
         return CrearPrestamoDelTipo(CrearTipoEquipamiento());
@@ -700,6 +900,15 @@ public sealed class RepositorioPrestamoSqlTests
     {
         return new Prestamo(
             solicitante: CrearSolicitante(),
+            tipoEquipamiento: CrearTipoEquipamiento(),
+            cantidadSolicitada: CantidadSolicitada,
+            fechaHoraPrestamo: fechaHoraPrestamo);
+    }
+
+    private static Prestamo CrearPrestamoDelSolicitanteEnLaFecha(Usuario solicitante, DateTime fechaHoraPrestamo)
+    {
+        return new Prestamo(
+            solicitante: solicitante,
             tipoEquipamiento: CrearTipoEquipamiento(),
             cantidadSolicitada: CantidadSolicitada,
             fechaHoraPrestamo: fechaHoraPrestamo);
@@ -755,10 +964,10 @@ public sealed class RepositorioPrestamoSqlTests
         return usuario;
     }
 
-    private static TipoEquipamiento CrearTipoEquipamiento(bool requiereAprobacion = false)
+    private static TipoEquipamiento CrearTipoEquipamiento(bool requiereAprobacion = false, string nombre = NombreTipo)
     {
         TipoEquipamiento tipo = new TipoEquipamiento(
-            nombre: NombreTipo,
+            nombre: nombre,
             descripcion: "Computadora para laboratorio",
             duracionMaxPrestamo: 5,
             requiereAprobacion: requiereAprobacion,
