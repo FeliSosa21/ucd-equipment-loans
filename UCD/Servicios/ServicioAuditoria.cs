@@ -33,6 +33,25 @@ public class ServicioAuditoria
         return CrearFiltro(filtro).TieneCriterios();
     }
 
+    private void ValidarQueSeaAdministradorActivo(string dniResponsable)
+    {
+        Usuario? responsable = _usuarios.ObtenerUsuarioPorDni(dniResponsable);
+
+        if (responsable is null || !responsable.EstaActivo() || !responsable.TienePermiso(Permiso.GestionarUsuarios))
+        {
+            throw new ServicioException("Solo un administrador activo puede consultar el log de auditoria");
+        }
+    }
+
+    private static void ValidarRango(FiltroAuditoriaDto filtro)
+    {
+        if (filtro.Desde > filtro.Hasta)
+        {
+            throw new ServicioException(nameof(FiltroAuditoriaDto.Desde),
+                "La fecha desde no puede ser posterior a la fecha hasta");
+        }
+    }
+
     // Las fechas son dias completos: Hasta pasa como el inicio del dia siguiente porque el filtro lo excluye.
     private static FiltroAuditoria CrearFiltro(FiltroAuditoriaDto filtro)
     {
@@ -58,24 +77,5 @@ public class ServicioAuditoria
     private static string DescribirResponsable(RegistroAuditoria registro)
     {
         return registro.EsDelSistema() ? UsuarioSistema : RegistradorDeAuditoria.Describir(registro.Responsable!);
-    }
-
-    private static void ValidarRango(FiltroAuditoriaDto filtro)
-    {
-        if (filtro.Desde > filtro.Hasta)
-        {
-            throw new ServicioException(nameof(FiltroAuditoriaDto.Desde),
-                "La fecha desde no puede ser posterior a la fecha hasta");
-        }
-    }
-
-    private void ValidarQueSeaAdministradorActivo(string dniResponsable)
-    {
-        Usuario? responsable = _usuarios.ObtenerUsuarioPorDni(dniResponsable);
-
-        if (responsable is null || !responsable.EstaActivo() || !responsable.TienePermiso(Permiso.GestionarUsuarios))
-        {
-            throw new ServicioException("Solo un administrador activo puede consultar el log de auditoria");
-        }
     }
 }
