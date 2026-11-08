@@ -58,6 +58,8 @@ public class RepositorioCatalogoSql
 
     public void ActualizarCatalogo(Catalogo catalogo)
     {
+        ArgumentNullException.ThrowIfNull(catalogo);
+
         _contexto.SaveChanges();
     }
 }
