@@ -123,6 +123,7 @@ public class ServicioAdministracionUsuarios
         }
 
         usuario.Desactivar();
+        _repositorio.ActualizarUsuario(usuario);
         _auditoria.RegistrarDeUsuario(AccionAuditada.DesactivacionDeUsuario, administrador,
             $"Se desactivó la cuenta de {usuario.NombreCompletoConDni}");
     }
