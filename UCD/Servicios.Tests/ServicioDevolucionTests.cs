@@ -342,6 +342,6 @@ public class ServicioDevolucionTests
         prestamos.AgregarPrestamo(prestamo);
 
         return new ServicioDevolucion(prestamos, usuarios, new RepositorioDevolucion(memoria),
-            new RepositorioMovimiento(memoria), new RelojFijo(ahora));
+            new RepositorioMovimiento(memoria), new RelojFijo(ahora), AuditoriaDePrueba.Registrador(memoria));
     }
 }

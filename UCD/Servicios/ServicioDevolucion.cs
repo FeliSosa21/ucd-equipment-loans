@@ -23,15 +23,18 @@ public class ServicioDevolucion
     private readonly RepositorioDevolucion _devoluciones;
     private readonly RepositorioMovimiento _movimientos;
     private readonly TimeProvider _reloj;
+    private readonly RegistradorDeAuditoria _auditoria;
 
     public ServicioDevolucion(RepositorioPrestamo prestamos, RepositorioUsuario usuarios,
-        RepositorioDevolucion devoluciones, RepositorioMovimiento movimientos, TimeProvider reloj)
+        RepositorioDevolucion devoluciones, RepositorioMovimiento movimientos, TimeProvider reloj,
+        RegistradorDeAuditoria auditoria)
     {
         _prestamos = prestamos;
         _usuarios = usuarios;
         _devoluciones = devoluciones;
         _movimientos = movimientos;
         _reloj = reloj;
+        _auditoria = auditoria;
     }
 
     public List<string> CondicionesPosibles()
