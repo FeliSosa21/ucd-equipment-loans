@@ -138,6 +138,22 @@ public class ServicioAuditoriaTests
     }
 
     [TestMethod]
+    public void ListarRegistros_RegistroDelSistema_UsuarioEsSistema()
+    {
+        Memoria memoria = new Memoria();
+        AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
+        new RepositorioAuditoria(memoria).AgregarRegistro(new RegistroAuditoria(
+            RegistroDeAccion.DelSistema(Dia.ToDateTime(TimeOnly.MinValue)), AccionAuditada.RechazoDePrestamo,
+            "Rechazo automatico"));
+        ServicioAuditoria servicio = CrearServicio(memoria);
+
+        RegistroAuditoriaDto registro =
+            servicio.ListarRegistros(new FiltroAuditoriaDto { Desde = Dia }, DniAdministrador).Single();
+
+        Assert.AreEqual("Sistema", registro.Usuario);
+    }
+
+    [TestMethod]
     public void TieneCriterios_SoloDniEnBlanco_DevuelveFalse()
     {
         ServicioAuditoria servicio = CrearServicio(new Memoria());
