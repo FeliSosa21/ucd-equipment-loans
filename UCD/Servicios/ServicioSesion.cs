@@ -60,6 +60,7 @@ public class ServicioSesion
         }
 
         TraduccionDeErrores.Ejecutar(() => usuario.CambiarContrasena(nueva));
+        _repositorio.ActualizarUsuario(usuario);
     }
 
     private static UsuarioSesionDto CrearSesion(Usuario usuario)
