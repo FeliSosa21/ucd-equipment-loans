@@ -56,7 +56,7 @@ public class Usuario
 
     public bool TieneTipo(TipoUsuario tipo)
     {
-        return true;
+        return Tipo.Nombre == tipo.Nombre;
     }
 
     public bool EstaPendienteDeActivacion()
