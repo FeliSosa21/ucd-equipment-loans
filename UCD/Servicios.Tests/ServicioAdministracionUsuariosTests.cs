@@ -209,6 +209,28 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void AsignarTipo_AuditoriaConOtroContexto_PersisteElTipoAsignado()
+    {
+        CrearServicioConAdministrador(out RepositorioUsuarioSql usuarios, out RepositorioTipoUsuarioSql tipos);
+        using SqlContext contextoAuditoria = new SqlContext(_opciones);
+        contextoAuditoria.Attach(usuarios.ObtenerUsuarioPorDni(DniResponsable)!);
+        RegistradorDeAuditoria auditoria = new RegistradorDeAuditoria(
+            new RepositorioAuditoriaSql(contextoAuditoria), new RelojFijo(Ahora));
+        ServicioUsuario servicioUsuario = new ServicioUsuario(usuarios, tipos, auditoria);
+        ServicioAdministracionUsuarios servicio = new ServicioAdministracionUsuarios(
+            usuarios, servicioUsuario, tipos, auditoria);
+        TipoUsuario docente = tipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!;
+
+        servicio.AsignarTipo(DniValido, docente.Nombre, DniResponsable);
+
+        using SqlContext lectura = new SqlContext(_opciones);
+        Usuario guardado = new RepositorioUsuarioSql(lectura).ObtenerUsuarioPorDni(DniValido)!;
+        Assert.AreEqual(docente.Id, guardado.Tipo.Id);
+        Assert.AreEqual(docente.Nombre, guardado.Tipo.Nombre);
+        Assert.AreEqual(AccionAuditada.CambioDeTipoDeUsuario, LeerAccionesDelAdministrador().Single().Accion);
+    }
+
+    [TestMethod]
     public void AsignarTipo_TipoExistente_RegistraElCambioConElAdministradorComoResponsable()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _, out _);
