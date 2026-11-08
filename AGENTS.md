@@ -30,7 +30,7 @@ Todos desde `UCD/`:
 ## Forma de trabajo
 
 1. **TDD siempre**, también en lo hecho por agentes (letra, pág. 8): un commit por paso, `test: ... (RED)`, `feat: ... (GREEN)`, `refactor: ... (REFACTOR)`. El RED compila y falla solo por el test nuevo; el GREEN es el código mínimo.
-2. **Mostrar el código antes de cada commit** y explicar qué hace. Lo commitea el integrante, después de correr `dotnet test`; nunca se commitea con tests en rojo.
+2. **Mostrar el código antes de cada commit** y explicar qué hace. Lo commitea el integrante, después de correr `dotnet test`. El commit RED es el único con un test en rojo, y falla solo el test nuevo; un GREEN o un REFACTOR nunca se commitea con algún test fallando.
 3. **Modo plan** para cambios grandes: proponer, ajustar con el integrante, recién ahí implementar.
 4. **Ramas:** una por funcionalidad desde `develop` (`feature/...`, `fix/...`). Nada se mergea a `develop` sin PR revisado por otro integrante. No usar `amend`, `rebase` ni `push --force`.
 5. **Migraciones:** una por vez y desde `develop` actualizado (el snapshot es un solo archivo). Revisar la migración antes de aplicarla: no puede crear ni borrar nada que no corresponda al cambio.
