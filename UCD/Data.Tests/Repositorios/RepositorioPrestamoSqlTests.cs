@@ -607,9 +607,7 @@ public sealed class RepositorioPrestamoSqlTests
         GuardarCatalogosYPrestamos(
             new List<Catalogo> { catalogoDelSolicitado, catalogoDelActivo }, solicitado, activo, deOtroSolicitante);
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        int obtenido = repositorio.ContarPrestamosVigentesDeSolicitante(DniSolicitante);
+        int obtenido = ContarPrestamosVigentesDeSolicitanteConOtroContexto(DniSolicitante);
 
         Assert.AreEqual(2, obtenido);
     }
@@ -626,9 +624,7 @@ public sealed class RepositorioPrestamoSqlTests
         Devolver(devuelto);
         GuardarConOtroContexto(solicitado, rechazado, devuelto);
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        int obtenido = repositorio.ContarPrestamosVigentesDeSolicitante(DniSolicitante);
+        int obtenido = ContarPrestamosVigentesDeSolicitanteConOtroContexto(DniSolicitante);
 
         Assert.AreEqual(1, obtenido);
     }
@@ -711,6 +707,14 @@ public sealed class RepositorioPrestamoSqlTests
         RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
 
         return repositorio.ExistenPrestamosVigentesDelCatalogo(idCatalogo);
+    }
+
+    private int ContarPrestamosVigentesDeSolicitanteConOtroContexto(string dni)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+
+        return repositorio.ContarPrestamosVigentesDeSolicitante(dni);
     }
 
     private static Prestamo CrearPrestamo()
