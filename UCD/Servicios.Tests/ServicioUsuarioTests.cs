@@ -181,6 +181,19 @@ public class ServicioUsuarioTests
         Assert.AreEqual("Se registro Felipe Sosa (DNI 12345672)", LeerLog(memoria).Single().Detalle);
     }
 
+    [TestMethod]
+    public void Registrar_DniDuplicado_NoAgregaNadaAlLog()
+    {
+        Memoria memoria = new Memoria();
+        ServicioUsuario servicio = new ServicioUsuario(new RepositorioUsuario(memoria),
+            TiposDePrueba.Cargados(memoria), AuditoriaDePrueba.Registrador(memoria));
+        servicio.Registrar(CrearDto());
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(CrearDto(correo: "otro@hotmail.com")));
+
+        Assert.AreEqual(1, LeerLog(memoria).Count);
+    }
+
     private static IReadOnlyList<RegistroAuditoria> LeerLog(Memoria memoria)
     {
         return new RepositorioAuditoria(memoria).ObtenerRegistros(
