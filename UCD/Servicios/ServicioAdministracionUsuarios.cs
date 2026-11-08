@@ -84,7 +84,7 @@ public class ServicioAdministracionUsuarios
 
         usuario.AsignarTipo(tipoNuevo);
         _auditoria.RegistrarDeUsuario(AccionAuditada.CambioDeTipoDeUsuario, administrador,
-            $"{RegistradorDeAuditoria.Describir(usuario)} paso de {tipoAnterior} a {tipoNuevo.Nombre}");
+            $"{RegistradorDeAuditoria.Describir(usuario)} pasó de {tipoAnterior} a {tipoNuevo.Nombre}");
     }
 
     public UsuarioResumenDto ObtenerResumen(string dni, string dniResponsable)
@@ -121,7 +121,7 @@ public class ServicioAdministracionUsuarios
 
         usuario.Desactivar();
         _auditoria.RegistrarDeUsuario(AccionAuditada.DesactivacionDeUsuario, administrador,
-            $"Se desactivo la cuenta de {RegistradorDeAuditoria.Describir(usuario)}");
+            $"Se desactivó la cuenta de {RegistradorDeAuditoria.Describir(usuario)}");
     }
 
     public void Reactivar(string dni, string dniResponsable)
@@ -136,7 +136,7 @@ public class ServicioAdministracionUsuarios
 
         TraduccionDeErrores.Ejecutar(() => usuario.Reactivar());
         _auditoria.RegistrarDeUsuario(AccionAuditada.ReactivacionDeUsuario, administrador,
-            $"Se reactivo la cuenta de {RegistradorDeAuditoria.Describir(usuario)}");
+            $"Se reactivó la cuenta de {RegistradorDeAuditoria.Describir(usuario)}");
     }
 
     // El mismo usuario puede ver y modificar sus datos mientras siga activo; a otro, solo un administrador.
