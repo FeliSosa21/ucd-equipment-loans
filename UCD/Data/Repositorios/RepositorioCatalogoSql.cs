@@ -63,15 +63,14 @@ public class RepositorioCatalogoSql
         _contexto.SaveChanges();
     }
 
-    public TipoEquipamiento? ObtenerTipoPorNombre(int catalogoId, string nombre)
+    public TipoEquipamiento? ObtenerTipoPorNombre(int idCatalogo, string nombre)
     {
-
         ArgumentNullException.ThrowIfNull(nombre);
 
         string nombreBuscado = nombre.Trim().ToLower();
 
         return CatalogosActivos
-            .Where(catalogo => catalogo.Id == catalogoId)
+            .Where(catalogo => catalogo.Id == idCatalogo)
             .SelectMany(catalogo => catalogo.Tipos)
             .Include(tipo => tipo.Unidades)
             .FirstOrDefault(tipo => tipo.Nombre.Trim().ToLower() == nombreBuscado);

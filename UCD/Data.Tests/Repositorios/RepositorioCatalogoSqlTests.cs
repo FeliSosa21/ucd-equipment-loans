@@ -360,13 +360,13 @@ public sealed class RepositorioCatalogoSqlTests
     }
 
     [TestMethod]
-    public void ObtenerTipoPorNombre_TipoDeOtroCatalogo_DevulveNull()
+    public void ObtenerTipoPorNombre_TipoDeOtroCatalogo_DevuelveNull()
     {
         Catalogo primerCatalogo = new Catalogo(NombreCatalogo);
         Catalogo segundoCatalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreSegundoCatalogo);
         GuardarConOtroContexto(primerCatalogo, segundoCatalogo);
 
-        using  SqlContext contextoQueLee = new SqlContext(_opciones);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
         TipoEquipamiento? resultado = repositorioQueLee.ObtenerTipoPorNombre(primerCatalogo.Id, NombreTipo);
 
