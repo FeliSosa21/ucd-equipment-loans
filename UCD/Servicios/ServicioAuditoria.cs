@@ -87,6 +87,6 @@ public class ServicioAuditoria
 
     private static string DescribirResponsable(RegistroAuditoria registro)
     {
-        return registro.EsDelSistema() ? UsuarioSistema : RegistradorDeAuditoria.Describir(registro.Responsable!);
+        return registro.EsDelSistema() ? UsuarioSistema : registro.Responsable!.NombreCompletoConDni;
     }
 }

@@ -23,9 +23,4 @@ public class RegistradorDeAuditoria
     {
         _repositorio.AgregarRegistro(new RegistroAuditoria(registro, accion, detalle));
     }
-
-    internal static string Describir(Usuario usuario)
-    {
-        return $"{usuario.Nombre} {usuario.Apellido} (DNI {usuario.Dni})";
-    }
 }

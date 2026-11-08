@@ -22,7 +22,7 @@ public class ServicioUsuario
     {
         Usuario usuario = Agregar(dto);
         _auditoria.RegistrarDeUsuario(AccionAuditada.RegistroDeUsuario, usuario,
-            $"Se registró {RegistradorDeAuditoria.Describir(usuario)}");
+            $"Se registró {usuario.NombreCompletoConDni}");
     }
 
     internal Usuario Agregar(UsuarioDto dto)

@@ -76,7 +76,7 @@ public class ServicioDevolucion
     private void RegistrarEnAuditoria(Devolucion devolucion, RegistroDeAccion registro)
     {
         _auditoria.Registrar(registro, AccionAuditada.DevolucionDePrestamo,
-            $"Devolución del préstamo de {RegistradorDeAuditoria.Describir(devolucion.Prestamo.Solicitante)}: " +
+            $"Devolución del préstamo de {devolucion.Prestamo.Solicitante.NombreCompletoConDni}: " +
             DescribirCantidad(devolucion.Unidades.Count));
     }
 
