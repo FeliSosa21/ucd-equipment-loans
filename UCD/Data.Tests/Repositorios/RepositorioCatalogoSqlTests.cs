@@ -329,6 +329,15 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.AreEqual(0, resultado.Count);
     }
 
+    [TestMethod]
+    public void ActualizarCatalogo_CatalogoNull_LanzaArgumentNullException()
+    {
+        using SqlContext contexto = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contexto);
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.ActualizarCatalogo(null!));
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
