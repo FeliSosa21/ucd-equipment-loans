@@ -65,6 +65,9 @@ public class RepositorioCatalogoSql
 
     public TipoEquipamiento? ObtenerTipoPorNombre(int catalogoId, string nombre)
     {
+
+        ArgumentNullException.ThrowIfNull(nombre);
+
         string nombreBuscado = nombre.Trim().ToLower();
 
         return CatalogosActivos
