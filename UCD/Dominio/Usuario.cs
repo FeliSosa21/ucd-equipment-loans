@@ -66,7 +66,7 @@ public class Usuario
 
     public bool PuedeGestionarUsuarios()
     {
-        return EstaActivo();
+        return EstaActivo() && TienePermiso(Permiso.GestionarUsuarios);
     }
 
     public bool EstaPendienteDeActivacion()
