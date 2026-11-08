@@ -17,6 +17,7 @@ public sealed class RepositorioCatalogoSqlTests
     private const string UbicacionUnidad = "Laboratorio";
     private const string IdSegundaUnidad = "EQP-0002";
     private const string NombreSegundoTipo = "Proyector";
+    private const string NumeroDeSerie = "5CG1234ABC";
 
     private DbContextOptions<SqlContext> _opciones = null!;
 
@@ -454,6 +455,22 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.AreEqual(0, resultado.Count);
     }
 
+    [TestMethod]
+    public void ExisteUnidadConNumeroDeSerie_UnidadEnOtroCatalogo_DevuelveTrue()
+    {
+        Catalogo primerCatalogo = new Catalogo(NombreCatalogo);
+        Catalogo segundoCatalogo = new Catalogo(NombreSegundoCatalogo);
+        TipoEquipamiento tipo = CrearTipoEquipamientoConUnidad(NombreTipo, IdUnidad, NumeroDeSerie);
+        segundoCatalogo.AgregarTipo(tipo);
+        GuardarConOtroContexto(primerCatalogo, segundoCatalogo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        bool existe = repositorioQueLee.ExisteUnidadConNumeroDeSerie(NumeroDeSerie, null);
+
+        Assert.IsTrue(existe);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -465,11 +482,12 @@ public sealed class RepositorioCatalogoSqlTests
         }
     }
 
-    private static TipoEquipamiento CrearTipoEquipamientoConUnidad(string nombreTipo, string idUnidad)
+    private static TipoEquipamiento CrearTipoEquipamientoConUnidad(string nombreTipo, string idUnidad,
+        string? numeroDeSerie = null)
     {
         TipoEquipamiento tipo = new TipoEquipamiento(nombreTipo, DescripcionTipo, DuracionMaxPrestamo,
             requiereAprobacion: false, Categoria.Computacion);
-        tipo.AgregarUnidad(new UnidadFisica(idUnidad, UbicacionUnidad, null));
+        tipo.AgregarUnidad(new UnidadFisica(idUnidad, UbicacionUnidad, numeroDeSerie));
 
         return tipo;
     }
