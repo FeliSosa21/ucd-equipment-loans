@@ -50,6 +50,8 @@ public class RepositorioCatalogoSql
 
     public bool ExisteUnidadConIdInstitucional(string idInstitucional)
     {
+        ArgumentNullException.ThrowIfNull(idInstitucional);
+
         return _contexto.Catalogos
             .SelectMany(catalogo => catalogo.Tipos)
             .SelectMany(tipo => tipo.Unidades)
