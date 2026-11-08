@@ -748,6 +748,27 @@ public sealed class RepositorioPrestamoSqlTests
         CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamosVencidosDeSolicitante_ActivosQueVencenElDiaDelCorteODespues_NoLosDevuelve()
+    {
+        Usuario solicitante = CrearSolicitante();
+        Prestamo vencido = CrearPrestamoDelSolicitanteEnLaFecha(solicitante, FechaFija.AddDays(-60));
+        vencido.Activar(CrearUnidadesDelTipo(vencido.TipoEquipamiento));
+        Prestamo venceElDiaDelCorte = CrearPrestamoDelSolicitanteEnLaFecha(solicitante, FechaFija);
+        venceElDiaDelCorte.Activar(CrearUnidadesDelTipo(venceElDiaDelCorte.TipoEquipamiento));
+        Prestamo venceDespues = CrearPrestamoDelSolicitanteEnLaFecha(solicitante, FechaFija.AddDays(7));
+        venceDespues.Activar(CrearUnidadesDelTipo(venceDespues.TipoEquipamiento));
+        GuardarConOtroContexto(vencido, venceElDiaDelCorte, venceDespues);
+        DateTime corte = venceElDiaDelCorte.FechaEsperadaDevolucion;
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosVencidosDeSolicitanteConOtroContexto(
+            DniSolicitante, corte);
+
+        List<Guid> idsEsperados = new List<Guid> { vencido.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
