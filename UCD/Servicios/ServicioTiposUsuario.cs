@@ -44,6 +44,7 @@ public class ServicioTiposUsuario
 
             tipo.Modificar(dto.Descripcion, dto.Imagen, topes);
         });
+        _repositorioTipos.ActualizarTipo(tipo);
     }
 
     private void ValidarQueSeaAdministradorActivo(string dniResponsable)
