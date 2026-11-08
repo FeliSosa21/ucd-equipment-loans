@@ -78,6 +78,8 @@ public class RepositorioCatalogoSql
 
     public IReadOnlyList<Catalogo> ObtenerCatalogosParaExportar()
     {
-        return _contexto.Catalogos.ToList();
+        return _contexto.Catalogos
+            .Include(catalogo => catalogo.Tipos)
+            .ToList();
     }
 }
