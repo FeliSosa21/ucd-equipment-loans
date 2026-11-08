@@ -526,6 +526,24 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.IsFalse(obtenido);
     }
 
+    [TestMethod]
+    public void ExistenPrestamosVigentesDelCatalogo_SoloRechazadosYDevueltos_DevuelveFalse()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento();
+        Catalogo catalogo = CrearCatalogoConElTipo("Laboratorio de Informatica", tipo);
+
+        Prestamo rechazado = CrearPrestamoDelTipo(tipo);
+        rechazado.Rechazar(CrearEvaluador(), MotivoDelRechazo);
+        Prestamo devuelto = CrearPrestamoDelTipo(tipo);
+        devuelto.Activar(CrearUnidadesDelTipo(tipo));
+        Devolver(devuelto);
+        GuardarCatalogosYPrestamos(new List<Catalogo> { catalogo }, rechazado, devuelto);
+
+        bool obtenido = ExistenPrestamosVigentesDelCatalogoConOtroContexto(catalogo.Id);
+
+        Assert.IsFalse(obtenido);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
