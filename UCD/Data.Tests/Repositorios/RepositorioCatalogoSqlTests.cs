@@ -314,6 +314,27 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.AreEqual(NombreTipo, leido.Tipos.Single().Nombre);
     }
 
+    [TestMethod]
+    public void ActualizarCatalogo_CatalogoDadoDeBaja_YaNoApareceEntreLosActivos()
+    {
+        Catalogo catalogo = new Catalogo(NombreCatalogo);
+        GuardarConOtroContexto(catalogo);
+
+        using (SqlContext contextoQueModifica = new SqlContext(_opciones))
+        {
+            RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueModifica);
+            Catalogo obtenido = repositorio.ObtenerCatalogoActivoPorId(catalogo.Id)!;
+            obtenido.DarDeBaja();
+            repositorio.ActualizarCatalogo(obtenido);
+        }
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        IReadOnlyList<Catalogo> resultado = repositorioQueLee.ObtenerCatalogosActivos();
+
+        Assert.AreEqual(0, resultado.Count);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
