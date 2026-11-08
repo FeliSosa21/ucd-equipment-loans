@@ -91,7 +91,8 @@ public class RepositorioPrestamoSql
         return _contexto.Prestamos
             .Where(prestamo => prestamo.Solicitante.Dni == dni)
             .Where(prestamo => prestamo.Estado == EstadoPrestamo.Solicitado
-                || prestamo.Estado == EstadoPrestamo.Activo)
+                               || prestamo.Estado == EstadoPrestamo.Activo)
+            .Where(prestamo => prestamo.Id != idExcluido)
             .Count();
     }
 }
