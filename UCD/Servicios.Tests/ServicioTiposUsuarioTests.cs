@@ -2,6 +2,7 @@ using Data;
 using Data.Repositorios;
 using Dominio;
 using DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace Servicios.Tests;
 
@@ -13,22 +14,37 @@ public class ServicioTiposUsuarioTests
     private const string ImagenPng = "data:image/png;base64,iVBORw0KGgo=";
     private const string ImagenJpeg = "data:image/jpeg;base64,/9j/4AAQ";
 
-    private Memoria _memoria = null!;
-    private RepositorioUsuario _repositorioUsuarios = null!;
-    private RepositorioTipoUsuario _repositorioTipos = null!;
+    private DbContextOptions<SqlContext> _opciones = null!;
+    private SqlContext _contexto = null!;
+    private RepositorioUsuarioSql _repositorioUsuarios = null!;
+    private RepositorioTipoUsuarioSql _repositorioTipos = null!;
     private ServicioTiposUsuario _servicio = null!;
 
     [TestInitialize]
     public void Inicializar()
     {
-        _memoria = new Memoria();
-        _repositorioUsuarios = new RepositorioUsuario(_memoria);
-        _repositorioTipos = TiposDePrueba.Cargados(_memoria);
-        Usuario administrador = new Usuario(dni: DniAdministrador, nombre: "Root", apellido: "Admin",
-            correo: "root@ucd.edu.uy", contrasena: "Root2026");
-        administrador.AsignarTipo(_repositorioTipos.ObtenerTipoPorNombre(TipoUsuario.Administrador().Nombre)!);
-        _repositorioUsuarios.AgregarUsuario(administrador);
+        _opciones = new DbContextOptionsBuilder<SqlContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        using (SqlContext preparacion = new SqlContext(_opciones))
+        {
+            preparacion.Database.EnsureCreated();
+            Usuario administrador = new Usuario(dni: DniAdministrador, nombre: "Root", apellido: "Admin",
+                correo: "root@ucd.edu.uy", contrasena: "Root2026");
+            administrador.AsignarTipo(new RepositorioTipoUsuarioSql(preparacion)
+                .ObtenerTipoPorNombre(TipoUsuario.Administrador().Nombre)!);
+            new RepositorioUsuarioSql(preparacion).AgregarUsuario(administrador);
+        }
+
+        _contexto = new SqlContext(_opciones);
+        _repositorioUsuarios = new RepositorioUsuarioSql(_contexto);
+        _repositorioTipos = new RepositorioTipoUsuarioSql(_contexto);
         _servicio = new ServicioTiposUsuario(_repositorioTipos, _repositorioUsuarios);
+    }
+
+    [TestCleanup]
+    public void Limpiar()
+    {
+        _contexto.Dispose();
     }
 
     [TestMethod]
