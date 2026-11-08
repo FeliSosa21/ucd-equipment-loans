@@ -659,6 +659,30 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(2, obtenido);
     }
 
+    [TestMethod]
+    public void ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo_OtroTipoDelMismoCatalogoYOtroCatalogo_SumaSoloLasDelCatalogo()
+    {
+        Usuario solicitante = CrearSolicitante();
+        Prestamo activoDelCatalogo = CrearPrestamoDelSolicitante(solicitante);
+        activoDelCatalogo.Activar(CrearUnidadesDelTipo(activoDelCatalogo.TipoEquipamiento));
+        Prestamo activoDeOtroCatalogo = CrearPrestamoDelSolicitante(solicitante);
+        activoDeOtroCatalogo.Activar(CrearUnidadesDelTipo(activoDeOtroCatalogo.TipoEquipamiento));
+        TipoEquipamiento otroTipoDelCatalogo = CrearTipoEquipamiento(nombre: "Notebook HP ProBook 450");
+
+        Catalogo electronica = CrearCatalogoConElTipo("Electronica", activoDelCatalogo.TipoEquipamiento);
+        electronica.AgregarTipo(otroTipoDelCatalogo);
+        Catalogo biotecnologia = CrearCatalogoConElTipo("Biotecnologia", activoDeOtroCatalogo.TipoEquipamiento);
+        GuardarCatalogosYPrestamos(
+            new List<Catalogo> { electronica, biotecnologia }, activoDelCatalogo, activoDeOtroCatalogo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+        int obtenido = repositorio.ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(
+            DniSolicitante, otroTipoDelCatalogo.Id);
+
+        Assert.AreEqual(2, obtenido);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -829,10 +853,10 @@ public sealed class RepositorioPrestamoSqlTests
         return usuario;
     }
 
-    private static TipoEquipamiento CrearTipoEquipamiento(bool requiereAprobacion = false)
+    private static TipoEquipamiento CrearTipoEquipamiento(bool requiereAprobacion = false, string nombre = NombreTipo)
     {
         TipoEquipamiento tipo = new TipoEquipamiento(
-            nombre: NombreTipo,
+            nombre: nombre,
             descripcion: "Computadora para laboratorio",
             duracionMaxPrestamo: 5,
             requiereAprobacion: requiereAprobacion,
