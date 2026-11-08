@@ -759,6 +759,16 @@ public sealed class UsuarioTests
         Assert.IsTrue(usuario.PuedeGestionarUsuarios());
     }
 
+    [TestMethod]
+    public void PuedeGestionarUsuarios_DesactivadoConPermiso_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Administrador());
+        usuario.Desactivar();
+
+        Assert.IsFalse(usuario.PuedeGestionarUsuarios());
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
