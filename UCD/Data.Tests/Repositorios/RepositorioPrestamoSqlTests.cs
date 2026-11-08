@@ -593,6 +593,27 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.IsTrue(obtenido);
     }
 
+    [TestMethod]
+    public void ContarPrestamosVigentesDeSolicitante_SolicitadoYActivoEnDosCatalogos_CuentaLosDos()
+    {
+        Usuario solicitante = CrearSolicitante();
+        Prestamo solicitado = CrearPrestamoDelSolicitante(solicitante);
+        Prestamo activo = CrearPrestamoDelSolicitante(solicitante);
+        activo.Activar(CrearUnidadesDelTipo(activo.TipoEquipamiento));
+        Prestamo deOtroSolicitante = CrearPrestamoDelSolicitante(CrearOtroSolicitante());
+
+        Catalogo catalogoDelSolicitado = CrearCatalogoConElTipo("Informatica", solicitado.TipoEquipamiento);
+        Catalogo catalogoDelActivo = CrearCatalogoConElTipo("Audiovisuales", activo.TipoEquipamiento);
+        GuardarCatalogosYPrestamos(
+            new List<Catalogo> { catalogoDelSolicitado, catalogoDelActivo }, solicitado, activo, deOtroSolicitante);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+        int obtenido = repositorio.ContarPrestamosVigentesDeSolicitante(DniSolicitante);
+
+        Assert.AreEqual(2, obtenido);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);

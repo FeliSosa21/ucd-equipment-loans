@@ -85,4 +85,9 @@ public class RepositorioPrestamoSql
                 || prestamo.Estado == EstadoPrestamo.Activo)
             .Any();
     }
+
+    public int ContarPrestamosVigentesDeSolicitante(string dni)
+    {
+        return 0;
+    }
 }
