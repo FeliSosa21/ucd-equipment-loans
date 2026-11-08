@@ -110,6 +110,20 @@ public class ServicioAuditoriaTests
     }
 
     [TestMethod]
+    public void ListarRegistros_Registro_FechaHoraEnIso8601()
+    {
+        Memoria memoria = new Memoria();
+        Usuario administrador = AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
+        AgregarRegistro(memoria, administrador, Dia.ToDateTime(new TimeOnly(9, 30, 15)), "Alta");
+        ServicioAuditoria servicio = CrearServicio(memoria);
+
+        RegistroAuditoriaDto registro =
+            servicio.ListarRegistros(new FiltroAuditoriaDto { Desde = Dia }, DniAdministrador).Single();
+
+        Assert.AreEqual("2026-11-05T09:30:15", registro.FechaHora);
+    }
+
+    [TestMethod]
     public void TieneCriterios_SoloDniEnBlanco_DevuelveFalse()
     {
         ServicioAuditoria servicio = CrearServicio(new Memoria());
