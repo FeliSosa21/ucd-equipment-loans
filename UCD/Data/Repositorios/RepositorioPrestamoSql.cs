@@ -91,7 +91,7 @@ public class RepositorioPrestamoSql
         return _contexto.Prestamos
             .Where(prestamo => prestamo.Solicitante.Dni == dni)
             .Where(prestamo => prestamo.Estado == EstadoPrestamo.Solicitado
-                               || prestamo.Estado == EstadoPrestamo.Activo)
+                || prestamo.Estado == EstadoPrestamo.Activo)
             .Where(prestamo => prestamo.Id != idExcluido)
             .Count();
     }
@@ -102,6 +102,7 @@ public class RepositorioPrestamoSql
             .Where(tipo => tipo.Id == idTipoEquipamiento)
             .Select(tipo => EF.Property<int>(tipo, ColumnaCatalogo))
             .Single();
+        
         return _contexto.Prestamos
             .Where(prestamo => prestamo.Solicitante.Dni == dni)
             .Where(prestamo => EF.Property<int>(prestamo.TipoEquipamiento, ColumnaCatalogo) == idCatalogo)
