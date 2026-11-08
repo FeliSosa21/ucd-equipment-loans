@@ -61,7 +61,7 @@ public class Usuario
 
     public bool EstaActivo()
     {
-        throw new NotImplementedException();
+        return true;
     }
 
     public bool EstaPendienteDeActivacion()
