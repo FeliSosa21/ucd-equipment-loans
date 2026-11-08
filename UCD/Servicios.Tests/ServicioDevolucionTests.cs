@@ -335,6 +335,19 @@ public class ServicioDevolucionTests
         Assert.AreEqual(1, new RepositorioDevolucion(memoria).ObtenerTodas().Count);
     }
 
+    [TestMethod]
+    public void RegistrarDevolucion_PrestamoYaDevuelto_NoAgregaNadaAlLog()
+    {
+        Memoria memoria = new Memoria();
+        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
+        servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario));
+
+        Assert.AreEqual(1, LeerAccionesDelFuncionario(memoria).Count);
+    }
+
     private static Prestamo AgregarPrestamoDeUnaUnidad(Memoria memoria)
     {
         Usuario solicitante = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSolicitante)!;
