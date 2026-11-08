@@ -182,6 +182,14 @@ public class ServicioAuditoriaTests
     }
 
     [TestMethod]
+    public void TieneCriterios_FiltroNulo_LanzaArgumentNullException()
+    {
+        ServicioAuditoria servicio = CrearServicio(new Memoria());
+
+        Assert.ThrowsException<ArgumentNullException>(() => servicio.TieneCriterios(null!));
+    }
+
+    [TestMethod]
     public void TieneCriterios_SoloDniEnBlanco_DevuelveFalse()
     {
         ServicioAuditoria servicio = CrearServicio(new Memoria());
