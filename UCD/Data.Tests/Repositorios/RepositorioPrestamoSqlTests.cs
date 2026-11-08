@@ -703,9 +703,7 @@ public sealed class RepositorioPrestamoSqlTests
         deOtroSolicitante.Activar(CrearUnidadesDelTipo(deOtroSolicitante.TipoEquipamiento));
         GuardarConOtroContexto(vencido, deOtroSolicitante);
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        IReadOnlyList<Prestamo> obtenidos = repositorio.ObtenerPrestamosVencidosDeSolicitante(
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosVencidosDeSolicitanteConOtroContexto(
             DniSolicitante, FechaFija.Date);
 
         List<Guid> idsEsperados = new List<Guid> { vencido.Id };
@@ -720,9 +718,7 @@ public sealed class RepositorioPrestamoSqlTests
         vencido.Activar(CrearUnidadesDelTipo(vencido.TipoEquipamiento));
         GuardarConOtroContexto(vencido);
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        Prestamo obtenido = repositorio.ObtenerPrestamosVencidosDeSolicitante(
+        Prestamo obtenido = ObtenerPrestamosVencidosDeSolicitanteConOtroContexto(
             DniSolicitante, FechaFija.Date).Single();
 
         Assert.IsNotNull(obtenido.Solicitante);
@@ -825,6 +821,14 @@ public sealed class RepositorioPrestamoSqlTests
         RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
 
         return repositorio.ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(dni, idTipoEquipamiento);
+    }
+
+    private IReadOnlyList<Prestamo> ObtenerPrestamosVencidosDeSolicitanteConOtroContexto(string dni, DateTime corte)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+
+        return repositorio.ObtenerPrestamosVencidosDeSolicitante(dni, corte);
     }
 
     private static Prestamo CrearPrestamo()
