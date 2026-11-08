@@ -129,7 +129,8 @@ public class ServicioAdministracionUsuarios
         Usuario administrador = ObtenerAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         Usuario usuario = ObtenerUsuario(dni);
         TraduccionDeErrores.Ejecutar(() => usuario.Reactivar());
-        _auditoria.RegistrarDeUsuario(AccionAuditada.ReactivacionDeUsuario, administrador, "Reactivacion");
+        _auditoria.RegistrarDeUsuario(AccionAuditada.ReactivacionDeUsuario, administrador,
+            $"Se reactivo la cuenta de {RegistradorDeAuditoria.Describir(usuario)}");
     }
 
     // El mismo usuario puede ver y modificar sus datos mientras siga activo; a otro, solo un administrador.
