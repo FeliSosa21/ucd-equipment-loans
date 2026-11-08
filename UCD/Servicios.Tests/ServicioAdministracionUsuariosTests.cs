@@ -206,7 +206,7 @@ public class ServicioAdministracionUsuariosTests
 
         servicio.AsignarTipo(DniValido, TipoUsuario.Docente().Nombre, DniResponsable);
 
-        Assert.AreEqual("Felipe Sosa (DNI 12345672) paso de Sin permisos a Docente",
+        Assert.AreEqual("Felipe Sosa (DNI 12345672) pasó de Sin permisos a Docente",
             LeerAccionesDelAdministrador(memoria).Single().Detalle);
     }
 
@@ -275,7 +275,7 @@ public class ServicioAdministracionUsuariosTests
 
         servicio.Desactivar(DniValido, DniResponsable);
 
-        Assert.AreEqual("Se desactivo la cuenta de Felipe Sosa (DNI 12345672)",
+        Assert.AreEqual("Se desactivó la cuenta de Felipe Sosa (DNI 12345672)",
             LeerAccionesDelAdministrador(memoria).Single().Detalle);
     }
 
@@ -333,7 +333,7 @@ public class ServicioAdministracionUsuariosTests
 
         RegistroAuditoria reactivacion = LeerAccionesDelAdministrador(memoria)
             .Single(registro => registro.Accion == AccionAuditada.ReactivacionDeUsuario);
-        Assert.AreEqual("Se reactivo la cuenta de Felipe Sosa (DNI 12345672)", reactivacion.Detalle);
+        Assert.AreEqual("Se reactivó la cuenta de Felipe Sosa (DNI 12345672)", reactivacion.Detalle);
     }
 
     [TestMethod]
