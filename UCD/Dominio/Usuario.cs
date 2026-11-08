@@ -54,6 +54,11 @@ public class Usuario
         return Tipo.TienePermiso(permiso);
     }
 
+    public bool TieneTipo(TipoUsuario tipo)
+    {
+        throw new NotImplementedException();
+    }
+
     public bool EstaPendienteDeActivacion()
     {
         return Tipo.NoTienePermisos();

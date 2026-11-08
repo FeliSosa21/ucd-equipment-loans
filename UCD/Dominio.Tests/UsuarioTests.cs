@@ -715,6 +715,15 @@ public sealed class UsuarioTests
         Assert.IsTrue(usuario.TienePermiso(Permiso.GestionarUsuarios));
     }
 
+    [TestMethod]
+    public void TieneTipo_OtraInstanciaConElMismoNombre_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Docente());
+
+        Assert.IsTrue(usuario.TieneTipo(TipoUsuario.Docente()));
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
