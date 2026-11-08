@@ -47,7 +47,8 @@ public class ServicioAdministracionUsuarios
 
         creado.AsignarTipo(tipo);
         creado.ExigirCambioDeContrasena();
-        _auditoria.RegistrarDeUsuario(AccionAuditada.AltaDeUsuario, administrador, "Alta de usuario");
+        _auditoria.RegistrarDeUsuario(AccionAuditada.AltaDeUsuario, administrador,
+            $"Alta de {creado.Nombre} {creado.Apellido} (DNI {creado.Dni}) como {tipo.Nombre}");
     }
 
     public List<UsuarioResumenDto> ListarUsuarios(FiltroUsuariosDto filtro, string dniResponsable)
