@@ -74,4 +74,9 @@ public class RepositorioPrestamoSql
             .Where(prestamo => prestamo.Solicitante.Dni == dni)
             .ToList();
     }
+
+    public bool ExistenPrestamosVigentesDelCatalogo(int idCatalogo)
+    {
+        return false;
+    }
 }

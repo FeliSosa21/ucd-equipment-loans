@@ -495,6 +495,21 @@ public sealed class RepositorioPrestamoSqlTests
         CollectionAssert.AreEquivalent(idsEsperados, idsAsignados);
     }
 
+    [TestMethod]
+    public void ExistenPrestamosVigentesDelCatalogo_PrestamoSolicitadoDelCatalogo_DevuelveTrue()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento();
+        Catalogo catalogo = CrearCatalogoConElTipo("Laboratorio de Informatica", tipo);
+        Prestamo solicitado = CrearPrestamoDelTipo(tipo);
+        GuardarCatalogosYPrestamos(new List<Catalogo> { catalogo }, solicitado);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+        bool obtenido = repositorio.ExistenPrestamosVigentesDelCatalogo(catalogo.Id);
+
+        Assert.IsTrue(obtenido);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
@@ -659,6 +674,14 @@ public sealed class RepositorioPrestamoSqlTests
             categoria: Categoria.Computacion);
 
         return tipo;
+    }
+
+    private static Catalogo CrearCatalogoConElTipo(string nombre, TipoEquipamiento tipo)
+    {
+        Catalogo catalogo = new Catalogo(nombre);
+        catalogo.AgregarTipo(tipo);
+
+        return catalogo;
     }
 
     private List<string> LeerIdsDeUnidades(Guid idPrestamo)
