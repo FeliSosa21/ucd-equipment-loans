@@ -262,6 +262,19 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void CrearUsuario_DniDuplicado_NoAgregaNadaAlLog()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _, out _, out Memoria memoria);
+        UsuarioDto dto = CrearDtoNuevo();
+        dto.Dni = DniValido;
+
+        Assert.ThrowsException<ServicioException>(() => servicio.CrearUsuario(dto, TipoUsuario.Estudiante().Nombre,
+            DniResponsable));
+
+        Assert.AreEqual(0, LeerAccionesDelAdministrador(memoria).Count);
+    }
+
+    [TestMethod]
     public void CrearUsuario_CedulaDe7Digitos_LeAsignaElTipo()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
