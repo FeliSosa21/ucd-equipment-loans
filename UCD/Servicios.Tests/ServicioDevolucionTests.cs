@@ -57,6 +57,19 @@ public class ServicioDevolucionTests
     }
 
     [TestMethod]
+    public void RegistrarDevolucion_DatosValidos_RegistraLaDevolucionConSuResponsableYSuHora()
+    {
+        Memoria memoria = new Memoria();
+        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
+
+        servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
+
+        RegistroAuditoria registro = LeerAccionesDelFuncionario(memoria).Single();
+        Assert.AreEqual(AccionAuditada.DevolucionDePrestamo, registro.Accion);
+        Assert.AreEqual(MomentoDevolucion, registro.FechaHora);
+    }
+
+    [TestMethod]
     public void RegistrarDevolucion_CondicionPorUnidad_ActualizaCadaUnidad()
     {
         ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
@@ -287,6 +300,12 @@ public class ServicioDevolucionTests
         Assert.ThrowsException<ServicioException>(() =>
             servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario));
         Assert.AreEqual(1, new RepositorioDevolucion(memoria).ObtenerTodas().Count);
+    }
+
+    private static IReadOnlyList<RegistroAuditoria> LeerAccionesDelFuncionario(Memoria memoria)
+    {
+        return new RepositorioAuditoria(memoria).ObtenerRegistros(
+            new FiltroAuditoria { DniUsuario = DniFuncionario });
     }
 
     private static DevolucionDto CrearDatos(Guid idPrestamo, string condicionSegunda = "Sin observaciones")
