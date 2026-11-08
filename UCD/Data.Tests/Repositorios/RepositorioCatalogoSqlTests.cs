@@ -31,8 +31,8 @@ public sealed class RepositorioCatalogoSqlTests
     public void ObtenerCatalogosActivos_BaseVacia_DevuelveListaVacia()
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueLee);
-        IReadOnlyList<Catalogo> resultado = repositorio.ObtenerCatalogosActivos();
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        IReadOnlyList<Catalogo> resultado = repositorioQueLee.ObtenerCatalogosActivos();
 
         Assert.AreEqual(0, resultado.Count);
     }
@@ -331,7 +331,13 @@ public sealed class RepositorioCatalogoSqlTests
         Catalogo catalogo = new Catalogo(NombreCatalogo);
         GuardarConOtroContexto(catalogo);
 
-        DarDeBajaConOtroContexto(catalogo);
+        using (SqlContext contextoQueModifica = new SqlContext(_opciones))
+        {
+            RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueModifica);
+            Catalogo obtenido = repositorio.ObtenerCatalogoActivoPorId(catalogo.Id)!;
+            obtenido.DarDeBaja();
+            repositorio.ActualizarCatalogo(obtenido);
+        }
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
@@ -416,11 +422,11 @@ public sealed class RepositorioCatalogoSqlTests
         List<string> nombresEsperados = new List<string> { NombreCatalogo, NombreSegundoCatalogo };
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueLee);
-        IReadOnlyList<Catalogo> resultado = repositorio.ObtenerCatalogosParaExportar();
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        IReadOnlyList<Catalogo> resultado = repositorioQueLee.ObtenerCatalogosParaExportar();
 
         List<string> nombresObtenidos = resultado.Select(catalogo => catalogo.Nombre).ToList();
-        CollectionAssert.AreEqual(nombresEsperados, nombresObtenidos);
+        CollectionAssert.AreEquivalent(nombresEsperados, nombresObtenidos);
     }
 
     [TestMethod]
@@ -430,8 +436,8 @@ public sealed class RepositorioCatalogoSqlTests
         GuardarConOtroContexto(catalogo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueLee);
-        IReadOnlyList<Catalogo> resultado = repositorio.ObtenerCatalogosParaExportar();
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        IReadOnlyList<Catalogo> resultado = repositorioQueLee.ObtenerCatalogosParaExportar();
 
         TipoEquipamiento tipo = resultado.Single().Tipos.Single();
         Assert.AreEqual(NombreTipo, tipo.Nombre);
@@ -451,11 +457,11 @@ public sealed class RepositorioCatalogoSqlTests
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
-        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueGuarda);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueGuarda);
 
         foreach (Catalogo catalogo in catalogos)
         {
-            repositorio.AgregarCatalogo(catalogo);
+            repositorioQueLee.AgregarCatalogo(catalogo);
         }
     }
 

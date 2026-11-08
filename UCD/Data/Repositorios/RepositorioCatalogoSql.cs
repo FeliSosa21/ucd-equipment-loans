@@ -7,7 +7,8 @@ public class RepositorioCatalogoSql
 {
     private readonly SqlContext _contexto;
 
-    private IQueryable<Catalogo> CatalogosActivos => _contexto.Catalogos.Where(catalogo => catalogo.Activo);
+    private IQueryable<Catalogo> CatalogosActivos =>
+        _contexto.Catalogos.Where(catalogo => catalogo.Activo);
 
     public RepositorioCatalogoSql(SqlContext contexto)
     {
