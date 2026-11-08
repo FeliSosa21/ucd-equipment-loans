@@ -387,6 +387,15 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.IsNull(resultado);
     }
 
+    [TestMethod]
+    public void ObtenerTipoPorNombre_NombreNull_LanzaArgumentNullException()
+    {
+        using SqlContext contexto = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contexto);
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.ObtenerTipoPorNombre(IdInexistente, null!));
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
