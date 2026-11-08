@@ -95,4 +95,9 @@ public class RepositorioPrestamoSql
             .Where(prestamo => prestamo.Id != idExcluido)
             .Count();
     }
+
+    public int ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(string dni, int idTipoEquipamiento)
+    {
+        return 0;
+    }
 }
