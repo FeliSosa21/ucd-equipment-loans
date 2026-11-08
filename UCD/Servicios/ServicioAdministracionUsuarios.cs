@@ -161,7 +161,7 @@ public class ServicioAdministracionUsuarios
     {
         Usuario? responsable = _repositorio.ObtenerUsuarioPorDni(dniResponsable);
 
-        if (responsable is null || !PuedeGestionarUsuarios(responsable))
+        if (responsable is null || !responsable.PuedeGestionarUsuarios())
         {
             throw new ServicioException(mensaje);
         }
@@ -185,11 +185,6 @@ public class ServicioAdministracionUsuarios
         {
             throw new ServicioException(mensaje);
         }
-    }
-
-    private static bool PuedeGestionarUsuarios(Usuario usuario)
-    {
-        return usuario.Estado == EstadoUsuario.Activo && usuario.TienePermiso(Permiso.GestionarUsuarios);
     }
 
     private FiltroUsuarios CrearFiltro(FiltroUsuariosDto filtro)
