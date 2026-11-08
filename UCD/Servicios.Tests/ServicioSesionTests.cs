@@ -128,18 +128,11 @@ public class ServicioSesionTests
     public void CambiarContrasena_CambioObligatorio_PersisteLaNuevaYLiberaLaObligacion()
     {
         ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
-        using (SqlContext preparacion = new SqlContext(_opciones))
-        {
-            RepositorioUsuarioSql usuarios = new RepositorioUsuarioSql(preparacion);
-            Usuario usuario = usuarios.ObtenerUsuarioPorDni(DniValido)!;
-            usuario.ExigirCambioDeContrasena();
-            usuarios.ActualizarUsuario(usuario);
-        }
+        ExigirCambioDeContrasena();
 
         servicio.CambiarContrasena(DniValido, ContrasenaValida, ContrasenaNueva);
 
-        using SqlContext lectura = new SqlContext(_opciones);
-        Usuario guardado = new RepositorioUsuarioSql(lectura).ObtenerUsuarioPorDni(DniValido)!;
+        Usuario guardado = LeerUsuario();
         Assert.IsTrue(guardado.ContrasenaEsCorrecta(ContrasenaNueva));
         Assert.IsFalse(guardado.ContrasenaEsCorrecta(ContrasenaValida));
         Assert.IsFalse(guardado.DebeCambiarContrasena);
@@ -154,16 +147,22 @@ public class ServicioSesionTests
 
         servicio.CambiarContrasena(DniValido, ContrasenaValida, ContrasenaNueva);
 
-        Assert.IsTrue(repositorio.ObtenerUsuarioPorDni(DniValido)!.ContrasenaEsCorrecta(ContrasenaNueva));
+        Assert.IsTrue(LeerUsuario().ContrasenaEsCorrecta(ContrasenaNueva));
     }
 
     [TestMethod]
-    public void CambiarContrasena_ActualIncorrecta_LanzaExcepcion()
+    public void CambiarContrasena_ActualIncorrecta_LanzaExcepcionYConservaLosDatosGuardados()
     {
         ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
+        ExigirCambioDeContrasena();
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.CambiarContrasena(DniValido, "OtraClave2026", ContrasenaNueva));
+
+        Usuario guardado = LeerUsuario();
+        Assert.IsTrue(guardado.ContrasenaEsCorrecta(ContrasenaValida));
+        Assert.IsFalse(guardado.ContrasenaEsCorrecta(ContrasenaNueva));
+        Assert.IsTrue(guardado.DebeCambiarContrasena);
     }
 
     [TestMethod]
@@ -178,14 +177,18 @@ public class ServicioSesionTests
     }
 
     [TestMethod]
-    public void CambiarContrasena_NuevaInvalida_LanzaExcepcionConLaDelDominio()
+    public void CambiarContrasena_NuevaInvalida_ConservaLaExcepcionDelDominioYLosDatosGuardados()
     {
         ServicioSesion servicio = CrearServicioConUsuarioRegistrado(out _);
+        ExigirCambioDeContrasena();
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
             servicio.CambiarContrasena(DniValido, ContrasenaValida, "corta1A"));
 
         Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
+        Usuario guardado = LeerUsuario();
+        Assert.IsTrue(guardado.ContrasenaEsCorrecta(ContrasenaValida));
+        Assert.IsTrue(guardado.DebeCambiarContrasena);
     }
 
     [TestMethod]
@@ -207,7 +210,8 @@ public class ServicioSesionTests
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.CambiarContrasena(DniValido, ContrasenaValida, ContrasenaNueva));
-        Assert.IsTrue(usuario.ContrasenaEsCorrecta(ContrasenaValida));
+
+        Assert.IsTrue(LeerUsuario().ContrasenaEsCorrecta(ContrasenaValida));
     }
 
     [TestMethod]
@@ -251,6 +255,21 @@ public class ServicioSesionTests
         new RepositorioUsuarioSql(preparacion).AgregarUsuario(usuario);
         repositorio = new RepositorioUsuarioSql(_contexto);
         return new ServicioSesion(repositorio);
+    }
+
+    private void ExigirCambioDeContrasena()
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
+        RepositorioUsuarioSql usuarios = new RepositorioUsuarioSql(preparacion);
+        Usuario usuario = usuarios.ObtenerUsuarioPorDni(DniValido)!;
+        usuario.ExigirCambioDeContrasena();
+        usuarios.ActualizarUsuario(usuario);
+    }
+
+    private Usuario LeerUsuario()
+    {
+        using SqlContext lectura = new SqlContext(_opciones);
+        return new RepositorioUsuarioSql(lectura).ObtenerUsuarioPorDni(DniValido)!;
     }
 
     private TipoUsuario ObtenerTipo(string nombre)
