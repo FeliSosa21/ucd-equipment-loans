@@ -90,6 +90,25 @@ public class ServicioTiposUsuarioTests
     }
 
     [TestMethod]
+    public void ModificarTipo_DatosValidos_PersisteDescripcionImagenYTopes()
+    {
+        TipoUsuarioDto dto = CrearDtoDocente();
+        dto.Descripcion = "Docentes de la facultad";
+        dto.Imagen = ImagenJpeg;
+        dto.MaxUnidadesPorCatalogo = 10;
+        dto.MaxPrestamosConcurrentes = 2;
+
+        _servicio.ModificarTipo(dto, DniAdministrador);
+
+        using SqlContext lectura = new SqlContext(_opciones);
+        TipoUsuario guardado = new RepositorioTipoUsuarioSql(lectura).ObtenerTipoPorNombre(dto.Nombre)!;
+        Assert.AreEqual(dto.Descripcion, guardado.Descripcion);
+        Assert.AreEqual(dto.Imagen, guardado.Imagen);
+        Assert.AreEqual(dto.MaxUnidadesPorCatalogo, guardado.MaxUnidadesPorCatalogo);
+        Assert.AreEqual(dto.MaxPrestamosConcurrentes, guardado.MaxPrestamosConcurrentes);
+    }
+
+    [TestMethod]
     public void ModificarTipo_ImagenNueva_LaGuarda()
     {
         TipoUsuarioDto dto = CrearDtoDocente();
