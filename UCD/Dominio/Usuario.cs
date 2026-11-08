@@ -21,6 +21,7 @@ public class Usuario
     public bool DebeCambiarContrasena { get; private set; }
     public TipoUsuario Tipo { get; private set; }
     public string NombreCompleto => $"{Nombre} {Apellido}";
+    public string NombreCompletoConDni => throw new NotImplementedException();
 
     public Usuario(string dni, string nombre, string apellido, string correo, string contrasena)
     {

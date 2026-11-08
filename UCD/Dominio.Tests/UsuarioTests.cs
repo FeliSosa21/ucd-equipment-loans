@@ -778,6 +778,14 @@ public sealed class UsuarioTests
         Assert.IsFalse(usuario.PuedeGestionarUsuarios());
     }
 
+    [TestMethod]
+    public void NombreCompletoConDni_UsuarioValido_DevuelveNombreApellidoYDni()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.AreEqual("Felipe Sosa (DNI 12345672)", usuario.NombreCompletoConDni);
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
