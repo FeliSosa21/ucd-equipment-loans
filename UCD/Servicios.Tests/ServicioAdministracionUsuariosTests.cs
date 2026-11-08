@@ -189,6 +189,17 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void AsignarTipo_TipoExistente_RegistraElCambioConElAdministradorComoResponsable()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _, out _, out Memoria memoria);
+
+        servicio.AsignarTipo(DniValido, TipoUsuario.Docente().Nombre, DniResponsable);
+
+        Assert.AreEqual(AccionAuditada.CambioDeTipoDeUsuario,
+            LeerAccionesDelAdministrador(memoria).Single().Accion);
+    }
+
+    [TestMethod]
     public void AsignarTipo_TipoInexistente_LanzaExcepcion()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
