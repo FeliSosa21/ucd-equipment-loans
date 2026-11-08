@@ -124,6 +124,20 @@ public class ServicioAuditoriaTests
     }
 
     [TestMethod]
+    public void ListarRegistros_Registro_UsuarioConNombreYDni()
+    {
+        Memoria memoria = new Memoria();
+        Usuario administrador = AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
+        AgregarRegistro(memoria, administrador, Dia.ToDateTime(TimeOnly.MinValue), "Alta");
+        ServicioAuditoria servicio = CrearServicio(memoria);
+
+        RegistroAuditoriaDto registro =
+            servicio.ListarRegistros(new FiltroAuditoriaDto { Desde = Dia }, DniAdministrador).Single();
+
+        Assert.AreEqual("Ana Perez (DNI 11111111)", registro.Usuario);
+    }
+
+    [TestMethod]
     public void TieneCriterios_SoloDniEnBlanco_DevuelveFalse()
     {
         ServicioAuditoria servicio = CrearServicio(new Memoria());
