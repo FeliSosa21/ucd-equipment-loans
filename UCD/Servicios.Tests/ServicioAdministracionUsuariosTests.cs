@@ -251,6 +251,17 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void CrearUsuario_DatosValidos_ElDetalleTieneElUsuarioCreadoYSuTipo()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _, out _, out Memoria memoria);
+
+        servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Estudiante().Nombre, DniResponsable);
+
+        Assert.AreEqual("Alta de Ana Perez (DNI 45678905) como Estudiante",
+            LeerAccionesDelAdministrador(memoria).Single().Detalle);
+    }
+
+    [TestMethod]
     public void CrearUsuario_CedulaDe7Digitos_LeAsignaElTipo()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
