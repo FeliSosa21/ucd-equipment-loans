@@ -428,6 +428,16 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.AreEqual(0, tipo.Unidades.Count);
     }
 
+    [TestMethod]
+    public void ObtenerCatalogosParaExportar_BaseVacia_DevuelveListaVacia()
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueLee);
+        IReadOnlyList<Catalogo> resultado = repositorio.ObtenerCatalogosParaExportar();
+
+        Assert.AreEqual(0, resultado.Count);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
