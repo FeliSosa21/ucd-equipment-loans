@@ -66,6 +66,7 @@ public class ServicioDevolucion
             nueva.Aplicar();
             _devoluciones.AgregarDevolucion(nueva);
             RegistrarMovimientos(nueva, registro);
+            _auditoria.Registrar(registro, AccionAuditada.DevolucionDePrestamo, "Devolucion");
             return nueva;
         });
 
