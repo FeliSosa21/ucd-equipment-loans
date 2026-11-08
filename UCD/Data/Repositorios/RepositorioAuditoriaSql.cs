@@ -39,6 +39,7 @@ public class RepositorioAuditoriaSql
         }
 
         return _contexto.RegistrosAuditoria
+            .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}")
             .Where(registro => filtro.Desde == null
                                || EF.Property<RegistroDeAccion>(registro, CampoRegistro).FechaHora >= filtro.Desde)
             .Where(registro => filtro.Hasta == null
