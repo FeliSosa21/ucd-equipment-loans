@@ -152,6 +152,20 @@ public sealed class RepositorioAuditoriaSqlTests
             resultado.Select(registro => registro.Detalle).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerRegistros_MismaFechaHora_PrimeroElDeMayorId()
+    {
+        Usuario responsable = CrearUsuario(dni: "45678905", correo: "laura.diaz@ejemplo.com");
+        GuardarConOtroContexto(
+            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija), "Primero"),
+            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija), "Segundo"));
+
+        IReadOnlyList<RegistroAuditoria> resultado = LeerRegistros(new FiltroAuditoria { Desde = FechaFija });
+
+        CollectionAssert.AreEqual(new List<string> { "Segundo", "Primero" },
+            resultado.Select(registro => registro.Detalle).ToList());
+    }
+
     private void GuardarConOtroContexto(params RegistroAuditoria[] registros)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
