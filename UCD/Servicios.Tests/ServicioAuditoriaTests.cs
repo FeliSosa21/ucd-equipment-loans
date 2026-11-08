@@ -77,6 +77,21 @@ public class ServicioAuditoriaTests
     }
 
     [TestMethod]
+    public void ListarRegistros_HastaEsLaUltimaFecha_DevuelveLosRegistrosSinLimiteSuperior()
+    {
+        Memoria memoria = new Memoria();
+        Usuario administrador = AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
+        AgregarRegistro(memoria, administrador, Dia.ToDateTime(TimeOnly.MinValue), "Ese dia");
+        ServicioAuditoria servicio = CrearServicio(memoria);
+        FiltroAuditoriaDto filtro = new FiltroAuditoriaDto { Desde = Dia, Hasta = DateOnly.MaxValue };
+
+        List<RegistroAuditoriaDto> registros = servicio.ListarRegistros(filtro, DniAdministrador);
+
+        CollectionAssert.AreEqual(new List<string> { "Ese dia" },
+            registros.Select(registro => registro.Detalle).ToList());
+    }
+
+    [TestMethod]
     public void ListarRegistros_FiltroDni_DevuelveSoloLosDeEseResponsable()
     {
         Memoria memoria = new Memoria();
