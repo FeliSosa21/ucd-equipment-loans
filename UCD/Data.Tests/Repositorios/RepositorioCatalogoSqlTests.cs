@@ -396,6 +396,23 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.ThrowsException<ArgumentNullException>(() => repositorio.ObtenerTipoPorNombre(IdInexistente, null!));
     }
 
+    [TestMethod]
+    public void ObtenerCatalogosParaExportar_ActivosYEliminados_DevuelveTod()
+    {
+        Catalogo primerCatalogo = new Catalogo(NombreCatalogo);
+        Catalogo segundoCatalogo = new Catalogo(NombreSegundoCatalogo);
+        GuardarConOtroContexto(primerCatalogo, segundoCatalogo);
+        DarDeBajaConOtroContexto(primerCatalogo);
+        List<string> nombresEsperados = new List<string> { NombreCatalogo, NombreSegundoCatalogo };
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueLee);
+        IReadOnlyList<Catalogo> resultado = repositorio.ObtenerCatalogosParaExportar();
+
+        List<string> nombresObtenidos = resultado.Select(catalogo => catalogo.Nombre).ToList();
+        CollectionAssert.AreEqual(nombresEsperados, nombresObtenidos);
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
