@@ -66,13 +66,18 @@ public class ServicioDevolucion
             nueva.Aplicar();
             _devoluciones.AgregarDevolucion(nueva);
             RegistrarMovimientos(nueva, registro);
-            _auditoria.Registrar(registro, AccionAuditada.DevolucionDePrestamo,
-                $"Devolucion del prestamo de {RegistradorDeAuditoria.Describir(prestamo.Solicitante)}: " +
-                DescribirCantidad(nueva.Unidades.Count));
+            RegistrarEnAuditoria(nueva, registro);
             return nueva;
         });
 
         return CrearDevolucionRegistradaDto(devolucion);
+    }
+
+    private void RegistrarEnAuditoria(Devolucion devolucion, RegistroDeAccion registro)
+    {
+        _auditoria.Registrar(registro, AccionAuditada.DevolucionDePrestamo,
+            $"Devolucion del prestamo de {RegistradorDeAuditoria.Describir(devolucion.Prestamo.Solicitante)}: " +
+            DescribirCantidad(devolucion.Unidades.Count));
     }
 
     private static string DescribirCantidad(int cantidadUnidades)
