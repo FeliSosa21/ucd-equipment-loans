@@ -397,7 +397,7 @@ public sealed class RepositorioCatalogoSqlTests
     }
 
     [TestMethod]
-    public void ObtenerCatalogosParaExportar_ActivosYEliminados_DevuelveTod()
+    public void ObtenerCatalogosParaExportar_ActivosYEliminados_DevuelveTodos()
     {
         Catalogo primerCatalogo = new Catalogo(NombreCatalogo);
         Catalogo segundoCatalogo = new Catalogo(NombreSegundoCatalogo);
@@ -411,6 +411,21 @@ public sealed class RepositorioCatalogoSqlTests
 
         List<string> nombresObtenidos = resultado.Select(catalogo => catalogo.Nombre).ToList();
         CollectionAssert.AreEqual(nombresEsperados, nombresObtenidos);
+    }
+
+    [TestMethod]
+    public void ObtenerCatalogosParaExportar_CatalogoConTipos_TraeLosTiposSinUnidades()
+    {
+        Catalogo catalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreCatalogo);
+        GuardarConOtroContexto(catalogo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueLee);
+        IReadOnlyList<Catalogo> resultado = repositorio.ObtenerCatalogosParaExportar();
+
+        TipoEquipamiento tipo = resultado.Single().Tipos.Single();
+        Assert.AreEqual(NombreTipo, tipo.Nombre);
+        Assert.AreEqual(0, tipo.Unidades.Count);
     }
 
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
