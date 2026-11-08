@@ -137,6 +137,21 @@ public sealed class RepositorioAuditoriaSqlTests
             resultado.Select(registro => registro.Detalle).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerRegistros_VariosRegistros_DelMasRecienteAlMasViejo()
+    {
+        Usuario responsable = CrearUsuario(dni: "45678905", correo: "laura.diaz@ejemplo.com");
+        GuardarConOtroContexto(
+            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija), "Viejo"),
+            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija.AddHours(2)), "Reciente"),
+            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija.AddHours(1)), "Intermedio"));
+
+        IReadOnlyList<RegistroAuditoria> resultado = LeerRegistros(new FiltroAuditoria { Desde = FechaFija });
+
+        CollectionAssert.AreEqual(new List<string> { "Reciente", "Intermedio", "Viejo" },
+            resultado.Select(registro => registro.Detalle).ToList());
+    }
+
     private void GuardarConOtroContexto(params RegistroAuditoria[] registros)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
