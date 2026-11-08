@@ -727,6 +727,27 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(NombreTipo, obtenido.TipoEquipamiento.Nombre);
     }
 
+    [TestMethod]
+    public void ObtenerPrestamosVencidosDeSolicitante_SolicitadoYDevueltoVencidos_NoLosDevuelve()
+    {
+        Usuario solicitante = CrearSolicitante();
+        DateTime pedidoHace60Dias = FechaFija.AddDays(-60);
+        Prestamo activo = CrearPrestamoDelSolicitanteEnLaFecha(solicitante, pedidoHace60Dias);
+        activo.Activar(CrearUnidadesDelTipo(activo.TipoEquipamiento));
+        Prestamo solicitado = CrearPrestamoDelSolicitanteEnLaFecha(solicitante, pedidoHace60Dias);
+        Prestamo devuelto = CrearPrestamoDelSolicitanteEnLaFecha(solicitante, pedidoHace60Dias);
+        devuelto.Activar(CrearUnidadesDelTipo(devuelto.TipoEquipamiento));
+        Devolver(devuelto);
+        GuardarConOtroContexto(activo, solicitado, devuelto);
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosVencidosDeSolicitanteConOtroContexto(
+            DniSolicitante, FechaFija.Date);
+
+        List<Guid> idsEsperados = new List<Guid> { activo.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
