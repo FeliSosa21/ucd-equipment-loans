@@ -365,6 +365,28 @@ public sealed class RepositorioPrestamoSqlTests
     }
 
     [TestMethod]
+    public void ObtenerPrestamos_FiltroPorEstado_DevuelveSoloLosDeEseEstado()
+    {
+        TipoEquipamiento tipo = CrearTipoEquipamiento();
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo);
+
+        Prestamo devuelto = CrearPrestamoDelTipo(tipo);
+        devuelto.Activar(unidades);
+        Devolver(devuelto);
+        Prestamo activo = CrearPrestamoDelTipo(tipo);
+        activo.Activar(unidades);
+        Prestamo solicitado = CrearPrestamoDelTipo(tipo);
+        GuardarConOtroContexto(devuelto, activo, solicitado);
+
+        IReadOnlyList<Prestamo> obtenidos = ObtenerPrestamosConOtroContexto(
+            new FiltroPorCatalogoYFechas(), EstadoPrestamo.Activo);
+
+        List<Guid> idsEsperados = new List<Guid> { activo.Id };
+        List<Guid> idsObtenidos = obtenidos.Select(prestamo => prestamo.Id).ToList();
+        CollectionAssert.AreEquivalent(idsEsperados, idsObtenidos);
+    }
+
+    [TestMethod]
     public void ObtenerPrestamosActivos_VariosEstados_DevuelveSoloLosActivos()
     {
         TipoEquipamiento tipo = CrearTipoEquipamiento();
@@ -611,12 +633,12 @@ public sealed class RepositorioPrestamoSqlTests
         return repositorio.ObtenerPrestamoPorId(idPrestamo);
     }
 
-    private IReadOnlyList<Prestamo> ObtenerPrestamosConOtroContexto(FiltroPorCatalogoYFechas filtro)
+    private IReadOnlyList<Prestamo> ObtenerPrestamosConOtroContexto(FiltroPorCatalogoYFechas filtro, EstadoPrestamo? estado = null)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
 
-        return repositorio.ObtenerPrestamos(filtro);
+        return repositorio.ObtenerPrestamos(filtro, estado);
     }
 
     private IReadOnlyList<Prestamo> ObtenerPrestamosActivosConOtroContexto()

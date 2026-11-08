@@ -41,7 +41,7 @@ public class RepositorioPrestamoSql
         _contexto.SaveChanges();
     }
 
-    public IReadOnlyList<Prestamo> ObtenerPrestamos(FiltroPorCatalogoYFechas filtro)
+    public IReadOnlyList<Prestamo> ObtenerPrestamos(FiltroPorCatalogoYFechas filtro, EstadoPrestamo? estado = null)
     {
         return PrestamosConSolicitanteTipoYAsignadas
             .Include(prestamo => prestamo.Evaluador)
