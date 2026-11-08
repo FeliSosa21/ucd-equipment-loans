@@ -669,7 +669,7 @@ public sealed class RepositorioPrestamoSqlTests
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        
+
         return repositorio.ExistenPrestamosVigentesDelCatalogo(idCatalogo);
     }
 
