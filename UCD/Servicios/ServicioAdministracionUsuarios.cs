@@ -106,6 +106,7 @@ public class ServicioAdministracionUsuarios
         }
 
         TraduccionDeErrores.Ejecutar(() => usuario.ModificarDatos(datos.Nombre, datos.Apellido, datos.Correo));
+        _repositorio.ActualizarUsuario(usuario);
     }
 
     public void Desactivar(string dni, string dniResponsable)
