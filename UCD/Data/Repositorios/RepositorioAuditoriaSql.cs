@@ -33,6 +33,14 @@ public class RepositorioAuditoriaSql
     {
         ArgumentNullException.ThrowIfNull(filtro);
 
-        return new List<RegistroAuditoria>();
+        if (!filtro.TieneCriterios())
+        {
+            return new List<RegistroAuditoria>();
+        }
+
+        return _contexto.RegistrosAuditoria
+            .Where(registro => filtro.Desde == null
+                               || EF.Property<RegistroDeAccion>(registro, CampoRegistro).FechaHora >= filtro.Desde)
+            .ToList();
     }
 }
