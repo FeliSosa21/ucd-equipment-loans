@@ -19,4 +19,9 @@ public class RegistradorDeAuditoria
         RegistroDeAccion registro = RegistroDeAccion.DeUsuario(responsable, _reloj.GetLocalNow().DateTime);
         _repositorio.AgregarRegistro(new RegistroAuditoria(registro, accion, detalle));
     }
+
+    internal static string Describir(Usuario usuario)
+    {
+        return $"{usuario.Nombre} {usuario.Apellido} (DNI {usuario.Dni})";
+    }
 }
