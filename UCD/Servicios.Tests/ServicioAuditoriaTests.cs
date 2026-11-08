@@ -30,12 +30,24 @@ public class ServicioAuditoriaTests
             servicio.ListarRegistros(new FiltroAuditoriaDto(), DniDocente));
     }
 
-    private static void AgregarUsuario(Memoria memoria, string dni, TipoUsuario tipo)
+    [TestMethod]
+    public void ListarRegistros_ResponsableDesactivado_LanzaServicioException()
+    {
+        Memoria memoria = new Memoria();
+        AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador()).Desactivar();
+        ServicioAuditoria servicio = CrearServicio(memoria);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarRegistros(new FiltroAuditoriaDto(), DniAdministrador));
+    }
+
+    private static Usuario AgregarUsuario(Memoria memoria, string dni, TipoUsuario tipo)
     {
         Usuario usuario = new Usuario(dni: dni, nombre: "Ana", apellido: "Perez", correo: $"{dni}@hotmail.com",
             contrasena: "VivaLaOrt2026");
         usuario.AsignarTipo(tipo);
         new RepositorioUsuario(memoria).AgregarUsuario(usuario);
+        return usuario;
     }
 
     private static ServicioAuditoria CrearServicio(Memoria memoria)
