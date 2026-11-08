@@ -154,6 +154,27 @@ public class ServicioUsuarioTests
         Assert.AreEqual(dto.Correo, guardado.Correo);
     }
 
+    [TestMethod]
+    public void Registrar_DatosValidos_RegistraElAutorregistroConElUsuarioComoResponsable()
+    {
+        Memoria memoria = new Memoria();
+        ServicioUsuario servicio = new ServicioUsuario(new RepositorioUsuario(memoria),
+            TiposDePrueba.Cargados(memoria), AuditoriaDePrueba.Registrador(memoria));
+        UsuarioDto dto = CrearDto();
+
+        servicio.Registrar(dto);
+
+        RegistroAuditoria registro = LeerLog(memoria).Single();
+        Assert.AreEqual(AccionAuditada.RegistroDeUsuario, registro.Accion);
+        Assert.AreEqual(dto.Dni, registro.Responsable?.Dni);
+    }
+
+    private static IReadOnlyList<RegistroAuditoria> LeerLog(Memoria memoria)
+    {
+        return new RepositorioAuditoria(memoria).ObtenerRegistros(
+            new FiltroAuditoria { Desde = AuditoriaDePrueba.Ahora });
+    }
+
     private static UsuarioDto CrearDto(string dni = "12345672", string correo = "felipe@hotmail.com")
     {
         return new UsuarioDto
