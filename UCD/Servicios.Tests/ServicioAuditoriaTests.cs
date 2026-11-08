@@ -93,6 +93,16 @@ public class ServicioAuditoriaTests
             registros.Select(registro => registro.Detalle).ToList());
     }
 
+    [TestMethod]
+    public void TieneCriterios_SoloDniEnBlanco_DevuelveFalse()
+    {
+        ServicioAuditoria servicio = CrearServicio(new Memoria());
+
+        bool tieneCriterios = servicio.TieneCriterios(new FiltroAuditoriaDto { DniUsuario = "   " });
+
+        Assert.IsFalse(tieneCriterios);
+    }
+
     private static void AgregarRegistro(Memoria memoria, Usuario responsable, DateTime fechaHora, string detalle)
     {
         new RepositorioAuditoria(memoria).AgregarRegistro(new RegistroAuditoria(

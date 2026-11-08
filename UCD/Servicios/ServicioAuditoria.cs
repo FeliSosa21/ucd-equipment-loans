@@ -30,6 +30,11 @@ public class ServicioAuditoria
         return _registros.ObtenerRegistros(filtroDelRepositorio).Select(CrearDto).ToList();
     }
 
+    public bool TieneCriterios(FiltroAuditoriaDto filtro)
+    {
+        throw new NotImplementedException();
+    }
+
     private static RegistroAuditoriaDto CrearDto(RegistroAuditoria registro)
     {
         return new RegistroAuditoriaDto { Detalle = registro.Detalle };
