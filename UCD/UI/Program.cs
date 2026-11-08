@@ -25,6 +25,8 @@ builder.Services.AddScoped<RepositorioPrestamo>();
 builder.Services.AddScoped<RepositorioDevolucion>();
 builder.Services.AddScoped<RepositorioMovimiento>();
 builder.Services.AddScoped<RepositorioCatalogo>();
+builder.Services.AddScoped<RepositorioAuditoria>();
+builder.Services.AddScoped<RegistradorDeAuditoria>();
 builder.Services.AddScoped<ServicioUsuario>();
 builder.Services.AddScoped<ServicioSesion>();
 builder.Services.AddScoped<CargaInicial>();

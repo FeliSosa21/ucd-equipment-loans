@@ -198,7 +198,9 @@ public class ServicioSesionTests
     {
         Memoria memoria = new Memoria();
         repositorio = new RepositorioUsuario(memoria);
-        new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria)).Registrar(new UsuarioDto
+        ServicioUsuario servicioUsuario = new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria),
+            AuditoriaDePrueba.Registrador(memoria));
+        servicioUsuario.Registrar(new UsuarioDto
         {
             Dni = DniValido,
             Nombre = "Felipe",

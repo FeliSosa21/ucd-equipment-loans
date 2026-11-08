@@ -8,11 +8,14 @@ public class ServicioUsuario
 {
     private readonly RepositorioUsuario _repositorio;
     private readonly RepositorioTipoUsuario _repositorioTipos;
+    private readonly RegistradorDeAuditoria _auditoria;
 
-    public ServicioUsuario(RepositorioUsuario repositorio, RepositorioTipoUsuario repositorioTipos)
+    public ServicioUsuario(RepositorioUsuario repositorio, RepositorioTipoUsuario repositorioTipos,
+        RegistradorDeAuditoria auditoria)
     {
         _repositorio = repositorio;
         _repositorioTipos = repositorioTipos;
+        _auditoria = auditoria;
     }
 
     public void Registrar(UsuarioDto dto)

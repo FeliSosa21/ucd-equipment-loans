@@ -682,7 +682,8 @@ public class ServicioAdministracionUsuariosTests
         repositorio = new RepositorioUsuario(memoria);
         repositorioTipos = TiposDePrueba.Cargados(memoria);
 
-        ServicioUsuario servicioUsuario = new ServicioUsuario(repositorio, repositorioTipos);
+        ServicioUsuario servicioUsuario = new ServicioUsuario(repositorio, repositorioTipos,
+            AuditoriaDePrueba.Registrador(memoria));
         servicioUsuario.Registrar(new UsuarioDto
         {
             Dni = DniValido, Nombre = "Felipe", Apellido = "Sosa", Correo = "felipe@hotmail.com",

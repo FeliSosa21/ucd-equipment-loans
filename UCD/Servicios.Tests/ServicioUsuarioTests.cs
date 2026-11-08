@@ -13,7 +13,8 @@ public class ServicioUsuarioTests
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        ServicioUsuario servicio = new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria));
+        ServicioUsuario servicio = new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria),
+            AuditoriaDePrueba.Registrador(memoria));
         UsuarioDto dto = CrearDto();
 
         servicio.Registrar(dto);
@@ -27,7 +28,8 @@ public class ServicioUsuarioTests
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
         RepositorioTipoUsuario repositorioTipos = TiposDePrueba.Cargados(memoria);
-        ServicioUsuario servicio = new ServicioUsuario(repositorio, repositorioTipos);
+        ServicioUsuario servicio = new ServicioUsuario(repositorio, repositorioTipos,
+            AuditoriaDePrueba.Registrador(memoria));
         UsuarioDto dto = CrearDto();
 
         servicio.Registrar(dto);
@@ -41,7 +43,8 @@ public class ServicioUsuarioTests
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        ServicioUsuario servicio = new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria));
+        ServicioUsuario servicio = new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria),
+            AuditoriaDePrueba.Registrador(memoria));
         UsuarioDto primero = CrearDto();
         UsuarioDto repetido = CrearDto(correo: "otro@hotmail.com");
         servicio.Registrar(primero);
@@ -55,7 +58,8 @@ public class ServicioUsuarioTests
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        ServicioUsuario servicio = new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria));
+        ServicioUsuario servicio = new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria),
+            AuditoriaDePrueba.Registrador(memoria));
         UsuarioDto primero = CrearDto(dni: "01234561");
         UsuarioDto repetido = CrearDto(dni: "1234561", correo: "otro@hotmail.com");
         servicio.Registrar(primero);
@@ -69,7 +73,8 @@ public class ServicioUsuarioTests
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        ServicioUsuario servicio = new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria));
+        ServicioUsuario servicio = new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria),
+            AuditoriaDePrueba.Registrador(memoria));
         UsuarioDto primero = CrearDto();
         UsuarioDto repetido = CrearDto(dni: "45678905", correo: "Felipe@Hotmail.COM");
         servicio.Registrar(primero);
@@ -83,7 +88,8 @@ public class ServicioUsuarioTests
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        ServicioUsuario servicio = new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria));
+        ServicioUsuario servicio = new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria),
+            AuditoriaDePrueba.Registrador(memoria));
         UsuarioDto dto = CrearDto(dni: "12345678");
 
         Assert.ThrowsException<ServicioException>(() => servicio.Registrar(dto));
@@ -93,7 +99,8 @@ public class ServicioUsuarioTests
     public void Registrar_DniInvalido_ElErrorIndicaElCampoDni()
     {
         Memoria memoria = new Memoria();
-        ServicioUsuario servicio = new ServicioUsuario(new RepositorioUsuario(memoria), TiposDePrueba.Cargados(memoria));
+        ServicioUsuario servicio = new ServicioUsuario(new RepositorioUsuario(memoria), TiposDePrueba.Cargados(memoria),
+            AuditoriaDePrueba.Registrador(memoria));
         UsuarioDto dto = CrearDto(dni: "12345678");
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(() => servicio.Registrar(dto));
@@ -105,7 +112,8 @@ public class ServicioUsuarioTests
     public void Registrar_DniDuplicado_ElErrorIndicaElCampoDni()
     {
         Memoria memoria = new Memoria();
-        ServicioUsuario servicio = new ServicioUsuario(new RepositorioUsuario(memoria), TiposDePrueba.Cargados(memoria));
+        ServicioUsuario servicio = new ServicioUsuario(new RepositorioUsuario(memoria), TiposDePrueba.Cargados(memoria),
+            AuditoriaDePrueba.Registrador(memoria));
         servicio.Registrar(CrearDto());
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
@@ -118,7 +126,8 @@ public class ServicioUsuarioTests
     public void Registrar_CorreoDuplicado_ElErrorIndicaElCampoCorreo()
     {
         Memoria memoria = new Memoria();
-        ServicioUsuario servicio = new ServicioUsuario(new RepositorioUsuario(memoria), TiposDePrueba.Cargados(memoria));
+        ServicioUsuario servicio = new ServicioUsuario(new RepositorioUsuario(memoria), TiposDePrueba.Cargados(memoria),
+            AuditoriaDePrueba.Registrador(memoria));
         servicio.Registrar(CrearDto());
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
@@ -132,7 +141,8 @@ public class ServicioUsuarioTests
     {
         Memoria memoria = new Memoria();
         RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
-        ServicioUsuario servicio = new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria));
+        ServicioUsuario servicio = new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria),
+            AuditoriaDePrueba.Registrador(memoria));
         UsuarioDto dto = CrearDto();
 
         servicio.Registrar(dto);
