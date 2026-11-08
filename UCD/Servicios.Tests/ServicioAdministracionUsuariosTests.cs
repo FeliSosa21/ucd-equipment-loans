@@ -211,6 +211,16 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void AsignarTipo_MismoTipo_NoAgregaNadaAlLog()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _, out _, out Memoria memoria);
+
+        servicio.AsignarTipo(DniValido, TipoUsuario.SinPermisos().Nombre, DniResponsable);
+
+        Assert.AreEqual(0, LeerAccionesDelAdministrador(memoria).Count);
+    }
+
+    [TestMethod]
     public void AsignarTipo_TipoInexistente_LanzaExcepcion()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
