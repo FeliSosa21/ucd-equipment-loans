@@ -22,7 +22,8 @@ public class ServicioAuditoria
 
         FiltroAuditoria filtroDelRepositorio = new FiltroAuditoria
         {
-            Desde = filtro.Desde?.ToDateTime(TimeOnly.MinValue)
+            Desde = filtro.Desde?.ToDateTime(TimeOnly.MinValue),
+            Hasta = filtro.Hasta?.AddDays(1).ToDateTime(TimeOnly.MinValue)
         };
 
         return _registros.ObtenerRegistros(filtroDelRepositorio).Select(CrearDto).ToList();
