@@ -66,7 +66,7 @@ public class Usuario
 
     public bool PuedeGestionarUsuarios()
     {
-        throw new NotImplementedException();
+        return true;
     }
 
     public bool EstaPendienteDeActivacion()
