@@ -40,7 +40,15 @@ public class ServicioUsuario
             throw new ServicioException(nameof(Usuario.Correo), "El correo ya existe");
         }
 
-        _repositorio.AgregarUsuario(usuario);
+        try
+        {
+            _repositorio.AgregarUsuario(usuario);
+        }
+        catch (InvalidOperationException excepcion)
+        {
+            throw new ServicioException("Ya existe un usuario con ese DNI o correo", excepcion);
+        }
+
         return usuario;
     }
 
