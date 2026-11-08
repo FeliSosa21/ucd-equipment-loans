@@ -15,6 +15,7 @@ public sealed class RepositorioCatalogoSqlTests
     private const int DuracionMaxPrestamo = 7;
     private const string IdUnidad = "EQP-0001";
     private const string UbicacionUnidad = "Laboratorio";
+    private const string IdSegundaUnidad = "EQP-0002";
 
     private DbContextOptions<SqlContext> _opciones = null!;
 
@@ -266,7 +267,7 @@ public sealed class RepositorioCatalogoSqlTests
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
-        bool existe = repositorioQueLee.ExisteUnidadConIdInstitucional("EQP-0002");
+        bool existe = repositorioQueLee.ExisteUnidadConIdInstitucional(IdSegundaUnidad);
 
         Assert.IsFalse(existe);
     }
@@ -301,8 +302,7 @@ public sealed class RepositorioCatalogoSqlTests
         {
             RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueModifica);
             Catalogo obtenido = repositorio.ObtenerCatalogoActivoPorId(catalogo.Id)!;
-            TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo,DescripcionTipo,DuracionMaxPrestamo,requiereAprobacion: false, Categoria.Computacion);
-            tipo.AgregarUnidad(new UnidadFisica(IdUnidad, UbicacionUnidad, null));
+            TipoEquipamiento tipo = CrearTipoEquipamientoConUnidad(NombreTipo, IdUnidad);
             obtenido.AgregarTipo(tipo);
             repositorio.ActualizarCatalogo(obtenido);
         }
@@ -320,7 +320,7 @@ public sealed class RepositorioCatalogoSqlTests
         Catalogo catalogo = new Catalogo(NombreCatalogo);
         GuardarConOtroContexto(catalogo);
 
-        DiscontinuarConOtroContexto(catalogo);
+        DarDeBajaConOtroContexto(catalogo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
@@ -349,26 +349,24 @@ public sealed class RepositorioCatalogoSqlTests
         }
     }
 
-    private void DarDeBajaConOtroContexto(Catalogo catalogo)
+    private static TipoEquipamiento CrearTipoEquipamientoConUnidad(string nombreTipo, string idUnidad)
     {
-        using SqlContext contextoQueModifica = new SqlContext(_opciones);
-        Catalogo guardado = contextoQueModifica.Catalogos.Find(catalogo.Id)!;
-        guardado.DarDeBaja();
-        contextoQueModifica.SaveChanges();
+        TipoEquipamiento tipo = new TipoEquipamiento(nombreTipo, DescripcionTipo, DuracionMaxPrestamo, requiereAprobacion: false, Categoria.Computacion);
+        tipo.AgregarUnidad(new UnidadFisica(idUnidad, UbicacionUnidad, null));
+
+        return tipo;
     }
 
     private static Catalogo CrearCatalogoConTipoEquipamientoYUnidad(string nombreCatalogo)
     {
         Catalogo catalogo = new Catalogo(nombreCatalogo);
-        TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo,DescripcionTipo,DuracionMaxPrestamo,requiereAprobacion: false, Categoria.Computacion);
-        UnidadFisica unidad = new UnidadFisica(IdUnidad, UbicacionUnidad, null);
-        tipo.AgregarUnidad(unidad);
+        TipoEquipamiento tipo = CrearTipoEquipamientoConUnidad(NombreTipo, IdUnidad);
         catalogo.AgregarTipo(tipo);
 
         return catalogo;
     }
 
-    private void DiscontinuarConOtroContexto(Catalogo catalogo)
+    private void DarDeBajaConOtroContexto(Catalogo catalogo)
     {
         using SqlContext contextoQueModifica = new SqlContext(_opciones);
         RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueModifica);
