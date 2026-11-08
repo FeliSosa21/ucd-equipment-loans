@@ -66,7 +66,7 @@ public class Usuario
 
     public bool PuedeGestionarUsuarios()
     {
-        return true;
+        return EstaActivo();
     }
 
     public bool EstaPendienteDeActivacion()
