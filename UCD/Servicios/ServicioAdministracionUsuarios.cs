@@ -47,6 +47,7 @@ public class ServicioAdministracionUsuarios
 
         creado.AsignarTipo(tipo);
         creado.ExigirCambioDeContrasena();
+        _repositorio.ActualizarUsuario(creado);
         _auditoria.RegistrarDeUsuario(AccionAuditada.AltaDeUsuario, administrador,
             $"Alta de {creado.NombreCompletoConDni} como {tipo.Nombre}");
     }
