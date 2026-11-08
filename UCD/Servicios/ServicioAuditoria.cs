@@ -8,6 +8,7 @@ namespace Servicios;
 public class ServicioAuditoria
 {
     private const string FormatoIso8601 = "yyyy-MM-ddTHH:mm:ss";
+    private const string UsuarioSistema = "Sistema";
 
     private readonly RepositorioAuditoria _registros;
     private readonly RepositorioUsuario _usuarios;
@@ -46,9 +47,14 @@ public class ServicioAuditoria
         return new RegistroAuditoriaDto
         {
             FechaHora = registro.FechaHora.ToString(FormatoIso8601, CultureInfo.InvariantCulture),
-            Usuario = RegistradorDeAuditoria.Describir(registro.Responsable!),
+            Usuario = DescribirResponsable(registro),
             Detalle = registro.Detalle
         };
+    }
+
+    private static string DescribirResponsable(RegistroAuditoria registro)
+    {
+        return registro.EsDelSistema() ? UsuarioSistema : RegistradorDeAuditoria.Describir(registro.Responsable!);
     }
 
     private void ValidarQueSeaAdministradorActivo(string dniResponsable)
