@@ -428,6 +428,7 @@ public class ServicioAdministracionUsuariosTests
 
         Assert.ThrowsException<ServicioException>(() => servicio.Reactivar(DniNuevo, DniResponsable));
 
+        Assert.IsNull(LeerUsuarioPorDni(DniNuevo));
         Assert.AreEqual(0, LeerAccionesDelAdministrador().Count);
     }
 
@@ -438,6 +439,7 @@ public class ServicioAdministracionUsuariosTests
 
         servicio.Reactivar(DniValido, DniResponsable);
 
+        Assert.AreEqual(EstadoUsuario.Activo, LeerUsuarioPorDni(DniValido)!.Estado);
         Assert.AreEqual(0, LeerAccionesDelAdministrador().Count);
     }
 
@@ -700,6 +702,11 @@ public class ServicioAdministracionUsuariosTests
             Assert.ThrowsException<ServicioException>(() => servicio.Reactivar(DniValido, DniResponsable));
 
         Assert.AreEqual("El usuario no existe", excepcion.Message);
+        using SqlContext lectura = new SqlContext(_opciones);
+        Usuario guardado = lectura.Usuarios.Single(usuario => usuario.Dni == DniValido);
+        Assert.IsTrue(guardado.EstaEliminado);
+        Assert.AreEqual(EstadoUsuario.Desactivado, guardado.Estado);
+        Assert.AreEqual(0, LeerAccionesDelAdministrador().Count);
     }
 
     [TestMethod]
@@ -840,9 +847,12 @@ public class ServicioAdministracionUsuariosTests
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuarioSql repositorio);
         servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Estudiante().Nombre, DniResponsable);
         servicio.Desactivar(DniValido, DniResponsable);
+        int cantidadAnterior = LeerAccionesDelAdministrador().Count;
 
         Assert.ThrowsException<ServicioException>(() => servicio.Reactivar(DniValido, DniNuevo));
+
         Assert.AreEqual(EstadoUsuario.Desactivado, LeerUsuarioPorDni(DniValido)!.Estado);
+        Assert.AreEqual(cantidadAnterior, LeerAccionesDelAdministrador().Count);
     }
 
     [TestMethod]
@@ -930,9 +940,12 @@ public class ServicioAdministracionUsuariosTests
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuarioSql repositorio);
         servicio.Desactivar(DniValido, DniResponsable);
+        int cantidadAnterior = LeerAccionesDelAdministrador().Count;
 
         Assert.ThrowsException<ServicioException>(() => servicio.Reactivar(DniValido, DniNuevo));
+
         Assert.AreEqual(EstadoUsuario.Desactivado, LeerUsuarioPorDni(DniValido)!.Estado);
+        Assert.AreEqual(cantidadAnterior, LeerAccionesDelAdministrador().Count);
     }
 
     [TestMethod]
