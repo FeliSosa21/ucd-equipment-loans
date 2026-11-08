@@ -679,6 +679,20 @@ public sealed class RepositorioPrestamoSqlTests
         Assert.AreEqual(2, obtenido);
     }
 
+    [TestMethod]
+    public void ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo_PrestamoDevuelto_NoSumaSusUnidades()
+    {
+        Prestamo devuelto = CrearPrestamoDelSolicitante(CrearSolicitante());
+        devuelto.Activar(CrearUnidadesDelTipo(devuelto.TipoEquipamiento));
+        Devolver(devuelto);
+        GuardarConOtroContexto(devuelto);
+
+        int obtenido = ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipoConOtroContexto(
+            DniSolicitante, devuelto.TipoEquipamiento.Id);
+
+        Assert.AreEqual(0, obtenido);
+    }
+
     private void GuardarConOtroContexto(params Prestamo[] prestamos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
