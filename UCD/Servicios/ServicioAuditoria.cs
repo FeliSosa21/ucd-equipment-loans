@@ -46,6 +46,7 @@ public class ServicioAuditoria
         return new RegistroAuditoriaDto
         {
             FechaHora = registro.FechaHora.ToString(FormatoIso8601, CultureInfo.InvariantCulture),
+            Usuario = RegistradorDeAuditoria.Describir(registro.Responsable!),
             Detalle = registro.Detalle
         };
     }
