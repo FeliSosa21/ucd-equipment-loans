@@ -59,53 +59,6 @@ public sealed class RepositorioAuditoriaSqlTests
     }
 
     [TestMethod]
-    public void ObtenerPaginaDeRegistros_SinFiltro_DelMasRecienteAlMasViejo()
-    {
-        Usuario responsable = CrearUsuario(dni: "45678905", correo: "laura.diaz@ejemplo.com");
-        GuardarConOtroContexto(
-            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija), "Viejo"),
-            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija.AddHours(2)), "Reciente"),
-            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija.AddHours(1)), "Intermedio"));
-
-        IReadOnlyList<RegistroAuditoria> resultado =
-            LeerPagina(new FiltroAuditoria(), pagina: 1, tamanoPagina: 10);
-
-        CollectionAssert.AreEqual(new List<string> { "Reciente", "Intermedio", "Viejo" },
-            resultado.Select(registro => registro.Detalle).ToList());
-    }
-
-    [TestMethod]
-    public void ObtenerPaginaDeRegistros_MismaFechaHora_PrimeroElDeMayorId()
-    {
-        Usuario responsable = CrearUsuario(dni: "45678905", correo: "laura.diaz@ejemplo.com");
-        GuardarConOtroContexto(
-            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija), "Primero"),
-            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija), "Segundo"));
-
-        IReadOnlyList<RegistroAuditoria> resultado =
-            LeerPagina(new FiltroAuditoria(), pagina: 1, tamanoPagina: 10);
-
-        CollectionAssert.AreEqual(new List<string> { "Segundo", "Primero" },
-            resultado.Select(registro => registro.Detalle).ToList());
-    }
-
-    [TestMethod]
-    public void ObtenerPaginaDeRegistros_SegundaPaginaDeUno_DevuelveSoloElSegundo()
-    {
-        Usuario responsable = CrearUsuario(dni: "45678905", correo: "laura.diaz@ejemplo.com");
-        GuardarConOtroContexto(
-            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija), "Viejo"),
-            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija.AddHours(1)), "Intermedio"),
-            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija.AddHours(2)), "Reciente"));
-
-        IReadOnlyList<RegistroAuditoria> resultado =
-            LeerPagina(new FiltroAuditoria(), pagina: 2, tamanoPagina: 1);
-
-        CollectionAssert.AreEqual(new List<string> { "Intermedio" },
-            resultado.Select(registro => registro.Detalle).ToList());
-    }
-
-    [TestMethod]
     public void ObtenerRegistros_FiltroNulo_LanzaArgumentNullException()
     {
         Assert.ThrowsException<ArgumentNullException>(() => LeerRegistros(null!));
@@ -226,14 +179,6 @@ public sealed class RepositorioAuditoriaSqlTests
         {
             repositorio.AgregarRegistro(registro);
         }
-    }
-
-    private IReadOnlyList<RegistroAuditoria> LeerPagina(FiltroAuditoria filtro, int pagina, int tamanoPagina)
-    {
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioAuditoriaSql repositorio = new RepositorioAuditoriaSql(contextoQueLee);
-
-        return repositorio.ObtenerPaginaDeRegistros(filtro, pagina, tamanoPagina);
     }
 
     private IReadOnlyList<RegistroAuditoria> LeerRegistros(FiltroAuditoria filtro)

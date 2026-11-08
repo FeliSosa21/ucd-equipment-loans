@@ -20,16 +20,6 @@ public class RepositorioAuditoriaSql
         _contexto.SaveChanges();
     }
 
-    public IReadOnlyList<RegistroAuditoria> ObtenerPaginaDeRegistros(FiltroAuditoria filtro, int pagina, int tamanoPagina)
-    {
-        return _contexto.RegistrosAuditoria
-            .OrderByDescending(registro => EF.Property<RegistroDeAccion>(registro, CampoRegistro).FechaHora)
-            .ThenByDescending(registro => registro.Id)
-            .Skip((pagina - 1) * tamanoPagina)
-            .Take(tamanoPagina)
-            .ToList();
-    }
-
     public IReadOnlyList<RegistroAuditoria> ObtenerRegistros(FiltroAuditoria filtro)
     {
         ArgumentNullException.ThrowIfNull(filtro);
@@ -39,17 +29,48 @@ public class RepositorioAuditoriaSql
             return new List<RegistroAuditoria>();
         }
 
-        return _contexto.RegistrosAuditoria
-            .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}")
-            .Where(registro => filtro.Desde == null
-                               || EF.Property<RegistroDeAccion>(registro, CampoRegistro).FechaHora >= filtro.Desde)
-            .Where(registro => filtro.Hasta == null
-                               || EF.Property<RegistroDeAccion>(registro, CampoRegistro).FechaHora < filtro.Hasta)
-            .Where(registro => filtro.DniUsuario == null
-                               || EF.Property<RegistroDeAccion>(registro, CampoRegistro).Responsable!.Dni
-                               == filtro.DniUsuario)
+        IQueryable<RegistroAuditoria> registros = FiltrarDesde(RegistrosConResponsable, filtro.Desde);
+        registros = FiltrarHasta(registros, filtro.Hasta);
+        registros = FiltrarPorResponsable(registros, filtro.DniUsuario);
+
+        return registros
             .OrderByDescending(registro => EF.Property<RegistroDeAccion>(registro, CampoRegistro).FechaHora)
             .ThenByDescending(registro => registro.Id)
             .ToList();
+    }
+
+    private IQueryable<RegistroAuditoria> RegistrosConResponsable =>
+        _contexto.RegistrosAuditoria.Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}");
+
+    private static IQueryable<RegistroAuditoria> FiltrarDesde(IQueryable<RegistroAuditoria> registros, DateTime? desde)
+    {
+        if (desde is null)
+        {
+            return registros;
+        }
+
+        return registros.Where(registro => EF.Property<RegistroDeAccion>(registro, CampoRegistro).FechaHora >= desde);
+    }
+
+    private static IQueryable<RegistroAuditoria> FiltrarHasta(IQueryable<RegistroAuditoria> registros, DateTime? hasta)
+    {
+        if (hasta is null)
+        {
+            return registros;
+        }
+
+        return registros.Where(registro => EF.Property<RegistroDeAccion>(registro, CampoRegistro).FechaHora < hasta);
+    }
+
+    private static IQueryable<RegistroAuditoria> FiltrarPorResponsable(IQueryable<RegistroAuditoria> registros,
+        string? dniUsuario)
+    {
+        if (dniUsuario is null)
+        {
+            return registros;
+        }
+
+        return registros.Where(registro =>
+            EF.Property<RegistroDeAccion>(registro, CampoRegistro).Responsable!.Dni == dniUsuario);
     }
 }
