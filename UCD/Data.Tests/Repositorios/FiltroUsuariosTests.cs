@@ -1,0 +1,82 @@
+using Dominio;
+using Data.Repositorios;
+
+namespace Data.Tests.Repositorios;
+
+[TestClass]
+public sealed class FiltroUsuariosTests
+{
+    [TestMethod]
+    public void TieneCriterios_SinTextoNiTipo_DevuelveFalse()
+    {
+        FiltroUsuarios filtro = new FiltroUsuarios();
+
+        bool tieneCriterios = filtro.TieneCriterios();
+
+        Assert.IsFalse(tieneCriterios);
+    }
+
+    [TestMethod]
+    public void TieneCriterios_ConTexto_DevuelveTrue()
+    {
+        FiltroUsuarios filtro = new FiltroUsuarios { Texto = "Lucia" };
+
+        bool tieneCriterios = filtro.TieneCriterios();
+
+        Assert.IsTrue(tieneCriterios);
+    }
+
+    [TestMethod]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void TieneCriterios_TextoEnBlanco_DevuelveFalse(string textoEnBlanco)
+    {
+        FiltroUsuarios filtro = new FiltroUsuarios { Texto = textoEnBlanco };
+
+        bool tieneCriterios = filtro.TieneCriterios();
+
+        Assert.IsFalse(tieneCriterios);
+    }
+
+    [TestMethod]
+    public void TieneCriterios_ConTipo_DevuelveTrue()
+    {
+        FiltroUsuarios filtro = new FiltroUsuarios { Tipo = TipoUsuario.SinPermisos() };
+
+        bool tieneCriterios = filtro.TieneCriterios();
+
+        Assert.IsTrue(tieneCriterios);
+    }
+
+    [TestMethod]
+    public void TextoNormalizado_TextoConEspaciosYMayusculas_LoDevuelveRecortadoYEnMinusculas()
+    {
+        FiltroUsuarios filtro = new FiltroUsuarios { Texto = "  FeRnAnDeZ  " };
+
+        string? textoNormalizado = filtro.TextoNormalizado;
+
+        Assert.AreEqual("fernandez", textoNormalizado);
+    }
+
+    [TestMethod]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void TextoNormalizado_TextoEnBlanco_DevuelveNull(string textoEnBlanco)
+    {
+        FiltroUsuarios filtro = new FiltroUsuarios { Texto = textoEnBlanco };
+
+        string? textoNormalizado = filtro.TextoNormalizado;
+
+        Assert.IsNull(textoNormalizado);
+    }
+
+    [TestMethod]
+    public void TieneCriterios_TextoEnBlancoConTipo_DevuelveTrue()
+    {
+        FiltroUsuarios filtro = new FiltroUsuarios { Texto = "   ", Tipo = TipoUsuario.SinPermisos() };
+
+        bool tieneCriterios = filtro.TieneCriterios();
+
+        Assert.IsTrue(tieneCriterios);
+    }
+}

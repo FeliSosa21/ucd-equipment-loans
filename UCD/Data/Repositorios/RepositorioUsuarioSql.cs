@@ -13,61 +13,107 @@ public class RepositorioUsuarioSql
     }
 
     private IQueryable<Usuario> UsuariosConTipo =>
-        _contexto.Usuarios.Include(usuario => usuario.Tipo);
+        _contexto.Usuarios.Include(usuario => usuario.Tipo)
+            .Where(usuario => !usuario.EstaEliminado);
 
     public void AgregarUsuario(Usuario usuario)
     {
+        ArgumentNullException.ThrowIfNull(usuario);
+
+        ValidarQueNoExista(usuario);
+
         _contexto.Usuarios.Add(usuario);
         _contexto.SaveChanges();
     }
 
     public Usuario? ObtenerUsuarioPorDni(string dni)
     {
+        ArgumentNullException.ThrowIfNull(dni);
+
         return UsuariosConTipo.FirstOrDefault(usuario => usuario.Dni == dni);
     }
 
     public Usuario? ObtenerUsuarioPorCorreo(string correo)
     {
-        string buscado = correo.ToLower();
+        ArgumentNullException.ThrowIfNull(correo);
+
+        string correoEnMinusculas = correo.ToLower();
 
         return UsuariosConTipo
-            .FirstOrDefault(usuario => usuario.Correo.ToLower() == buscado);
+            .FirstOrDefault(usuario => usuario.Correo.ToLower() == correoEnMinusculas);
     }
 
-    public IReadOnlyList<Usuario> ObtenerPaginaDeUsuarios(string? filtro, int pagina, int tamanoPagina)
+    public IReadOnlyList<Usuario> ObtenerUsuarios(FiltroUsuarios filtro)
     {
-        return FiltrarPor(filtro)
+        ArgumentNullException.ThrowIfNull(filtro);
+
+        if (!filtro.TieneCriterios())
+        {
+            return new List<Usuario>();
+        }
+
+        IQueryable<Usuario> usuarios = FiltrarPorTexto(UsuariosConTipo, filtro.TextoNormalizado);
+        usuarios = FiltrarPorTipo(usuarios, filtro.Tipo);
+
+        return usuarios
             .OrderBy(usuario => usuario.Apellido)
             .ThenBy(usuario => usuario.Nombre)
             .ThenBy(usuario => usuario.Dni)
-            .Skip((pagina - 1) * tamanoPagina)
-            .Take(tamanoPagina)
             .ToList();
-    }
-
-    private IQueryable<Usuario> FiltrarPor(string? filtro)
-    {
-        IQueryable<Usuario> usuarios = UsuariosConTipo;
-
-        if (filtro is not null)
-        {
-            string buscado = filtro.ToLower();
-            usuarios = usuarios.Where(usuario => usuario.Nombre.ToLower().Contains(buscado)
-                                                 || usuario.Apellido.ToLower().Contains(buscado)
-                                                 || usuario.Dni.Contains(buscado)
-                                                 || usuario.Correo.ToLower().Contains(buscado));
-        }
-
-        return usuarios;
-    }
-
-    public int ContarUsuarios(string? filtro)
-    {
-        return FiltrarPor(filtro).Count();
     }
 
     public void ActualizarUsuario(Usuario usuario)
     {
+        ArgumentNullException.ThrowIfNull(usuario);
+        
+        _contexto.Usuarios.Update(usuario);
         _contexto.SaveChanges();
+    }
+
+    public void EliminarUsuario(Usuario usuario)
+    {
+        ArgumentNullException.ThrowIfNull(usuario);
+
+        usuario.Eliminar();
+        _contexto.Usuarios.Update(usuario);
+        _contexto.SaveChanges();
+    }
+
+    private IQueryable<Usuario> FiltrarPorTexto(IQueryable<Usuario> usuarios, string? textoNormalizado)
+    {
+        if (textoNormalizado is null)
+        {
+            return usuarios;
+        }
+
+        return usuarios.Where(usuario => usuario.Nombre.ToLower().Contains(textoNormalizado)
+                                         || usuario.Apellido.ToLower().Contains(textoNormalizado)
+                                         || usuario.Dni.Contains(textoNormalizado)
+                                         || usuario.Correo.ToLower().Contains(textoNormalizado));
+    }
+
+    private IQueryable<Usuario> FiltrarPorTipo(IQueryable<Usuario> usuarios, TipoUsuario? tipo)
+    {
+        if (tipo is null)
+        {
+            return usuarios;
+        }
+
+        return usuarios.Where(usuario => usuario.Tipo == tipo);
+    }
+
+    private void ValidarQueNoExista(Usuario usuario)
+    {
+        if (_contexto.Usuarios.Any(existente => existente.Dni == usuario.Dni))
+        {
+            throw new InvalidOperationException($"Ya existe un usuario con el DNI {usuario.Dni}");
+        }
+
+        string correoEnMinusculas = usuario.Correo.ToLower();
+
+        if (_contexto.Usuarios.Any(existente => existente.Correo.ToLower() == correoEnMinusculas))
+        {
+            throw new InvalidOperationException($"Ya existe un usuario con el correo {usuario.Correo}");
+        }
     }
 }
