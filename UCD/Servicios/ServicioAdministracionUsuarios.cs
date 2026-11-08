@@ -33,7 +33,7 @@ public class ServicioAdministracionUsuarios
     public void CrearUsuario(UsuarioDto dto, string nombreTipo, string dniResponsable)
     {
         ArgumentNullException.ThrowIfNull(dto);
-        ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
+        Usuario administrador = ObtenerAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         TipoUsuario tipo = ObtenerTipo(nombreTipo);
 
         Usuario creado = _servicioUsuario.Agregar(new UsuarioDto
@@ -47,6 +47,7 @@ public class ServicioAdministracionUsuarios
 
         creado.AsignarTipo(tipo);
         creado.ExigirCambioDeContrasena();
+        _auditoria.RegistrarDeUsuario(AccionAuditada.AltaDeUsuario, administrador, "Alta de usuario");
     }
 
     public List<UsuarioResumenDto> ListarUsuarios(FiltroUsuariosDto filtro, string dniResponsable)
