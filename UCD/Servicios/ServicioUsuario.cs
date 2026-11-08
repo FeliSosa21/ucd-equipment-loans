@@ -21,7 +21,8 @@ public class ServicioUsuario
     public void Registrar(UsuarioDto dto)
     {
         Usuario usuario = Agregar(dto);
-        _auditoria.RegistrarDeUsuario(AccionAuditada.RegistroDeUsuario, usuario, "Se registro");
+        _auditoria.RegistrarDeUsuario(AccionAuditada.RegistroDeUsuario, usuario,
+            $"Se registro {usuario.Nombre} {usuario.Apellido} (DNI {usuario.Dni})");
     }
 
     internal Usuario Agregar(UsuarioDto dto)
