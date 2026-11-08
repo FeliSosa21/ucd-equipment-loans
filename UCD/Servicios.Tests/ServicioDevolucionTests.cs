@@ -70,6 +70,18 @@ public class ServicioDevolucionTests
     }
 
     [TestMethod]
+    public void RegistrarDevolucion_DatosValidos_ElDetalleTieneElSolicitanteYLaCantidadDeUnidades()
+    {
+        Memoria memoria = new Memoria();
+        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
+
+        servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
+
+        Assert.AreEqual("Devolucion del prestamo de Ana Perez (DNI 45678905): 2 unidades",
+            LeerAccionesDelFuncionario(memoria).Single().Detalle);
+    }
+
+    [TestMethod]
     public void RegistrarDevolucion_CondicionPorUnidad_ActualizaCadaUnidad()
     {
         ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
