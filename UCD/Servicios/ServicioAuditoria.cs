@@ -52,15 +52,26 @@ public class ServicioAuditoria
         }
     }
 
-    // Las fechas son dias completos: Hasta pasa como el inicio del dia siguiente porque el filtro lo excluye.
     private static FiltroAuditoria CrearFiltro(FiltroAuditoriaDto filtro)
     {
         return new FiltroAuditoria
         {
             Desde = filtro.Desde?.ToDateTime(TimeOnly.MinValue),
-            Hasta = filtro.Hasta?.AddDays(1).ToDateTime(TimeOnly.MinValue),
+            Hasta = InicioDelDiaSiguiente(filtro.Hasta),
             DniUsuario = string.IsNullOrWhiteSpace(filtro.DniUsuario) ? null : filtro.DniUsuario.Trim()
         };
+    }
+
+    // Las fechas son dias completos: Hasta pasa como el inicio del dia siguiente porque el filtro lo excluye.
+    // La ultima fecha posible no tiene dia siguiente: se toma como sin limite.
+    private static DateTime? InicioDelDiaSiguiente(DateOnly? hasta)
+    {
+        if (hasta is null || hasta == DateOnly.MaxValue)
+        {
+            return null;
+        }
+
+        return hasta.Value.AddDays(1).ToDateTime(TimeOnly.MinValue);
     }
 
     private static RegistroAuditoriaDto CrearDto(RegistroAuditoria registro)
