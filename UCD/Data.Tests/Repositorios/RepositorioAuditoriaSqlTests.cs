@@ -122,6 +122,21 @@ public sealed class RepositorioAuditoriaSqlTests
         Assert.AreEqual(0, resultado.Count);
     }
 
+    [TestMethod]
+    public void ObtenerRegistros_FiltroDesde_IncluyeElDeEsaFechaYDejaAfueraLosAnteriores()
+    {
+        Usuario responsable = CrearUsuario(dni: "45678905", correo: "laura.diaz@ejemplo.com");
+        GuardarConOtroContexto(
+            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija.AddMinutes(-1)), "Anterior"),
+            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija), "EnElDesde"),
+            CrearRegistro(RegistroDeAccion.DeUsuario(responsable, FechaFija.AddHours(1)), "Posterior"));
+
+        IReadOnlyList<RegistroAuditoria> resultado = LeerRegistros(new FiltroAuditoria { Desde = FechaFija });
+
+        CollectionAssert.AreEquivalent(new List<string> { "EnElDesde", "Posterior" },
+            resultado.Select(registro => registro.Detalle).ToList());
+    }
+
     private void GuardarConOtroContexto(params RegistroAuditoria[] registros)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
