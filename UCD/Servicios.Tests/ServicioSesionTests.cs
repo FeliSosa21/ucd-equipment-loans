@@ -198,16 +198,11 @@ public class ServicioSesionTests
     {
         Memoria memoria = new Memoria();
         repositorio = new RepositorioUsuario(memoria);
-        ServicioUsuario servicioUsuario = new ServicioUsuario(repositorio, TiposDePrueba.Cargados(memoria),
-            AuditoriaDePrueba.Registrador(memoria));
-        servicioUsuario.Registrar(new UsuarioDto
-        {
-            Dni = DniValido,
-            Nombre = "Felipe",
-            Apellido = "Sosa",
-            Correo = CorreoValido,
-            Contrasena = ContrasenaValida
-        });
+        Usuario usuario = new Usuario(dni: DniValido, nombre: "Felipe", apellido: "Sosa",
+            correo: CorreoValido, contrasena: ContrasenaValida);
+        usuario.AsignarTipo(TiposDePrueba.Cargados(memoria)
+            .ObtenerTipoPorNombre(TipoUsuario.SinPermisos().Nombre)!);
+        repositorio.AgregarUsuario(usuario);
 
         return new ServicioSesion(repositorio);
     }

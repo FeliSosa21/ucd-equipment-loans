@@ -16,13 +16,13 @@ public class ServicioAdministracionUsuarios
     public static readonly string NombreTipoPendiente = TipoUsuario.SinPermisos().Nombre;
     private const string MensajeSoloAdministrador = "Solo un administrador activo puede gestionar usuarios";
 
-    private readonly RepositorioUsuario _repositorio;
+    private readonly RepositorioUsuarioSql _repositorio;
     private readonly ServicioUsuario _servicioUsuario;
-    private readonly RepositorioTipoUsuario _repositorioTipos;
+    private readonly RepositorioTipoUsuarioSql _repositorioTipos;
     private readonly RegistradorDeAuditoria _auditoria;
 
-    public ServicioAdministracionUsuarios(RepositorioUsuario repositorio, ServicioUsuario servicioUsuario,
-        RepositorioTipoUsuario repositorioTipos, RegistradorDeAuditoria auditoria)
+    public ServicioAdministracionUsuarios(RepositorioUsuarioSql repositorio, ServicioUsuario servicioUsuario,
+        RepositorioTipoUsuarioSql repositorioTipos, RegistradorDeAuditoria auditoria)
     {
         _repositorio = repositorio;
         _servicioUsuario = servicioUsuario;

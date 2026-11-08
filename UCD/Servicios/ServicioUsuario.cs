@@ -6,11 +6,11 @@ namespace Servicios;
 
 public class ServicioUsuario
 {
-    private readonly RepositorioUsuario _repositorio;
-    private readonly RepositorioTipoUsuario _repositorioTipos;
+    private readonly RepositorioUsuarioSql _repositorio;
+    private readonly RepositorioTipoUsuarioSql _repositorioTipos;
     private readonly RegistradorDeAuditoria _auditoria;
 
-    public ServicioUsuario(RepositorioUsuario repositorio, RepositorioTipoUsuario repositorioTipos,
+    public ServicioUsuario(RepositorioUsuarioSql repositorio, RepositorioTipoUsuarioSql repositorioTipos,
         RegistradorDeAuditoria auditoria)
     {
         _repositorio = repositorio;

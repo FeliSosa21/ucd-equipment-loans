@@ -10,12 +10,16 @@ internal static class AuditoriaDePrueba
 {
     public static readonly DateTime Ahora = new(2026, 11, 8, 9, 30, 0);
 
-    // Puente temporal mientras los consumidores migran de Memoria a EF por separado.
+    // Solo devoluciones conserva Memoria hasta el pase completo a EF.
     private static readonly ConditionalWeakTable<Memoria, DbContextOptions<SqlContext>> _bases = new();
 
-    public static RegistradorDeAuditoria Registrador(Memoria memoria)
+    public static SqlContext CrearContexto(Memoria memoria)
     {
-        SqlContext contexto = new SqlContext(Opciones(memoria));
+        return new SqlContext(Opciones(memoria));
+    }
+
+    public static RegistradorDeAuditoria Registrador(SqlContext contexto)
+    {
         return new RegistradorDeAuditoria(new RepositorioAuditoriaSql(contexto), new RelojFijo(Ahora));
     }
 
