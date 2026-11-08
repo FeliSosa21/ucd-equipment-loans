@@ -77,6 +77,8 @@ public class RepositorioPrestamoSql
 
     public bool ExistenPrestamosVigentesDelCatalogo(int idCatalogo)
     {
-        return _contexto.Prestamos.Any();
+        return _contexto.Prestamos
+            .Where(prestamo => EF.Property<int>(prestamo.TipoEquipamiento, ColumnaCatalogo) == idCatalogo)
+            .Any();
     }
 }
