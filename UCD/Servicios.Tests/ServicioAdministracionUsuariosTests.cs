@@ -258,6 +258,17 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void Desactivar_UsuarioActivo_RegistraLaDesactivacionConElAdministradorComoResponsable()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _, out _, out Memoria memoria);
+
+        servicio.Desactivar(DniValido, DniResponsable);
+
+        Assert.AreEqual(AccionAuditada.DesactivacionDeUsuario,
+            LeerAccionesDelAdministrador(memoria).Single().Accion);
+    }
+
+    [TestMethod]
     public void Reactivar_UsuarioDesactivado_QuedaActivo()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
