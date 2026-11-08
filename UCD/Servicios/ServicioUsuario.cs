@@ -20,7 +20,8 @@ public class ServicioUsuario
 
     public void Registrar(UsuarioDto dto)
     {
-        Agregar(dto);
+        Usuario usuario = Agregar(dto);
+        _auditoria.RegistrarDeUsuario(AccionAuditada.RegistroDeUsuario, usuario, "Se registro");
     }
 
     internal Usuario Agregar(UsuarioDto dto)
