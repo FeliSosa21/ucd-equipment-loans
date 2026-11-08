@@ -19,13 +19,15 @@ public class ServicioAdministracionUsuarios
     private readonly RepositorioUsuario _repositorio;
     private readonly ServicioUsuario _servicioUsuario;
     private readonly RepositorioTipoUsuario _repositorioTipos;
+    private readonly RegistradorDeAuditoria _auditoria;
 
     public ServicioAdministracionUsuarios(RepositorioUsuario repositorio, ServicioUsuario servicioUsuario,
-        RepositorioTipoUsuario repositorioTipos)
+        RepositorioTipoUsuario repositorioTipos, RegistradorDeAuditoria auditoria)
     {
         _repositorio = repositorio;
         _servicioUsuario = servicioUsuario;
         _repositorioTipos = repositorioTipos;
+        _auditoria = auditoria;
     }
 
     public void CrearUsuario(UsuarioDto dto, string nombreTipo, string dniResponsable)
@@ -123,12 +125,19 @@ public class ServicioAdministracionUsuarios
 
     private void ValidarQueSeaAdministradorActivo(string dniResponsable, string mensaje)
     {
+        ObtenerAdministradorActivo(dniResponsable, mensaje);
+    }
+
+    private Usuario ObtenerAdministradorActivo(string dniResponsable, string mensaje)
+    {
         Usuario? responsable = _repositorio.ObtenerUsuarioPorDni(dniResponsable);
 
         if (responsable is null || !PuedeGestionarUsuarios(responsable))
         {
             throw new ServicioException(mensaje);
         }
+
+        return responsable;
     }
 
     private void ValidarQueEsteActivo(string dni)

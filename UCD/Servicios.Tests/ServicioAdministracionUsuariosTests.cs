@@ -682,8 +682,8 @@ public class ServicioAdministracionUsuariosTests
         repositorio = new RepositorioUsuario(memoria);
         repositorioTipos = TiposDePrueba.Cargados(memoria);
 
-        ServicioUsuario servicioUsuario = new ServicioUsuario(repositorio, repositorioTipos,
-            AuditoriaDePrueba.Registrador(memoria));
+        RegistradorDeAuditoria auditoria = AuditoriaDePrueba.Registrador(memoria);
+        ServicioUsuario servicioUsuario = new ServicioUsuario(repositorio, repositorioTipos, auditoria);
         servicioUsuario.Registrar(new UsuarioDto
         {
             Dni = DniValido, Nombre = "Felipe", Apellido = "Sosa", Correo = "felipe@hotmail.com",
@@ -693,6 +693,6 @@ public class ServicioAdministracionUsuariosTests
             correo: "root@ucd.edu.uy", contrasena: "Root2026");
         administrador.AsignarTipo(TipoUsuario.Administrador());
         repositorio.AgregarUsuario(administrador);
-        return new ServicioAdministracionUsuarios(repositorio, servicioUsuario, repositorioTipos);
+        return new ServicioAdministracionUsuarios(repositorio, servicioUsuario, repositorioTipos, auditoria);
     }
 }
