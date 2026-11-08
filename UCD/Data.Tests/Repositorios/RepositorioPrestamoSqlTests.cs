@@ -651,9 +651,7 @@ public sealed class RepositorioPrestamoSqlTests
         deOtroSolicitante.Activar(CrearUnidadesDelTipo(deOtroSolicitante.TipoEquipamiento));
         GuardarConOtroContexto(activo, deOtroSolicitante);
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        int obtenido = repositorio.ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(
+        int obtenido = ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipoConOtroContexto(
             DniSolicitante, activo.TipoEquipamiento.Id);
 
         Assert.AreEqual(2, obtenido);
@@ -675,9 +673,7 @@ public sealed class RepositorioPrestamoSqlTests
         GuardarCatalogosYPrestamos(
             new List<Catalogo> { electronica, biotecnologia }, activoDelCatalogo, activoDeOtroCatalogo);
 
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
-        int obtenido = repositorio.ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(
+        int obtenido = ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipoConOtroContexto(
             DniSolicitante, otroTipoDelCatalogo.Id);
 
         Assert.AreEqual(2, obtenido);
@@ -769,6 +765,14 @@ public sealed class RepositorioPrestamoSqlTests
         RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
 
         return repositorio.ContarPrestamosVigentesDeSolicitante(dni, idExcluido);
+    }
+
+    private int ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipoConOtroContexto(string dni, int idTipoEquipamiento)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioPrestamoSql repositorio = new RepositorioPrestamoSql(contextoQueLee);
+
+        return repositorio.ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(dni, idTipoEquipamiento);
     }
 
     private static Prestamo CrearPrestamo()
