@@ -19,20 +19,23 @@ public class ServicioAuditoria
     {
         ArgumentNullException.ThrowIfNull(filtro);
         ValidarQueSeaAdministradorActivo(dniResponsable);
-
-        FiltroAuditoria filtroDelRepositorio = new FiltroAuditoria
-        {
-            Desde = filtro.Desde?.ToDateTime(TimeOnly.MinValue),
-            Hasta = filtro.Hasta?.AddDays(1).ToDateTime(TimeOnly.MinValue),
-            DniUsuario = filtro.DniUsuario
-        };
-
-        return _registros.ObtenerRegistros(filtroDelRepositorio).Select(CrearDto).ToList();
+        return _registros.ObtenerRegistros(CrearFiltro(filtro)).Select(CrearDto).ToList();
     }
 
     public bool TieneCriterios(FiltroAuditoriaDto filtro)
     {
-        throw new NotImplementedException();
+        return CrearFiltro(filtro).TieneCriterios();
+    }
+
+    // Las fechas son dias completos: Hasta pasa como el inicio del dia siguiente porque el filtro lo excluye.
+    private static FiltroAuditoria CrearFiltro(FiltroAuditoriaDto filtro)
+    {
+        return new FiltroAuditoria
+        {
+            Desde = filtro.Desde?.ToDateTime(TimeOnly.MinValue),
+            Hasta = filtro.Hasta?.AddDays(1).ToDateTime(TimeOnly.MinValue),
+            DniUsuario = string.IsNullOrWhiteSpace(filtro.DniUsuario) ? null : filtro.DniUsuario
+        };
     }
 
     private static RegistroAuditoriaDto CrearDto(RegistroAuditoria registro)
