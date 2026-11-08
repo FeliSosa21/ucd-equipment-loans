@@ -75,4 +75,9 @@ public class RepositorioCatalogoSql
             .Include(tipo => tipo.Unidades)
             .FirstOrDefault(tipo => tipo.Nombre.Trim().ToLower() == nombreBuscado);
     }
+
+    public IReadOnlyList<Catalogo> ObtenerCatalogosParaExportar()
+    {
+        return _contexto.Catalogos.ToList();
+    }
 }
