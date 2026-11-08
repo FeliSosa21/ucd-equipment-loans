@@ -44,6 +44,7 @@ public class RepositorioPrestamoSql
     public IReadOnlyList<Prestamo> ObtenerPrestamos(FiltroPorCatalogoYFechas filtro)
     {
         return PrestamosConSolicitanteTipoYAsignadas
+            .Include(prestamo => prestamo.Evaluador)
             .Where(prestamo => filtro.Desde == null || prestamo.FechaHoraPrestamo >= filtro.Desde)
             .Where(prestamo => filtro.Hasta == null || prestamo.FechaHoraPrestamo < filtro.Hasta)
             .Where(prestamo => filtro.IdCatalogo == null
