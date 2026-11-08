@@ -556,6 +556,15 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.IsFalse(existe);
     }
 
+    [TestMethod]
+    public void ExisteUnidadConNumeroDeSerie_NumeroNull_LanzaArgumentNullException()
+    {
+        using SqlContext contexto =  new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contexto);
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.ExisteUnidadConNumeroDeSerie(null!, null));
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
