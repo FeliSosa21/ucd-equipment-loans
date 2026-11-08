@@ -68,6 +68,7 @@ public class RepositorioCatalogoSql
         string nombreBuscado = nombre.Trim().ToLower();
 
         return _contexto.Catalogos
+            .Where(catalogo => catalogo.Id == catalogoId)
             .SelectMany(catalogo => catalogo.Tipos)
             .Include(tipo => tipo.Unidades)
             .FirstOrDefault(tipo => tipo.Nombre.Trim().ToLower() == nombreBuscado);
