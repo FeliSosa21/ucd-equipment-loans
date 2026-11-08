@@ -82,6 +82,27 @@ public class ServicioDevolucionTests
     }
 
     [TestMethod]
+    public void RegistrarDevolucion_UnaUnidad_ElDetalleDiceUnaUnidad()
+    {
+        Memoria memoria = new Memoria();
+        ServicioDevolucion servicio = CrearServicio(memoria, out _);
+        Prestamo deUnaUnidad = AgregarPrestamoDeUnaUnidad(memoria);
+        DevolucionDto datos = new DevolucionDto
+        {
+            IdPrestamo = deUnaUnidad.Id,
+            Unidades = new List<UnidadDevueltaDto>
+            {
+                new UnidadDevueltaDto { IdInstitucional = "EQP-0003", Condicion = "Sin observaciones" }
+            }
+        };
+
+        servicio.RegistrarDevolucion(datos, DniFuncionario);
+
+        Assert.AreEqual("Devolucion del prestamo de Ana Perez (DNI 45678905): 1 unidad",
+            LeerAccionesDelFuncionario(memoria).Single().Detalle);
+    }
+
+    [TestMethod]
     public void RegistrarDevolucion_CondicionPorUnidad_ActualizaCadaUnidad()
     {
         ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
@@ -312,6 +333,19 @@ public class ServicioDevolucionTests
         Assert.ThrowsException<ServicioException>(() =>
             servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario));
         Assert.AreEqual(1, new RepositorioDevolucion(memoria).ObtenerTodas().Count);
+    }
+
+    private static Prestamo AgregarPrestamoDeUnaUnidad(Memoria memoria)
+    {
+        Usuario solicitante = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSolicitante)!;
+        TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Notebook Lenovo", descripcion: "Notebook para clases",
+            duracionMaxPrestamo: 5, requiereAprobacion: false, categoria: Categoria.Computacion);
+        UnidadFisica unidad = new UnidadFisica(idInstitucional: "EQP-0003", ubiFisica: "Deposito A", numSerie: null);
+        tipo.AgregarUnidad(unidad);
+        Prestamo prestamo = new Prestamo(solicitante, tipo, cantidadSolicitada: 1, fechaHoraPrestamo: InicioPrestamo);
+        prestamo.Activar(new List<UnidadFisica> { unidad });
+        new RepositorioPrestamo(memoria).AgregarPrestamo(prestamo);
+        return prestamo;
     }
 
     private static IReadOnlyList<RegistroAuditoria> LeerAccionesDelFuncionario(Memoria memoria)
