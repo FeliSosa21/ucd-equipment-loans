@@ -241,6 +241,16 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void CrearUsuario_DatosValidos_RegistraElAltaConElAdministradorComoResponsable()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _, out _, out Memoria memoria);
+
+        servicio.CrearUsuario(CrearDtoNuevo(), TipoUsuario.Estudiante().Nombre, DniResponsable);
+
+        Assert.AreEqual(AccionAuditada.AltaDeUsuario, LeerAccionesDelAdministrador(memoria).Single().Accion);
+    }
+
+    [TestMethod]
     public void CrearUsuario_CedulaDe7Digitos_LeAsignaElTipo()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
@@ -678,7 +688,14 @@ public class ServicioAdministracionUsuariosTests
     private static ServicioAdministracionUsuarios CrearServicioConAdministrador(out RepositorioUsuario repositorio,
         out RepositorioTipoUsuario repositorioTipos)
     {
-        Memoria memoria = new Memoria();
+        return CrearServicioConAdministrador(out repositorio, out repositorioTipos, out _);
+    }
+
+    // El log ya tiene el autorregistro de Felipe: los tests leen solo las acciones del administrador.
+    private static ServicioAdministracionUsuarios CrearServicioConAdministrador(out RepositorioUsuario repositorio,
+        out RepositorioTipoUsuario repositorioTipos, out Memoria memoria)
+    {
+        memoria = new Memoria();
         repositorio = new RepositorioUsuario(memoria);
         repositorioTipos = TiposDePrueba.Cargados(memoria);
 
@@ -694,5 +711,11 @@ public class ServicioAdministracionUsuariosTests
         administrador.AsignarTipo(TipoUsuario.Administrador());
         repositorio.AgregarUsuario(administrador);
         return new ServicioAdministracionUsuarios(repositorio, servicioUsuario, repositorioTipos, auditoria);
+    }
+
+    private static IReadOnlyList<RegistroAuditoria> LeerAccionesDelAdministrador(Memoria memoria)
+    {
+        return new RepositorioAuditoria(memoria).ObtenerRegistros(
+            new FiltroAuditoria { DniUsuario = DniResponsable });
     }
 }
