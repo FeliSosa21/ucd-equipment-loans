@@ -141,6 +141,28 @@ public class ServicioUsuarioTests
     }
 
     [TestMethod]
+    public void Registrar_CorreoDeUsuarioEliminadoConOtrasMayusculas_LanzaServicioExceptionGeneral()
+    {
+        UsuarioDto original = CrearDto();
+        _servicio.Registrar(original);
+        using (SqlContext preparacion = new SqlContext(_opciones))
+        {
+            RepositorioUsuarioSql usuarios = new RepositorioUsuarioSql(preparacion);
+            usuarios.EliminarUsuario(usuarios.ObtenerUsuarioPorDni(original.Dni)!);
+        }
+        UsuarioDto repetido = CrearDto(dni: "45678905", correo: "Felipe@Hotmail.COM");
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(() => _servicio.Registrar(repetido));
+
+        Assert.IsNull(excepcion.Campo);
+        Assert.AreEqual("Ya existe un usuario con ese DNI o correo", excepcion.Message);
+        Assert.IsNull(LeerUsuarioPorDni(repetido.Dni));
+        Assert.AreEqual(1, LeerLog().Count);
+        using SqlContext lectura = new SqlContext(_opciones);
+        Assert.IsTrue(lectura.Usuarios.Single().EstaEliminado);
+    }
+
+    [TestMethod]
     public void Registrar_CorreoDuplicado_ElErrorIndicaElCampoCorreo()
     {
         _servicio.Registrar(CrearDto());
