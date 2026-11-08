@@ -5,10 +5,10 @@ namespace Servicios;
 
 public class RegistradorDeAuditoria
 {
-    private readonly RepositorioAuditoria _repositorio;
+    private readonly RepositorioAuditoriaSql _repositorio;
     private readonly TimeProvider _reloj;
 
-    public RegistradorDeAuditoria(RepositorioAuditoria repositorio, TimeProvider reloj)
+    public RegistradorDeAuditoria(RepositorioAuditoriaSql repositorio, TimeProvider reloj)
     {
         _repositorio = repositorio;
         _reloj = reloj;

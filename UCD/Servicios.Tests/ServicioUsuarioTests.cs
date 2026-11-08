@@ -196,7 +196,7 @@ public class ServicioUsuarioTests
 
     private static IReadOnlyList<RegistroAuditoria> LeerLog(Memoria memoria)
     {
-        return new RepositorioAuditoria(memoria).ObtenerRegistros(
+        return AuditoriaDePrueba.LeerRegistros(memoria,
             new FiltroAuditoria { Desde = AuditoriaDePrueba.Ahora });
     }
 

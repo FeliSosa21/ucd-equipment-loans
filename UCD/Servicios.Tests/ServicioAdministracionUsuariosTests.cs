@@ -869,7 +869,7 @@ public class ServicioAdministracionUsuariosTests
 
     private static IReadOnlyList<RegistroAuditoria> LeerAccionesDelAdministrador(Memoria memoria)
     {
-        return new RepositorioAuditoria(memoria).ObtenerRegistros(
+        return AuditoriaDePrueba.LeerRegistros(memoria,
             new FiltroAuditoria { DniUsuario = DniResponsable });
     }
 }

@@ -1,16 +1,33 @@
+using System.Runtime.CompilerServices;
 using Data;
 using Data.Repositorios;
+using Dominio;
+using Microsoft.EntityFrameworkCore;
 
 namespace Servicios.Tests;
 
-// Registrador que guarda en la misma Memoria del test, con un reloj fijo: el test puede leer el log con
-// un RepositorioAuditoria sobre esa Memoria.
 internal static class AuditoriaDePrueba
 {
     public static readonly DateTime Ahora = new(2026, 11, 8, 9, 30, 0);
 
+    // Puente temporal mientras los consumidores migran de Memoria a EF por separado.
+    private static readonly ConditionalWeakTable<Memoria, DbContextOptions<SqlContext>> _bases = new();
+
     public static RegistradorDeAuditoria Registrador(Memoria memoria)
     {
-        return new RegistradorDeAuditoria(new RepositorioAuditoria(memoria), new RelojFijo(Ahora));
+        SqlContext contexto = new SqlContext(Opciones(memoria));
+        return new RegistradorDeAuditoria(new RepositorioAuditoriaSql(contexto), new RelojFijo(Ahora));
+    }
+
+    public static IReadOnlyList<RegistroAuditoria> LeerRegistros(Memoria memoria, FiltroAuditoria filtro)
+    {
+        using SqlContext contexto = new SqlContext(Opciones(memoria));
+        return new RepositorioAuditoriaSql(contexto).ObtenerRegistros(filtro);
+    }
+
+    private static DbContextOptions<SqlContext> Opciones(Memoria memoria)
+    {
+        return _bases.GetValue(memoria, _ => new DbContextOptionsBuilder<SqlContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
     }
 }

@@ -363,7 +363,7 @@ public class ServicioDevolucionTests
 
     private static IReadOnlyList<RegistroAuditoria> LeerAccionesDelFuncionario(Memoria memoria)
     {
-        return new RepositorioAuditoria(memoria).ObtenerRegistros(
+        return AuditoriaDePrueba.LeerRegistros(memoria,
             new FiltroAuditoria { DniUsuario = DniFuncionario });
     }
 

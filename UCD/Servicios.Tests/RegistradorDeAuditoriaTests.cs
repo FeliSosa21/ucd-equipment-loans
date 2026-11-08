@@ -1,6 +1,7 @@
 using Data;
 using Data.Repositorios;
 using Dominio;
+using Microsoft.EntityFrameworkCore;
 
 namespace Servicios.Tests;
 
@@ -9,14 +10,23 @@ public class RegistradorDeAuditoriaTests
 {
     private static readonly DateTime Ahora = new(2026, 11, 8, 9, 30, 0);
 
-    private RepositorioAuditoria _repositorio = null!;
+    private DbContextOptions<SqlContext> _opciones = null!;
+    private SqlContext _contexto = null!;
     private RegistradorDeAuditoria _registrador = null!;
 
     [TestInitialize]
     public void Inicializar()
     {
-        _repositorio = new RepositorioAuditoria(new Memoria());
-        _registrador = new RegistradorDeAuditoria(_repositorio, new RelojFijo(Ahora));
+        _opciones = new DbContextOptionsBuilder<SqlContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        _contexto = new SqlContext(_opciones);
+        _registrador = new RegistradorDeAuditoria(new RepositorioAuditoriaSql(_contexto), new RelojFijo(Ahora));
+    }
+
+    [TestCleanup]
+    public void Limpiar()
+    {
+        _contexto.Dispose();
     }
 
     [TestMethod]
@@ -26,9 +36,11 @@ public class RegistradorDeAuditoriaTests
 
         _registrador.RegistrarDeUsuario(AccionAuditada.RegistroDeUsuario, responsable, "Se registro Felipe Sosa");
 
-        RegistroAuditoria guardado = _repositorio.ObtenerRegistros(new FiltroAuditoria { Desde = Ahora }).Single();
+        using SqlContext lectura = new SqlContext(_opciones);
+        RegistroAuditoria guardado = new RepositorioAuditoriaSql(lectura).ObtenerRegistros(new FiltroAuditoria { Desde = Ahora }).Single();
         Assert.AreEqual(Ahora, guardado.FechaHora);
-        Assert.AreSame(responsable, guardado.Responsable);
+        Assert.AreEqual(responsable.Id, guardado.Responsable!.Id);
+        Assert.AreEqual(responsable.Dni, guardado.Responsable.Dni);
         Assert.AreEqual(AccionAuditada.RegistroDeUsuario, guardado.Accion);
         Assert.AreEqual("Se registro Felipe Sosa", guardado.Detalle);
     }
@@ -42,9 +54,11 @@ public class RegistradorDeAuditoriaTests
         _registrador.Registrar(RegistroDeAccion.DeUsuario(responsable, otraHora),
             AccionAuditada.DevolucionDePrestamo, "Devolucion");
 
-        RegistroAuditoria guardado = _repositorio.ObtenerRegistros(new FiltroAuditoria { Desde = otraHora }).Single();
+        using SqlContext lectura = new SqlContext(_opciones);
+        RegistroAuditoria guardado = new RepositorioAuditoriaSql(lectura).ObtenerRegistros(new FiltroAuditoria { Desde = otraHora }).Single();
         Assert.AreEqual(otraHora, guardado.FechaHora);
-        Assert.AreSame(responsable, guardado.Responsable);
+        Assert.AreEqual(responsable.Id, guardado.Responsable!.Id);
+        Assert.AreEqual(responsable.Dni, guardado.Responsable.Dni);
         Assert.AreEqual(AccionAuditada.DevolucionDePrestamo, guardado.Accion);
     }
 
