@@ -181,6 +181,22 @@ public sealed class RepositorioAuditoriaSqlTests
             resultado.Select(registro => registro.Detalle).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerRegistros_FiltroDniUsuario_DevuelveSoloLosDeEseResponsable()
+    {
+        Usuario felipe = CrearUsuario(dni: "12345672", correo: "felipe@hotmail.com");
+        Usuario laura = CrearUsuario(dni: "45678905", correo: "laura.diaz@ejemplo.com");
+        GuardarConOtroContexto(
+            CrearRegistro(RegistroDeAccion.DeUsuario(felipe, FechaFija), "DeFelipe"),
+            CrearRegistro(RegistroDeAccion.DeUsuario(laura, FechaFija), "DeLaura"),
+            CrearRegistro(RegistroDeAccion.DelSistema(FechaFija), "DelSistema"));
+
+        IReadOnlyList<RegistroAuditoria> resultado = LeerRegistros(new FiltroAuditoria { DniUsuario = "45678905" });
+
+        CollectionAssert.AreEqual(new List<string> { "DeLaura" },
+            resultado.Select(registro => registro.Detalle).ToList());
+    }
+
     private void GuardarConOtroContexto(params RegistroAuditoria[] registros)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
