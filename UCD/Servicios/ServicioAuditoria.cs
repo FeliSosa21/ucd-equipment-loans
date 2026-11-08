@@ -1,3 +1,4 @@
+using System.Globalization;
 using Data.Repositorios;
 using Dominio;
 using DTOs;
@@ -6,6 +7,8 @@ namespace Servicios;
 
 public class ServicioAuditoria
 {
+    private const string FormatoIso8601 = "yyyy-MM-ddTHH:mm:ss";
+
     private readonly RepositorioAuditoria _registros;
     private readonly RepositorioUsuario _usuarios;
 
@@ -40,7 +43,11 @@ public class ServicioAuditoria
 
     private static RegistroAuditoriaDto CrearDto(RegistroAuditoria registro)
     {
-        return new RegistroAuditoriaDto { Detalle = registro.Detalle };
+        return new RegistroAuditoriaDto
+        {
+            FechaHora = registro.FechaHora.ToString(FormatoIso8601, CultureInfo.InvariantCulture),
+            Detalle = registro.Detalle
+        };
     }
 
     private void ValidarQueSeaAdministradorActivo(string dniResponsable)
