@@ -320,13 +320,7 @@ public sealed class RepositorioCatalogoSqlTests
         Catalogo catalogo = new Catalogo(NombreCatalogo);
         GuardarConOtroContexto(catalogo);
 
-        using (SqlContext contextoQueModifica = new SqlContext(_opciones))
-        {
-            RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueModifica);
-            Catalogo obtenido = repositorio.ObtenerCatalogoActivoPorId(catalogo.Id)!;
-            obtenido.DarDeBaja();
-            repositorio.ActualizarCatalogo(obtenido);
-        }
+        DiscontinuarConOtroContexto(catalogo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
         RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
@@ -363,5 +357,14 @@ public sealed class RepositorioCatalogoSqlTests
         catalogo.AgregarTipo(tipo);
 
         return catalogo;
+    }
+
+    private void DiscontinuarConOtroContexto(Catalogo catalogo)
+    {
+        using SqlContext contextoQueModifica = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contextoQueModifica);
+        Catalogo obtenido = repositorio.ObtenerCatalogoActivoPorId(catalogo.Id)!;
+        obtenido.DarDeBaja();
+        repositorio.ActualizarCatalogo(obtenido);
     }
 }
