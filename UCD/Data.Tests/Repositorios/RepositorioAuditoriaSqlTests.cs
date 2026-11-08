@@ -197,6 +197,17 @@ public sealed class RepositorioAuditoriaSqlTests
             resultado.Select(registro => registro.Detalle).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerRegistros_ConResponsable_OtroContextoLeeSuResponsable()
+    {
+        Usuario laura = CrearUsuario(dni: "45678905", correo: "laura.diaz@ejemplo.com");
+        GuardarConOtroContexto(CrearRegistro(RegistroDeAccion.DeUsuario(laura, FechaFija), "DeLaura"));
+
+        IReadOnlyList<RegistroAuditoria> resultado = LeerRegistros(new FiltroAuditoria { Desde = FechaFija });
+
+        Assert.AreEqual("45678905", resultado.Single().Responsable?.Dni);
+    }
+
     private void GuardarConOtroContexto(params RegistroAuditoria[] registros)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
