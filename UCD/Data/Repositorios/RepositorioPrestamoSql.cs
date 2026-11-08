@@ -77,6 +77,6 @@ public class RepositorioPrestamoSql
 
     public bool ExistenPrestamosVigentesDelCatalogo(int idCatalogo)
     {
-        return false;
+        return _contexto.Prestamos.Any();
     }
 }
