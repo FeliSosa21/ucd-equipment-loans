@@ -741,6 +741,15 @@ public sealed class UsuarioTests
         Assert.IsTrue(usuario.EstaActivo());
     }
 
+    [TestMethod]
+    public void EstaActivo_UsuarioDesactivado_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.Desactivar();
+
+        Assert.IsFalse(usuario.EstaActivo());
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
