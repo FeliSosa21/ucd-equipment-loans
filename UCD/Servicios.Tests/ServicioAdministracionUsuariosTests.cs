@@ -501,6 +501,21 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void ModificarDatos_DatosValidos_PersisteNombreApellidoYCorreo()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _);
+        DatosPersonalesDto datos = CrearDatos(dni: DniValido, nombre: "Pedro", apellido: "Suarez",
+            correo: "pedro@hotmail.com");
+
+        servicio.ModificarDatos(datos, DniValido);
+
+        Usuario guardado = LeerUsuarioPorDni(DniValido)!;
+        Assert.AreEqual(datos.Nombre, guardado.Nombre);
+        Assert.AreEqual(datos.Apellido, guardado.Apellido);
+        Assert.AreEqual(datos.Correo, guardado.Correo);
+    }
+
+    [TestMethod]
     public void ModificarDatos_MismoCorreoConOtrasMayusculas_LoPermite()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuarioSql repositorio);
