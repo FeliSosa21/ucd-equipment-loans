@@ -62,4 +62,14 @@ public class RepositorioCatalogoSql
 
         _contexto.SaveChanges();
     }
+
+    public TipoEquipamiento? ObtenerTipoPorNombre(int catalogoId, string nombre)
+    {
+        string nombreBuscado = nombre.Trim().ToLower();
+
+        return _contexto.Catalogos
+            .SelectMany(catalogo => catalogo.Tipos)
+            .Include(tipo => tipo.Unidades)
+            .FirstOrDefault(tipo => tipo.Nombre.Trim().ToLower() == nombreBuscado);
+    }
 }
