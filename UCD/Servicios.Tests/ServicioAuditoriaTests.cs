@@ -138,6 +138,20 @@ public class ServicioAuditoriaTests
     }
 
     [TestMethod]
+    public void ListarRegistros_Registro_AccionConElNombreDelEnum()
+    {
+        Memoria memoria = new Memoria();
+        Usuario administrador = AgregarUsuario(memoria, DniAdministrador, TipoUsuario.Administrador());
+        AgregarRegistro(memoria, administrador, Dia.ToDateTime(TimeOnly.MinValue), "Alta");
+        ServicioAuditoria servicio = CrearServicio(memoria);
+
+        RegistroAuditoriaDto registro =
+            servicio.ListarRegistros(new FiltroAuditoriaDto { Desde = Dia }, DniAdministrador).Single();
+
+        Assert.AreEqual(nameof(AccionAuditada.AltaDeUsuario), registro.Accion);
+    }
+
+    [TestMethod]
     public void ListarRegistros_RegistroDelSistema_UsuarioEsSistema()
     {
         Memoria memoria = new Memoria();
