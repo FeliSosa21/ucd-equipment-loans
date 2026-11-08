@@ -215,6 +215,16 @@ public class ServicioAuditoriaTests
     }
 
     [TestMethod]
+    public void TieneCriterios_SoloHastaEnLaUltimaFecha_DevuelveFalse()
+    {
+        ServicioAuditoria servicio = CrearServicio(new Memoria());
+
+        bool tieneCriterios = servicio.TieneCriterios(new FiltroAuditoriaDto { Hasta = DateOnly.MaxValue });
+
+        Assert.IsFalse(tieneCriterios);
+    }
+
+    [TestMethod]
     public void TieneCriterios_SoloDni_DevuelveTrue()
     {
         ServicioAuditoria servicio = CrearServicio(new Memoria());
