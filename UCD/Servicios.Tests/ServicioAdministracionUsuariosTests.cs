@@ -312,6 +312,18 @@ public class ServicioAdministracionUsuariosTests
     }
 
     [TestMethod]
+    public void Reactivar_UsuarioDesactivado_RegistraLaReactivacionConElAdministradorComoResponsable()
+    {
+        ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out _, out _, out Memoria memoria);
+        servicio.Desactivar(DniValido, DniResponsable);
+
+        servicio.Reactivar(DniValido, DniResponsable);
+
+        Assert.AreEqual(1, LeerAccionesDelAdministrador(memoria)
+            .Count(registro => registro.Accion == AccionAuditada.ReactivacionDeUsuario));
+    }
+
+    [TestMethod]
     public void CrearUsuario_DatosValidos_QuedaConElTipoYLaContrasenaPredeterminada()
     {
         ServicioAdministracionUsuarios servicio = CrearServicioConAdministrador(out RepositorioUsuario repositorio);
