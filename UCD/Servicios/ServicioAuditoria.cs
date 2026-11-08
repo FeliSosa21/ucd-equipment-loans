@@ -16,6 +16,7 @@ public class ServicioAuditoria
 
     public List<RegistroAuditoriaDto> ListarRegistros(FiltroAuditoriaDto filtro, string dniResponsable)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(filtro);
+        return new List<RegistroAuditoriaDto>();
     }
 }
