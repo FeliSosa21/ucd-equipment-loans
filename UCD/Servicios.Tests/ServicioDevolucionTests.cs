@@ -77,7 +77,7 @@ public class ServicioDevolucionTests
 
         servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
 
-        Assert.AreEqual("Devolucion del prestamo de Ana Perez (DNI 45678905): 2 unidades",
+        Assert.AreEqual("Devolución del préstamo de Ana Perez (DNI 45678905): 2 unidades",
             LeerAccionesDelFuncionario(memoria).Single().Detalle);
     }
 
@@ -98,7 +98,7 @@ public class ServicioDevolucionTests
 
         servicio.RegistrarDevolucion(datos, DniFuncionario);
 
-        Assert.AreEqual("Devolucion del prestamo de Ana Perez (DNI 45678905): 1 unidad",
+        Assert.AreEqual("Devolución del préstamo de Ana Perez (DNI 45678905): 1 unidad",
             LeerAccionesDelFuncionario(memoria).Single().Detalle);
     }
 
