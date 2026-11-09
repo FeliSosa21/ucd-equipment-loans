@@ -85,4 +85,38 @@ public class RepositorioPrestamoSql
                 || prestamo.Estado == EstadoPrestamo.Activo)
             .Any();
     }
+
+    public int ContarPrestamosVigentesDeSolicitante(string dni, Guid? idExcluido = null)
+    {
+        return _contexto.Prestamos
+            .Where(prestamo => prestamo.Solicitante.Dni == dni)
+            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Solicitado
+                || prestamo.Estado == EstadoPrestamo.Activo)
+            .Where(prestamo => prestamo.Id != idExcluido)
+            .Count();
+    }
+
+    public int ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(string dni, int idTipoEquipamiento)
+    {
+        int idCatalogo = _contexto.Set<TipoEquipamiento>()
+            .Where(tipo => tipo.Id == idTipoEquipamiento)
+            .Select(tipo => EF.Property<int>(tipo, ColumnaCatalogo))
+            .Single();
+        
+        return _contexto.Prestamos
+            .Where(prestamo => prestamo.Solicitante.Dni == dni)
+            .Where(prestamo => EF.Property<int>(prestamo.TipoEquipamiento, ColumnaCatalogo) == idCatalogo)
+            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Activo)
+            .SelectMany(prestamo => prestamo.UnidadesAsignadas)
+            .Count();
+    }
+
+    public IReadOnlyList<Prestamo> ObtenerPrestamosVencidosDeSolicitante(string dni, DateTime corte)
+    {
+        return PrestamosConSolicitanteTipoYAsignadas
+            .Where(prestamo => prestamo.Solicitante.Dni == dni)
+            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Activo)
+            .Where(prestamo => prestamo.FechaEsperadaDevolucion < corte)
+            .ToList();
+    }
 }

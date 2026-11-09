@@ -36,9 +36,9 @@ public class ConfiguracionPrestamo : IEntityTypeConfiguration<Prestamo>
             .IsRequired()
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(prestamo => prestamo.UnidadesAsignadas).
-            WithMany().
-            UsingEntity(
+        builder.HasMany(prestamo => prestamo.UnidadesAsignadas)
+            .WithMany()
+            .UsingEntity(
                 "UnidadesAsignadas",
                 asignacion => asignacion.HasOne(typeof(UnidadFisica)).WithMany()
                     .HasForeignKey("UnidadFisicaId").OnDelete(DeleteBehavior.Restrict),

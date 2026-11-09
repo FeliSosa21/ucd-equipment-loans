@@ -38,6 +38,24 @@ public class CargaInicialTests
     }
 
     [TestMethod]
+    public void CargarRoot_CorreoModificado_NoDuplicaElUsuarioConDniRoot()
+    {
+        Memoria memoria = new Memoria();
+        RepositorioUsuario repositorio = new RepositorioUsuario(memoria);
+        CargaInicial carga = CrearCarga(memoria);
+        carga.CargarTiposDeUsuario();
+        carga.CargarRoot();
+        Usuario root = repositorio.ObtenerUsuarioPorDni(CargaInicial.DniRoot)!;
+        string correoModificado = "root.actualizado@ucd.edu.uy";
+        root.ModificarDatos(root.Nombre, root.Apellido, correoModificado);
+
+        carga.CargarRoot();
+
+        Assert.AreEqual(1, repositorio.ContarUsuarios(CargaInicial.DniRoot));
+        Assert.AreEqual(correoModificado, repositorio.ObtenerUsuarioPorDni(CargaInicial.DniRoot)!.Correo);
+    }
+
+    [TestMethod]
     public void CargarCatalogo_MemoriaVacia_GuardaUnCatalogo()
     {
         Memoria memoria = new Memoria();
