@@ -11,12 +11,14 @@ public class ServicioTiposEquipamiento
     private const string MensajeSinPermiso = "El usuario no tiene permiso para gestionar el catalogo";
     private const string MensajeNoSePudoGuardar =
         "No se pudieron guardar los cambios; verifique que no exista otro tipo con ese nombre";
-    private const string MensajeSinPermisoParaListar = "El usuario no tiene permiso para ver los tipos de equipamiento";
+    private const string MensajeSinPermisoParaListar =
+        "El usuario no tiene permiso para ver los tipos de equipamiento";
 
     private readonly RepositorioCatalogoSql _repositorioCatalogo;
     private readonly RepositorioUsuarioSql _repositorioUsuario;
 
-    public ServicioTiposEquipamiento(RepositorioCatalogoSql repositorioCatalogo, RepositorioUsuarioSql repositorioUsuario)
+    public ServicioTiposEquipamiento(RepositorioCatalogoSql repositorioCatalogo,
+        RepositorioUsuarioSql repositorioUsuario)
     {
         _repositorioCatalogo = repositorioCatalogo;
         _repositorioUsuario = repositorioUsuario;

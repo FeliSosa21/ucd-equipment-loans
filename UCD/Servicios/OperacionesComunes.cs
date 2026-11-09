@@ -4,20 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Servicios;
 
-// Pasos que comparten los servicios de gestion del catalogo (tipos, unidades e inventario).
+// Pasos que comparten los servicios del catalogo (consulta, inventario, tipos y unidades).
 internal static class OperacionesComunes
 {
-    public static Catalogo ObtenerCatalogo(RepositorioCatalogo repositorioCatalogo)
-    {
-        Catalogo? catalogo = repositorioCatalogo.Obtener();
-        if (catalogo is null)
-        {
-            throw new ServicioException("El catalogo no esta cargado");
-        }
-
-        return catalogo;
-    }
-
     public static Catalogo ObtenerCatalogoActivo(RepositorioCatalogoSql repositorioCatalogo, int idCatalogo)
     {
         Catalogo? catalogo = repositorioCatalogo.ObtenerCatalogoActivoPorId(idCatalogo);
