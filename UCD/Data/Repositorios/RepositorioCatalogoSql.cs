@@ -7,6 +7,11 @@ public class RepositorioCatalogoSql
 {
     private readonly SqlContext _contexto;
 
+    private IQueryable<UnidadFisica> TodasLasUnidades =>
+        _contexto.Catalogos
+            .SelectMany(catalogo => catalogo.Tipos)
+            .SelectMany(tipo => tipo.Unidades);
+
     private IQueryable<Catalogo> CatalogosActivos =>
         _contexto.Catalogos.Where(catalogo => catalogo.Activo);
 
@@ -53,9 +58,7 @@ public class RepositorioCatalogoSql
     {
         ArgumentNullException.ThrowIfNull(idInstitucional);
 
-        return _contexto.Catalogos
-            .SelectMany(catalogo => catalogo.Tipos)
-            .SelectMany(tipo => tipo.Unidades)
+        return TodasLasUnidades
             .Any(unidad => unidad.IdInstitucional == idInstitucional);
     }
 
@@ -92,9 +95,9 @@ public class RepositorioCatalogoSql
 
         string numeroDeSerieBuscado = numeroDeSerie.Trim().ToLower();
 
-        return _contexto.Catalogos
-            .SelectMany(catalogo => catalogo.Tipos)
-            .SelectMany(tipo => tipo.Unidades)
-            .Any(unidad => unidad.NumSerie!.Trim().ToLower() == numeroDeSerieBuscado && unidad.Id != idUnidadExcluida);
+        return TodasLasUnidades
+            .Any(unidad => unidad.NumSerie != null
+                           && unidad.NumSerie.Trim().ToLower() == numeroDeSerieBuscado
+                           && unidad.Id != idUnidadExcluida);
     }
 }
