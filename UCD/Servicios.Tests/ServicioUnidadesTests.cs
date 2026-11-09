@@ -860,6 +860,14 @@ public class ServicioUnidadesTests
                 DniFuncionario));
     }
 
+    [TestMethod]
+    public void Listar_FiltroNull_LanzaArgumentNullException()
+    {
+        ServicioUnidades servicio = CrearServicio();
+
+        Assert.ThrowsException<ArgumentNullException>(() => servicio.Listar(_idCatalogo, null!, DniFuncionario));
+    }
+
     private ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
