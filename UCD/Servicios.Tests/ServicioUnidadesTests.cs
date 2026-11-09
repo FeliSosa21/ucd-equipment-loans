@@ -769,6 +769,22 @@ public class ServicioUnidadesTests
                 DniFuncionario));
     }
 
+    [TestMethod]
+    public void Modificar_DatosValidos_SeLeeConOtroContexto()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
+        ServicioUnidades servicio = CrearServicio(proyector);
+
+        servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: "SN999"),
+            DniFuncionario);
+
+        UnidadFisica guardada = LeerUnidad("PRY-0001")!;
+        Assert.AreEqual("Laboratorio 3", guardada.UbiFisica);
+        Assert.AreEqual("SN999", guardada.NumSerie);
+        Assert.AreEqual("Lampara nueva", guardada.Observaciones);
+    }
+
     private ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
