@@ -12,6 +12,7 @@ public class ServicioCatalogoTests
     private const string DniSupervisor = "23456783";
     private const string DniSinPermisos = "45678905";
     private const string DniDesactivado = "34567894";
+    private const string DniInexistente = "56789016";
 
     private ContextoDePrueba _entorno = null!;
     private int _idCatalogo;
@@ -229,6 +230,15 @@ public class ServicioCatalogoTests
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.ConsultarTipos(_idCatalogo, new FiltroCatalogoDto(), DniDesactivado));
+    }
+
+    [TestMethod]
+    public void ConsultarTipos_DniInexistente_LanzaServicioException()
+    {
+        var servicio = CrearServicio(CrearTipo(nombre: "Teclado HP"));
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ConsultarTipos(_idCatalogo, new FiltroCatalogoDto(), DniInexistente));
     }
 
     [TestMethod]
