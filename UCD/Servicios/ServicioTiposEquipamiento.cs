@@ -24,6 +24,7 @@ public class ServicioTiposEquipamiento
 
     public List<TipoEquipamientoDetalleDto> Listar(int idCatalogo, FiltroTiposDto filtro, string dniUsuario)
     {
+        ArgumentNullException.ThrowIfNull(filtro);
         ValidarQuePuedaListar(dniUsuario);
         List<TipoEquipamientoDetalleDto> resultado = new List<TipoEquipamientoDetalleDto>();
 
