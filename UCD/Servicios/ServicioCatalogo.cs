@@ -39,6 +39,7 @@ public class ServicioCatalogo
 
     public List<UnidadFisicaDto> ObtenerUnidadesDisponibles(int idCatalogo, string nombreTipo, string dniUsuario)
     {
+        ValidarResponsable(dniUsuario);
         var tipo = _repositorioCatalogo.ObtenerTipoPorNombre(idCatalogo, nombreTipo);
 
         if (tipo is null)
