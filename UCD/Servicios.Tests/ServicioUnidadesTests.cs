@@ -686,6 +686,21 @@ public class ServicioUnidadesTests
             servicio.Listar(_idCatalogo, new FiltroUnidadesDto(), "11111111"));
     }
 
+    [TestMethod]
+    public void Registrar_DatosValidos_SeLeeConOtroContexto()
+    {
+        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
+        DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
+            numeroSerie: "SN123");
+
+        servicio.Registrar(_idCatalogo, datos, DniFuncionario);
+
+        UnidadFisica? guardada = LeerUnidad("PRY-0001");
+        Assert.IsNotNull(guardada);
+        Assert.AreEqual("Deposito A", guardada.UbiFisica);
+        Assert.AreEqual("SN123", guardada.NumSerie);
+    }
+
     private ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
@@ -721,6 +736,14 @@ public class ServicioUnidadesTests
         Catalogo catalogo = repositorio.ObtenerCatalogoActivoPorId(_idCatalogo)!;
         catalogo.DarDeBaja();
         repositorio.ActualizarCatalogo(catalogo);
+    }
+
+    private UnidadFisica? LeerUnidad(string idInstitucional)
+    {
+        using SqlContext lectura = _entorno.NuevoContexto();
+        Catalogo catalogo = new RepositorioCatalogoSql(lectura).ObtenerCatalogoActivoPorId(_idCatalogo)!;
+        return catalogo.Tipos.SelectMany(tipo => tipo.Unidades)
+            .FirstOrDefault(unidad => unidad.IdInstitucional == idInstitucional);
     }
 
     private List<UnidadDetalleDto> ListarTodas(ServicioUnidades servicio)
