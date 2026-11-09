@@ -33,7 +33,7 @@ public class CargaInicial
 
     public void CargarRoot()
     {
-        if (_repositorioUsuario.ObtenerUsuarioPorCorreo(CorreoRoot) != null)
+        if (_repositorioUsuario.ObtenerUsuarioPorDni(DniRoot) != null)
         {
             return;
         }
