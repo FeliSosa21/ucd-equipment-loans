@@ -1,7 +1,6 @@
 ﻿using Data.Repositorios;
 using Dominio;
 using DTOs;
-using Microsoft.EntityFrameworkCore;
 
 namespace Servicios;
 
@@ -10,6 +9,8 @@ namespace Servicios;
 public class ServicioUnidades
 {
     private const string MensajeSinPermiso = "El usuario no tiene permiso para gestionar unidades";
+    private const string MensajeNoSePudoGuardar =
+        "No se pudieron guardar los cambios; verifique que el id institucional y el numero de serie no esten repetidos";
 
     private readonly RepositorioCatalogoSql _repositorioCatalogo;
     private readonly RepositorioUsuarioSql _repositorioUsuario;
@@ -51,7 +52,7 @@ public class ServicioUnidades
 
         TraduccionDeErrores.Ejecutar(() =>
             tipo.AgregarUnidad(new UnidadFisica(idInstitucional, ubicacionFisica, numeroSerie)));
-        GuardarCambios(catalogo);
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
     public void Modificar(int idCatalogo, DatosUnidadDto datos, string dniResponsable)
@@ -66,7 +67,7 @@ public class ServicioUnidades
         TraduccionDeErrores.Ejecutar(() =>
             unidad.ModificarInfo(OperacionesComunes.Normalizar(datos.UbicacionFisica), numeroSerie,
                 NormalizarOpcional(datos.Observaciones)));
-        GuardarCambios(catalogo);
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
     public void EnviarAMantenimiento(int idCatalogo, string idInstitucional, string dniResponsable)
@@ -82,7 +83,7 @@ public class ServicioUnidades
         }
 
         TraduccionDeErrores.Ejecutar(unidad.AMantenimiento);
-        GuardarCambios(catalogo);
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
     public void VolverADisponible(int idCatalogo, string idInstitucional, string dniResponsable)
@@ -97,7 +98,7 @@ public class ServicioUnidades
         }
 
         TraduccionDeErrores.Ejecutar(unidad.Disponible);
-        GuardarCambios(catalogo);
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
     public void DarDeBaja(int idCatalogo, string idInstitucional, string dniResponsable)
@@ -107,22 +108,7 @@ public class ServicioUnidades
         UnidadFisica unidad = ObtenerUnidad(catalogo, idInstitucional);
 
         TraduccionDeErrores.Ejecutar(unidad.DarDeBaja);
-        GuardarCambios(catalogo);
-    }
-
-    // Ultima barrera: si la base rechaza el guardado (por ejemplo un indice unico), la UI recibe un ServicioException.
-    private void GuardarCambios(Catalogo catalogo)
-    {
-        try
-        {
-            _repositorioCatalogo.ActualizarCatalogo(catalogo);
-        }
-        catch (DbUpdateException ex)
-        {
-            throw new ServicioException(
-                "No se pudieron guardar los cambios; verifique que el id institucional y el numero de serie " +
-                "no esten repetidos", ex);
-        }
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
     // Los campos opcionales en blanco se guardan como null: "sin numero de serie" no es lo mismo que "   ".
