@@ -176,7 +176,7 @@ public class ServicioPrestamo
             throw new ServicioException("El solicitante esta desactivado");
         }
 
-        if (!solicitante.Tipo.TienePermiso(Permiso.SolicitarPrestamo))
+        if (!solicitante.TienePermiso(Permiso.SolicitarPrestamo))
         {
             throw new ServicioException("El solicitante no tiene permiso para solicitar prestamos");
         }
@@ -188,9 +188,7 @@ public class ServicioPrestamo
     {
         Usuario? usuario = _usuarios.ObtenerUsuarioPorDni(dni);
 
-        if (usuario is null
-            || usuario.Estado == EstadoUsuario.Desactivado
-            || !usuario.Tipo.TienePermiso(permiso))
+        if (usuario is null || !usuario.EstaHabilitadoPara(permiso))
         {
             throw new ServicioException(mensaje);
         }
