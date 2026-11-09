@@ -1,6 +1,7 @@
 ﻿using Data.Repositorios;
 using Dominio;
 using DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace Servicios;
 
@@ -50,7 +51,7 @@ public class ServicioUnidades
 
         TraduccionDeErrores.Ejecutar(() =>
             tipo.AgregarUnidad(new UnidadFisica(idInstitucional, ubicacionFisica, numeroSerie)));
-        _repositorioCatalogo.ActualizarCatalogo(catalogo);
+        GuardarCambios(catalogo);
     }
 
     public void Modificar(int idCatalogo, DatosUnidadDto datos, string dniResponsable)
@@ -107,6 +108,21 @@ public class ServicioUnidades
 
         TraduccionDeErrores.Ejecutar(unidad.DarDeBaja);
         _repositorioCatalogo.ActualizarCatalogo(catalogo);
+    }
+
+    // Ultima barrera: si la base rechaza el guardado (por ejemplo un indice unico), la UI recibe un ServicioException.
+    private void GuardarCambios(Catalogo catalogo)
+    {
+        try
+        {
+            _repositorioCatalogo.ActualizarCatalogo(catalogo);
+        }
+        catch (DbUpdateException ex)
+        {
+            throw new ServicioException(
+                "No se pudieron guardar los cambios; verifique que el id institucional y el numero de serie " +
+                "no esten repetidos", ex);
+        }
     }
 
     // Los campos opcionales en blanco se guardan como null: "sin numero de serie" no es lo mismo que "   ".
