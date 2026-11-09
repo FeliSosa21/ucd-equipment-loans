@@ -734,6 +734,15 @@ public sealed class UsuarioTests
         Assert.IsFalse(usuario.EstaHabilitadoPara(Permiso.EvaluarSolicitud));
     }
 
+    [TestMethod]
+    public void EstaHabilitadoPara_UsuarioActivoSinElPermiso_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante());
+
+        Assert.IsFalse(usuario.EstaHabilitadoPara(Permiso.EvaluarSolicitud));
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
