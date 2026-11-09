@@ -75,10 +75,11 @@ public class ServicioTiposEquipamiento
     public void Discontinuar(int idCatalogo, string nombre, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        TipoEquipamiento tipo = ObtenerTipo(
-            OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo), nombre);
+        Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
+        TipoEquipamiento tipo = ObtenerTipo(catalogo, nombre);
 
         TraduccionDeErrores.Ejecutar(tipo.Discontinuar);
+        _repositorioCatalogo.ActualizarCatalogo(catalogo);
     }
 
     // Foro del curso: un tipo discontinuado puede volver a activarse.
