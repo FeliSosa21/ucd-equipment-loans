@@ -38,6 +38,7 @@ public class ServicioInventario
 
     public List<CantidadesPorEstadoDto> ContarPorCategoria(int idCatalogo, string dniUsuario)
     {
+        ValidarResponsable(dniUsuario);
         IReadOnlyCollection<TipoEquipamiento> tipos = ObtenerTipos(idCatalogo);
         List<CantidadesPorEstadoDto> filas = new List<CantidadesPorEstadoDto>();
         foreach (Categoria categoria in Enum.GetValues<Categoria>())
