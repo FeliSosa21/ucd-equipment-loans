@@ -785,6 +785,21 @@ public class ServicioUnidadesTests
         Assert.AreEqual("Lampara nueva", guardada.Observaciones);
     }
 
+    [DataTestMethod]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void Modificar_NumeroDeSerieVacioOConEspacios_SeGuardaNull(string numeroSerie)
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001", numeroSerie: "SN123"));
+        ServicioUnidades servicio = CrearServicio(proyector);
+
+        servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: numeroSerie),
+            DniFuncionario);
+
+        Assert.IsNull(LeerUnidad("PRY-0001")!.NumSerie);
+    }
+
     private ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
