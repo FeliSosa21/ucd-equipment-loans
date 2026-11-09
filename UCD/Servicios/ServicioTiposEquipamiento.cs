@@ -69,6 +69,7 @@ public class ServicioTiposEquipamiento
         TraduccionDeErrores.Ejecutar(() =>
             tipo.Modificar(nombreNuevo, OperacionesComunes.Normalizar(datos.Descripcion), datos.DuracionMaxPrestamo,
                 datos.RequiereAprobacion, categoria));
+        _repositorioCatalogo.ActualizarCatalogo(catalogo);
     }
 
     public void Discontinuar(int idCatalogo, string nombre, string dniResponsable)
