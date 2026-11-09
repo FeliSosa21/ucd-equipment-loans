@@ -86,10 +86,11 @@ public class ServicioTiposEquipamiento
     public void Reactivar(int idCatalogo, string nombre, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        TipoEquipamiento tipo = ObtenerTipo(
-            OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo), nombre);
+        Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
+        TipoEquipamiento tipo = ObtenerTipo(catalogo, nombre);
 
         TraduccionDeErrores.Ejecutar(tipo.Reactivar);
+        _repositorioCatalogo.ActualizarCatalogo(catalogo);
     }
 
     public string ObtenerNombreCatalogo(int idCatalogo)
