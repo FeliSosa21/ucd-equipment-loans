@@ -561,6 +561,20 @@ public class ServicioTiposEquipamientoTests
             servicio.Listar(_idCatalogo, new FiltroTiposDto(), "11111111"));
     }
 
+    [TestMethod]
+    public void Registrar_DatosValidos_SeLeeConOtroContexto()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
+
+        servicio.Registrar(_idCatalogo, datos, DniSupervisor);
+
+        TipoEquipamiento? guardado = LeerTipo("Camara Canon EOS");
+        Assert.IsNotNull(guardado);
+        Assert.AreEqual(Categoria.Audiovisual, guardado.Categoria);
+        Assert.AreEqual(EstadoTipoEquipamiento.Activo, guardado.Estado);
+    }
+
     private ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
@@ -596,6 +610,12 @@ public class ServicioTiposEquipamientoTests
         Catalogo catalogo = repositorio.ObtenerCatalogoActivoPorId(_idCatalogo)!;
         catalogo.DarDeBaja();
         repositorio.ActualizarCatalogo(catalogo);
+    }
+
+    private TipoEquipamiento? LeerTipo(string nombre)
+    {
+        using SqlContext lectura = _entorno.NuevoContexto();
+        return new RepositorioCatalogoSql(lectura).ObtenerTipoPorNombre(_idCatalogo, nombre);
     }
 
     private List<TipoEquipamientoDetalleDto> ListarTodos(ServicioTiposEquipamiento servicio)
