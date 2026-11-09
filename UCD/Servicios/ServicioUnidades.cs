@@ -102,9 +102,11 @@ public class ServicioUnidades
     public void DarDeBaja(int idCatalogo, string idInstitucional, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        UnidadFisica unidad = ObtenerUnidad(ObtenerCatalogoActivo(idCatalogo), idInstitucional);
+        Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
+        UnidadFisica unidad = ObtenerUnidad(catalogo, idInstitucional);
 
         TraduccionDeErrores.Ejecutar(unidad.DarDeBaja);
+        _repositorioCatalogo.ActualizarCatalogo(catalogo);
     }
 
     // Los campos opcionales en blanco se guardan como null: "sin numero de serie" no es lo mismo que "   ".
