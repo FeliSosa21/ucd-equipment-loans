@@ -58,8 +58,12 @@ public partial class Unidades
         try
         {
             _tipos = ServicioTipos.Listar(_idCatalogo, new FiltroTiposDto(), DniUsuario);
-            _unidades = ServicioUnidades.Listar(ValoresDeFiltro.ValorONulo(_tipoFiltro),
-                ValoresDeFiltro.ValorONulo(_estadoFiltro));
+            FiltroUnidadesDto filtro = new FiltroUnidadesDto
+            {
+                NombreTipo = ValoresDeFiltro.ValorONulo(_tipoFiltro),
+                Estado = ValoresDeFiltro.ValorONulo(_estadoFiltro)
+            };
+            _unidades = ServicioUnidades.Listar(_idCatalogo, filtro, DniUsuario);
         }
         catch (ServicioException ex)
         {
@@ -162,12 +166,12 @@ public partial class Unidades
         {
             if (EsAlta())
             {
-                ServicioUnidades.Registrar(_datos, DniUsuario);
+                ServicioUnidades.Registrar(_idCatalogo, _datos, DniUsuario);
                 _exito = $"Se registró la unidad {id}.";
             }
             else
             {
-                ServicioUnidades.Modificar(_datos, DniUsuario);
+                ServicioUnidades.Modificar(_idCatalogo, _datos, DniUsuario);
                 _exito = $"Se guardaron los cambios de la unidad {id}.";
             }
 
@@ -200,7 +204,7 @@ public partial class Unidades
         CerrarTodo();
         try
         {
-            ServicioUnidades.EnviarAMantenimiento(unidad.IdInstitucional, DniUsuario);
+            ServicioUnidades.EnviarAMantenimiento(_idCatalogo, unidad.IdInstitucional, DniUsuario);
             _exito = $"La unidad {unidad.IdInstitucional} pasó a mantenimiento.";
         }
         catch (ServicioException ex)
@@ -222,7 +226,7 @@ public partial class Unidades
         CerrarTodo();
         try
         {
-            ServicioUnidades.VolverADisponible(unidad.IdInstitucional, DniUsuario);
+            ServicioUnidades.VolverADisponible(_idCatalogo, unidad.IdInstitucional, DniUsuario);
             _exito = $"La unidad {unidad.IdInstitucional} volvió a estar disponible.";
         }
         catch (ServicioException ex)
@@ -253,7 +257,7 @@ public partial class Unidades
         _aDarDeBaja = null;
         try
         {
-            ServicioUnidades.DarDeBaja(id, DniUsuario);
+            ServicioUnidades.DarDeBaja(_idCatalogo, id, DniUsuario);
             _exito = $"Se dio de baja la unidad {id}.";
         }
         catch (ServicioException ex)
