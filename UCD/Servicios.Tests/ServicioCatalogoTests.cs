@@ -179,6 +179,21 @@ public class ServicioCatalogoTests
     }
 
     [TestMethod]
+    public void ConsultarTipos_TipoConElMismoNombreEnOtroCatalogo_NoAparece()
+    {
+        var servicio = CrearServicio(CrearTipo(nombre: "Teclado HP"));
+        var tipoDelOtroCatalogo = CrearTipo(nombre: "Teclado HP");
+        tipoDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "EQP-0009"));
+        GuardarOtroCatalogo("Catalogo Secundario", tipoDelOtroCatalogo, CrearTipo(nombre: "Proyector Sony"));
+
+        var resultado = servicio.ConsultarTipos(_idCatalogo, new FiltroCatalogoDto(), DniDocente);
+
+        Assert.AreEqual(1, resultado.Count);
+        Assert.AreEqual("Teclado HP", resultado[0].Nombre);
+        Assert.AreEqual(0, resultado[0].CantidadDisponibles);
+    }
+
+    [TestMethod]
     public void ConsultarTipos_FiltroNull_LanzaArgumentNullException()
     {
         var teclado = CrearTipo(nombre: "Teclado HP");
@@ -247,6 +262,17 @@ public class ServicioCatalogoTests
         _idCatalogo = _entorno.GuardarCatalogo(catalogo);
         _entorno.GuardarUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente());
         return new ServicioCatalogo(_entorno.Catalogos, _entorno.Usuarios);
+    }
+
+    private void GuardarOtroCatalogo(string nombre, params TipoEquipamiento[] tipos)
+    {
+        var catalogo = new Catalogo(nombre);
+        foreach (var tipo in tipos)
+        {
+            catalogo.AgregarTipo(tipo);
+        }
+
+        _entorno.GuardarCatalogo(catalogo);
     }
 
     private void DarDeBajaElCatalogo()
