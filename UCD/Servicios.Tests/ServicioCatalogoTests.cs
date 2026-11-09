@@ -407,6 +407,15 @@ public class ServicioCatalogoTests
         Assert.AreEqual("Catalogo Central", resultado[1].Nombre);
     }
 
+    [TestMethod]
+    public void ListarCatalogos_UsuarioSinPermiso_LanzaServicioException()
+    {
+        var servicio = CrearServicio();
+        _entorno.GuardarUsuario(DniSinPermisos, "sinpermisos@ucd.edu.uy", TipoUsuario.SinPermisos());
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ListarCatalogos(DniSinPermisos));
+    }
+
     private ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var catalogo = new Catalogo("Catalogo Central");
