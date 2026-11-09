@@ -44,7 +44,7 @@ public class ServicioUnidades
         TipoEquipamiento tipo = OperacionesComunes.ObtenerTipo(_repositorioCatalogo, idCatalogo, datos.NombreTipo);
         string idInstitucional = OperacionesComunes.Normalizar(datos.IdInstitucional);
         string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
-        ValidarIdDisponible(catalogo, idInstitucional);
+        ValidarIdDisponible(idInstitucional);
         ValidarSerieDisponible(catalogo, numeroSerie, null);
         string ubicacionFisica = OperacionesComunes.Normalizar(datos.UbicacionFisica);
 
@@ -157,9 +157,10 @@ public class ServicioUnidades
         return unidad;
     }
 
-    private static void ValidarIdDisponible(Catalogo catalogo, string idInstitucional)
+    // El ID institucional es unico en todo el sistema, no solo dentro del catalogo.
+    private void ValidarIdDisponible(string idInstitucional)
     {
-        if (BuscarUnidad(catalogo, idInstitucional) is not null)
+        if (_repositorioCatalogo.ExisteUnidadConIdInstitucional(idInstitucional))
         {
             throw new ServicioException("Ya existe una unidad con ese id institucional");
         }
