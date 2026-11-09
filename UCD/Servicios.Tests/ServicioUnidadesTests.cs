@@ -848,6 +848,18 @@ public class ServicioUnidadesTests
         Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
     }
 
+    [TestMethod]
+    public void Modificar_FallaElGuardado_LanzaServicioException()
+    {
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
+        ServicioUnidades servicio = CrearServicioQueFallaAlGuardar(proyector);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: "SN999"),
+                DniFuncionario));
+    }
+
     private ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
