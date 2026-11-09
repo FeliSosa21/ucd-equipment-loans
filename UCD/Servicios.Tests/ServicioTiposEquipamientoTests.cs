@@ -568,6 +568,17 @@ public class ServicioTiposEquipamientoTests
         Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniSupervisor));
     }
 
+    [TestMethod]
+    public void Modificar_FallaElGuardado_LanzaServicioException()
+    {
+        ServicioTiposEquipamiento servicio =
+            CrearServicioQueFallaAlGuardar(CrearTipo("Camara Canon EOS", Categoria.Audiovisual));
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS R", categoria: "Audiovisual");
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Modificar(_idCatalogo, CrearModificacion("Camara Canon EOS", datos), DniSupervisor));
+    }
+
     private ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
