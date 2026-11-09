@@ -9,6 +9,7 @@ namespace Servicios.Tests;
 public class ServicioInventarioTests
 {
     private const string DniFuncionario = "12345672";
+    private const string DniDocente = "45678905";
 
     private ContextoDePrueba _entorno = null!;
     private int _idCatalogo;
@@ -174,6 +175,16 @@ public class ServicioInventarioTests
         List<CantidadesPorEstadoDto> resultado = servicio.ContarPorCategoria(_idCatalogo, DniFuncionario);
 
         Assert.AreEqual(1, BuscarFila(resultado, "Computacion").Total);
+    }
+
+    [TestMethod]
+    public void ContarPorTipo_UsuarioSinPermiso_LanzaServicioException()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+        _entorno.GuardarUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente());
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ContarPorTipo(_idCatalogo, new FiltroInventarioDto(), DniDocente));
     }
 
     private ServicioInventario CrearServicio(params TipoEquipamiento[] tipos)
