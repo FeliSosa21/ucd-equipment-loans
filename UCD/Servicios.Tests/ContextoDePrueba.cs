@@ -12,6 +12,7 @@ internal sealed class ContextoDePrueba : IDisposable
     private const string ContrasenaDePrueba = "VivaLaOrt2026";
 
     private readonly DbContextOptions<SqlContext> _opciones;
+    private readonly List<SqlContext> _contextosQueFallan = new List<SqlContext>();
 
     public SqlContext Contexto { get; }
     public RepositorioUsuarioSql Usuarios { get; }
@@ -32,6 +33,13 @@ internal sealed class ContextoDePrueba : IDisposable
     public SqlContext NuevoContexto()
     {
         return new SqlContext(_opciones);
+    }
+
+    public SqlContext NuevoContextoQueFallaAlGuardar()
+    {
+        SqlContext contexto = new ContextoQueFallaAlGuardar(_opciones);
+        _contextosQueFallan.Add(contexto);
+        return contexto;
     }
 
     public int GuardarCatalogo(Catalogo catalogo)
@@ -57,6 +65,10 @@ internal sealed class ContextoDePrueba : IDisposable
     public void Dispose()
     {
         Contexto.Dispose();
+        foreach (SqlContext contexto in _contextosQueFallan)
+        {
+            contexto.Dispose();
+        }
     }
 
     // Con HasData los seis tipos ya vienen sembrados; si el mapeo deja de sembrarlos, se cargan aca.

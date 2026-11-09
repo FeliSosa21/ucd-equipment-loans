@@ -838,6 +838,16 @@ public class ServicioUnidadesTests
         Assert.AreEqual(EstadoUnidadFisica.DadaDeBaja, LeerUnidad("PRY-0001")!.Estado);
     }
 
+    [TestMethod]
+    public void Registrar_FallaElGuardado_LanzaServicioException()
+    {
+        ServicioUnidades servicio = CrearServicioQueFallaAlGuardar(CrearTipo("Proyector Epson"));
+        DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
+            numeroSerie: "SN123");
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
+    }
+
     private ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
@@ -881,6 +891,13 @@ public class ServicioUnidadesTests
         Catalogo catalogo = new RepositorioCatalogoSql(lectura).ObtenerCatalogoActivoPorId(_idCatalogo)!;
         return catalogo.Tipos.SelectMany(tipo => tipo.Unidades)
             .FirstOrDefault(unidad => unidad.IdInstitucional == idInstitucional);
+    }
+
+    private ServicioUnidades CrearServicioQueFallaAlGuardar(params TipoEquipamiento[] tipos)
+    {
+        CrearServicio(tipos);
+        SqlContext contexto = _entorno.NuevoContextoQueFallaAlGuardar();
+        return new ServicioUnidades(new RepositorioCatalogoSql(contexto), new RepositorioUsuarioSql(contexto));
     }
 
     private List<UnidadDetalleDto> ListarTodas(ServicioUnidades servicio)
