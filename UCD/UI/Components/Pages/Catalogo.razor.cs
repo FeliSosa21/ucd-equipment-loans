@@ -7,9 +7,6 @@ namespace UI.Components.Pages;
 
 public partial class Catalogo
 {
-    // Hasta que exista el selector de catalogo (T4).
-    private const int IdCatalogoProvisorio = 1;
-
     private List<TipoEquipamientoDto> _tipos = new List<TipoEquipamientoDto>();
     private string? _error;
     private string _categoria = string.Empty;
@@ -44,7 +41,7 @@ public partial class Catalogo
 
         try
         {
-            _tipos = ServicioCatalogo.ConsultarTipos(IdCatalogoProvisorio, filtro, DniUsuario);
+            _tipos = ServicioCatalogo.ConsultarTipos(ObtenerIdCatalogoProvisorio(), filtro, DniUsuario);
             CerrarUnidadesSiElTipoNoEstaEnLaLista();
         }
         catch (ServicioException ex)
@@ -53,6 +50,18 @@ public partial class Catalogo
             _tipos = new List<TipoEquipamientoDto>();
             CerrarUnidades();
         }
+    }
+
+    // Provisorio hasta que exista el selector de catalogo (T4): el primer catalogo activo.
+    private int ObtenerIdCatalogoProvisorio()
+    {
+        List<CatalogoDto> catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
+        if (catalogos.Count == 0)
+        {
+            throw new ServicioException("No hay catalogos disponibles");
+        }
+
+        return catalogos[0].Id;
     }
 
     private string? EstadoAFiltrar()
@@ -88,7 +97,7 @@ public partial class Catalogo
         _error = null;
         try
         {
-            _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(IdCatalogoProvisorio, nombreTipo, DniUsuario);
+            _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(ObtenerIdCatalogoProvisorio(), nombreTipo, DniUsuario);
             _tipoSeleccionado = nombreTipo;
         }
         catch (ServicioException ex)
