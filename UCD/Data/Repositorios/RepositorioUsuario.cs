@@ -11,6 +11,9 @@ public class RepositorioUsuario
         _memoria = memoria;
     }
 
+    private IEnumerable<Usuario> UsuariosVigentes =>
+        _memoria.Usuarios.Where(usuario => !usuario.EstaEliminado);
+
     public void AgregarUsuario(Usuario usuario)
     {
         _memoria.Usuarios.Add(usuario);
@@ -18,37 +21,62 @@ public class RepositorioUsuario
 
     public Usuario? ObtenerUsuarioPorDni(string dni)
     {
-        return _memoria.Usuarios.FirstOrDefault(usuario => usuario.Dni == dni);
+        return UsuariosVigentes.FirstOrDefault(usuario => usuario.Dni == dni);
     }
 
     public Usuario? ObtenerUsuarioPorCorreo(string correo)
     {
-        return _memoria.Usuarios.FirstOrDefault(usuario =>
+        return UsuariosVigentes.FirstOrDefault(usuario =>
             string.Equals(usuario.Correo, correo, StringComparison.OrdinalIgnoreCase));
     }
 
-    public IReadOnlyList<Usuario> ObtenerPaginaDeUsuarios(string? filtro, int pagina, int tamanoPagina)
+    public IReadOnlyList<Usuario> ObtenerUsuarios(FiltroUsuarios filtro)
     {
-        return FiltrarPor(filtro)
+        ArgumentNullException.ThrowIfNull(filtro);
+
+        if (!filtro.TieneCriterios())
+        {
+            return new List<Usuario>();
+        }
+
+        IEnumerable<Usuario> usuarios = FiltrarPorTexto(UsuariosVigentes, filtro.TextoNormalizado);
+        usuarios = FiltrarPorTipo(usuarios, filtro.Tipo);
+
+        return usuarios
             .OrderBy(usuario => usuario.Apellido)
             .ThenBy(usuario => usuario.Nombre)
             .ThenBy(usuario => usuario.Dni)
-            .Skip((pagina - 1) * tamanoPagina)
-            .Take(tamanoPagina)
             .ToList();
     }
 
-    public int ContarUsuarios(string? filtro)
+    public void EliminarUsuario(Usuario usuario)
     {
-        return FiltrarPor(filtro).Count();
+        ArgumentNullException.ThrowIfNull(usuario);
+
+        usuario.Eliminar();
     }
 
-    // Busca el texto en nombre, apellido, cedula o correo; sin texto no filtra.
-    private IEnumerable<Usuario> FiltrarPor(string? filtro)
+    private IEnumerable<Usuario> FiltrarPorTexto(IEnumerable<Usuario> usuarios, string? textoNormalizado)
     {
-        string busqueda = filtro?.Trim() ?? string.Empty;
+        if (textoNormalizado is null)
+        {
+            return usuarios;
+        }
 
-        return _memoria.Usuarios.Where(usuario => $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
-            .Contains(busqueda, StringComparison.OrdinalIgnoreCase));
+        return usuarios.Where(usuario =>
+            usuario.Nombre.Contains(textoNormalizado, StringComparison.OrdinalIgnoreCase)
+            || usuario.Apellido.Contains(textoNormalizado, StringComparison.OrdinalIgnoreCase)
+            || usuario.Dni.Contains(textoNormalizado)
+            || usuario.Correo.Contains(textoNormalizado, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private IEnumerable<Usuario> FiltrarPorTipo(IEnumerable<Usuario> usuarios, TipoUsuario? tipo)
+    {
+        if (tipo is null)
+        {
+            return usuarios;
+        }
+
+        return usuarios.Where(usuario => usuario.Tipo == tipo);
     }
 }

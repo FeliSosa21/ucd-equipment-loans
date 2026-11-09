@@ -6,18 +6,23 @@ namespace Servicios;
 
 public class ServicioUsuario
 {
-    private readonly RepositorioUsuario _repositorio;
-    private readonly RepositorioTipoUsuario _repositorioTipos;
+    private readonly RepositorioUsuarioSql _repositorio;
+    private readonly RepositorioTipoUsuarioSql _repositorioTipos;
+    private readonly RegistradorDeAuditoria _auditoria;
 
-    public ServicioUsuario(RepositorioUsuario repositorio, RepositorioTipoUsuario repositorioTipos)
+    public ServicioUsuario(RepositorioUsuarioSql repositorio, RepositorioTipoUsuarioSql repositorioTipos,
+        RegistradorDeAuditoria auditoria)
     {
         _repositorio = repositorio;
         _repositorioTipos = repositorioTipos;
+        _auditoria = auditoria;
     }
 
     public void Registrar(UsuarioDto dto)
     {
-        Agregar(dto);
+        Usuario usuario = Agregar(dto);
+        _auditoria.RegistrarDeUsuario(AccionAuditada.RegistroDeUsuario, usuario,
+            $"Se registró {usuario.NombreCompletoConDni}");
     }
 
     internal Usuario Agregar(UsuarioDto dto)
@@ -35,7 +40,15 @@ public class ServicioUsuario
             throw new ServicioException(nameof(Usuario.Correo), "El correo ya existe");
         }
 
-        _repositorio.AgregarUsuario(usuario);
+        try
+        {
+            _repositorio.AgregarUsuario(usuario);
+        }
+        catch (InvalidOperationException excepcion)
+        {
+            throw new ServicioException("Ya existe un usuario con ese DNI o correo", excepcion);
+        }
+
         return usuario;
     }
 

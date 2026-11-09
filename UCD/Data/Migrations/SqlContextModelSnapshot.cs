@@ -141,6 +141,28 @@ namespace Data.Migrations
                     b.ToTable("Prestamos", (string)null);
                 });
 
+            modelBuilder.Entity("Dominio.RegistroAuditoria", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Accion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Detalle")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RegistrosAuditoria", (string)null);
+                });
+
             modelBuilder.Entity("Dominio.TipoEquipamiento", b =>
                 {
                     b.Property<int>("Id")
@@ -520,6 +542,42 @@ namespace Data.Migrations
                     b.Navigation("Solicitante");
 
                     b.Navigation("TipoEquipamiento");
+                });
+
+            modelBuilder.Entity("Dominio.RegistroAuditoria", b =>
+                {
+                    b.OwnsOne("Dominio.RegistroDeAccion", "_registro", b1 =>
+                        {
+                            b1.Property<int>("RegistroAuditoriaId")
+                                .HasColumnType("int");
+
+                            b1.Property<DateTime>("FechaHora")
+                                .HasColumnType("datetime2")
+                                .HasColumnName("FechaHora");
+
+                            b1.Property<int?>("ResponsableId")
+                                .HasColumnType("int")
+                                .HasColumnName("ResponsableId");
+
+                            b1.HasKey("RegistroAuditoriaId");
+
+                            b1.HasIndex("ResponsableId");
+
+                            b1.ToTable("RegistrosAuditoria");
+
+                            b1.WithOwner()
+                                .HasForeignKey("RegistroAuditoriaId");
+
+                            b1.HasOne("Dominio.Usuario", "Responsable")
+                                .WithMany()
+                                .HasForeignKey("ResponsableId")
+                                .OnDelete(DeleteBehavior.Restrict);
+
+                            b1.Navigation("Responsable");
+                        });
+
+                    b.Navigation("_registro")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Dominio.TipoEquipamiento", b =>

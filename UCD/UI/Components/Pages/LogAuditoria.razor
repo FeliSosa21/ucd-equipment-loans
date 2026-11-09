@@ -1,0 +1,66 @@
+@page "/log-auditoria"
+@using DTOs
+@using Servicios
+@inherits PaginaConSesion
+@inject ServicioAuditoria ServicioAuditoria
+@inject TimeProvider Reloj
+
+<PageTitle>UCD · Log de auditoría</PageTitle>
+
+<div class="page-header">
+    <h1>Log de auditoría</h1>
+    <p>Registros de usuarios, préstamos y devoluciones, con quién hizo cada acción. Las fechas incluyen el día completo.</p>
+</div>
+
+<div class="toolbar">
+    <div>
+        <label class="lbl" for="filtro-desde">Desde</label>
+        <input id="filtro-desde" class="field" type="date"
+               aria-invalid="@_errores.AriaInvalid(CampoDesde)"
+               aria-describedby="@_errores.IdDelError(CampoDesde, "filtro-desde")"
+               @bind="_desde" @bind:after="Recargar" />
+        <ErrorDeCampo Errores="_errores" Campo="@CampoDesde" IdDelCampo="filtro-desde" />
+    </div>
+    <div>
+        <label class="lbl" for="filtro-hasta">Hasta</label>
+        <input id="filtro-hasta" class="field" type="date" @bind="_hasta" @bind:after="Recargar" />
+    </div>
+    <div>
+        <label class="lbl" for="filtro-dni">DNI del responsable</label>
+        <input id="filtro-dni" class="field mono" inputmode="numeric" spellcheck="false"
+               @bind="_dni" @bind:event="oninput" @bind:after="Recargar" />
+    </div>
+</div>
+
+@if (_errores.General is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_errores.General</div>
+}
+
+<div class="card table-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha y hora</th>
+                <th>Usuario</th>
+                <th>Acción</th>
+                <th>Detalle</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (RegistroAuditoriaDto registro in _registros)
+            {
+                <tr>
+                    <td class="mono">@registro.FechaHora</td>
+                    <td>@registro.Usuario</td>
+                    <td>@TextosVisibles.AccionAuditada(registro.Accion)</td>
+                    <td>@registro.Detalle</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!_registros.Any() && !HayError)
+    {
+        <EstadoVacio Titulo="@TituloSinRegistros" />
+    }
+</div>
