@@ -50,6 +50,7 @@ public class ServicioUnidades
 
         TraduccionDeErrores.Ejecutar(() =>
             tipo.AgregarUnidad(new UnidadFisica(idInstitucional, ubicacionFisica, numeroSerie)));
+        _repositorioCatalogo.ActualizarCatalogo(catalogo);
     }
 
     public void Modificar(int idCatalogo, DatosUnidadDto datos, string dniResponsable)
