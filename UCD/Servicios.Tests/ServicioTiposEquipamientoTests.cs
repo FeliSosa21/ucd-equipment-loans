@@ -579,6 +579,14 @@ public class ServicioTiposEquipamientoTests
             servicio.Modificar(_idCatalogo, CrearModificacion("Camara Canon EOS", datos), DniSupervisor));
     }
 
+    [TestMethod]
+    public void Listar_FiltroNull_LanzaArgumentNullException()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio();
+
+        Assert.ThrowsException<ArgumentNullException>(() => servicio.Listar(_idCatalogo, null!, DniSupervisor));
+    }
+
     private ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
