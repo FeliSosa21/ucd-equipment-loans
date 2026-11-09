@@ -141,6 +141,41 @@ public class ServicioInventarioTests
         Assert.ThrowsException<ArgumentNullException>(() => servicio.ContarPorTipo(_idCatalogo, null!, DniFuncionario));
     }
 
+    [TestMethod]
+    public void ContarPorTipo_CatalogoDadoDeBaja_LanzaServicioException()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+        DarDeBajaElCatalogo();
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ContarPorTipo(_idCatalogo, new FiltroInventarioDto(), DniFuncionario));
+    }
+
+    [TestMethod]
+    public void ContarPorCategoria_CatalogoDadoDeBaja_LanzaServicioException()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+        DarDeBajaElCatalogo();
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ContarPorCategoria(_idCatalogo, DniFuncionario));
+    }
+
+    [TestMethod]
+    public void ContarPorCategoria_UnidadesDeOtroCatalogo_NoSeCuentan()
+    {
+        TipoEquipamiento notebook = CrearTipo(nombre: "Notebook", categoria: Categoria.Computacion);
+        notebook.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0001"));
+        ServicioInventario servicio = CrearServicio(notebook);
+        TipoEquipamiento notebookDelOtroCatalogo = CrearTipo(nombre: "Notebook", categoria: Categoria.Computacion);
+        notebookDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0002"));
+        notebookDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0003"));
+        GuardarOtroCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
+
+        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorCategoria(_idCatalogo, DniFuncionario);
+
+        Assert.AreEqual(1, BuscarFila(resultado, "Computacion").Total);
+    }
+
     private ServicioInventario CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo Central");
@@ -152,6 +187,26 @@ public class ServicioInventarioTests
         _idCatalogo = _entorno.GuardarCatalogo(catalogo);
         _entorno.GuardarUsuario(DniFuncionario, "funcionario@ucd.edu.uy", TipoUsuario.FuncionarioCE());
         return new ServicioInventario(_entorno.Catalogos, _entorno.Usuarios);
+    }
+
+    private void GuardarOtroCatalogo(string nombre, params TipoEquipamiento[] tipos)
+    {
+        Catalogo catalogo = new Catalogo(nombre);
+        foreach (TipoEquipamiento tipo in tipos)
+        {
+            catalogo.AgregarTipo(tipo);
+        }
+
+        _entorno.GuardarCatalogo(catalogo);
+    }
+
+    private void DarDeBajaElCatalogo()
+    {
+        using SqlContext contexto = _entorno.NuevoContexto();
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contexto);
+        Catalogo catalogo = repositorio.ObtenerCatalogoActivoPorId(_idCatalogo)!;
+        catalogo.DarDeBaja();
+        repositorio.ActualizarCatalogo(catalogo);
     }
 
     private static TipoEquipamiento CrearTipo(string nombre = "Proyector", Categoria categoria = Categoria.Audiovisual)
