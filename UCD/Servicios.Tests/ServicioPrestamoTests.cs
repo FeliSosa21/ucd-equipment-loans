@@ -2,6 +2,7 @@
 using Data.Repositorios;
 using Dominio;
 using DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace Servicios.Tests;
 
@@ -31,61 +32,74 @@ public sealed class ServicioPrestamoTests
 
     private const string MotivoDeRechazo = "El equipo esta reservado para un examen";
 
+    private DbContextOptions<SqlContext> _opciones = null!;
+    private SqlContext _contexto = null!;
+    private int _idCatalogo;
+
+    [TestInitialize]
+    public void Inicializar()
+    {
+        _opciones = new DbContextOptionsBuilder<SqlContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        _contexto = new SqlContext(_opciones);
+    }
+
+    [TestCleanup]
+    public void Limpiar()
+    {
+        _contexto.Dispose();
+    }
+
     [TestMethod]
     public void Solicitar_DatosNulos_LanzaArgumentNullException()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
 
         Assert.ThrowsException<ArgumentNullException>(
             () => servicio.Solicitar(null!, DniDocente));
 
-        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
+        VerificarQueNoSeGuardoNiSePrestoNada(DniDocente);
     }
 
     [TestMethod]
     public void Solicitar_SolicitanteInexistente_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud();
 
         Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(datos, DniInexistente));
 
-        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniInexistente);
+        VerificarQueNoSeGuardoNiSePrestoNada(DniInexistente);
     }
 
     [TestMethod]
     public void Solicitar_SolicitanteDesactivado_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud();
 
         Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(datos, DniDocenteDesactivado));
 
-        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocenteDesactivado);
+        VerificarQueNoSeGuardoNiSePrestoNada(DniDocenteDesactivado);
     }
 
     [TestMethod]
     public void Solicitar_SolicitanteSinPermiso_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud();
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(
             () => servicio.Solicitar(datos, DniFuncionario));
         Assert.AreEqual("El solicitante no tiene permiso para solicitar prestamos", excepcion.Message);
 
-        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniFuncionario);
+        VerificarQueNoSeGuardoNiSePrestoNada(DniFuncionario);
     }
 
     [TestMethod]
     public void Solicitar_TipoSinAprobacionConUnidades_QuedaActivo()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud();
 
         PrestamoDto resultado = servicio.Solicitar(datos, DniDocente);
@@ -96,13 +110,13 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Solicitar_TipoSinAprobacionConUnidades_PrestaLaCantidadSolicitada()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud();
 
         servicio.Solicitar(datos, DniDocente);
 
-        TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoSinAprobacion)!;
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        TipoEquipamiento tipo = ObtenerTipoGuardado(contextoQueLee, NombreTipoSinAprobacion);
 
         Assert.AreEqual(CantidadSolicitadaPorDefecto,
             tipo.Unidades.Count(unidad => unidad.Estado == EstadoUnidadFisica.Prestada));
@@ -112,13 +126,14 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Solicitar_DatosValidos_LoGuarda()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud();
 
         servicio.Solicitar(datos, DniDocente);
 
-        IReadOnlyList<Prestamo> guardados = new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniDocente);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<Prestamo> guardados =
+            new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(DniDocente);
 
         Assert.AreEqual(1, guardados.Count);
         Assert.AreEqual(EstadoPrestamo.Activo, guardados[0].Estado);
@@ -127,14 +142,14 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Solicitar_DatosValidos_UsaElMomentoDelReloj()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud();
 
         servicio.Solicitar(datos, DniDocente);
 
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
         Prestamo guardado =
-            new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniDocente).Single();
+            new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(DniDocente).Single();
 
         Assert.AreEqual(FechaFija, guardado.FechaHoraPrestamo);
     }
@@ -142,14 +157,14 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Solicitar_DatosValidos_RegistraUnMovimientoDeSolicitud()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1);
 
         servicio.Solicitar(datos, DniDocente);
 
-        Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
-        List<Movimiento> solicitudes = new RepositorioMovimiento(memoria).ObtenerTodos()
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario docente = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(DniDocente)!;
+        List<Movimiento> solicitudes = LeerMovimientos(contextoQueLee)
             .Where(movimiento => movimiento.Tipo == TipoMovimiento.Solicitud).ToList();
 
         Assert.AreEqual(1, solicitudes.Count);
@@ -162,15 +177,15 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Solicitar_TipoSinAprobacionConUnidades_RegistraUnMovimientoDePrestamoPorUnidad()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud();
 
         servicio.Solicitar(datos, DniDocente);
 
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
         Prestamo guardado =
-            new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniDocente).Single();
-        List<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos()
+            new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(DniDocente).Single();
+        List<Movimiento> movimientos = LeerMovimientos(contextoQueLee)
             .Where(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo).ToList();
 
         Assert.AreEqual(CantidadSolicitadaPorDefecto, movimientos.Count);
@@ -188,13 +203,13 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Solicitar_TipoSinAprobacionConUnidades_RegistraUnaSolicitudYUnPrestamoPorUnidad()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud();
 
         servicio.Solicitar(datos, DniDocente);
 
-        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<Movimiento> movimientos = LeerMovimientos(contextoQueLee);
 
         CollectionAssert.AreEqual(
             new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Prestamo, TipoMovimiento.Prestamo },
@@ -211,8 +226,7 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Solicitar_TipoSinAprobacionSinUnidadesSuficientes_QuedaRechazadoConMotivo()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades);
 
         PrestamoDto resultado = servicio.Solicitar(datos, DniDocente);
@@ -225,37 +239,37 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Solicitar_TipoSinAprobacionSinUnidadesSuficientes_LoGuardaSinPrestarNiRegistrarMovimientosDePrestamo()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 4);
 
         servicio.Solicitar(datos, DniDocente);
 
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
         IReadOnlyList<Prestamo> guardados =
-            new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniDocente);
+            new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(DniDocente);
 
         Assert.AreEqual(1, guardados.Count);
         Assert.AreEqual(EstadoPrestamo.Rechazado, guardados[0].Estado);
 
         Assert.AreEqual(0, guardados[0].UnidadesAsignadas.Count);
-        TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoSinAprobacion)!;
+        TipoEquipamiento tipo = ObtenerTipoGuardado(contextoQueLee, NombreTipoSinAprobacion);
         Assert.AreEqual(3, tipo.CantidadDisponibles());
 
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos()
+        Assert.AreEqual(0, LeerMovimientos(contextoQueLee)
             .Count(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo));
     }
 
     [TestMethod]
     public void Solicitar_TipoSinAprobacionSinUnidadesSuficientes_RegistraUnMovimientoDeRechazo()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades, cantidadSolicitada: 1);
 
         servicio.Solicitar(datos, DniDocente);
 
-        Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
-        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario docente = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(DniDocente)!;
+        IReadOnlyList<Movimiento> movimientos = LeerMovimientos(contextoQueLee);
 
         CollectionAssert.AreEqual(
             new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
@@ -273,88 +287,84 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Solicitar_TipoConAprobacion_QuedaSolicitadoSinUnidades()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion);
 
         PrestamoDto resultado = servicio.Solicitar(datos, DniDocente);
 
         Assert.AreEqual("Solicitado", resultado.Estado);
 
-        TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoConAprobacion)!;
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        TipoEquipamiento tipo = ObtenerTipoGuardado(contextoQueLee, NombreTipoConAprobacion);
         Assert.AreEqual(3, tipo.CantidadDisponibles());
     }
 
     [TestMethod]
     public void Solicitar_TipoConAprobacion_LoGuardaSinRegistrarMovimientosDePrestamo()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion);
 
         servicio.Solicitar(datos, DniDocente);
 
-        IReadOnlyList<Prestamo> guardados = new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniDocente);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<Prestamo> guardados =
+            new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(DniDocente);
         Assert.AreEqual(1, guardados.Count);
         Assert.AreEqual(EstadoPrestamo.Solicitado, guardados[0].Estado);
 
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos()
+        Assert.AreEqual(0, LeerMovimientos(contextoQueLee)
             .Count(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo));
     }
 
     [TestMethod]
     public void Solicitar_TipoInexistente_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoInexistente);
 
         Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(datos, DniDocente));
 
-        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
+        VerificarQueNoSeGuardoNiSePrestoNada(DniDocente);
     }
 
     [TestMethod]
     public void Solicitar_TipoSinNombre_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: null!);
 
         Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(datos, DniDocente));
 
-        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
+        VerificarQueNoSeGuardoNiSePrestoNada(DniDocente);
     }
 
     [TestMethod]
     public void Solicitar_TipoDiscontinuado_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoDiscontinuado);
 
         Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(datos, DniDocente));
 
-        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
+        VerificarQueNoSeGuardoNiSePrestoNada(DniDocente);
     }
 
     [TestMethod]
     public void Solicitar_SuperaUnidadesPorPrestamo_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 3);
 
         Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(datos, DniEstudiante));
 
-        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniEstudiante);
+        VerificarQueNoSeGuardoNiSePrestoNada(DniEstudiante);
     }
 
     [TestMethod]
     public void Solicitar_UnidadesActivasMasSolicitadasSuperanElMaximo_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         servicio.Solicitar(CrearSolicitud(), DniEstudiante);
         SolicitudPrestamoDto segunda = CrearSolicitud(cantidadSolicitada: 1);
 
@@ -362,8 +372,10 @@ public sealed class ServicioPrestamoTests
             () => servicio.Solicitar(segunda, DniEstudiante));
         Assert.AreEqual("La cantidad solicitada supera el maximo de unidades del solicitante", excepcion.Message);
 
-        Assert.AreEqual(1, new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniEstudiante).Count);
-        TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoSinAprobacion)!;
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(1,
+            new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(DniEstudiante).Count);
+        TipoEquipamiento tipo = ObtenerTipoGuardado(contextoQueLee, NombreTipoSinAprobacion);
         Assert.IsTrue(tipo.Unidades.Single(unidad => unidad.IdInstitucional == "EQP-0003").EstaDisponible(),
             "La unidad EQP-0003 deberia seguir disponible");
     }
@@ -371,8 +383,7 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Solicitar_SolicitudesPendientesNoCuentanParaElMaximoDeUnidades()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion), DniEstudiante);
         SolicitudPrestamoDto segunda = CrearSolicitud();
 
@@ -385,8 +396,7 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Solicitar_SuperaPrestamosConcurrentes_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
 
         servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniEstudiante);
         servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1),
@@ -395,18 +405,19 @@ public sealed class ServicioPrestamoTests
 
         Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(tercera, DniEstudiante));
 
-        Assert.AreEqual(2, new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniEstudiante).Count);
-        Assert.AreEqual(1, new RepositorioMovimiento(memoria).ObtenerTodos()
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(2,
+            new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(DniEstudiante).Count);
+        Assert.AreEqual(1, LeerMovimientos(contextoQueLee)
             .Count(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo));
-        TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoSinAprobacion)!;
+        TipoEquipamiento tipo = ObtenerTipoGuardado(contextoQueLee, NombreTipoSinAprobacion);
         Assert.AreEqual(2, tipo.CantidadDisponibles());
     }
 
     [TestMethod]
     public void Solicitar_SolicitudesRechazadasPrevias_NoCuentanParaElLimite()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades), DniEstudiante);
         servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades), DniEstudiante);
 
@@ -418,27 +429,27 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Solicitar_CantidadCero_LanzaExcepcionConCausaDeDominio()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 0);
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(
             () => servicio.Solicitar(datos, DniDocente));
         Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
 
-        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
+        VerificarQueNoSeGuardoNiSePrestoNada(DniDocente);
     }
 
     [TestMethod]
     public void Solicitar_TipoSinAprobacionConUnidades_DevuelveSusDatos()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud();
 
         PrestamoDto resultado = servicio.Solicitar(datos, DniDocente);
 
-        Prestamo guardado = new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniDocente).Single();
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado =
+            new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(DniDocente).Single();
         Assert.AreEqual(guardado.Id, resultado.Id);
         Assert.AreEqual(NombreTipoSinAprobacion, resultado.TipoEquipamiento);
         Assert.AreEqual(CantidadSolicitadaPorDefecto, resultado.CantidadSolicitada);
@@ -451,8 +462,7 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Solicitar_DatosValidos_DevuelveLaFechaEsperadaDeDevolucion()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 1);
         DateTime fechaEsperada = new DateTime(2026, 10, 12);
 
@@ -466,22 +476,20 @@ public sealed class ServicioPrestamoTests
     [DataRow(" ")]
     public void Solicitar_TipoVacio_LanzaExcepcionConMensaje(string nombreTipo)
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: nombreTipo);
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(
             () => servicio.Solicitar(datos, DniDocente));
         Assert.AreEqual("Debe indicar un tipo de equipamiento", excepcion.Message);
 
-        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
+        VerificarQueNoSeGuardoNiSePrestoNada(DniDocente);
     }
 
     [TestMethod]
     public void Aprobar_SolicitudPendienteConUnidades_QuedaActivo()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idPrestamo = CrearSolicitudPendiente(servicio);
 
         PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
@@ -492,15 +500,15 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Aprobar_SolicitudPendienteConUnidades_AsignaLasUnidadesYGuardaElEvaluador()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idPrestamo = CrearSolicitudPendiente(servicio);
 
         servicio.Aprobar(idPrestamo, DniSupervisor);
 
-        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
-        TipoEquipamiento camara = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoConAprobacion)!;
-        Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
+        TipoEquipamiento camara = ObtenerTipoGuardado(contextoQueLee, NombreTipoConAprobacion);
+        Usuario supervisor = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(DniSupervisor)!;
 
         Assert.AreEqual(CantidadSolicitadaPorDefecto, guardado.UnidadesAsignadas.Count);
         Assert.AreEqual(1, camara.CantidadDisponibles());
@@ -510,17 +518,17 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Aprobar_SolicitudPendienteConUnidades_RegistraUnMovimientoDePrestamoPorUnidadConElEvaluador()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idPrestamo = CrearSolicitudPendiente(servicio);
         ServicioPrestamo servicioDeLaEvaluacion =
-            CrearServicioConReloj(memoria, new RelojFijo(FechaDeEvaluacion));
+            CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
 
         servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
 
-        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
-        Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
-        List<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos()
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
+        Usuario supervisor = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(DniSupervisor)!;
+        List<Movimiento> movimientos = LeerMovimientos(contextoQueLee)
             .Where(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo).ToList();
 
         Assert.AreEqual(CantidadSolicitadaPorDefecto, movimientos.Count);
@@ -538,17 +546,17 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Aprobar_SolicitudPendienteConUnidades_RegistraUnMovimientoDeAprobacionPorUnidadConElEvaluador()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idPrestamo = CrearSolicitudPendiente(servicio);
         ServicioPrestamo servicioDeLaEvaluacion =
-            CrearServicioConReloj(memoria, new RelojFijo(FechaDeEvaluacion));
+            CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
 
         servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
 
-        Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
-        Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
-        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario docente = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(DniDocente)!;
+        Usuario supervisor = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(DniSupervisor)!;
+        IReadOnlyList<Movimiento> movimientos = LeerMovimientos(contextoQueLee);
         List<Movimiento> aprobaciones = movimientos
             .Where(movimiento => movimiento.Tipo == TipoMovimiento.Aprobacion).ToList();
 
@@ -574,13 +582,13 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Aprobar_SinUnidadesSuficientes_QuedaRechazadoSinEvaluador()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idPrestamo = CrearSolicitudPendiente(servicio, tipoEquipamiento: NombreTipoConAprobacionSinUnidades);
 
         PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
 
-        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
 
         Assert.AreEqual("Rechazado", resultado.Estado);
         Assert.IsNull(guardado.Evaluador);
@@ -589,18 +597,18 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Aprobar_SinUnidadesSuficientes_RegistraUnMovimientoDeRechazo()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos =
             CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacionSinUnidades, cantidadSolicitada: 1);
         Guid idPrestamo = servicio.Solicitar(datos, DniDocente).Id;
         ServicioPrestamo servicioDeLaEvaluacion =
-            CrearServicioConReloj(memoria, new RelojFijo(FechaDeEvaluacion));
+            CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
 
         servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
 
-        Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
-        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario docente = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(DniDocente)!;
+        IReadOnlyList<Movimiento> movimientos = LeerMovimientos(contextoQueLee);
 
         CollectionAssert.AreEqual(
             new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
@@ -617,16 +625,16 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Aprobar_UnidadesInsuficientesPeroNoCero_QuedaRechazadoSinEvaluador()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idDelAdministrador = CrearSolicitudPendiente(servicio, dniSolicitante: DniAdministrador);
         servicio.Aprobar(idDelAdministrador, DniSupervisor);
         Guid idDelDocente = CrearSolicitudPendiente(servicio);
 
         PrestamoDto resultado = servicio.Aprobar(idDelDocente, DniSupervisor);
 
-        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idDelDocente);
-        TipoEquipamiento camara = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoConAprobacion)!;
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idDelDocente);
+        TipoEquipamiento camara = ObtenerTipoGuardado(contextoQueLee, NombreTipoConAprobacion);
 
         Assert.AreEqual("Rechazado", resultado.Estado);
         Assert.IsNull(guardado.Evaluador);
@@ -637,15 +645,14 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Aprobar_PrestamoInexistente_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idInexistente = Guid.NewGuid();
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(
             () => servicio.Aprobar(idInexistente, DniSupervisor));
 
         Assert.AreEqual("El prestamo no existe", excepcion.Message);
-        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
+        VerificarQueNoSeGuardoNiSePrestoNada(DniDocente);
     }
 
     [TestMethod]
@@ -654,8 +661,7 @@ public sealed class ServicioPrestamoTests
     [DataRow(DniInexistente)]
     public void Aprobar_EvaluadorNoHabilitado_LanzaExcepcion(string dniEvaluador)
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idPrestamo = CrearSolicitudPendiente(servicio);
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(
@@ -663,36 +669,38 @@ public sealed class ServicioPrestamoTests
 
         Assert.AreEqual("El usuario no tiene permiso para evaluar solicitudes", excepcion.Message);
 
-        VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
+        VerificarQueSigueSolicitadaSinPrestarNada(idPrestamo);
     }
 
     [TestMethod]
     public void Aprobar_SolicitanteDesactivadoDespuesDeSolicitar_LanzaExcepcionYSigueSolicitado()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idPrestamo = CrearSolicitudPendiente(servicio);
 
-        Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
+        // Con el contexto del servicio: con otro, el servicio seguiria viendo al docente que ya tiene cargado.
+        RepositorioUsuarioSql usuarios = new RepositorioUsuarioSql(_contexto);
+        Usuario docente = usuarios.ObtenerUsuarioPorDni(DniDocente)!;
         docente.Desactivar();
+        usuarios.ActualizarUsuario(docente);
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(
             () => servicio.Aprobar(idPrestamo, DniSupervisor));
         Assert.AreEqual("El solicitante esta desactivado", excepcion.Message);
 
-        VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
+        VerificarQueSigueSolicitadaSinPrestarNada(idPrestamo);
     }
 
     [TestMethod]
     public void Aprobar_AdministradorApruebaSuPropiaSolicitud_QuedaActivo()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idPrestamo = CrearSolicitudPendiente(servicio, dniSolicitante: DniAdministrador);
 
         PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniAdministrador);
 
-        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
 
         Assert.AreEqual("Activo", resultado.Estado);
         Assert.AreSame(guardado.Solicitante, guardado.Evaluador);
@@ -701,8 +709,7 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Aprobar_PrestamoYaActivo_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idPrestamo = CrearSolicitudAprobada(servicio);
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(
@@ -711,7 +718,8 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual("El prestamo debe estar solicitado", excepcion.Message);
         Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
 
-        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
 
         Assert.AreEqual(EstadoPrestamo.Activo, guardado.Estado,
             "El prestamo deberia seguir activo");
@@ -722,14 +730,14 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Rechazar_SolicitudPendiente_QuedaRechazadoConMotivoYEvaluador()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idPrestamo = CrearSolicitudPendiente(servicio);
 
         PrestamoDto resultado = servicio.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor);
 
-        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
-        Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
+        Usuario supervisor = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(DniSupervisor)!;
 
         Assert.AreEqual("Rechazado", resultado.Estado);
         Assert.AreEqual(MotivoDeRechazo, resultado.MotivoRechazo);
@@ -739,18 +747,19 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Rechazar_SolicitudPendiente_RegistraUnMovimientoDeRechazoConElEvaluador()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         SolicitudPrestamoDto datos =
             CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1);
         Guid idPrestamo = servicio.Solicitar(datos, DniDocente).Id;
         ServicioPrestamo servicioDeLaEvaluacion =
-            CrearServicioConReloj(memoria, new RelojFijo(FechaDeEvaluacion));
+            CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
 
         servicioDeLaEvaluacion.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor);
-        Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
-        Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
-        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Usuario docente = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(DniDocente)!;
+        Usuario supervisor = new RepositorioUsuarioSql(contextoQueLee).ObtenerUsuarioPorDni(DniSupervisor)!;
+        IReadOnlyList<Movimiento> movimientos = LeerMovimientos(contextoQueLee);
 
         CollectionAssert.AreEqual(
             new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
@@ -767,8 +776,7 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void Rechazar_MotivoVacio_LanzaExcepcionConCausaDeDominio()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idPrestamo = CrearSolicitudPendiente(servicio);
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(
@@ -776,7 +784,7 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual("El motivo de rechazo no puede ser vacio", excepcion.Message);
         Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
 
-        VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
+        VerificarQueSigueSolicitadaSinPrestarNada(idPrestamo);
     }
 
     [TestMethod]
@@ -785,8 +793,7 @@ public sealed class ServicioPrestamoTests
     [DataRow(DniInexistente)]
     public void Rechazar_EvaluadorNoHabilitado_LanzaExcepcion(string dniEvaluador)
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idPrestamo = CrearSolicitudPendiente(servicio);
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(
@@ -794,28 +801,26 @@ public sealed class ServicioPrestamoTests
 
         Assert.AreEqual("El usuario no tiene permiso para evaluar solicitudes", excepcion.Message);
 
-        VerificarQueSigueSolicitadaSinPrestarNada(memoria, idPrestamo);
+        VerificarQueSigueSolicitadaSinPrestarNada(idPrestamo);
     }
 
     [TestMethod]
     public void Rechazar_PrestamoInexistente_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idInexistente = Guid.NewGuid();
 
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(
             () => servicio.Rechazar(idInexistente, MotivoDeRechazo, DniSupervisor));
 
         Assert.AreEqual("El prestamo no existe", excepcion.Message);
-        VerificarQueNoSeGuardoNiSePrestoNada(memoria, DniDocente);
+        VerificarQueNoSeGuardoNiSePrestoNada(DniDocente);
     }
 
     [TestMethod]
     public void ListarPrestamosPorEntregar_VariosEstados_DevuelveLosActivos()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion), DniAdministrador);
         servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades), DniAdministrador);
         Guid idPrimerActivo =
@@ -833,8 +838,7 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void ListarPrestamos_VariosEstados_DevuelveTodos()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idSolicitado =
             servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion), DniAdministrador).Id;
         Guid idRechazado =
@@ -854,8 +858,7 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void ListarSolicitudesPendientes_VariosEstados_DevuelveSoloLasPendientesConSuSolicitante()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         Guid idPendienteDocente = CrearSolicitudPendiente(servicio);
         Guid idPendienteAdministrador = CrearSolicitudPendiente(servicio, dniSolicitante: DniAdministrador);
 
@@ -880,8 +883,7 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void ListarPrestamosDeSolicitante_ConPrestamosDeVariosUsuarios_DevuelveSoloLosSuyos()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         PrestamoDto activoDelDocente =
             servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniDocente);
         PrestamoDto pendienteDelDocente =
@@ -898,8 +900,7 @@ public sealed class ServicioPrestamoTests
     [TestMethod]
     public void ListarPrestamosDeSolicitante_SinPrestamos_DevuelveListaVacia()
     {
-        Memoria memoria = new Memoria();
-        ServicioPrestamo servicio = CrearServicio(memoria);
+        ServicioPrestamo servicio = CrearServicio();
         servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniDocente);
 
         List<PrestamoDto> resultado = servicio.ListarPrestamosDeSolicitante(DniAdministrador);
@@ -908,36 +909,37 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(0, resultado.Count);
     }
 
-    private static ServicioPrestamo CrearServicio(Memoria memoria)
+    private ServicioPrestamo CrearServicio()
     {
-        CargarCatalogo(memoria);
-        CargarUsuarios(memoria);
+        CargarCatalogo();
+        CargarUsuarios();
 
-        return CrearServicioConReloj(memoria, new RelojFijo(FechaFija));
+        return CrearServicioConReloj(new RelojFijo(FechaFija));
     }
 
-    private static ServicioPrestamo CrearServicioConReloj(Memoria memoria, TimeProvider reloj)
+    private ServicioPrestamo CrearServicioConReloj(TimeProvider reloj)
     {
         return new ServicioPrestamo(
-            prestamos: new RepositorioPrestamo(memoria),
-            usuarios: new RepositorioUsuario(memoria),
-            catalogo: new RepositorioCatalogo(memoria),
-            movimientos: new RepositorioMovimiento(memoria),
+            prestamos: new RepositorioPrestamoSql(_contexto),
+            usuarios: new RepositorioUsuarioSql(_contexto),
+            catalogo: new RepositorioCatalogoSql(_contexto),
+            movimientos: new RepositorioMovimientoSql(_contexto),
             reloj: reloj);
     }
 
-    private static SolicitudPrestamoDto CrearSolicitud(
+    private SolicitudPrestamoDto CrearSolicitud(
         string tipoEquipamiento = NombreTipoSinAprobacion,
         int cantidadSolicitada = CantidadSolicitadaPorDefecto)
     {
         return new SolicitudPrestamoDto
         {
+            IdCatalogo = _idCatalogo,
             TipoEquipamiento = tipoEquipamiento,
             CantidadSolicitada = cantidadSolicitada
         };
     }
 
-    private static Guid CrearSolicitudPendiente(
+    private Guid CrearSolicitudPendiente(
         ServicioPrestamo servicio,
         string tipoEquipamiento = NombreTipoConAprobacion,
         string dniSolicitante = DniDocente)
@@ -948,7 +950,7 @@ public sealed class ServicioPrestamoTests
         return pendiente.Id;
     }
 
-    private static Guid CrearSolicitudAprobada(ServicioPrestamo servicio)
+    private Guid CrearSolicitudAprobada(ServicioPrestamo servicio)
     {
         Guid idPrestamo = CrearSolicitudPendiente(servicio);
         servicio.Aprobar(idPrestamo, DniSupervisor);
@@ -956,12 +958,30 @@ public sealed class ServicioPrestamoTests
         return idPrestamo;
     }
 
-    private static Prestamo ObtenerPrestamoGuardado(Memoria memoria, Guid idPrestamo)
+    private static Prestamo ObtenerPrestamoGuardado(SqlContext contextoQueLee, Guid idPrestamo)
     {
-        return new RepositorioPrestamo(memoria).ObtenerPrestamoPorId(idPrestamo)!;
+        return new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamoPorId(idPrestamo)!;
     }
 
-    private static void CargarCatalogo(Memoria memoria)
+    private TipoEquipamiento ObtenerTipoGuardado(SqlContext contextoQueLee, string nombreTipo)
+    {
+        return new RepositorioCatalogoSql(contextoQueLee).ObtenerTipoPorNombre(_idCatalogo, nombreTipo)!;
+    }
+
+    // RepositorioMovimientoSql no tiene una consulta de todos los movimientos: se leen de la base,
+    // en el orden en que se registraron.
+    private static IReadOnlyList<Movimiento> LeerMovimientos(SqlContext contextoQueLee)
+    {
+        return contextoQueLee.Movimientos
+            .Include(movimiento => movimiento.Prestamo)
+            .ThenInclude(prestamo => prestamo.Solicitante)
+            .Include(movimiento => movimiento.Evaluador)
+            .Include(movimiento => movimiento.Unidad)
+            .OrderBy(movimiento => movimiento.Id)
+            .ToList();
+    }
+
+    private void CargarCatalogo()
     {
         Catalogo catalogo = new Catalogo("Catalogo general");
 
@@ -992,7 +1012,8 @@ public sealed class ServicioPrestamoTests
         tipoEquipamientoDiscontinuado.Discontinuar();
         catalogo.AgregarTipo(tipoEquipamientoDiscontinuado);
 
-        new RepositorioCatalogo(memoria).Guardar(catalogo);
+        new RepositorioCatalogoSql(_contexto).AgregarCatalogo(catalogo);
+        _idCatalogo = catalogo.Id;
     }
 
     private static TipoEquipamiento CrearTipoEquipamiento(string nombre, bool requiereAprobacion, int cantidadUnidades,
@@ -1018,23 +1039,26 @@ public sealed class ServicioPrestamoTests
         return tipoEquipamiento;
     }
 
-    private static void CargarUsuarios(Memoria memoria)
+    // Un objeto por tipo de usuario, como en la base, donde el nombre del tipo es unico.
+    private void CargarUsuarios()
     {
-        RepositorioUsuario usuarios = new RepositorioUsuario(memoria);
+        RepositorioUsuarioSql usuarios = new RepositorioUsuarioSql(_contexto);
+        TipoUsuario docente = TipoUsuario.Docente();
+        TipoUsuario supervisor = TipoUsuario.Supervisor();
 
-        usuarios.AgregarUsuario(CrearUsuario(dni: DniDocente, tipoUsuario: TipoUsuario.Docente()));
+        usuarios.AgregarUsuario(CrearUsuario(dni: DniDocente, tipoUsuario: docente));
         usuarios.AgregarUsuario(CrearUsuario(dni: DniEstudiante, tipoUsuario: TipoUsuario.Estudiante()));
         usuarios.AgregarUsuario(CrearUsuario(dni: DniFuncionario, tipoUsuario: TipoUsuario.FuncionarioCE()));
-        usuarios.AgregarUsuario(CrearUsuario(dni: DniSupervisor, tipoUsuario: TipoUsuario.Supervisor(),
+        usuarios.AgregarUsuario(CrearUsuario(dni: DniSupervisor, tipoUsuario: supervisor,
             nombre: "Sofia", apellido: "Martinez"));
         usuarios.AgregarUsuario(CrearUsuario(dni: DniAdministrador, tipoUsuario: TipoUsuario.Administrador(),
             nombre: "Lucia", apellido: "Fernandez"));
 
-        Usuario desactivado = CrearUsuario(dni: DniDocenteDesactivado, tipoUsuario: TipoUsuario.Docente());
+        Usuario desactivado = CrearUsuario(dni: DniDocenteDesactivado, tipoUsuario: docente);
         desactivado.Desactivar();
         usuarios.AgregarUsuario(desactivado);
 
-        Usuario supervisorDesactivado = CrearUsuario(dni: DniSupervisorDesactivado, tipoUsuario: TipoUsuario.Supervisor(),
+        Usuario supervisorDesactivado = CrearUsuario(dni: DniSupervisorDesactivado, tipoUsuario: supervisor,
             nombre: "Diego", apellido: "Rodriguez");
         supervisorDesactivado.Desactivar();
         usuarios.AgregarUsuario(supervisorDesactivado);
@@ -1058,27 +1082,30 @@ public sealed class ServicioPrestamoTests
         return usuario;
     }
 
-    private static void VerificarQueNoSeGuardoNiSePrestoNada(Memoria memoria, string dni)
+    private void VerificarQueNoSeGuardoNiSePrestoNada(string dni)
     {
-        Assert.AreEqual(0, new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(dni: dni).Count,
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+
+        Assert.AreEqual(0, new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(dni: dni).Count,
             "No deberia haberse guardado ningun prestamo");
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count,
+        Assert.AreEqual(0, LeerMovimientos(contextoQueLee).Count,
             "No deberia haberse registrado ningun movimiento");
 
-        Catalogo catalogo = new RepositorioCatalogo(memoria).Obtener()!;
+        Catalogo catalogo = new RepositorioCatalogoSql(contextoQueLee).ObtenerCatalogoActivoPorId(_idCatalogo)!;
         Assert.IsTrue(catalogo.Tipos.SelectMany(tipo => tipo.Unidades).All(unidad => unidad.EstaDisponible()),
             "Ninguna unidad deberia estar prestada");
     }
 
-    private static void VerificarQueSigueSolicitadaSinPrestarNada(Memoria memoria, Guid idPrestamo)
+    private void VerificarQueSigueSolicitadaSinPrestarNada(Guid idPrestamo)
     {
-        Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
 
         Assert.AreEqual(EstadoPrestamo.Solicitado, guardado.Estado,
             "El prestamo deberia seguir solicitado");
         Assert.AreEqual(0, guardado.UnidadesAsignadas.Count,
             "No deberia haberse asignado ninguna unidad");
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos()
+        Assert.AreEqual(0, LeerMovimientos(contextoQueLee)
                 .Count(movimiento => movimiento.Tipo != TipoMovimiento.Solicitud),
             "No deberia haberse registrado ningun movimiento ademas de la solicitud");
     }

@@ -8,14 +8,14 @@ public class ServicioPrestamo
 {
     private const string MensajeSinPermisoParaEvaluar = "El usuario no tiene permiso para evaluar solicitudes";
 
-    private readonly RepositorioPrestamo _prestamos;
-    private readonly RepositorioUsuario _usuarios;
-    private readonly RepositorioCatalogo _catalogo;
-    private readonly RepositorioMovimiento _movimientos;
+    private readonly RepositorioPrestamoSql _prestamos;
+    private readonly RepositorioUsuarioSql _usuarios;
+    private readonly RepositorioCatalogoSql _catalogo;
+    private readonly RepositorioMovimientoSql _movimientos;
     private readonly TimeProvider _reloj;
 
-    public ServicioPrestamo(RepositorioPrestamo prestamos, RepositorioUsuario usuarios,
-        RepositorioCatalogo catalogo, RepositorioMovimiento movimientos, TimeProvider reloj)
+    public ServicioPrestamo(RepositorioPrestamoSql prestamos, RepositorioUsuarioSql usuarios,
+        RepositorioCatalogoSql catalogo, RepositorioMovimientoSql movimientos, TimeProvider reloj)
     {
         _prestamos = prestamos;
         _usuarios = usuarios;
@@ -29,7 +29,7 @@ public class ServicioPrestamo
         ArgumentNullException.ThrowIfNull(datos);
 
         Usuario solicitante = ObtenerSolicitante(dniSolicitante);
-        TipoEquipamiento tipo = ObtenerTipoEquipamiento(datos.TipoEquipamiento);
+        TipoEquipamiento tipo = ObtenerTipoEquipamiento(datos.IdCatalogo, datos.TipoEquipamiento);
         ValidarLimites(solicitante, datos.CantidadSolicitada);
 
         try
@@ -156,7 +156,7 @@ public class ServicioPrestamo
 
     public List<PrestamoDto> ListarPrestamos()
     {
-        return _prestamos.ObtenerTodos().Select(CrearPrestamoDto).ToList();
+        return _prestamos.ObtenerPrestamos(new FiltroPorCatalogoYFechas()).Select(CrearPrestamoDto).ToList();
     }
 
     private Usuario ObtenerSolicitante(string dniSolicitante)
@@ -207,14 +207,14 @@ public class ServicioPrestamo
         return prestamo;
     }
 
-    private TipoEquipamiento ObtenerTipoEquipamiento(string nombreTipo)
+    private TipoEquipamiento ObtenerTipoEquipamiento(int idCatalogo, string nombreTipo)
     {
         if (string.IsNullOrWhiteSpace(nombreTipo))
         {
             throw new ServicioException("Debe indicar un tipo de equipamiento");
         }
 
-        TipoEquipamiento? tipo = _catalogo.ObtenerTipoPorNombre(nombreTipo);
+        TipoEquipamiento? tipo = _catalogo.ObtenerTipoPorNombre(idCatalogo, nombreTipo);
 
         if (tipo is null)
         {
