@@ -23,6 +23,7 @@ public class ServicioUnidades
 
     public List<UnidadDetalleDto> Listar(int idCatalogo, FiltroUnidadesDto filtro, string dniUsuario)
     {
+        ArgumentNullException.ThrowIfNull(filtro);
         ValidarResponsable(dniUsuario);
         List<UnidadDetalleDto> resultado = new List<UnidadDetalleDto>();
         Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
