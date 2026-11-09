@@ -52,6 +52,7 @@ public class ServicioTiposEquipamiento
                 datos.RequiereAprobacion, categoria);
             catalogo.AgregarTipo(tipo);
         });
+        _repositorioCatalogo.ActualizarCatalogo(catalogo);
     }
 
     public void Modificar(int idCatalogo, ModificacionTipoEquipamientoDto modificacion, string dniResponsable)
