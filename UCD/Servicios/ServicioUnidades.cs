@@ -45,7 +45,7 @@ public class ServicioUnidades
         string idInstitucional = OperacionesComunes.Normalizar(datos.IdInstitucional);
         string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
         ValidarIdDisponible(idInstitucional);
-        ValidarSerieDisponibleEnElSistema(numeroSerie);
+        ValidarSerieDisponibleEnElSistema(numeroSerie, null);
         string ubicacionFisica = OperacionesComunes.Normalizar(datos.UbicacionFisica);
 
         TraduccionDeErrores.Ejecutar(() =>
@@ -60,7 +60,7 @@ public class ServicioUnidades
         Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
         UnidadFisica unidad = ObtenerUnidad(catalogo, datos.IdInstitucional);
         string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
-        ValidarSerieDisponible(catalogo, numeroSerie, unidad);
+        ValidarSerieDisponibleEnElSistema(numeroSerie, unidad.Id);
 
         TraduccionDeErrores.Ejecutar(() =>
             unidad.ModificarInfo(OperacionesComunes.Normalizar(datos.UbicacionFisica), numeroSerie,
@@ -167,29 +167,12 @@ public class ServicioUnidades
     }
 
     // El numero de serie, si existe, es unico en todo el sistema (foro 2.3).
-    private void ValidarSerieDisponibleEnElSistema(string? numeroSerie)
+    private void ValidarSerieDisponibleEnElSistema(string? numeroSerie, int? idUnidadExcluida)
     {
         if (!string.IsNullOrWhiteSpace(numeroSerie) &&
-            _repositorioCatalogo.ExisteUnidadConNumeroDeSerie(numeroSerie, null))
+            _repositorioCatalogo.ExisteUnidadConNumeroDeSerie(numeroSerie, idUnidadExcluida))
         {
             throw new ServicioException("Ya existe una unidad con ese numero de serie");
-        }
-    }
-
-    private static void ValidarSerieDisponible(Catalogo catalogo, string? numeroSerie, UnidadFisica? unidadEditada)
-    {
-        if (string.IsNullOrWhiteSpace(numeroSerie))
-        {
-            return;
-        }
-
-        foreach ((TipoEquipamiento _, UnidadFisica unidad) in UnidadesConSuTipo(catalogo))
-        {
-            if (unidad != unidadEditada &&
-                string.Equals(unidad.NumSerie, numeroSerie, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new ServicioException("Ya existe una unidad con ese numero de serie");
-            }
         }
     }
 
