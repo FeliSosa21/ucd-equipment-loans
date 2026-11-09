@@ -87,7 +87,8 @@ public class ServicioUnidades
     public void VolverADisponible(int idCatalogo, string idInstitucional, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        UnidadFisica unidad = ObtenerUnidad(ObtenerCatalogoActivo(idCatalogo), idInstitucional);
+        Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
+        UnidadFisica unidad = ObtenerUnidad(catalogo, idInstitucional);
         if (unidad.Estado != EstadoUnidadFisica.EnMantenimiento)
         {
             throw new ServicioException(
@@ -95,6 +96,7 @@ public class ServicioUnidades
         }
 
         TraduccionDeErrores.Ejecutar(unidad.Disponible);
+        _repositorioCatalogo.ActualizarCatalogo(catalogo);
     }
 
     public void DarDeBaja(int idCatalogo, string idInstitucional, string dniResponsable)
