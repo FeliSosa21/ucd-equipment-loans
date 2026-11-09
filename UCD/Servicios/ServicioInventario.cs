@@ -6,9 +6,11 @@ namespace Servicios;
 
 // Consulta de inventario (req. 9): cantidad de unidades en cada estado, por tipo y por categoria.
 // La disponibilidad sale del estado de las unidades fisicas (letra).
-// Como el historico, no recibe quien consulta: el permiso lo controla la pagina.
+// Quien consulta necesita el permiso GestionarUnidades (Funcionario, Supervisor y Administrador).
 public class ServicioInventario
 {
+    private const string MensajeSinPermiso = "El usuario no tiene permiso para consultar el inventario";
+
     private readonly RepositorioCatalogoSql _repositorioCatalogo;
     private readonly RepositorioUsuarioSql _repositorioUsuario;
 
@@ -21,6 +23,7 @@ public class ServicioInventario
     public List<CantidadesPorEstadoDto> ContarPorTipo(int idCatalogo, FiltroInventarioDto filtro, string dniUsuario)
     {
         ArgumentNullException.ThrowIfNull(filtro);
+        ValidarResponsable(dniUsuario);
         List<CantidadesPorEstadoDto> filas = new List<CantidadesPorEstadoDto>();
         foreach (TipoEquipamiento tipo in ObtenerTipos(idCatalogo))
         {
@@ -43,6 +46,12 @@ public class ServicioInventario
         }
 
         return filas;
+    }
+
+    private void ValidarResponsable(string dniUsuario)
+    {
+        OperacionesComunes.ValidarResponsable(_repositorioUsuario, dniUsuario, Permiso.GestionarUnidades,
+            MensajeSinPermiso);
     }
 
     private IReadOnlyCollection<TipoEquipamiento> ObtenerTipos(int idCatalogo)
