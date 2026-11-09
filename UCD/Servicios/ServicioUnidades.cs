@@ -71,7 +71,8 @@ public class ServicioUnidades
     public void EnviarAMantenimiento(int idCatalogo, string idInstitucional, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        UnidadFisica unidad = ObtenerUnidad(ObtenerCatalogoActivo(idCatalogo), idInstitucional);
+        Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
+        UnidadFisica unidad = ObtenerUnidad(catalogo, idInstitucional);
         // El dominio permite pasar de prestada a mantenimiento, pero eso solo ocurre al registrar la devolucion.
         if (!unidad.EstaDisponible())
         {
@@ -80,6 +81,7 @@ public class ServicioUnidades
         }
 
         TraduccionDeErrores.Ejecutar(unidad.AMantenimiento);
+        _repositorioCatalogo.ActualizarCatalogo(catalogo);
     }
 
     public void VolverADisponible(int idCatalogo, string idInstitucional, string dniResponsable)
