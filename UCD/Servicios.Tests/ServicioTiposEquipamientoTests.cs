@@ -13,6 +13,7 @@ public class ServicioTiposEquipamientoTests
     private const string DniSupervisorDesactivado = "23456783";
 
     private ContextoDePrueba _entorno = null!;
+    private int _idCatalogo;
 
     [TestInitialize]
     public void Inicializar()
@@ -36,7 +37,7 @@ public class ServicioTiposEquipamientoTests
         notebook.Discontinuar();
         ServicioTiposEquipamiento servicio = CrearServicio(proyector, notebook);
 
-        List<TipoEquipamientoDetalleDto> tipos = servicio.Listar(null, null);
+        List<TipoEquipamientoDetalleDto> tipos = ListarTodos(servicio);
 
         Assert.AreEqual(2, tipos.Count);
         Assert.AreEqual("Proyector Epson", tipos[0].Nombre);
@@ -49,12 +50,12 @@ public class ServicioTiposEquipamientoTests
     }
 
     [TestMethod]
-    public void Listar_SinCatalogo_LanzaServicioException()
+    public void Listar_CatalogoInexistente_LanzaServicioException()
     {
-        ServicioTiposEquipamiento servicio = new ServicioTiposEquipamiento(new RepositorioCatalogo(new Memoria()),
-            _entorno.Usuarios);
+        ServicioTiposEquipamiento servicio = CrearServicio();
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Listar(null, null));
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Listar(_idCatalogo + 1, new FiltroTiposDto(), DniSupervisor));
     }
 
     [TestMethod]
@@ -64,7 +65,8 @@ public class ServicioTiposEquipamientoTests
         TipoEquipamiento notebook = CrearTipo("Notebook Lenovo", Categoria.Computacion);
         ServicioTiposEquipamiento servicio = CrearServicio(proyector, notebook);
 
-        List<TipoEquipamientoDetalleDto> tipos = servicio.Listar("epson", null);
+        List<TipoEquipamientoDetalleDto> tipos = servicio.Listar(_idCatalogo,
+            new FiltroTiposDto { Nombre = "epson" }, DniSupervisor);
 
         Assert.AreEqual(1, tipos.Count);
         Assert.AreEqual("Proyector Epson", tipos[0].Nombre);
@@ -77,7 +79,8 @@ public class ServicioTiposEquipamientoTests
         TipoEquipamiento notebook = CrearTipo("Notebook Lenovo", Categoria.Computacion);
         ServicioTiposEquipamiento servicio = CrearServicio(proyector, notebook);
 
-        List<TipoEquipamientoDetalleDto> tipos = servicio.Listar(null, "Computacion");
+        List<TipoEquipamientoDetalleDto> tipos = servicio.Listar(_idCatalogo,
+            new FiltroTiposDto { Categoria = "Computacion" }, DniSupervisor);
 
         Assert.AreEqual(1, tipos.Count);
         Assert.AreEqual("Notebook Lenovo", tipos[0].Nombre);
@@ -89,9 +92,9 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio();
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
 
-        servicio.Registrar(datos, DniSupervisor);
+        servicio.Registrar(_idCatalogo, datos, DniSupervisor);
 
-        List<TipoEquipamientoDetalleDto> tipos = servicio.Listar(null, null);
+        List<TipoEquipamientoDetalleDto> tipos = ListarTodos(servicio);
         Assert.AreEqual(1, tipos.Count);
         Assert.AreEqual("Camara Canon EOS", tipos[0].Nombre);
         Assert.AreEqual("Descripcion de prueba", tipos[0].Descripcion);
@@ -107,7 +110,7 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio();
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniFuncionario));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
     }
 
     [TestMethod]
@@ -116,7 +119,7 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio();
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniSupervisorDesactivado));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniSupervisorDesactivado));
     }
 
     [TestMethod]
@@ -125,7 +128,7 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio();
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, "11111111"));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, "11111111"));
     }
 
     [TestMethod]
@@ -135,7 +138,7 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "camara canon eos", categoria: "Audiovisual");
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniSupervisor));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniSupervisor));
     }
 
     [DataTestMethod]
@@ -148,7 +151,7 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio();
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: categoria);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniSupervisor));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniSupervisor));
     }
 
     [TestMethod]
@@ -157,9 +160,9 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio();
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "audiovisual");
 
-        servicio.Registrar(datos, DniSupervisor);
+        servicio.Registrar(_idCatalogo, datos, DniSupervisor);
 
-        Assert.AreEqual("Audiovisual", servicio.Listar(null, null)[0].Categoria);
+        Assert.AreEqual("Audiovisual", ListarTodos(servicio)[0].Categoria);
     }
 
     [TestMethod]
@@ -169,9 +172,9 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS R", categoria: "Electronica");
 
-        servicio.Modificar("Camara Canon EOS", datos, DniSupervisor);
+        servicio.Modificar(_idCatalogo, CrearModificacion("Camara Canon EOS", datos), DniSupervisor);
 
-        List<TipoEquipamientoDetalleDto> tipos = servicio.Listar(null, null);
+        List<TipoEquipamientoDetalleDto> tipos = ListarTodos(servicio);
         Assert.AreEqual(1, tipos.Count);
         Assert.AreEqual("Camara Canon EOS R", tipos[0].Nombre);
         Assert.AreEqual("Descripcion de prueba", tipos[0].Descripcion);
@@ -188,7 +191,7 @@ public class ServicioTiposEquipamientoTests
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS R", categoria: "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.Modificar("Camara Canon EOS", datos, DniFuncionario));
+            servicio.Modificar(_idCatalogo, CrearModificacion("Camara Canon EOS", datos), DniFuncionario));
     }
 
     [TestMethod]
@@ -199,7 +202,7 @@ public class ServicioTiposEquipamientoTests
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS R", categoria: "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.Modificar("Camara Canon EOS", datos, DniSupervisorDesactivado));
+            servicio.Modificar(_idCatalogo, CrearModificacion("Camara Canon EOS", datos), DniSupervisorDesactivado));
     }
 
     [TestMethod]
@@ -209,7 +212,7 @@ public class ServicioTiposEquipamientoTests
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.Modificar("Camara Canon EOS", datos, DniSupervisor));
+            servicio.Modificar(_idCatalogo, CrearModificacion("Camara Canon EOS", datos), DniSupervisor));
     }
 
     [TestMethod]
@@ -221,7 +224,7 @@ public class ServicioTiposEquipamientoTests
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "notebook lenovo", categoria: "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.Modificar("Proyector Epson", datos, DniSupervisor));
+            servicio.Modificar(_idCatalogo, CrearModificacion("Proyector Epson", datos), DniSupervisor));
     }
 
     [TestMethod]
@@ -231,9 +234,9 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
 
-        servicio.Modificar("Camara Canon EOS", datos, DniSupervisor);
+        servicio.Modificar(_idCatalogo, CrearModificacion("Camara Canon EOS", datos), DniSupervisor);
 
-        Assert.AreEqual("Descripcion de prueba", servicio.Listar(null, null)[0].Descripcion);
+        Assert.AreEqual("Descripcion de prueba", ListarTodos(servicio)[0].Descripcion);
     }
 
     [TestMethod]
@@ -245,7 +248,7 @@ public class ServicioTiposEquipamientoTests
         datos.DuracionMaxPrestamo = 0;
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.Modificar("Camara Canon EOS", datos, DniSupervisor));
+            servicio.Modificar(_idCatalogo, CrearModificacion("Camara Canon EOS", datos), DniSupervisor));
     }
 
     [TestMethod]
@@ -254,9 +257,9 @@ public class ServicioTiposEquipamientoTests
         TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
 
-        servicio.Discontinuar("Camara Canon EOS", DniSupervisor);
+        servicio.Discontinuar(_idCatalogo, "Camara Canon EOS", DniSupervisor);
 
-        Assert.AreEqual("Discontinuado", servicio.Listar(null, null)[0].Estado);
+        Assert.AreEqual("Discontinuado", ListarTodos(servicio)[0].Estado);
     }
 
     [TestMethod]
@@ -266,7 +269,7 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.Discontinuar("Camara Canon EOS", DniFuncionario));
+            servicio.Discontinuar(_idCatalogo, "Camara Canon EOS", DniFuncionario));
     }
 
     [TestMethod]
@@ -276,7 +279,7 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.Discontinuar("Camara Canon EOS", DniSupervisorDesactivado));
+            servicio.Discontinuar(_idCatalogo, "Camara Canon EOS", DniSupervisorDesactivado));
     }
 
     [TestMethod]
@@ -287,7 +290,7 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.Discontinuar("Camara Canon EOS", DniSupervisor));
+            servicio.Discontinuar(_idCatalogo, "Camara Canon EOS", DniSupervisor));
     }
 
     [TestMethod]
@@ -297,9 +300,9 @@ public class ServicioTiposEquipamientoTests
         camara.Discontinuar();
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
 
-        servicio.Reactivar("Camara Canon EOS", DniSupervisor);
+        servicio.Reactivar(_idCatalogo, "Camara Canon EOS", DniSupervisor);
 
-        Assert.AreEqual("Activo", servicio.Listar(null, null)[0].Estado);
+        Assert.AreEqual("Activo", ListarTodos(servicio)[0].Estado);
     }
 
     [TestMethod]
@@ -308,7 +311,7 @@ public class ServicioTiposEquipamientoTests
         TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Reactivar("Camara Canon EOS", DniSupervisor));
+        Assert.ThrowsException<ServicioException>(() => servicio.Reactivar(_idCatalogo, "Camara Canon EOS", DniSupervisor));
     }
 
     [TestMethod]
@@ -316,7 +319,7 @@ public class ServicioTiposEquipamientoTests
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Reactivar("Camara Canon EOS", DniSupervisor));
+        Assert.ThrowsException<ServicioException>(() => servicio.Reactivar(_idCatalogo, "Camara Canon EOS", DniSupervisor));
     }
 
     [TestMethod]
@@ -326,7 +329,7 @@ public class ServicioTiposEquipamientoTests
         camara.Discontinuar();
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Reactivar("Camara Canon EOS", DniFuncionario));
+        Assert.ThrowsException<ServicioException>(() => servicio.Reactivar(_idCatalogo, "Camara Canon EOS", DniFuncionario));
     }
 
     [TestMethod]
@@ -337,7 +340,7 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.Reactivar("Camara Canon EOS", DniSupervisorDesactivado));
+            servicio.Reactivar(_idCatalogo, "Camara Canon EOS", DniSupervisorDesactivado));
     }
 
     [TestMethod]
@@ -345,7 +348,7 @@ public class ServicioTiposEquipamientoTests
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
 
-        Assert.AreEqual("Catalogo UCD", servicio.ObtenerNombreCatalogo());
+        Assert.AreEqual("Catalogo UCD", servicio.ObtenerNombreCatalogo(_idCatalogo));
     }
 
     [TestMethod]
@@ -353,9 +356,9 @@ public class ServicioTiposEquipamientoTests
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
 
-        servicio.ModificarNombreCatalogo("Centro de equipamiento ORT", DniSupervisor);
+        servicio.ModificarNombreCatalogo(_idCatalogo, "Centro de equipamiento ORT", DniSupervisor);
 
-        Assert.AreEqual("Centro de equipamiento ORT", servicio.ObtenerNombreCatalogo());
+        Assert.AreEqual("Centro de equipamiento ORT", servicio.ObtenerNombreCatalogo(_idCatalogo));
     }
 
     [TestMethod]
@@ -364,7 +367,7 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio();
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.ModificarNombreCatalogo("Centro de Equipamiento ORT", DniFuncionario));
+            servicio.ModificarNombreCatalogo(_idCatalogo, "Centro de Equipamiento ORT", DniFuncionario));
     }
 
     [TestMethod]
@@ -373,7 +376,7 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio();
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.ModificarNombreCatalogo("Centro de Equipamiento ORT", DniSupervisorDesactivado));
+            servicio.ModificarNombreCatalogo(_idCatalogo, "Centro de Equipamiento ORT", DniSupervisorDesactivado));
     }
 
     [TestMethod]
@@ -381,7 +384,7 @@ public class ServicioTiposEquipamientoTests
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
 
-        Assert.ThrowsException<ServicioException>(() => servicio.ModificarNombreCatalogo("AB", DniSupervisor));
+        Assert.ThrowsException<ServicioException>(() => servicio.ModificarNombreCatalogo(_idCatalogo, "AB", DniSupervisor));
     }
 
     [TestMethod]
@@ -391,9 +394,9 @@ public class ServicioTiposEquipamientoTests
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "  Camara Canon EOS  ", categoria: "Audiovisual");
         datos.Descripcion = "  Camara reflex  ";
 
-        servicio.Registrar(datos, DniSupervisor);
+        servicio.Registrar(_idCatalogo, datos, DniSupervisor);
 
-        TipoEquipamientoDetalleDto tipo = servicio.Listar(null, null)[0];
+        TipoEquipamientoDetalleDto tipo = ListarTodos(servicio)[0];
         Assert.AreEqual("Camara Canon EOS", tipo.Nombre);
         Assert.AreEqual("Camara reflex", tipo.Descripcion);
     }
@@ -405,9 +408,9 @@ public class ServicioTiposEquipamientoTests
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "  Camara Canon EOS R  ", categoria: "Audiovisual");
 
-        servicio.Modificar("Camara Canon EOS", datos, DniSupervisor);
+        servicio.Modificar(_idCatalogo, CrearModificacion("Camara Canon EOS", datos), DniSupervisor);
 
-        Assert.AreEqual("Camara Canon EOS R", servicio.Listar(null, null)[0].Nombre);
+        Assert.AreEqual("Camara Canon EOS R", ListarTodos(servicio)[0].Nombre);
     }
 
     [TestMethod]
@@ -415,27 +418,37 @@ public class ServicioTiposEquipamientoTests
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
 
-        servicio.ModificarNombreCatalogo("  Centro ORT  ", DniSupervisor);
+        servicio.ModificarNombreCatalogo(_idCatalogo, "  Centro ORT  ", DniSupervisor);
 
-        Assert.AreEqual("Centro ORT", servicio.ObtenerNombreCatalogo());
+        Assert.AreEqual("Centro ORT", servicio.ObtenerNombreCatalogo(_idCatalogo));
     }
 
     private ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
-        RepositorioCatalogo repositorioCatalogo = new RepositorioCatalogo(new Memoria());
         Catalogo catalogo = new Catalogo("Catalogo UCD");
         foreach (TipoEquipamiento tipo in tipos)
         {
             catalogo.AgregarTipo(tipo);
         }
 
-        repositorioCatalogo.Guardar(catalogo);
+        _idCatalogo = _entorno.GuardarCatalogo(catalogo);
 
         _entorno.GuardarUsuario(DniSupervisor, "supervisor@ucd.edu.uy", TipoUsuario.Supervisor());
         _entorno.GuardarUsuario(DniFuncionario, "funcionario@ucd.edu.uy", TipoUsuario.FuncionarioCE());
         _entorno.GuardarUsuario(DniSupervisorDesactivado, "desactivado@ucd.edu.uy", TipoUsuario.Supervisor(),
             desactivado: true);
-        return new ServicioTiposEquipamiento(repositorioCatalogo, _entorno.Usuarios);
+        return new ServicioTiposEquipamiento(_entorno.Catalogos, _entorno.Usuarios);
+    }
+
+    private List<TipoEquipamientoDetalleDto> ListarTodos(ServicioTiposEquipamiento servicio)
+    {
+        return servicio.Listar(_idCatalogo, new FiltroTiposDto(), DniSupervisor);
+    }
+
+    private static ModificacionTipoEquipamientoDto CrearModificacion(string nombreActual,
+        DatosTipoEquipamientoDto datos)
+    {
+        return new ModificacionTipoEquipamientoDto { NombreActual = nombreActual, Datos = datos };
     }
 
     private static DatosTipoEquipamientoDto CrearDatos(string nombre, string categoria)

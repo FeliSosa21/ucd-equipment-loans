@@ -18,6 +18,7 @@ public partial class Unidades
     private string _tipoEditando = string.Empty;
     private DatosUnidadDto _datos = new DatosUnidadDto();
     private UnidadDetalleDto? _aDarDeBaja;
+    private int _idCatalogo;
     private string? _error;
     private string? _exito;
 
@@ -28,8 +29,27 @@ public partial class Unidades
             return;
         }
 
+        ResolverCatalogoProvisorio();
         Recargar();
     }
+
+    // Provisorio hasta que exista el selector de catalogo (T4): el primer catalogo activo.
+    private void ResolverCatalogoProvisorio()
+    {
+        try
+        {
+            List<CatalogoDto> catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
+            if (catalogos.Count > 0)
+            {
+                _idCatalogo = catalogos[0].Id;
+            }
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
 
     // ---------- Listado y filtros ----------
 
@@ -37,7 +57,7 @@ public partial class Unidades
     {
         try
         {
-            _tipos = ServicioTipos.Listar(null, null);
+            _tipos = ServicioTipos.Listar(_idCatalogo, new FiltroTiposDto(), DniUsuario);
             _unidades = ServicioUnidades.Listar(ValoresDeFiltro.ValorONulo(_tipoFiltro),
                 ValoresDeFiltro.ValorONulo(_estadoFiltro));
         }
