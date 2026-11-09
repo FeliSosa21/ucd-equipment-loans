@@ -24,7 +24,7 @@ public class ServicioUnidades
     {
         ValidarResponsable(dniUsuario);
         List<UnidadDetalleDto> resultado = new List<UnidadDetalleDto>();
-        Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
+        Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
 
         foreach ((TipoEquipamiento tipo, UnidadFisica unidad) in UnidadesConSuTipo(catalogo))
         {
@@ -41,7 +41,7 @@ public class ServicioUnidades
     {
         ArgumentNullException.ThrowIfNull(datos);
         ValidarResponsable(dniResponsable);
-        Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
+        Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
         TipoEquipamiento tipo = OperacionesComunes.ObtenerTipo(_repositorioCatalogo, idCatalogo, datos.NombreTipo);
         string idInstitucional = OperacionesComunes.Normalizar(datos.IdInstitucional);
         string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
@@ -58,7 +58,7 @@ public class ServicioUnidades
     {
         ArgumentNullException.ThrowIfNull(datos);
         ValidarResponsable(dniResponsable);
-        Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
+        Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
         UnidadFisica unidad = ObtenerUnidad(catalogo, datos.IdInstitucional);
         string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
         ValidarSerieDisponibleEnElSistema(numeroSerie, unidad.Id);
@@ -82,7 +82,7 @@ public class ServicioUnidades
         }
 
         TraduccionDeErrores.Ejecutar(unidad.AMantenimiento);
-        _repositorioCatalogo.ActualizarCatalogo(catalogo);
+        GuardarCambios(catalogo);
     }
 
     public void VolverADisponible(int idCatalogo, string idInstitucional, string dniResponsable)
@@ -97,7 +97,7 @@ public class ServicioUnidades
         }
 
         TraduccionDeErrores.Ejecutar(unidad.Disponible);
-        _repositorioCatalogo.ActualizarCatalogo(catalogo);
+        GuardarCambios(catalogo);
     }
 
     public void DarDeBaja(int idCatalogo, string idInstitucional, string dniResponsable)
@@ -107,7 +107,7 @@ public class ServicioUnidades
         UnidadFisica unidad = ObtenerUnidad(catalogo, idInstitucional);
 
         TraduccionDeErrores.Ejecutar(unidad.DarDeBaja);
-        _repositorioCatalogo.ActualizarCatalogo(catalogo);
+        GuardarCambios(catalogo);
     }
 
     // Ultima barrera: si la base rechaza el guardado (por ejemplo un indice unico), la UI recibe un ServicioException.
