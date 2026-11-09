@@ -50,7 +50,7 @@ internal static class OperacionesComunes
         Permiso permiso, string mensajeSinPermiso)
     {
         Usuario responsable = ObtenerResponsableActivo(repositorioUsuario, dniResponsable, mensajeSinPermiso);
-        if (!responsable.Tipo.TienePermiso(permiso))
+        if (!responsable.TienePermiso(permiso))
         {
             throw new ServicioException(mensajeSinPermiso);
         }
@@ -62,7 +62,7 @@ internal static class OperacionesComunes
         string mensajeSinPermiso)
     {
         Usuario? responsable = repositorioUsuario.ObtenerUsuarioPorDni(dniResponsable);
-        if (responsable is null || responsable.Estado == EstadoUsuario.Desactivado)
+        if (responsable is null || !responsable.EstaActivo())
         {
             throw new ServicioException(mensajeSinPermiso);
         }
