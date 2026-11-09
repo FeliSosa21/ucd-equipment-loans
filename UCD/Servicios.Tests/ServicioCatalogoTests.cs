@@ -12,6 +12,7 @@ public class ServicioCatalogoTests
     private const string DniSupervisor = "23456783";
     private const string DniSinPermisos = "45678905";
     private const string DniDesactivado = "34567894";
+    private const string DniEstudiante = "67890127";
     private const string DniInexistente = "56789016";
 
     private ContextoDePrueba _entorno = null!;
@@ -255,6 +256,20 @@ public class ServicioCatalogoTests
         Assert.AreEqual(1, resultado.Count);
         Assert.AreEqual("Teclado HP", resultado[0].Nombre);
         Assert.AreEqual("Activo", resultado[0].Estado);
+    }
+
+    [TestMethod]
+    public void ConsultarTipos_EstudianteFiltraPorDiscontinuado_DevuelveListaVacia()
+    {
+        var discontinuado = CrearTipo(nombre: "Monitor LG");
+        discontinuado.Discontinuar();
+        var servicio = CrearServicio(CrearTipo(nombre: "Teclado HP"), discontinuado);
+        _entorno.GuardarUsuario(DniEstudiante, "estudiante@ucd.edu.uy", TipoUsuario.Estudiante());
+        var filtro = new FiltroCatalogoDto { Estado = "Discontinuado" };
+
+        var resultado = servicio.ConsultarTipos(_idCatalogo, filtro, DniEstudiante);
+
+        Assert.AreEqual(0, resultado.Count);
     }
 
     [TestMethod]
