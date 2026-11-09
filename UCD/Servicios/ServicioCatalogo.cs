@@ -19,6 +19,7 @@ public class ServicioCatalogo
 
     public List<CatalogoDto> ListarCatalogos(string dniUsuario)
     {
+        ValidarResponsable(dniUsuario);
         var resultado = new List<CatalogoDto>();
 
         foreach (var catalogo in _repositorioCatalogo.ObtenerCatalogosActivos())
