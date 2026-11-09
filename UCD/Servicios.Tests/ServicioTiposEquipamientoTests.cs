@@ -575,6 +575,21 @@ public class ServicioTiposEquipamientoTests
         Assert.AreEqual(EstadoTipoEquipamiento.Activo, guardado.Estado);
     }
 
+    [TestMethod]
+    public void Modificar_DatosValidos_SeLeeConOtroContexto()
+    {
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS R", categoria: "Electronica");
+
+        servicio.Modificar(_idCatalogo, CrearModificacion("Camara Canon EOS", datos), DniSupervisor);
+
+        TipoEquipamiento? guardado = LeerTipo("Camara Canon EOS R");
+        Assert.IsNotNull(guardado);
+        Assert.AreEqual(Categoria.Electronica, guardado.Categoria);
+        Assert.IsNull(LeerTipo("Camara Canon EOS"));
+    }
+
     private ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
