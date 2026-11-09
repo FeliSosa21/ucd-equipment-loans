@@ -1,5 +1,6 @@
 using Data.Repositorios;
 using Dominio;
+using Microsoft.EntityFrameworkCore;
 
 namespace Servicios;
 
@@ -39,6 +40,20 @@ internal static class OperacionesComunes
         }
 
         return tipo;
+    }
+
+    // Ultima barrera: si la base rechaza el guardado (por ejemplo un indice unico), la UI recibe un ServicioException.
+    public static void GuardarCambios(RepositorioCatalogoSql repositorioCatalogo, Catalogo catalogo,
+        string mensajeSiFalla)
+    {
+        try
+        {
+            repositorioCatalogo.ActualizarCatalogo(catalogo);
+        }
+        catch (DbUpdateException ex)
+        {
+            throw new ServicioException(mensajeSiFalla, ex);
+        }
     }
 
     // El responsable se valida en cada operacion: la pantalla pudo abrirse antes de que lo desactivaran.

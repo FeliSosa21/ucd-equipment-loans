@@ -9,6 +9,8 @@ namespace Servicios;
 public class ServicioTiposEquipamiento
 {
     private const string MensajeSinPermiso = "El usuario no tiene permiso para gestionar el catalogo";
+    private const string MensajeNoSePudoGuardar =
+        "No se pudieron guardar los cambios; verifique que no exista otro tipo con ese nombre";
     private const string MensajeSinPermisoParaListar = "El usuario no tiene permiso para ver los tipos de equipamiento";
 
     private readonly RepositorioCatalogoSql _repositorioCatalogo;
@@ -52,7 +54,7 @@ public class ServicioTiposEquipamiento
                 datos.RequiereAprobacion, categoria);
             catalogo.AgregarTipo(tipo);
         });
-        _repositorioCatalogo.ActualizarCatalogo(catalogo);
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
     public void Modificar(int idCatalogo, ModificacionTipoEquipamientoDto modificacion, string dniResponsable)
