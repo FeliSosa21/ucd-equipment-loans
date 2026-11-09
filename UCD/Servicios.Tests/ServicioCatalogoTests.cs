@@ -9,6 +9,7 @@ namespace Servicios.Tests;
 public class ServicioCatalogoTests
 {
     private const string DniDocente = "12345672";
+    private const string DniSupervisor = "23456783";
 
     private ContextoDePrueba _entorno = null!;
     private int _idCatalogo;
@@ -191,6 +192,21 @@ public class ServicioCatalogoTests
         Assert.AreEqual(1, resultado.Count);
         Assert.AreEqual("Teclado HP", resultado[0].Nombre);
         Assert.AreEqual(0, resultado[0].CantidadDisponibles);
+    }
+
+    [TestMethod]
+    public void ConsultarTipos_SupervisorSinFiltro_VeActivosYDiscontinuados()
+    {
+        var discontinuado = CrearTipo(nombre: "Monitor LG");
+        discontinuado.Discontinuar();
+        var servicio = CrearServicio(CrearTipo(nombre: "Teclado HP"), discontinuado);
+        _entorno.GuardarUsuario(DniSupervisor, "supervisor@ucd.edu.uy", TipoUsuario.Supervisor());
+
+        var resultado = servicio.ConsultarTipos(_idCatalogo, new FiltroCatalogoDto(), DniSupervisor);
+
+        Assert.AreEqual(2, resultado.Count);
+        Assert.AreEqual("Activo", resultado[0].Estado);
+        Assert.AreEqual("Discontinuado", resultado[1].Estado);
     }
 
     [TestMethod]
