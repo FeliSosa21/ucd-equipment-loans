@@ -10,6 +10,8 @@ public class ServicioInventarioTests
 {
     private const string DniFuncionario = "12345672";
     private const string DniDocente = "45678905";
+    private const string DniDesactivado = "23456783";
+    private const string DniInexistente = "34567894";
 
     private ContextoDePrueba _entorno = null!;
     private int _idCatalogo;
@@ -194,6 +196,36 @@ public class ServicioInventarioTests
         _entorno.GuardarUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente());
 
         Assert.ThrowsException<ServicioException>(() => servicio.ContarPorCategoria(_idCatalogo, DniDocente));
+    }
+
+    [TestMethod]
+    public void ContarPorTipo_UsuarioDesactivado_LanzaServicioException()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+        _entorno.GuardarUsuario(DniDesactivado, "desactivado@ucd.edu.uy", TipoUsuario.FuncionarioCE(),
+            desactivado: true);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ContarPorTipo(_idCatalogo, new FiltroInventarioDto(), DniDesactivado));
+    }
+
+    [TestMethod]
+    public void ContarPorCategoria_UsuarioDesactivado_LanzaServicioException()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+        _entorno.GuardarUsuario(DniDesactivado, "desactivado@ucd.edu.uy", TipoUsuario.FuncionarioCE(),
+            desactivado: true);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ContarPorCategoria(_idCatalogo, DniDesactivado));
+    }
+
+    [TestMethod]
+    public void ContarPorTipo_DniInexistente_LanzaServicioException()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ContarPorTipo(_idCatalogo, new FiltroInventarioDto(), DniInexistente));
     }
 
     private ServicioInventario CrearServicio(params TipoEquipamiento[] tipos)
