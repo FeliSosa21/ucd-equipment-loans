@@ -3,4 +3,3 @@ select.field:disabled { opacity: .6; }
 .alta { padding: 1.25rem; margin-bottom: 1rem; }
 .pregunta { margin: 0 0 1rem; }
 td .btn + .btn { margin-left: .4rem; }
-.paginacion { display: flex; align-items: center; justify-content: center; gap: .75rem; padding: .75rem; }
