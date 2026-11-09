@@ -659,6 +659,15 @@ public class ServicioUnidadesTests
             servicio.DarDeBaja(_idCatalogo, "PRY-0001", DniFuncionario));
     }
 
+    [TestMethod]
+    public void Listar_UsuarioSinPermiso_LanzaServicioException()
+    {
+        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Listar(_idCatalogo, new FiltroUnidadesDto(), DniDocente));
+    }
+
     private ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
