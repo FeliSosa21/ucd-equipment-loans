@@ -29,7 +29,7 @@ internal static class OperacionesComunes
     }
 
     // El responsable se valida en cada operacion: la pantalla pudo abrirse antes de que lo desactivaran.
-    public static void ValidarResponsable(RepositorioUsuarioSql repositorioUsuario, string dniResponsable,
+    public static Usuario ValidarResponsable(RepositorioUsuarioSql repositorioUsuario, string dniResponsable,
         Permiso permiso, string mensajeSinPermiso)
     {
         Usuario? responsable = repositorioUsuario.ObtenerUsuarioPorDni(dniResponsable);
@@ -38,6 +38,8 @@ internal static class OperacionesComunes
         {
             throw new ServicioException(mensajeSinPermiso);
         }
+
+        return responsable;
     }
 
     public static string Normalizar(string? texto)

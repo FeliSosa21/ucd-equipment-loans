@@ -62,9 +62,10 @@ public class ServicioCatalogoTests
         var notebook = CrearTipo(nombre: "notebook");
         notebook.Discontinuar();
         var servicio = CrearServicio(proyector, notebook);
+        _entorno.GuardarUsuario(DniSupervisor, "supervisor@ucd.edu.uy", TipoUsuario.Supervisor());
         var filtro = new FiltroCatalogoDto { Estado = "Discontinuado" };
 
-        var resultado = servicio.ConsultarTipos(_idCatalogo, filtro, DniDocente);
+        var resultado = servicio.ConsultarTipos(_idCatalogo, filtro, DniSupervisor);
 
         Assert.AreEqual(1, resultado.Count);
         Assert.AreEqual("notebook", resultado[0].Nombre);
@@ -96,9 +97,10 @@ public class ServicioCatalogoTests
         monitor.Discontinuar();
         notebook.Discontinuar();
         var servicio = CrearServicio(teclado, monitor, notebook);
+        _entorno.GuardarUsuario(DniSupervisor, "supervisor@ucd.edu.uy", TipoUsuario.Supervisor());
         var filtro = new FiltroCatalogoDto { Categoria = "Computacion", Estado = "Discontinuado" };
 
-        var resultado = servicio.ConsultarTipos(_idCatalogo, filtro, DniDocente);
+        var resultado = servicio.ConsultarTipos(_idCatalogo, filtro, DniSupervisor);
 
         Assert.AreEqual(1, resultado.Count);
         Assert.AreEqual("Notebook Lenovo", resultado[0].Nombre);

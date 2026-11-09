@@ -20,14 +20,15 @@ public class ServicioCatalogo
     public List<TipoEquipamientoDto> ConsultarTipos(int idCatalogo, FiltroCatalogoDto filtro, string dniUsuario)
     {
         ArgumentNullException.ThrowIfNull(filtro);
-        ValidarResponsable(dniUsuario);
+        Usuario usuario = ValidarResponsable(dniUsuario);
+        bool veDiscontinuados = usuario.TienePermiso(Permiso.GestionarCatalogo);
         ValidarFiltro(filtro);
         var catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
         var resultado = new List<TipoEquipamientoDto>();
 
         foreach (var tipo in catalogo.Tipos)
         {
-            if (CumpleFiltro(tipo, filtro))
+            if (CumpleFiltro(tipo, filtro) && (veDiscontinuados || tipo.EstaActivo))
             {
                 resultado.Add(CrearTipoDto(tipo));
             }
@@ -55,9 +56,9 @@ public class ServicioCatalogo
         return resultado;
     }
 
-    private void ValidarResponsable(string dniUsuario)
+    private Usuario ValidarResponsable(string dniUsuario)
     {
-        OperacionesComunes.ValidarResponsable(_repositorioUsuario, dniUsuario, Permiso.ConsultarCatalogo,
+        return OperacionesComunes.ValidarResponsable(_repositorioUsuario, dniUsuario, Permiso.ConsultarCatalogo,
             MensajeSinPermiso);
     }
 
