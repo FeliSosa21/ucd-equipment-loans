@@ -45,7 +45,7 @@ public class ServicioUnidades
         string idInstitucional = OperacionesComunes.Normalizar(datos.IdInstitucional);
         string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
         ValidarIdDisponible(idInstitucional);
-        ValidarSerieDisponible(catalogo, numeroSerie, null);
+        ValidarSerieDisponibleEnElSistema(numeroSerie);
         string ubicacionFisica = OperacionesComunes.Normalizar(datos.UbicacionFisica);
 
         TraduccionDeErrores.Ejecutar(() =>
@@ -163,6 +163,16 @@ public class ServicioUnidades
         if (_repositorioCatalogo.ExisteUnidadConIdInstitucional(idInstitucional))
         {
             throw new ServicioException("Ya existe una unidad con ese id institucional");
+        }
+    }
+
+    // El numero de serie, si existe, es unico en todo el sistema (foro 2.3).
+    private void ValidarSerieDisponibleEnElSistema(string? numeroSerie)
+    {
+        if (!string.IsNullOrWhiteSpace(numeroSerie) &&
+            _repositorioCatalogo.ExisteUnidadConNumeroDeSerie(numeroSerie, null))
+        {
+            throw new ServicioException("Ya existe una unidad con ese numero de serie");
         }
     }
 
