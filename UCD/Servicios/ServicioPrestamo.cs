@@ -57,14 +57,15 @@ public class ServicioPrestamo
             _movimientos.AgregarMovimiento(Movimiento.DeSolicitud(prestamo,
                 RegistroDeAccion.DeUsuario(solicitante, prestamo.FechaHoraPrestamo)));
 
-            RegistroDeAccion delSistema = RegistroDeAccion.DelSistema(prestamo.FechaHoraPrestamo);
+            Func<RegistroDeAccion> crearRegistroDelSistema =
+                () => RegistroDeAccion.DelSistema(prestamo.FechaHoraPrestamo);
 
             if (prestamo.Estado == EstadoPrestamo.Rechazado)
             {
-                _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo, delSistema));
+                _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo, crearRegistroDelSistema()));
             }
 
-            RegistrarMovimientos(prestamo, delSistema);
+            RegistrarMovimientos(prestamo, crearRegistroDelSistema);
 
             return CrearPrestamoDto(prestamo);
         }
@@ -98,14 +99,16 @@ public class ServicioPrestamo
                 List<UnidadFisica> unidades = prestamo.TipoEquipamiento.UnidadesDisponibles()
                     .Take(prestamo.CantidadSolicitada).ToList();
                 prestamo.Aprobar(evaluador, unidades);
-                RegistroDeAccion registro = RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion);
+                Func<RegistroDeAccion> crearRegistroDelEvaluador =
+                    () => RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion);
 
                 foreach (UnidadFisica unidad in prestamo.UnidadesAsignadas)
                 {
-                    _movimientos.AgregarMovimiento(Movimiento.DeAprobacion(prestamo, registro, unidad));
+                    _movimientos.AgregarMovimiento(
+                        Movimiento.DeAprobacion(prestamo, crearRegistroDelEvaluador(), unidad));
                 }
 
-                RegistrarMovimientos(prestamo, registro);
+                RegistrarMovimientos(prestamo, crearRegistroDelEvaluador);
             }
 
             return CrearPrestamoDto(prestamo);
@@ -247,11 +250,13 @@ public class ServicioPrestamo
         }
     }
 
-    private void RegistrarMovimientos(Prestamo prestamo, RegistroDeAccion registro)
+    // Un registro nuevo por movimiento: con EF, RegistroDeAccion es owned de Movimiento y una misma
+    // instancia no puede pertenecer a dos movimientos.
+    private void RegistrarMovimientos(Prestamo prestamo, Func<RegistroDeAccion> crearRegistro)
     {
         foreach (UnidadFisica unidad in prestamo.UnidadesAsignadas)
         {
-            _movimientos.AgregarMovimiento(Movimiento.DePrestamo(prestamo, registro, unidad));
+            _movimientos.AgregarMovimiento(Movimiento.DePrestamo(prestamo, crearRegistro(), unidad));
         }
     }
 
