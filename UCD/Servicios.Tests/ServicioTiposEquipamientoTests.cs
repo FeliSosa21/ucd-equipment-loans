@@ -559,6 +559,15 @@ public class ServicioTiposEquipamientoTests
         Assert.AreEqual(EstadoTipoEquipamiento.Activo, LeerTipo("Camara Canon EOS")!.Estado);
     }
 
+    [TestMethod]
+    public void Registrar_FallaElGuardado_LanzaServicioException()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicioQueFallaAlGuardar();
+        DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniSupervisor));
+    }
+
     private ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
@@ -600,6 +609,13 @@ public class ServicioTiposEquipamientoTests
     {
         using SqlContext lectura = _entorno.NuevoContexto();
         return new RepositorioCatalogoSql(lectura).ObtenerTipoPorNombre(_idCatalogo, nombre);
+    }
+
+    private ServicioTiposEquipamiento CrearServicioQueFallaAlGuardar(params TipoEquipamiento[] tipos)
+    {
+        CrearServicio(tipos);
+        SqlContext contexto = _entorno.NuevoContextoQueFallaAlGuardar();
+        return new ServicioTiposEquipamiento(new RepositorioCatalogoSql(contexto), new RepositorioUsuarioSql(contexto));
     }
 
     private List<TipoEquipamientoDetalleDto> ListarTodos(ServicioTiposEquipamiento servicio)
