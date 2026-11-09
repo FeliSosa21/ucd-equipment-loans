@@ -701,6 +701,20 @@ public class ServicioUnidadesTests
         Assert.AreEqual("SN123", guardada.NumSerie);
     }
 
+    [DataTestMethod]
+    [DataRow("")]
+    [DataRow("   ")]
+    public void Registrar_NumeroDeSerieVacioOConEspacios_SeGuardaNull(string numeroSerie)
+    {
+        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
+        DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
+            numeroSerie: numeroSerie);
+
+        servicio.Registrar(_idCatalogo, datos, DniFuncionario);
+
+        Assert.IsNull(LeerUnidad("PRY-0001")!.NumSerie);
+    }
+
     private ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
