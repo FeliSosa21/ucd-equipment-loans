@@ -23,7 +23,7 @@ public partial class Catalogo
             return;
         }
 
-        // Foro: Docente y Estudiante solo ven los tipos activos; filtrar por estado es de quien gestiona el catalogo.
+        // Solo quien gestiona el catalogo ve el filtro por estado; los discontinuados los oculta el servicio.
         _puedeFiltrarPorEstado = SesionActual.Usuario!.Permisos.Contains(Permisos.GestionarCatalogo);
         Consultar();
     }
@@ -35,7 +35,7 @@ public partial class Catalogo
         FiltroCatalogoDto filtro = new FiltroCatalogoDto
         {
             Categoria = ValoresDeFiltro.ValorONulo(_categoria),
-            Estado = EstadoAFiltrar(),
+            Estado = ValoresDeFiltro.ValorONulo(_estado),
             MinimoDisponibles = _minimoDisponibles
         };
 
@@ -64,16 +64,6 @@ public partial class Catalogo
         return catalogos[0].Id;
     }
 
-    private string? EstadoAFiltrar()
-    {
-        if (_puedeFiltrarPorEstado)
-        {
-            return ValoresDeFiltro.ValorONulo(_estado);
-        }
-
-        return EstadosCatalogo.TipoActivo;
-    }
-
     private void LimpiarFiltros()
     {
         _categoria = string.Empty;
@@ -97,7 +87,8 @@ public partial class Catalogo
         _error = null;
         try
         {
-            _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(ObtenerIdCatalogoProvisorio(), nombreTipo, DniUsuario);
+            _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(ObtenerIdCatalogoProvisorio(), nombreTipo,
+                DniUsuario);
             _tipoSeleccionado = nombreTipo;
         }
         catch (ServicioException ex)
