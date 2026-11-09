@@ -188,8 +188,8 @@ public class ServicioUnidades
 
     private void ValidarResponsable(string dniResponsable)
     {
-        OperacionesComunes.ValidarResponsable(_repositorioUsuario, dniResponsable, Permiso.GestionarUnidades,
-            MensajeSinPermiso);
+        OperacionesComunes.ValidarResponsable(_repositorioUsuario.ObtenerUsuarioPorDni(dniResponsable),
+            Permiso.GestionarUnidades, MensajeSinPermiso);
     }
 
     private static bool CoincideTipo(TipoEquipamiento tipo, string? nombreTipo)

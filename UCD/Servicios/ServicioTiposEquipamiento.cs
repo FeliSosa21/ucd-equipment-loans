@@ -111,8 +111,8 @@ public class ServicioTiposEquipamiento
     // Listan los tipos quien gestiona el catalogo y quien gestiona unidades (necesita elegir el tipo de cada unidad).
     private void ValidarQuePuedaListar(string dniUsuario)
     {
-        Usuario usuario = OperacionesComunes.ObtenerResponsableActivo(_repositorioUsuario, dniUsuario,
-            MensajeSinPermisoParaListar);
+        Usuario usuario = OperacionesComunes.ObtenerResponsableActivo(
+            _repositorioUsuario.ObtenerUsuarioPorDni(dniUsuario), MensajeSinPermisoParaListar);
         if (!usuario.TienePermiso(Permiso.GestionarCatalogo) && !usuario.TienePermiso(Permiso.GestionarUnidades))
         {
             throw new ServicioException(MensajeSinPermisoParaListar);
@@ -121,8 +121,8 @@ public class ServicioTiposEquipamiento
 
     private void ValidarResponsable(string dniResponsable)
     {
-        OperacionesComunes.ValidarResponsable(_repositorioUsuario, dniResponsable, Permiso.GestionarCatalogo,
-            MensajeSinPermiso);
+        OperacionesComunes.ValidarResponsable(_repositorioUsuario.ObtenerUsuarioPorDni(dniResponsable),
+            Permiso.GestionarCatalogo, MensajeSinPermiso);
     }
 
     // Solo nombres de la enumeracion: Enum.TryParse tambien aceptaria numeros como "1".

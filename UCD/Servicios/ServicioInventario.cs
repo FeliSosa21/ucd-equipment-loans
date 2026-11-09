@@ -51,8 +51,8 @@ public class ServicioInventario
 
     private void ValidarResponsable(string dniUsuario)
     {
-        OperacionesComunes.ValidarResponsable(_repositorioUsuario, dniUsuario, Permiso.GestionarUnidades,
-            MensajeSinPermiso);
+        OperacionesComunes.ValidarResponsable(_repositorioUsuario.ObtenerUsuarioPorDni(dniUsuario),
+            Permiso.GestionarUnidades, MensajeSinPermiso);
     }
 
     private IReadOnlyCollection<TipoEquipamiento> ObtenerTipos(int idCatalogo)

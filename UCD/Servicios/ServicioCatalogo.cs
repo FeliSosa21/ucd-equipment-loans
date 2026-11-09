@@ -67,8 +67,8 @@ public class ServicioCatalogo
 
     private Usuario ValidarResponsable(string dniUsuario)
     {
-        return OperacionesComunes.ValidarResponsable(_repositorioUsuario, dniUsuario, Permiso.ConsultarCatalogo,
-            MensajeSinPermiso);
+        return OperacionesComunes.ValidarResponsable(_repositorioUsuario.ObtenerUsuarioPorDni(dniUsuario),
+            Permiso.ConsultarCatalogo, MensajeSinPermiso);
     }
 
     private void ValidarFiltro (FiltroCatalogoDto filtro)
