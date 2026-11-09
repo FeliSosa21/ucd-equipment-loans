@@ -668,6 +668,24 @@ public class ServicioUnidadesTests
             servicio.Listar(_idCatalogo, new FiltroUnidadesDto(), DniDocente));
     }
 
+    [TestMethod]
+    public void Listar_UsuarioDesactivado_LanzaServicioException()
+    {
+        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Listar(_idCatalogo, new FiltroUnidadesDto(), DniFuncionarioDesactivado));
+    }
+
+    [TestMethod]
+    public void Listar_DniInexistente_LanzaServicioException()
+    {
+        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Listar(_idCatalogo, new FiltroUnidadesDto(), "11111111"));
+    }
+
     private ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
