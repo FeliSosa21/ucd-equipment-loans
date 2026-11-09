@@ -12,6 +12,20 @@ public class ServicioUnidadesTests
     private const string DniDocente = "45678905";
     private const string DniFuncionarioDesactivado = "23456783";
 
+    private ContextoDePrueba _entorno = null!;
+
+    [TestInitialize]
+    public void Inicializar()
+    {
+        _entorno = new ContextoDePrueba();
+    }
+
+    [TestCleanup]
+    public void Limpiar()
+    {
+        _entorno.Dispose();
+    }
+
     [TestMethod]
     public void Listar_SinFiltros_DevuelveLasUnidadesDeTodosLosTipos()
     {
@@ -507,10 +521,9 @@ public class ServicioUnidadesTests
         Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniFuncionario));
     }
 
-    private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
+    private ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
-        Memoria memoria = new Memoria();
-        RepositorioCatalogo repositorioCatalogo = new RepositorioCatalogo(memoria);
+        RepositorioCatalogo repositorioCatalogo = new RepositorioCatalogo(new Memoria());
         Catalogo catalogo = new Catalogo("Catalogo UCD");
         foreach (TipoEquipamiento tipo in tipos)
         {
@@ -519,22 +532,11 @@ public class ServicioUnidadesTests
 
         repositorioCatalogo.Guardar(catalogo);
 
-        RepositorioUsuario repositorioUsuario = new RepositorioUsuario(memoria);
-        repositorioUsuario.AgregarUsuario(CrearUsuario(DniFuncionario, "funcionario@ucd.edu.uy",
-            TipoUsuario.FuncionarioCE()));
-        repositorioUsuario.AgregarUsuario(CrearUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente()));
-        Usuario desactivado = CrearUsuario(DniFuncionarioDesactivado, "desactivado@ucd.edu.uy",
-            TipoUsuario.FuncionarioCE());
-        desactivado.Desactivar();
-        repositorioUsuario.AgregarUsuario(desactivado);
-        return new ServicioUnidades(repositorioCatalogo, repositorioUsuario);
-    }
-
-    private static Usuario CrearUsuario(string dni, string correo, TipoUsuario tipo)
-    {
-        Usuario usuario = new Usuario(dni, "Nombre", "Apellido", correo, "VivaLaOrt2026");
-        usuario.AsignarTipo(tipo);
-        return usuario;
+        _entorno.GuardarUsuario(DniFuncionario, "funcionario@ucd.edu.uy", TipoUsuario.FuncionarioCE());
+        _entorno.GuardarUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente());
+        _entorno.GuardarUsuario(DniFuncionarioDesactivado, "desactivado@ucd.edu.uy", TipoUsuario.FuncionarioCE(),
+            desactivado: true);
+        return new ServicioUnidades(repositorioCatalogo, _entorno.Usuarios);
     }
 
     private static TipoEquipamiento CrearTipo(string nombre)

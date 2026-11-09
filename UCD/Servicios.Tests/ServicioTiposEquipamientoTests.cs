@@ -12,6 +12,20 @@ public class ServicioTiposEquipamientoTests
     private const string DniFuncionario = "45678905";
     private const string DniSupervisorDesactivado = "23456783";
 
+    private ContextoDePrueba _entorno = null!;
+
+    [TestInitialize]
+    public void Inicializar()
+    {
+        _entorno = new ContextoDePrueba();
+    }
+
+    [TestCleanup]
+    public void Limpiar()
+    {
+        _entorno.Dispose();
+    }
+
     [TestMethod]
     public void Listar_SinFiltros_DevuelveTodosConSusDatos()
     {
@@ -37,9 +51,8 @@ public class ServicioTiposEquipamientoTests
     [TestMethod]
     public void Listar_SinCatalogo_LanzaServicioException()
     {
-        Memoria memoria = new Memoria();
-        ServicioTiposEquipamiento servicio = new ServicioTiposEquipamiento(new RepositorioCatalogo(memoria),
-            new RepositorioUsuario(memoria));
+        ServicioTiposEquipamiento servicio = new ServicioTiposEquipamiento(new RepositorioCatalogo(new Memoria()),
+            _entorno.Usuarios);
 
         Assert.ThrowsException<ServicioException>(() => servicio.Listar(null, null));
     }
@@ -407,10 +420,9 @@ public class ServicioTiposEquipamientoTests
         Assert.AreEqual("Centro ORT", servicio.ObtenerNombreCatalogo());
     }
 
-    private static ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
+    private ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
-        Memoria memoria = new Memoria();
-        RepositorioCatalogo repositorioCatalogo = new RepositorioCatalogo(memoria);
+        RepositorioCatalogo repositorioCatalogo = new RepositorioCatalogo(new Memoria());
         Catalogo catalogo = new Catalogo("Catalogo UCD");
         foreach (TipoEquipamiento tipo in tipos)
         {
@@ -419,22 +431,11 @@ public class ServicioTiposEquipamientoTests
 
         repositorioCatalogo.Guardar(catalogo);
 
-        RepositorioUsuario repositorioUsuario = new RepositorioUsuario(memoria);
-        repositorioUsuario.AgregarUsuario(CrearUsuario(DniSupervisor, "supervisor@ucd.edu.uy", TipoUsuario.Supervisor()));
-        repositorioUsuario.AgregarUsuario(CrearUsuario(DniFuncionario, "funcionario@ucd.edu.uy",
-            TipoUsuario.FuncionarioCE()));
-        Usuario desactivado = CrearUsuario(DniSupervisorDesactivado, "desactivado@ucd.edu.uy",
-            TipoUsuario.Supervisor());
-        desactivado.Desactivar();
-        repositorioUsuario.AgregarUsuario(desactivado);
-        return new ServicioTiposEquipamiento(repositorioCatalogo, repositorioUsuario);
-    }
-
-    private static Usuario CrearUsuario(string dni, string correo, TipoUsuario tipo)
-    {
-        Usuario usuario = new Usuario(dni, "Nombre", "Apellido", correo, "VivaLaOrt2026");
-        usuario.AsignarTipo(tipo);
-        return usuario;
+        _entorno.GuardarUsuario(DniSupervisor, "supervisor@ucd.edu.uy", TipoUsuario.Supervisor());
+        _entorno.GuardarUsuario(DniFuncionario, "funcionario@ucd.edu.uy", TipoUsuario.FuncionarioCE());
+        _entorno.GuardarUsuario(DniSupervisorDesactivado, "desactivado@ucd.edu.uy", TipoUsuario.Supervisor(),
+            desactivado: true);
+        return new ServicioTiposEquipamiento(repositorioCatalogo, _entorno.Usuarios);
     }
 
     private static DatosTipoEquipamientoDto CrearDatos(string nombre, string categoria)

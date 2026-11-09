@@ -11,9 +11,9 @@ public class ServicioUnidades
     private const string MensajeSinPermiso = "El usuario no tiene permiso para gestionar unidades";
 
     private readonly RepositorioCatalogo _repositorioCatalogo;
-    private readonly RepositorioUsuario _repositorioUsuario;
+    private readonly RepositorioUsuarioSql _repositorioUsuario;
 
-    public ServicioUnidades(RepositorioCatalogo repositorioCatalogo, RepositorioUsuario repositorioUsuario)
+    public ServicioUnidades(RepositorioCatalogo repositorioCatalogo, RepositorioUsuarioSql repositorioUsuario)
     {
         _repositorioCatalogo = repositorioCatalogo;
         _repositorioUsuario = repositorioUsuario;

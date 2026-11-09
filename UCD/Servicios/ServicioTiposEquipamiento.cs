@@ -11,9 +11,9 @@ public class ServicioTiposEquipamiento
     private const string MensajeSinPermiso = "El usuario no tiene permiso para gestionar el catalogo";
 
     private readonly RepositorioCatalogo _repositorioCatalogo;
-    private readonly RepositorioUsuario _repositorioUsuario;
+    private readonly RepositorioUsuarioSql _repositorioUsuario;
 
-    public ServicioTiposEquipamiento(RepositorioCatalogo repositorioCatalogo, RepositorioUsuario repositorioUsuario)
+    public ServicioTiposEquipamiento(RepositorioCatalogo repositorioCatalogo, RepositorioUsuarioSql repositorioUsuario)
     {
         _repositorioCatalogo = repositorioCatalogo;
         _repositorioUsuario = repositorioUsuario;
