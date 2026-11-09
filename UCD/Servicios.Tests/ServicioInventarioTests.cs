@@ -187,6 +187,15 @@ public class ServicioInventarioTests
             servicio.ContarPorTipo(_idCatalogo, new FiltroInventarioDto(), DniDocente));
     }
 
+    [TestMethod]
+    public void ContarPorCategoria_UsuarioSinPermiso_LanzaServicioException()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+        _entorno.GuardarUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente());
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ContarPorCategoria(_idCatalogo, DniDocente));
+    }
+
     private ServicioInventario CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo Central");
