@@ -56,7 +56,7 @@ public class Usuario
 
     public bool EstaHabilitadoPara(Permiso permiso)
     {
-        return false;
+        return true;
     }
 
     public bool EstaPendienteDeActivacion()
