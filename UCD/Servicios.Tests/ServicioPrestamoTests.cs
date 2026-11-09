@@ -515,6 +515,22 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    [DataRow(0)]
+    [DataRow(-1)]
+    public void Solicitar_CatalogoNoIndicado_LanzaExcepcionConMensaje(int idCatalogo)
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto datos = CrearSolicitud();
+        datos.IdCatalogo = idCatalogo;
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Solicitar(datos, DniDocente));
+        Assert.AreEqual("Debe indicar un catalogo", excepcion.Message);
+
+        VerificarQueNoSeGuardoNiSePrestoNada(DniDocente);
+    }
+
+    [TestMethod]
     public void Aprobar_SolicitudPendienteConUnidades_QuedaActivo()
     {
         ServicioPrestamo servicio = CrearServicio();
