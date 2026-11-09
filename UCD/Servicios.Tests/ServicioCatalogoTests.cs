@@ -379,6 +379,16 @@ public class ServicioCatalogoTests
             servicio.ObtenerUnidadesDisponibles(_idCatalogo, "Teclado HP", DniDocente));
     }
 
+    [TestMethod]
+    public void ObtenerUnidadesDisponibles_UsuarioSinPermiso_LanzaServicioException()
+    {
+        var servicio = CrearServicio(CrearTipo(nombre: "Teclado HP"));
+        _entorno.GuardarUsuario(DniSinPermisos, "sinpermisos@ucd.edu.uy", TipoUsuario.SinPermisos());
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ObtenerUnidadesDisponibles(_idCatalogo, "Teclado HP", DniSinPermisos));
+    }
+
     private ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var catalogo = new Catalogo("Catalogo Central");
