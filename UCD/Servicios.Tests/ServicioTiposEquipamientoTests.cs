@@ -345,50 +345,6 @@ public class ServicioTiposEquipamientoTests
     }
 
     [TestMethod]
-    public void ObtenerNombreCatalogo_DevuelveElNombre()
-    {
-        ServicioTiposEquipamiento servicio = CrearServicio();
-
-        Assert.AreEqual("Catalogo UCD", servicio.ObtenerNombreCatalogo(_idCatalogo));
-    }
-
-    [TestMethod]
-    public void ModificarNombreCatalogo_NombreValido_LoCambia()
-    {
-        ServicioTiposEquipamiento servicio = CrearServicio();
-
-        servicio.ModificarNombreCatalogo(_idCatalogo, "Centro de equipamiento ORT", DniSupervisor);
-
-        Assert.AreEqual("Centro de equipamiento ORT", servicio.ObtenerNombreCatalogo(_idCatalogo));
-    }
-
-    [TestMethod]
-    public void ModificarNombreCatalogo_ResponsableSinPermiso_LanzaServicioException()
-    {
-        ServicioTiposEquipamiento servicio = CrearServicio();
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.ModificarNombreCatalogo(_idCatalogo, "Centro de Equipamiento ORT", DniFuncionario));
-    }
-
-    [TestMethod]
-    public void ModificarNombreCatalogo_ResponsableDesactivado_LanzaServicioException()
-    {
-        ServicioTiposEquipamiento servicio = CrearServicio();
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.ModificarNombreCatalogo(_idCatalogo, "Centro de Equipamiento ORT", DniSupervisorDesactivado));
-    }
-
-    [TestMethod]
-    public void ModificarNombreCatalogo_NombreMuyCorto_LanzaServicioException()
-    {
-        ServicioTiposEquipamiento servicio = CrearServicio();
-
-        Assert.ThrowsException<ServicioException>(() => servicio.ModificarNombreCatalogo(_idCatalogo, "AB", DniSupervisor));
-    }
-
-    [TestMethod]
     public void Registrar_TextosConEspacios_LosGuardaRecortados()
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
@@ -412,16 +368,6 @@ public class ServicioTiposEquipamientoTests
         servicio.Modificar(_idCatalogo, CrearModificacion("Camara Canon EOS", datos), DniSupervisor);
 
         Assert.AreEqual("Camara Canon EOS R", ListarTodos(servicio)[0].Nombre);
-    }
-
-    [TestMethod]
-    public void ModificarNombreCatalogo_NombreConEspacios_LoGuardaRecortado()
-    {
-        ServicioTiposEquipamiento servicio = CrearServicio();
-
-        servicio.ModificarNombreCatalogo(_idCatalogo, "  Centro ORT  ", DniSupervisor);
-
-        Assert.AreEqual("Centro ORT", servicio.ObtenerNombreCatalogo(_idCatalogo));
     }
 
     [TestMethod]

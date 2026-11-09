@@ -13,34 +13,6 @@
     <p>Registrá, modificá, discontinuá o reactivá los modelos de equipamiento del catálogo.</p>
 </div>
 
-<section class="card catalogo" aria-label="Nombre del catálogo">
-    @if (_editandoNombreCatalogo)
-    {
-        <form class="nombre-catalogo" @onsubmit="GuardarNombreCatalogo" novalidate>
-            <label class="lbl" for="nombre-catalogo">Nombre del catálogo</label>
-            <input id="nombre-catalogo" class="field" maxlength="80"
-                   @bind="_nombreCatalogoEditado" @bind:event="oninput" />
-            <span class="hint">Entre 3 y 80 caracteres.</span>
-            <div class="acciones">
-                <button type="submit" class="btn btn-primary btn-sm" disabled="@(!NombreCatalogoCompleto())">
-                    Guardar
-                </button>
-                <button type="button" class="btn btn-ghost btn-sm" @onclick="CancelarNombreCatalogo">Cancelar</button>
-            </div>
-        </form>
-    }
-    else
-    {
-        <div class="nombre-catalogo">
-            <span class="lbl">Nombre del catálogo</span>
-            <strong>@_nombreCatalogo</strong>
-            <button type="button" class="btn btn-ghost btn-sm" @onclick="AbrirEdicionNombreCatalogo">
-                Cambiar nombre
-            </button>
-        </div>
-    }
-</section>
-
 <div class="toolbar">
     <button type="button" class="btn btn-primary btn-sm" @onclick="AbrirAlta" disabled="@_mostrarFormulario">
         Nuevo tipo

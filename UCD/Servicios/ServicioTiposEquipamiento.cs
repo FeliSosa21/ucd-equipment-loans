@@ -4,7 +4,7 @@ using DTOs;
 
 namespace Servicios;
 
-// Gestion de tipos de equipamiento y del nombre del catalogo (req. 4).
+// Gestion de tipos de equipamiento (req. 4).
 // Registrar, modificar, discontinuar y reactivar requieren el permiso GestionarCatalogo (Supervisor y Administrador).
 public class ServicioTiposEquipamiento
 {
@@ -92,19 +92,6 @@ public class ServicioTiposEquipamiento
 
         TraduccionDeErrores.Ejecutar(tipo.Reactivar);
         _repositorioCatalogo.ActualizarCatalogo(catalogo);
-    }
-
-    public string ObtenerNombreCatalogo(int idCatalogo)
-    {
-        return OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo).Nombre;
-    }
-
-    public void ModificarNombreCatalogo(int idCatalogo, string nombre, string dniResponsable)
-    {
-        ValidarResponsable(dniResponsable);
-        Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
-
-        TraduccionDeErrores.Ejecutar(() => catalogo.ModificarNombre(OperacionesComunes.Normalizar(nombre)));
     }
 
     private static void ValidarNombreDisponible(Catalogo catalogo, TipoEquipamiento tipo, string nombreNuevo)
