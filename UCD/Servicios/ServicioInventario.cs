@@ -9,18 +9,20 @@ namespace Servicios;
 // Como el historico, no recibe quien consulta: el permiso lo controla la pagina.
 public class ServicioInventario
 {
-    private readonly RepositorioCatalogo _repositorioCatalogo;
+    private readonly RepositorioCatalogoSql _repositorioCatalogo;
+    private readonly RepositorioUsuarioSql _repositorioUsuario;
 
-    public ServicioInventario(RepositorioCatalogo repositorioCatalogo)
+    public ServicioInventario(RepositorioCatalogoSql repositorioCatalogo, RepositorioUsuarioSql repositorioUsuario)
     {
         _repositorioCatalogo = repositorioCatalogo;
+        _repositorioUsuario = repositorioUsuario;
     }
 
-    public List<CantidadesPorEstadoDto> ContarPorTipo(FiltroInventarioDto filtro)
+    public List<CantidadesPorEstadoDto> ContarPorTipo(int idCatalogo, FiltroInventarioDto filtro, string dniUsuario)
     {
         ArgumentNullException.ThrowIfNull(filtro);
         List<CantidadesPorEstadoDto> filas = new List<CantidadesPorEstadoDto>();
-        foreach (TipoEquipamiento tipo in ObtenerTipos())
+        foreach (TipoEquipamiento tipo in ObtenerTipos(idCatalogo))
         {
             if (CumpleFiltro(tipo, filtro))
             {
@@ -31,9 +33,9 @@ public class ServicioInventario
         return filas;
     }
 
-    public List<CantidadesPorEstadoDto> ContarPorCategoria()
+    public List<CantidadesPorEstadoDto> ContarPorCategoria(int idCatalogo, string dniUsuario)
     {
-        IReadOnlyCollection<TipoEquipamiento> tipos = ObtenerTipos();
+        IReadOnlyCollection<TipoEquipamiento> tipos = ObtenerTipos(idCatalogo);
         List<CantidadesPorEstadoDto> filas = new List<CantidadesPorEstadoDto>();
         foreach (Categoria categoria in Enum.GetValues<Categoria>())
         {
@@ -43,9 +45,9 @@ public class ServicioInventario
         return filas;
     }
 
-    private IReadOnlyCollection<TipoEquipamiento> ObtenerTipos()
+    private IReadOnlyCollection<TipoEquipamiento> ObtenerTipos(int idCatalogo)
     {
-        return OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo).Tipos;
+        return OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo).Tipos;
     }
 
     private static bool CumpleFiltro(TipoEquipamiento tipo, FiltroInventarioDto filtro)
