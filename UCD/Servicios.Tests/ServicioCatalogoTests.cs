@@ -242,6 +242,20 @@ public class ServicioCatalogoTests
     }
 
     [TestMethod]
+    public void ConsultarTipos_DocenteSinFiltro_NoVeTiposDiscontinuados()
+    {
+        var discontinuado = CrearTipo(nombre: "Monitor LG");
+        discontinuado.Discontinuar();
+        var servicio = CrearServicio(CrearTipo(nombre: "Teclado HP"), discontinuado);
+
+        var resultado = servicio.ConsultarTipos(_idCatalogo, new FiltroCatalogoDto(), DniDocente);
+
+        Assert.AreEqual(1, resultado.Count);
+        Assert.AreEqual("Teclado HP", resultado[0].Nombre);
+        Assert.AreEqual("Activo", resultado[0].Estado);
+    }
+
+    [TestMethod]
     public void ConsultarTipos_FiltroNull_LanzaArgumentNullException()
     {
         var teclado = CrearTipo(nombre: "Teclado HP");
