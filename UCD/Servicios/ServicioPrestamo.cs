@@ -111,6 +111,8 @@ public class ServicioPrestamo
                 RegistrarMovimientos(prestamo, crearRegistroDelEvaluador);
             }
 
+            _prestamos.ActualizarPrestamo(prestamo);
+
             return CrearPrestamoDto(prestamo);
         }
         catch (DominioException excepcion)
@@ -128,6 +130,7 @@ public class ServicioPrestamo
         try
         {
             prestamo.Rechazar(evaluador, motivo);
+            _prestamos.ActualizarPrestamo(prestamo);
             _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo,
                 RegistroDeAccion.DeUsuario(evaluador, _reloj.GetLocalNow().DateTime)));
 
