@@ -590,6 +590,17 @@ public class ServicioTiposEquipamientoTests
         Assert.IsNull(LeerTipo("Camara Canon EOS"));
     }
 
+    [TestMethod]
+    public void Discontinuar_TipoActivo_SeLeeConOtroContexto()
+    {
+        TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
+        ServicioTiposEquipamiento servicio = CrearServicio(camara);
+
+        servicio.Discontinuar(_idCatalogo, "Camara Canon EOS", DniSupervisor);
+
+        Assert.AreEqual(EstadoTipoEquipamiento.Discontinuado, LeerTipo("Camara Canon EOS")!.Estado);
+    }
+
     private ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
