@@ -389,6 +389,24 @@ public class ServicioCatalogoTests
             servicio.ObtenerUnidadesDisponibles(_idCatalogo, "Teclado HP", DniSinPermisos));
     }
 
+    [TestMethod]
+    public void ListarCatalogos_UsuarioConPermiso_DevuelveSoloLosActivosOrdenadosPorNombre()
+    {
+        var servicio = CrearServicio();
+        var idAulas = _entorno.GuardarCatalogo(new Catalogo("Aulas"));
+        var dadoDeBaja = new Catalogo("Zeta");
+        dadoDeBaja.DarDeBaja();
+        _entorno.GuardarCatalogo(dadoDeBaja);
+
+        var resultado = servicio.ListarCatalogos(DniDocente);
+
+        Assert.AreEqual(2, resultado.Count);
+        Assert.AreEqual(idAulas, resultado[0].Id);
+        Assert.AreEqual("Aulas", resultado[0].Nombre);
+        Assert.AreEqual(_idCatalogo, resultado[1].Id);
+        Assert.AreEqual("Catalogo Central", resultado[1].Nombre);
+    }
+
     private ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var catalogo = new Catalogo("Catalogo Central");

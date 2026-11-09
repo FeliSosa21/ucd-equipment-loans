@@ -17,6 +17,11 @@ public class ServicioCatalogo
         _repositorioUsuario = repositorioUsuario;
     }
 
+    public List<CatalogoDto> ListarCatalogos(string dniUsuario)
+    {
+        return new List<CatalogoDto>();
+    }
+
     public List<TipoEquipamientoDto> ConsultarTipos(int idCatalogo, FiltroCatalogoDto filtro, string dniUsuario)
     {
         ArgumentNullException.ThrowIfNull(filtro);
