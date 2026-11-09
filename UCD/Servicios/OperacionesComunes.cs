@@ -28,6 +28,19 @@ internal static class OperacionesComunes
         return catalogo;
     }
 
+    // Una sola forma de obtener un tipo: por catalogo y nombre, sin importar mayusculas ni espacios.
+    public static TipoEquipamiento ObtenerTipo(RepositorioCatalogoSql repositorioCatalogo, int idCatalogo,
+        string nombre)
+    {
+        TipoEquipamiento? tipo = repositorioCatalogo.ObtenerTipoPorNombre(idCatalogo, nombre);
+        if (tipo is null)
+        {
+            throw new ServicioException("El tipo de equipamiento no existe");
+        }
+
+        return tipo;
+    }
+
     // El responsable se valida en cada operacion: la pantalla pudo abrirse antes de que lo desactivaran.
     public static Usuario ValidarResponsable(RepositorioUsuarioSql repositorioUsuario, string dniResponsable,
         Permiso permiso, string mensajeSinPermiso)

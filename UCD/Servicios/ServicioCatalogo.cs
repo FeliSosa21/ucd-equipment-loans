@@ -53,12 +53,7 @@ public class ServicioCatalogo
     public List<UnidadFisicaDto> ObtenerUnidadesDisponibles(int idCatalogo, string nombreTipo, string dniUsuario)
     {
         ValidarResponsable(dniUsuario);
-        var tipo = _repositorioCatalogo.ObtenerTipoPorNombre(idCatalogo, nombreTipo);
-
-        if (tipo is null)
-        {
-            throw new ServicioException("No existe un tipo de equipamiento con ese nombre");
-        }
+        var tipo = OperacionesComunes.ObtenerTipo(_repositorioCatalogo, idCatalogo, nombreTipo);
 
         var resultado = new List<UnidadFisicaDto>();
 

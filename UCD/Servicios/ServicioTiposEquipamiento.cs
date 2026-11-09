@@ -61,7 +61,8 @@ public class ServicioTiposEquipamiento
         DatosTipoEquipamientoDto datos = modificacion.Datos;
         ValidarResponsable(dniResponsable);
         Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
-        TipoEquipamiento tipo = ObtenerTipo(catalogo, modificacion.NombreActual);
+        TipoEquipamiento tipo = OperacionesComunes.ObtenerTipo(_repositorioCatalogo, idCatalogo,
+            modificacion.NombreActual);
         Categoria categoria = ObtenerCategoria(datos.Categoria);
         string nombreNuevo = OperacionesComunes.Normalizar(datos.Nombre);
         ValidarNombreDisponible(catalogo, tipo, nombreNuevo);
@@ -76,7 +77,7 @@ public class ServicioTiposEquipamiento
     {
         ValidarResponsable(dniResponsable);
         Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
-        TipoEquipamiento tipo = ObtenerTipo(catalogo, nombre);
+        TipoEquipamiento tipo = OperacionesComunes.ObtenerTipo(_repositorioCatalogo, idCatalogo, nombre);
 
         TraduccionDeErrores.Ejecutar(tipo.Discontinuar);
         _repositorioCatalogo.ActualizarCatalogo(catalogo);
@@ -87,7 +88,7 @@ public class ServicioTiposEquipamiento
     {
         ValidarResponsable(dniResponsable);
         Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
-        TipoEquipamiento tipo = ObtenerTipo(catalogo, nombre);
+        TipoEquipamiento tipo = OperacionesComunes.ObtenerTipo(_repositorioCatalogo, idCatalogo, nombre);
 
         TraduccionDeErrores.Ejecutar(tipo.Reactivar);
         _repositorioCatalogo.ActualizarCatalogo(catalogo);
@@ -104,17 +105,6 @@ public class ServicioTiposEquipamiento
         Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
 
         TraduccionDeErrores.Ejecutar(() => catalogo.ModificarNombre(OperacionesComunes.Normalizar(nombre)));
-    }
-
-    private static TipoEquipamiento ObtenerTipo(Catalogo catalogo, string nombre)
-    {
-        TipoEquipamiento? tipo = catalogo.BuscarTipoPorNombre(nombre);
-        if (tipo is null)
-        {
-            throw new ServicioException("El tipo de equipamiento no existe");
-        }
-
-        return tipo;
     }
 
     private static void ValidarNombreDisponible(Catalogo catalogo, TipoEquipamiento tipo, string nombreNuevo)
