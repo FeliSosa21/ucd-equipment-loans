@@ -130,6 +130,11 @@ public class ServicioPrestamo
 
     private TipoEquipamiento ObtenerTipoEquipamiento(int idCatalogo, string nombreTipo)
     {
+        if (idCatalogo <= 0)
+        {
+            throw new ServicioException("Debe indicar un catalogo");
+        }
+
         if (string.IsNullOrWhiteSpace(nombreTipo))
         {
             throw new ServicioException("Debe indicar un tipo de equipamiento");
