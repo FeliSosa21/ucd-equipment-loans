@@ -181,7 +181,7 @@ public class ServicioCatalogoTests
     public void ConsultarTipos_CatalogoDadoDeBaja_LanzaServicioException()
     {
         var servicio = CrearServicio(CrearTipo(nombre: "Teclado HP"));
-        DarDeBajaElCatalogo();
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.ConsultarTipos(_idCatalogo, new FiltroCatalogoDto(), DniDocente));
@@ -193,7 +193,7 @@ public class ServicioCatalogoTests
         var servicio = CrearServicio(CrearTipo(nombre: "Teclado HP"));
         var tipoDelOtroCatalogo = CrearTipo(nombre: "Teclado HP");
         tipoDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "EQP-0009"));
-        GuardarOtroCatalogo("Catalogo Secundario", tipoDelOtroCatalogo, CrearTipo(nombre: "Proyector Sony"));
+        _entorno.GuardarCatalogo("Catalogo Secundario", tipoDelOtroCatalogo, CrearTipo(nombre: "Proyector Sony"));
 
         var resultado = servicio.ConsultarTipos(_idCatalogo, new FiltroCatalogoDto(), DniDocente);
 
@@ -363,7 +363,7 @@ public class ServicioCatalogoTests
     public void ObtenerUnidadesDisponibles_TipoDeOtroCatalogo_LanzaServicioException()
     {
         var servicio = CrearServicio(CrearTipo(nombre: "Teclado HP"));
-        GuardarOtroCatalogo("Catalogo Secundario", CrearTipo(nombre: "Proyector Sony"));
+        _entorno.GuardarCatalogo("Catalogo Secundario", CrearTipo(nombre: "Proyector Sony"));
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.ObtenerUnidadesDisponibles(_idCatalogo, "Proyector Sony", DniDocente));
@@ -373,7 +373,7 @@ public class ServicioCatalogoTests
     public void ObtenerUnidadesDisponibles_CatalogoDadoDeBaja_LanzaServicioException()
     {
         var servicio = CrearServicio(CrearTipo(nombre: "Teclado HP"));
-        DarDeBajaElCatalogo();
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.ObtenerUnidadesDisponibles(_idCatalogo, "Teclado HP", DniDocente));
@@ -427,26 +427,6 @@ public class ServicioCatalogoTests
         _idCatalogo = _entorno.GuardarCatalogo(catalogo);
         _entorno.GuardarUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente());
         return new ServicioCatalogo(_entorno.Catalogos, _entorno.Usuarios);
-    }
-
-    private void GuardarOtroCatalogo(string nombre, params TipoEquipamiento[] tipos)
-    {
-        var catalogo = new Catalogo(nombre);
-        foreach (var tipo in tipos)
-        {
-            catalogo.AgregarTipo(tipo);
-        }
-
-        _entorno.GuardarCatalogo(catalogo);
-    }
-
-    private void DarDeBajaElCatalogo()
-    {
-        using SqlContext contexto = _entorno.NuevoContexto();
-        var repositorio = new RepositorioCatalogoSql(contexto);
-        var catalogo = repositorio.ObtenerCatalogoActivoPorId(_idCatalogo)!;
-        catalogo.DarDeBaja();
-        repositorio.ActualizarCatalogo(catalogo);
     }
 
     private static TipoEquipamiento CrearTipo(

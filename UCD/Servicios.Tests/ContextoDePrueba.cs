@@ -42,6 +42,26 @@ internal sealed class ContextoDePrueba : IDisposable
         return contexto;
     }
 
+    public int GuardarCatalogo(string nombre, params TipoEquipamiento[] tipos)
+    {
+        Catalogo catalogo = new Catalogo(nombre);
+        foreach (TipoEquipamiento tipo in tipos)
+        {
+            catalogo.AgregarTipo(tipo);
+        }
+
+        return GuardarCatalogo(catalogo);
+    }
+
+    public void DarDeBajaCatalogo(int idCatalogo)
+    {
+        using SqlContext preparacion = NuevoContexto();
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(preparacion);
+        Catalogo catalogo = repositorio.ObtenerCatalogoActivoPorId(idCatalogo)!;
+        catalogo.DarDeBaja();
+        repositorio.ActualizarCatalogo(catalogo);
+    }
+
     public int GuardarCatalogo(Catalogo catalogo)
     {
         using SqlContext preparacion = NuevoContexto();

@@ -374,7 +374,7 @@ public class ServicioTiposEquipamientoTests
     public void Listar_CatalogoDadoDeBaja_LanzaServicioException()
     {
         ServicioTiposEquipamiento servicio = CrearServicio(CrearTipo("Proyector Epson", Categoria.Audiovisual));
-        DarDeBajaElCatalogo();
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
 
         Assert.ThrowsException<ServicioException>(() => ListarTodos(servicio));
     }
@@ -383,7 +383,7 @@ public class ServicioTiposEquipamientoTests
     public void Listar_TipoDeOtroCatalogo_NoAparece()
     {
         ServicioTiposEquipamiento servicio = CrearServicio(CrearTipo("Proyector Epson", Categoria.Audiovisual));
-        GuardarOtroCatalogo("Catalogo Secundario", CrearTipo("Proyector Epson", Categoria.Audiovisual),
+        _entorno.GuardarCatalogo("Catalogo Secundario", CrearTipo("Proyector Epson", Categoria.Audiovisual),
             CrearTipo("Notebook Lenovo", Categoria.Computacion));
 
         List<TipoEquipamientoDetalleDto> tipos = ListarTodos(servicio);
@@ -406,7 +406,7 @@ public class ServicioTiposEquipamientoTests
     public void Registrar_CatalogoDadoDeBaja_LanzaServicioException()
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
-        DarDeBajaElCatalogo();
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniSupervisor));
@@ -416,7 +416,7 @@ public class ServicioTiposEquipamientoTests
     public void Registrar_MismoNombreQueUnTipoDeOtroCatalogo_LoRegistra()
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
-        GuardarOtroCatalogo("Catalogo Secundario", CrearTipo("Camara Canon EOS", Categoria.Audiovisual));
+        _entorno.GuardarCatalogo("Catalogo Secundario", CrearTipo("Camara Canon EOS", Categoria.Audiovisual));
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS", categoria: "Audiovisual");
 
         servicio.Registrar(_idCatalogo, datos, DniSupervisor);
@@ -428,7 +428,7 @@ public class ServicioTiposEquipamientoTests
     public void Modificar_TipoDeOtroCatalogo_LanzaServicioException()
     {
         ServicioTiposEquipamiento servicio = CrearServicio();
-        GuardarOtroCatalogo("Catalogo Secundario", CrearTipo("Camara Canon EOS", Categoria.Audiovisual));
+        _entorno.GuardarCatalogo("Catalogo Secundario", CrearTipo("Camara Canon EOS", Categoria.Audiovisual));
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS R", categoria: "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() =>
@@ -439,7 +439,7 @@ public class ServicioTiposEquipamientoTests
     public void Modificar_CatalogoDadoDeBaja_LanzaServicioException()
     {
         ServicioTiposEquipamiento servicio = CrearServicio(CrearTipo("Camara Canon EOS", Categoria.Audiovisual));
-        DarDeBajaElCatalogo();
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
         DatosTipoEquipamientoDto datos = CrearDatos(nombre: "Camara Canon EOS R", categoria: "Audiovisual");
 
         Assert.ThrowsException<ServicioException>(() =>
@@ -450,7 +450,7 @@ public class ServicioTiposEquipamientoTests
     public void Discontinuar_CatalogoDadoDeBaja_LanzaServicioException()
     {
         ServicioTiposEquipamiento servicio = CrearServicio(CrearTipo("Camara Canon EOS", Categoria.Audiovisual));
-        DarDeBajaElCatalogo();
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.Discontinuar(_idCatalogo, "Camara Canon EOS", DniSupervisor));
@@ -462,7 +462,7 @@ public class ServicioTiposEquipamientoTests
         TipoEquipamiento camara = CrearTipo("Camara Canon EOS", Categoria.Audiovisual);
         camara.Discontinuar();
         ServicioTiposEquipamiento servicio = CrearServicio(camara);
-        DarDeBajaElCatalogo();
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.Reactivar(_idCatalogo, "Camara Canon EOS", DniSupervisor));
@@ -602,26 +602,6 @@ public class ServicioTiposEquipamientoTests
         _entorno.GuardarUsuario(DniSupervisorDesactivado, "desactivado@ucd.edu.uy", TipoUsuario.Supervisor(),
             desactivado: true);
         return new ServicioTiposEquipamiento(_entorno.Catalogos, _entorno.Usuarios);
-    }
-
-    private void GuardarOtroCatalogo(string nombre, params TipoEquipamiento[] tipos)
-    {
-        Catalogo catalogo = new Catalogo(nombre);
-        foreach (TipoEquipamiento tipo in tipos)
-        {
-            catalogo.AgregarTipo(tipo);
-        }
-
-        _entorno.GuardarCatalogo(catalogo);
-    }
-
-    private void DarDeBajaElCatalogo()
-    {
-        using SqlContext contexto = _entorno.NuevoContexto();
-        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contexto);
-        Catalogo catalogo = repositorio.ObtenerCatalogoActivoPorId(_idCatalogo)!;
-        catalogo.DarDeBaja();
-        repositorio.ActualizarCatalogo(catalogo);
     }
 
     private TipoEquipamiento? LeerTipo(string nombre)

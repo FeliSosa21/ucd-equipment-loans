@@ -533,7 +533,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(proyector);
         TipoEquipamiento proyectorDelOtroCatalogo = CrearTipo("Proyector Epson");
         proyectorDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0002"));
-        GuardarOtroCatalogo("Catalogo Secundario", proyectorDelOtroCatalogo);
+        _entorno.GuardarCatalogo("Catalogo Secundario", proyectorDelOtroCatalogo);
 
         List<UnidadDetalleDto> unidades = ListarTodas(servicio);
 
@@ -545,7 +545,7 @@ public class ServicioUnidadesTests
     public void Listar_CatalogoDadoDeBaja_LanzaServicioException()
     {
         ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-        DarDeBajaElCatalogo();
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
 
         Assert.ThrowsException<ServicioException>(() => ListarTodas(servicio));
     }
@@ -565,7 +565,7 @@ public class ServicioUnidadesTests
     public void Registrar_CatalogoDadoDeBaja_LanzaServicioException()
     {
         ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-        DarDeBajaElCatalogo();
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
             numeroSerie: null);
 
@@ -576,7 +576,7 @@ public class ServicioUnidadesTests
     public void Registrar_TipoDeOtroCatalogo_LanzaServicioException()
     {
         ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-        GuardarOtroCatalogo("Catalogo Secundario", CrearTipo("Notebook Lenovo"));
+        _entorno.GuardarCatalogo("Catalogo Secundario", CrearTipo("Notebook Lenovo"));
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Notebook Lenovo", idInstitucional: "NTB-0001",
             numeroSerie: null);
 
@@ -589,7 +589,7 @@ public class ServicioUnidadesTests
         TipoEquipamiento proyector = CrearTipo("Proyector Epson");
         proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
         ServicioUnidades servicio = CrearServicio(proyector);
-        DarDeBajaElCatalogo();
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: null),
@@ -602,7 +602,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
         TipoEquipamiento proyectorDelOtroCatalogo = CrearTipo("Proyector Epson");
         proyectorDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0002"));
-        GuardarOtroCatalogo("Catalogo Secundario", proyectorDelOtroCatalogo);
+        _entorno.GuardarCatalogo("Catalogo Secundario", proyectorDelOtroCatalogo);
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0002", numeroSerie: null),
@@ -615,7 +615,7 @@ public class ServicioUnidadesTests
         TipoEquipamiento proyector = CrearTipo("Proyector Epson");
         proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
         ServicioUnidades servicio = CrearServicio(proyector);
-        DarDeBajaElCatalogo();
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.EnviarAMantenimiento(_idCatalogo, "PRY-0001", DniFuncionario));
@@ -627,7 +627,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
         TipoEquipamiento proyectorDelOtroCatalogo = CrearTipo("Proyector Epson");
         proyectorDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0002"));
-        GuardarOtroCatalogo("Catalogo Secundario", proyectorDelOtroCatalogo);
+        _entorno.GuardarCatalogo("Catalogo Secundario", proyectorDelOtroCatalogo);
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.EnviarAMantenimiento(_idCatalogo, "PRY-0002", DniFuncionario));
@@ -641,7 +641,7 @@ public class ServicioUnidadesTests
         unidad.AMantenimiento();
         proyector.AgregarUnidad(unidad);
         ServicioUnidades servicio = CrearServicio(proyector);
-        DarDeBajaElCatalogo();
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.VolverADisponible(_idCatalogo, "PRY-0001", DniFuncionario));
@@ -653,7 +653,7 @@ public class ServicioUnidadesTests
         TipoEquipamiento proyector = CrearTipo("Proyector Epson");
         proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
         ServicioUnidades servicio = CrearServicio(proyector);
-        DarDeBajaElCatalogo();
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.DarDeBaja(_idCatalogo, "PRY-0001", DniFuncionario));
@@ -721,7 +721,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
         TipoEquipamiento notebookDelOtroCatalogo = CrearTipo("Notebook Lenovo");
         notebookDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "EQP-0001"));
-        GuardarOtroCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
+        _entorno.GuardarCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "EQP-0001",
             numeroSerie: null);
 
@@ -734,7 +734,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
         TipoEquipamiento notebookDelOtroCatalogo = CrearTipo("Notebook Lenovo");
         notebookDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0001", numeroSerie: "SN123"));
-        GuardarOtroCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
+        _entorno.GuardarCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
             numeroSerie: "SN123");
 
@@ -747,7 +747,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
         TipoEquipamiento notebookDelOtroCatalogo = CrearTipo("Notebook Lenovo");
         notebookDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0001", numeroSerie: "SN123"));
-        GuardarOtroCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
+        _entorno.GuardarCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
             numeroSerie: " sn123 ");
 
@@ -762,7 +762,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(proyector);
         TipoEquipamiento notebookDelOtroCatalogo = CrearTipo("Notebook Lenovo");
         notebookDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0001", numeroSerie: "SN123"));
-        GuardarOtroCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
+        _entorno.GuardarCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: "SN123"),
@@ -883,26 +883,6 @@ public class ServicioUnidadesTests
         _entorno.GuardarUsuario(DniFuncionarioDesactivado, "desactivado@ucd.edu.uy", TipoUsuario.FuncionarioCE(),
             desactivado: true);
         return new ServicioUnidades(_entorno.Catalogos, _entorno.Usuarios);
-    }
-
-    private void GuardarOtroCatalogo(string nombre, params TipoEquipamiento[] tipos)
-    {
-        Catalogo catalogo = new Catalogo(nombre);
-        foreach (TipoEquipamiento tipo in tipos)
-        {
-            catalogo.AgregarTipo(tipo);
-        }
-
-        _entorno.GuardarCatalogo(catalogo);
-    }
-
-    private void DarDeBajaElCatalogo()
-    {
-        using SqlContext contexto = _entorno.NuevoContexto();
-        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contexto);
-        Catalogo catalogo = repositorio.ObtenerCatalogoActivoPorId(_idCatalogo)!;
-        catalogo.DarDeBaja();
-        repositorio.ActualizarCatalogo(catalogo);
     }
 
     private UnidadFisica? LeerUnidad(string idInstitucional)
