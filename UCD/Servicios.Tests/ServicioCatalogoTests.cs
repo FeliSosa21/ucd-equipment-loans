@@ -10,6 +10,7 @@ public class ServicioCatalogoTests
 {
     private const string DniDocente = "12345672";
     private const string DniSupervisor = "23456783";
+    private const string DniSinPermisos = "45678905";
 
     private ContextoDePrueba _entorno = null!;
     private int _idCatalogo;
@@ -207,6 +208,16 @@ public class ServicioCatalogoTests
         Assert.AreEqual(2, resultado.Count);
         Assert.AreEqual("Activo", resultado[0].Estado);
         Assert.AreEqual("Discontinuado", resultado[1].Estado);
+    }
+
+    [TestMethod]
+    public void ConsultarTipos_UsuarioSinPermiso_LanzaServicioException()
+    {
+        var servicio = CrearServicio(CrearTipo(nombre: "Teclado HP"));
+        _entorno.GuardarUsuario(DniSinPermisos, "sinpermisos@ucd.edu.uy", TipoUsuario.SinPermisos());
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ConsultarTipos(_idCatalogo, new FiltroCatalogoDto(), DniSinPermisos));
     }
 
     [TestMethod]
