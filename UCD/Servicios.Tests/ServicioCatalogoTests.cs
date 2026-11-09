@@ -169,6 +169,16 @@ public class ServicioCatalogoTests
     }
 
     [TestMethod]
+    public void ConsultarTipos_CatalogoDadoDeBaja_LanzaServicioException()
+    {
+        var servicio = CrearServicio(CrearTipo(nombre: "Teclado HP"));
+        DarDeBajaElCatalogo();
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ConsultarTipos(_idCatalogo, new FiltroCatalogoDto(), DniDocente));
+    }
+
+    [TestMethod]
     public void ConsultarTipos_FiltroNull_LanzaArgumentNullException()
     {
         var teclado = CrearTipo(nombre: "Teclado HP");
@@ -237,6 +247,15 @@ public class ServicioCatalogoTests
         _idCatalogo = _entorno.GuardarCatalogo(catalogo);
         _entorno.GuardarUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente());
         return new ServicioCatalogo(_entorno.Catalogos, _entorno.Usuarios);
+    }
+
+    private void DarDeBajaElCatalogo()
+    {
+        using SqlContext contexto = _entorno.NuevoContexto();
+        var repositorio = new RepositorioCatalogoSql(contexto);
+        var catalogo = repositorio.ObtenerCatalogoActivoPorId(_idCatalogo)!;
+        catalogo.DarDeBaja();
+        repositorio.ActualizarCatalogo(catalogo);
     }
 
     private static TipoEquipamiento CrearTipo(
