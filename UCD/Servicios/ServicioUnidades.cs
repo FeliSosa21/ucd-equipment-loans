@@ -21,6 +21,7 @@ public class ServicioUnidades
 
     public List<UnidadDetalleDto> Listar(int idCatalogo, FiltroUnidadesDto filtro, string dniUsuario)
     {
+        ValidarResponsable(dniUsuario);
         List<UnidadDetalleDto> resultado = new List<UnidadDetalleDto>();
         Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
 
