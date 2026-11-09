@@ -521,6 +521,17 @@ public class ServicioTiposEquipamientoTests
             servicio.Reactivar(_idCatalogo, "Camara Canon EOS", DniSupervisor));
     }
 
+    [TestMethod]
+    public void Listar_FuncionarioConGestionarUnidades_ListaLosTipos()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio(CrearTipo("Proyector Epson", Categoria.Audiovisual));
+
+        List<TipoEquipamientoDetalleDto> tipos =
+            servicio.Listar(_idCatalogo, new FiltroTiposDto(), DniFuncionario);
+
+        Assert.AreEqual(1, tipos.Count);
+    }
+
     private ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
