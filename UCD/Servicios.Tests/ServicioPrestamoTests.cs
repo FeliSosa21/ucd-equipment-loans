@@ -366,6 +366,19 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_TipoDeOtroCatalogoConElIdDeEseCatalogo_QuedaActivo()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        int idOtroCatalogo = CargarOtroCatalogo();
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoDeOtroCatalogo);
+        datos.IdCatalogo = idOtroCatalogo;
+
+        PrestamoDto resultado = servicio.Solicitar(datos, DniDocente);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+    }
+
+    [TestMethod]
     public void Solicitar_SuperaUnidadesPorPrestamo_LanzaExcepcion()
     {
         ServicioPrestamo servicio = CrearServicio();
@@ -1031,7 +1044,7 @@ public sealed class ServicioPrestamoTests
         _idCatalogo = catalogo.Id;
     }
 
-    private void CargarOtroCatalogo()
+    private int CargarOtroCatalogo()
     {
         Catalogo otroCatalogo = new Catalogo("Catalogo de laboratorio");
 
@@ -1042,6 +1055,8 @@ public sealed class ServicioPrestamoTests
             primerNumero: 301));
 
         new RepositorioCatalogoSql(_contexto).AgregarCatalogo(otroCatalogo);
+
+        return otroCatalogo.Id;
     }
 
     private static TipoEquipamiento CrearTipoEquipamiento(string nombre, bool requiereAprobacion, int cantidadUnidades,
