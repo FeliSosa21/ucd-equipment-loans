@@ -32,9 +32,20 @@ internal static class OperacionesComunes
     public static Usuario ValidarResponsable(RepositorioUsuarioSql repositorioUsuario, string dniResponsable,
         Permiso permiso, string mensajeSinPermiso)
     {
+        Usuario responsable = ObtenerResponsableActivo(repositorioUsuario, dniResponsable, mensajeSinPermiso);
+        if (!responsable.Tipo.TienePermiso(permiso))
+        {
+            throw new ServicioException(mensajeSinPermiso);
+        }
+
+        return responsable;
+    }
+
+    public static Usuario ObtenerResponsableActivo(RepositorioUsuarioSql repositorioUsuario, string dniResponsable,
+        string mensajeSinPermiso)
+    {
         Usuario? responsable = repositorioUsuario.ObtenerUsuarioPorDni(dniResponsable);
-        if (responsable is null || responsable.Estado == EstadoUsuario.Desactivado ||
-            !responsable.Tipo.TienePermiso(permiso))
+        if (responsable is null || responsable.Estado == EstadoUsuario.Desactivado)
         {
             throw new ServicioException(mensajeSinPermiso);
         }

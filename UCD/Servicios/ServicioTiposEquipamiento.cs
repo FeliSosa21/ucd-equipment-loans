@@ -9,6 +9,7 @@ namespace Servicios;
 public class ServicioTiposEquipamiento
 {
     private const string MensajeSinPermiso = "El usuario no tiene permiso para gestionar el catalogo";
+    private const string MensajeSinPermisoParaListar = "El usuario no tiene permiso para ver los tipos de equipamiento";
 
     private readonly RepositorioCatalogoSql _repositorioCatalogo;
     private readonly RepositorioUsuarioSql _repositorioUsuario;
@@ -21,6 +22,7 @@ public class ServicioTiposEquipamiento
 
     public List<TipoEquipamientoDetalleDto> Listar(int idCatalogo, FiltroTiposDto filtro, string dniUsuario)
     {
+        ValidarQuePuedaListar(dniUsuario);
         List<TipoEquipamientoDetalleDto> resultado = new List<TipoEquipamientoDetalleDto>();
 
         foreach (TipoEquipamiento tipo in
@@ -117,6 +119,17 @@ public class ServicioTiposEquipamiento
         if (existente is not null && existente != tipo)
         {
             throw new ServicioException("Ya existe un tipo de equipamiento con ese nombre");
+        }
+    }
+
+    // Listan los tipos quien gestiona el catalogo y quien gestiona unidades (necesita elegir el tipo de cada unidad).
+    private void ValidarQuePuedaListar(string dniUsuario)
+    {
+        Usuario usuario = OperacionesComunes.ObtenerResponsableActivo(_repositorioUsuario, dniUsuario,
+            MensajeSinPermisoParaListar);
+        if (!usuario.TienePermiso(Permiso.GestionarCatalogo) && !usuario.TienePermiso(Permiso.GestionarUnidades))
+        {
+            throw new ServicioException(MensajeSinPermisoParaListar);
         }
     }
 
