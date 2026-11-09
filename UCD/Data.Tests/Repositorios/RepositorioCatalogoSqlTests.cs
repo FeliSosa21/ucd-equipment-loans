@@ -460,9 +460,7 @@ public sealed class RepositorioCatalogoSqlTests
     public void ExisteUnidadConNumeroDeSerie_UnidadEnOtroCatalogo_DevuelveTrue()
     {
         Catalogo primerCatalogo = new Catalogo(NombreCatalogo);
-        Catalogo segundoCatalogo = new Catalogo(NombreSegundoCatalogo);
-        TipoEquipamiento tipo = CrearTipoEquipamientoConUnidad(NombreTipo, IdUnidad, NumeroDeSerie);
-        segundoCatalogo.AgregarTipo(tipo);
+        Catalogo segundoCatalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreSegundoCatalogo, NumeroDeSerie);
         GuardarConOtroContexto(primerCatalogo, segundoCatalogo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
@@ -478,9 +476,7 @@ public sealed class RepositorioCatalogoSqlTests
     [DataRow(" 5CG1234ABC ")]
     public void ExisteUnidadConNumeroDeSerie_NumeroEquivalente_DevuelveTrue(string numeroDeSerieBuscado)
     {
-        Catalogo catalogo = new Catalogo(NombreCatalogo);
-        TipoEquipamiento tipo = CrearTipoEquipamientoConUnidad(NombreTipo, IdUnidad, NumeroDeSerie);
-        catalogo.AgregarTipo(tipo);
+        Catalogo catalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreCatalogo, NumeroDeSerie);
         GuardarConOtroContexto(catalogo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
@@ -493,9 +489,7 @@ public sealed class RepositorioCatalogoSqlTests
     [TestMethod]
     public void ExisteUnidadConNumeroDeSerie_HayUnidadesSinNumero_DevuelveFalse()
     {
-        Catalogo catalogo = new Catalogo(NombreCatalogo);
-        TipoEquipamiento tipo = CrearTipoEquipamientoConUnidad(NombreTipo, IdUnidad, null);
-        catalogo.AgregarTipo(tipo);
+        Catalogo catalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreCatalogo);
         GuardarConOtroContexto(catalogo);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
@@ -508,9 +502,7 @@ public sealed class RepositorioCatalogoSqlTests
     [TestMethod]
     public void ExisteUnidadConNumeroDeSerie_MismaUnidad_DevuelveFalse()
     {
-        Catalogo catalogo = new Catalogo(NombreCatalogo);
-        TipoEquipamiento tipo = CrearTipoEquipamientoConUnidad(NombreTipo, IdUnidad, NumeroDeSerie);
-        catalogo.AgregarTipo(tipo);
+        Catalogo catalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreCatalogo, NumeroDeSerie);
         GuardarConOtroContexto(catalogo);
 
         using SqlContext contextoQueObtiene = new SqlContext(_opciones);
@@ -518,8 +510,8 @@ public sealed class RepositorioCatalogoSqlTests
         Catalogo catalogoGuardado = repositorioQueObtiene.ObtenerCatalogoActivoPorId(catalogo.Id)!;
         int IdDeLaUnidad = catalogoGuardado.Tipos.Single().Unidades.Single().Id;
 
-        using SqlContext contextoQueLee =  new SqlContext(_opciones);
-        RepositorioCatalogoSql  repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
         bool existe = repositorioQueLee.ExisteUnidadConNumeroDeSerie(NumeroDeSerie, IdDeLaUnidad);
 
         Assert.IsFalse(existe);
@@ -528,14 +520,12 @@ public sealed class RepositorioCatalogoSqlTests
     [TestMethod]
     public void ExisteUnidadConNumeroDeSerie_UnidadEnCatalogoEliminado_DevuelveTrue()
     {
-        Catalogo catalogo = new Catalogo(NombreCatalogo);
-        TipoEquipamiento tipo = CrearTipoEquipamientoConUnidad(NombreTipo, IdUnidad, NumeroDeSerie);
-        catalogo.AgregarTipo(tipo);
+        Catalogo catalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreCatalogo, NumeroDeSerie);
         GuardarConOtroContexto(catalogo);
         DarDeBajaConOtroContexto(catalogo);
 
-        using SqlContext contextoQueLee =  new SqlContext(_opciones);
-        RepositorioCatalogoSql  repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
         bool existe = repositorioQueLee.ExisteUnidadConNumeroDeSerie(NumeroDeSerie, null);
 
         Assert.IsTrue(existe);
@@ -544,13 +534,11 @@ public sealed class RepositorioCatalogoSqlTests
     [TestMethod]
     public void ExisteUnidadConNumeroDeSerie_NumeroLibre_DevuelveFalse()
     {
-        Catalogo catalogo = new Catalogo(NombreCatalogo);
-        TipoEquipamiento tipo = CrearTipoEquipamientoConUnidad(NombreTipo, IdUnidad, NumeroDeSerie);
-        catalogo.AgregarTipo(tipo);
+        Catalogo catalogo = CrearCatalogoConTipoEquipamientoYUnidad(NombreCatalogo, NumeroDeSerie);
         GuardarConOtroContexto(catalogo);
 
-        using SqlContext contextoQueLee =  new SqlContext(_opciones);
-        RepositorioCatalogoSql  repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueLee);
         bool existe = repositorioQueLee.ExisteUnidadConNumeroDeSerie(SegundoNumeroDeSerie, null);
 
         Assert.IsFalse(existe);
@@ -559,7 +547,7 @@ public sealed class RepositorioCatalogoSqlTests
     [TestMethod]
     public void ExisteUnidadConNumeroDeSerie_NumeroNull_LanzaArgumentNullException()
     {
-        using SqlContext contexto =  new SqlContext(_opciones);
+        using SqlContext contexto = new SqlContext(_opciones);
         RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contexto);
 
         Assert.ThrowsException<ArgumentNullException>(() => repositorio.ExisteUnidadConNumeroDeSerie(null!, null));
@@ -568,11 +556,11 @@ public sealed class RepositorioCatalogoSqlTests
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
-        RepositorioCatalogoSql repositorioQueLee = new RepositorioCatalogoSql(contextoQueGuarda);
+        RepositorioCatalogoSql repositorioQueGuarda = new RepositorioCatalogoSql(contextoQueGuarda);
 
         foreach (Catalogo catalogo in catalogos)
         {
-            repositorioQueLee.AgregarCatalogo(catalogo);
+            repositorioQueGuarda.AgregarCatalogo(catalogo);
         }
     }
 
@@ -586,10 +574,11 @@ public sealed class RepositorioCatalogoSqlTests
         return tipo;
     }
 
-    private static Catalogo CrearCatalogoConTipoEquipamientoYUnidad(string nombreCatalogo)
+    private static Catalogo CrearCatalogoConTipoEquipamientoYUnidad(string nombreCatalogo,
+        string? numeroDeSerie = null)
     {
         Catalogo catalogo = new Catalogo(nombreCatalogo);
-        TipoEquipamiento tipo = CrearTipoEquipamientoConUnidad(NombreTipo, IdUnidad);
+        TipoEquipamiento tipo = CrearTipoEquipamientoConUnidad(NombreTipo, IdUnidad, numeroDeSerie);
         catalogo.AgregarTipo(tipo);
 
         return catalogo;
