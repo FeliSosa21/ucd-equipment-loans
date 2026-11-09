@@ -728,6 +728,19 @@ public class ServicioUnidadesTests
         Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
     }
 
+    [TestMethod]
+    public void Registrar_NumeroDeSerieRepetidoEnOtroCatalogo_LanzaServicioException()
+    {
+        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
+        TipoEquipamiento notebookDelOtroCatalogo = CrearTipo("Notebook Lenovo");
+        notebookDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0001", numeroSerie: "SN123"));
+        GuardarOtroCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
+        DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
+            numeroSerie: "SN123");
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
+    }
+
     private ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
         Catalogo catalogo = new Catalogo("Catalogo UCD");
