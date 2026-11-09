@@ -19,7 +19,14 @@ public class ServicioCatalogo
 
     public List<CatalogoDto> ListarCatalogos(string dniUsuario)
     {
-        return new List<CatalogoDto>();
+        var resultado = new List<CatalogoDto>();
+
+        foreach (var catalogo in _repositorioCatalogo.ObtenerCatalogosActivos())
+        {
+            resultado.Add(new CatalogoDto { Id = catalogo.Id, Nombre = catalogo.Nombre });
+        }
+
+        return resultado;
     }
 
     public List<TipoEquipamientoDto> ConsultarTipos(int idCatalogo, FiltroCatalogoDto filtro, string dniUsuario)
