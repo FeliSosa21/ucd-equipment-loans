@@ -6,6 +6,8 @@ namespace Servicios;
 
 public class ServicioCatalogo
 {
+    private const string MensajeSinPermiso = "El usuario no tiene permiso para consultar el catalogo";
+
     private readonly RepositorioCatalogoSql _repositorioCatalogo;
     private readonly RepositorioUsuarioSql _repositorioUsuario;
 
@@ -18,6 +20,7 @@ public class ServicioCatalogo
     public List<TipoEquipamientoDto> ConsultarTipos(int idCatalogo, FiltroCatalogoDto filtro, string dniUsuario)
     {
         ArgumentNullException.ThrowIfNull(filtro);
+        ValidarResponsable(dniUsuario);
         ValidarFiltro(filtro);
         var catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
         var resultado = new List<TipoEquipamientoDto>();
@@ -50,6 +53,12 @@ public class ServicioCatalogo
         }
 
         return resultado;
+    }
+
+    private void ValidarResponsable(string dniUsuario)
+    {
+        OperacionesComunes.ValidarResponsable(_repositorioUsuario, dniUsuario, Permiso.ConsultarCatalogo,
+            MensajeSinPermiso);
     }
 
     private void ValidarFiltro (FiltroCatalogoDto filtro)
