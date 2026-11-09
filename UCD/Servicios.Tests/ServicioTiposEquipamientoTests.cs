@@ -11,6 +11,7 @@ public class ServicioTiposEquipamientoTests
     private const string DniSupervisor = "12345672";
     private const string DniFuncionario = "45678905";
     private const string DniSupervisorDesactivado = "23456783";
+    private const string DniDocente = "34567894";
 
     private ContextoDePrueba _entorno = null!;
     private int _idCatalogo;
@@ -530,6 +531,16 @@ public class ServicioTiposEquipamientoTests
             servicio.Listar(_idCatalogo, new FiltroTiposDto(), DniFuncionario);
 
         Assert.AreEqual(1, tipos.Count);
+    }
+
+    [TestMethod]
+    public void Listar_UsuarioSinPermiso_LanzaServicioException()
+    {
+        ServicioTiposEquipamiento servicio = CrearServicio(CrearTipo("Proyector Epson", Categoria.Audiovisual));
+        _entorno.GuardarUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente());
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.Listar(_idCatalogo, new FiltroTiposDto(), DniDocente));
     }
 
     private ServicioTiposEquipamiento CrearServicio(params TipoEquipamiento[] tipos)
