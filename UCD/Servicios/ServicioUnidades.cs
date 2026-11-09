@@ -66,7 +66,7 @@ public class ServicioUnidades
         TraduccionDeErrores.Ejecutar(() =>
             unidad.ModificarInfo(OperacionesComunes.Normalizar(datos.UbicacionFisica), numeroSerie,
                 NormalizarOpcional(datos.Observaciones)));
-        _repositorioCatalogo.ActualizarCatalogo(catalogo);
+        GuardarCambios(catalogo);
     }
 
     public void EnviarAMantenimiento(int idCatalogo, string idInstitucional, string dniResponsable)
