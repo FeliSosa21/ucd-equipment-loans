@@ -17,6 +17,17 @@ internal static class OperacionesComunes
         return catalogo;
     }
 
+    public static Catalogo ObtenerCatalogoActivo(RepositorioCatalogoSql repositorioCatalogo, int idCatalogo)
+    {
+        Catalogo? catalogo = repositorioCatalogo.ObtenerCatalogoActivoPorId(idCatalogo);
+        if (catalogo is null)
+        {
+            throw new ServicioException("El catalogo no existe o fue dado de baja");
+        }
+
+        return catalogo;
+    }
+
     // El responsable se valida en cada operacion: la pantalla pudo abrirse antes de que lo desactivaran.
     public static void ValidarResponsable(RepositorioUsuarioSql repositorioUsuario, string dniResponsable,
         Permiso permiso, string mensajeSinPermiso)

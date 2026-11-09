@@ -10,6 +10,9 @@ public partial class SolicitarPrestamo
 {
     private const int CantidadPorDefecto = 1;
 
+    // Hasta que exista el selector de catalogo (T4).
+    private const int IdCatalogoProvisorio = 1;
+
     // Estado de un tipo de equipamiento: solo se pueden solicitar los activos.
     private const string EstadoTipoActivo = "Activo";
 
@@ -127,7 +130,8 @@ public partial class SolicitarPrestamo
     {
         try
         {
-            _tipos = ServicioCatalogo.ConsultarTipos(new FiltroCatalogoDto { Estado = EstadoTipoActivo });
+            _tipos = ServicioCatalogo.ConsultarTipos(IdCatalogoProvisorio,
+                new FiltroCatalogoDto { Estado = EstadoTipoActivo }, DniUsuario);
         }
         catch (ServicioException ex)
         {

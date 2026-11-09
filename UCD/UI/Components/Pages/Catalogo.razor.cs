@@ -7,6 +7,9 @@ namespace UI.Components.Pages;
 
 public partial class Catalogo
 {
+    // Hasta que exista el selector de catalogo (T4).
+    private const int IdCatalogoProvisorio = 1;
+
     private List<TipoEquipamientoDto> _tipos = new List<TipoEquipamientoDto>();
     private string? _error;
     private string _categoria = string.Empty;
@@ -41,7 +44,7 @@ public partial class Catalogo
 
         try
         {
-            _tipos = ServicioCatalogo.ConsultarTipos(filtro);
+            _tipos = ServicioCatalogo.ConsultarTipos(IdCatalogoProvisorio, filtro, DniUsuario);
             CerrarUnidadesSiElTipoNoEstaEnLaLista();
         }
         catch (ServicioException ex)
@@ -85,7 +88,7 @@ public partial class Catalogo
         _error = null;
         try
         {
-            _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(nombreTipo);
+            _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(IdCatalogoProvisorio, nombreTipo, DniUsuario);
             _tipoSeleccionado = nombreTipo;
         }
         catch (ServicioException ex)

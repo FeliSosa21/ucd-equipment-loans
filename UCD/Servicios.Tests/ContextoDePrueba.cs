@@ -15,6 +15,7 @@ internal sealed class ContextoDePrueba : IDisposable
 
     public SqlContext Contexto { get; }
     public RepositorioUsuarioSql Usuarios { get; }
+    public RepositorioCatalogoSql Catalogos { get; }
 
     public ContextoDePrueba()
     {
@@ -25,11 +26,19 @@ internal sealed class ContextoDePrueba : IDisposable
         GuardarTiposDeUsuarioSiFaltan(preparacion);
         Contexto = new SqlContext(_opciones);
         Usuarios = new RepositorioUsuarioSql(Contexto);
+        Catalogos = new RepositorioCatalogoSql(Contexto);
     }
 
     public SqlContext NuevoContexto()
     {
         return new SqlContext(_opciones);
+    }
+
+    public int GuardarCatalogo(Catalogo catalogo)
+    {
+        using SqlContext preparacion = NuevoContexto();
+        new RepositorioCatalogoSql(preparacion).AgregarCatalogo(catalogo);
+        return catalogo.Id;
     }
 
     public void GuardarUsuario(string dni, string correo, TipoUsuario tipoPredefinido, bool desactivado = false)

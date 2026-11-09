@@ -6,18 +6,20 @@ namespace Servicios;
 
 public class ServicioCatalogo
 {
-    private readonly RepositorioCatalogo _repositorioCatalogo;
+    private readonly RepositorioCatalogoSql _repositorioCatalogo;
+    private readonly RepositorioUsuarioSql _repositorioUsuario;
 
-    public ServicioCatalogo(RepositorioCatalogo repositorioCatalogo)
+    public ServicioCatalogo(RepositorioCatalogoSql repositorioCatalogo, RepositorioUsuarioSql repositorioUsuario)
     {
         _repositorioCatalogo = repositorioCatalogo;
+        _repositorioUsuario = repositorioUsuario;
     }
 
-    public List<TipoEquipamientoDto> ConsultarTipos(FiltroCatalogoDto filtro)
+    public List<TipoEquipamientoDto> ConsultarTipos(int idCatalogo, FiltroCatalogoDto filtro, string dniUsuario)
     {
         ArgumentNullException.ThrowIfNull(filtro);
         ValidarFiltro(filtro);
-        var catalogo = ObtenerCatalogo();
+        var catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
         var resultado = new List<TipoEquipamientoDto>();
 
         foreach (var tipo in catalogo.Tipos)
@@ -31,9 +33,9 @@ public class ServicioCatalogo
         return resultado;
     }
 
-    public List<UnidadFisicaDto> ObtenerUnidadesDisponibles(string nombreTipo)
+    public List<UnidadFisicaDto> ObtenerUnidadesDisponibles(int idCatalogo, string nombreTipo, string dniUsuario)
     {
-        var tipo = _repositorioCatalogo.ObtenerTipoPorNombre(nombreTipo);
+        var tipo = _repositorioCatalogo.ObtenerTipoPorNombre(idCatalogo, nombreTipo);
 
         if (tipo is null)
         {
@@ -56,18 +58,6 @@ public class ServicioCatalogo
         {
             throw new ServicioException("La cantidad minima de unidades disponibles no puede ser negativa");
         }
-    }
-
-    private Catalogo ObtenerCatalogo()
-    {
-        var catalogo = _repositorioCatalogo.Obtener();
-
-        if (catalogo is null)
-        {
-            throw new ServicioException("Todavia no hay un catalogo cargado");
-        }
-
-        return catalogo;
     }
 
     private static bool CumpleFiltro(TipoEquipamiento tipo, FiltroCatalogoDto filtro)

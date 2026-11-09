@@ -8,12 +8,29 @@ namespace Servicios.Tests;
 [TestClass]
 public class ServicioCatalogoTests
 {
+    private const string DniDocente = "12345672";
+
+    private ContextoDePrueba _entorno = null!;
+    private int _idCatalogo;
+
+    [TestInitialize]
+    public void Inicializar()
+    {
+        _entorno = new ContextoDePrueba();
+    }
+
+    [TestCleanup]
+    public void Limpiar()
+    {
+        _entorno.Dispose();
+    }
+
     [TestMethod]
     public void ConsultarTipos_FiltroVacio_DevuelveTodos()
     {
         var servicio = CrearServicio(CrearTipo(nombre: "Proyector Sony"), CrearTipo(nombre:"Proyector Microsoft"));
 
-        var resultado = servicio.ConsultarTipos(new FiltroCatalogoDto());
+        var resultado = servicio.ConsultarTipos(_idCatalogo, new FiltroCatalogoDto(), DniDocente);
 
         Assert.AreEqual(2, resultado.Count);
         Assert.AreEqual("Proyector Sony", resultado[0].Nombre);
@@ -28,7 +45,7 @@ public class ServicioCatalogoTests
         var servicio = CrearServicio(proyector, notebook);
         var filtro = new FiltroCatalogoDto { Categoria = "Computacion" };
 
-        var resultado = servicio.ConsultarTipos(filtro);
+        var resultado = servicio.ConsultarTipos(_idCatalogo, filtro, DniDocente);
 
         Assert.AreEqual(1, resultado.Count);
         Assert.AreEqual("notebook", resultado[0].Nombre);
@@ -43,7 +60,7 @@ public class ServicioCatalogoTests
         var servicio = CrearServicio(proyector, notebook);
         var filtro = new FiltroCatalogoDto { Estado = "Discontinuado" };
 
-        var resultado = servicio.ConsultarTipos(filtro);
+        var resultado = servicio.ConsultarTipos(_idCatalogo, filtro, DniDocente);
 
         Assert.AreEqual(1, resultado.Count);
         Assert.AreEqual("notebook", resultado[0].Nombre);
@@ -60,7 +77,7 @@ public class ServicioCatalogoTests
         var servicio = CrearServicio(proyector, notebook);
         var filtro = new FiltroCatalogoDto{ MinimoDisponibles = 2 };
 
-        var resultado = servicio.ConsultarTipos(filtro);
+        var resultado = servicio.ConsultarTipos(_idCatalogo, filtro, DniDocente);
 
         Assert.AreEqual(1, resultado.Count);
         Assert.AreEqual("notebook", resultado[0].Nombre);
@@ -77,7 +94,7 @@ public class ServicioCatalogoTests
         var servicio = CrearServicio(teclado, monitor, notebook);
         var filtro = new FiltroCatalogoDto { Categoria = "Computacion", Estado = "Discontinuado" };
 
-        var resultado = servicio.ConsultarTipos(filtro);
+        var resultado = servicio.ConsultarTipos(_idCatalogo, filtro, DniDocente);
 
         Assert.AreEqual(1, resultado.Count);
         Assert.AreEqual("Notebook Lenovo", resultado[0].Nombre);
@@ -90,7 +107,7 @@ public class ServicioCatalogoTests
         var servicio = CrearServicio(teclado);
         var filtro = new FiltroCatalogoDto { Categoria = "Audiovisual" };
 
-        var resultado = servicio.ConsultarTipos(filtro);
+        var resultado = servicio.ConsultarTipos(_idCatalogo, filtro, DniDocente);
 
         Assert.AreEqual(0, resultado.Count);
     }
@@ -104,7 +121,7 @@ public class ServicioCatalogoTests
         var servicio = CrearServicio(teclado, monitor);
         var filtro = new FiltroCatalogoDto { MinimoDisponibles = 0 };
 
-        var resultado = servicio.ConsultarTipos(filtro);
+        var resultado = servicio.ConsultarTipos(_idCatalogo, filtro, DniDocente);
 
         Assert.AreEqual(2, resultado.Count);
     }
@@ -115,7 +132,7 @@ public class ServicioCatalogoTests
         var servicio = CrearServicio();
         var filtro = new FiltroCatalogoDto();
 
-        var resultado = servicio.ConsultarTipos(filtro);
+        var resultado = servicio.ConsultarTipos(_idCatalogo, filtro, DniDocente);
 
         Assert.AreEqual(0, resultado.Count);
     }
@@ -127,7 +144,7 @@ public class ServicioCatalogoTests
         var servicio = CrearServicio(teclado);
         var filtro = new FiltroCatalogoDto { Categoria = "Inexistente" };
 
-        var resultado = servicio.ConsultarTipos(filtro);
+        var resultado = servicio.ConsultarTipos(_idCatalogo, filtro, DniDocente);
 
         Assert.AreEqual(0, resultado.Count);
     }
@@ -139,17 +156,16 @@ public class ServicioCatalogoTests
         var servicio = CrearServicio(teclado);
         var filtro = new FiltroCatalogoDto { MinimoDisponibles = -1 };
 
-        Assert.ThrowsException<ServicioException>(() => servicio.ConsultarTipos(filtro));
+        Assert.ThrowsException<ServicioException>(() => servicio.ConsultarTipos(_idCatalogo, filtro, DniDocente));
     }
 
     [TestMethod]
-    public void ConsultarTipos_SinCatalogoGuardado_LanzaServicioException()
+    public void ConsultarTipos_CatalogoInexistente_LanzaServicioException()
     {
-        var memoria = new Memoria();
-        var repositorio = new RepositorioCatalogo(memoria);
-        var servicio = new ServicioCatalogo(repositorio);
+        var servicio = CrearServicio();
 
-        Assert.ThrowsException<ServicioException>(() => servicio.ConsultarTipos(new FiltroCatalogoDto()));
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ConsultarTipos(_idCatalogo + 1, new FiltroCatalogoDto(), DniDocente));
     }
 
     [TestMethod]
@@ -158,7 +174,7 @@ public class ServicioCatalogoTests
         var teclado = CrearTipo(nombre: "Teclado HP");
         var servicio = CrearServicio(teclado);
 
-        Assert.ThrowsException<ArgumentNullException>(() => servicio.ConsultarTipos(null!));
+        Assert.ThrowsException<ArgumentNullException>(() => servicio.ConsultarTipos(_idCatalogo, null!, DniDocente));
     }
 
     [TestMethod]
@@ -173,7 +189,7 @@ public class ServicioCatalogoTests
         var servicio = CrearServicio(teclado);
         var filtro = new FiltroCatalogoDto();
 
-        var resultado = servicio.ConsultarTipos(filtro);
+        var resultado = servicio.ConsultarTipos(_idCatalogo, filtro, DniDocente);
 
         Assert.AreEqual(1, resultado.Count);
         Assert.AreEqual("Computacion", resultado[0].Categoria);
@@ -195,7 +211,7 @@ public class ServicioCatalogoTests
         prestada.Prestada();
         var servicio = CrearServicio(proyector, teclado);
 
-        var resultado = servicio.ObtenerUnidadesDisponibles("Teclado HP");
+        var resultado = servicio.ObtenerUnidadesDisponibles(_idCatalogo, "Teclado HP", DniDocente);
 
         Assert.AreEqual(1, resultado.Count);
         Assert.AreEqual("EQP-0002", resultado[0].IdInstitucional);
@@ -207,21 +223,20 @@ public class ServicioCatalogoTests
         var teclado = CrearTipo(nombre: "Teclado HP");
         var servicio = CrearServicio(teclado);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.ObtenerUnidadesDisponibles("Teclado Lenovo"));
+        Assert.ThrowsException<ServicioException>(() => servicio.ObtenerUnidadesDisponibles(_idCatalogo, "Teclado Lenovo", DniDocente));
     }
 
-    private static ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
+    private ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
-        var memoria = new Memoria();
-        var repositorio = new RepositorioCatalogo(memoria);
         var catalogo = new Catalogo("Catalogo Central");
         foreach (var tipo in tipos)
         {
             catalogo.AgregarTipo(tipo);
         }
 
-        repositorio.Guardar(catalogo);
-        return new ServicioCatalogo(repositorio);
+        _idCatalogo = _entorno.GuardarCatalogo(catalogo);
+        _entorno.GuardarUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente());
+        return new ServicioCatalogo(_entorno.Catalogos, _entorno.Usuarios);
     }
 
     private static TipoEquipamiento CrearTipo(
