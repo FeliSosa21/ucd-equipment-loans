@@ -267,6 +267,16 @@ public class ServicioCatalogoTests
         Assert.ThrowsException<ServicioException>(() => servicio.ObtenerUnidadesDisponibles(_idCatalogo, "Teclado Lenovo", DniDocente));
     }
 
+    [TestMethod]
+    public void ObtenerUnidadesDisponibles_TipoDeOtroCatalogo_LanzaServicioException()
+    {
+        var servicio = CrearServicio(CrearTipo(nombre: "Teclado HP"));
+        GuardarOtroCatalogo("Catalogo Secundario", CrearTipo(nombre: "Proyector Sony"));
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ObtenerUnidadesDisponibles(_idCatalogo, "Proyector Sony", DniDocente));
+    }
+
     private ServicioCatalogo CrearServicio(params TipoEquipamiento[] tipos)
     {
         var catalogo = new Catalogo("Catalogo Central");
