@@ -69,16 +69,17 @@ internal sealed class ContextoDePrueba : IDisposable
         return catalogo.Id;
     }
 
-    public void GuardarUsuario(string dni, string correo, TipoUsuario tipoPredefinido, bool desactivado = false)
+    public void GuardarUsuario(string dni, TipoUsuario tipoPredefinido)
     {
         using SqlContext preparacion = NuevoContexto();
-        Usuario usuario = new Usuario(dni, "Nombre", "Apellido", correo, ContrasenaDePrueba);
-        usuario.AsignarTipo(new RepositorioTipoUsuarioSql(preparacion).ObtenerTipoPorNombre(tipoPredefinido.Nombre)!);
-        if (desactivado)
-        {
-            usuario.Desactivar();
-        }
+        new RepositorioUsuarioSql(preparacion).AgregarUsuario(CrearUsuario(preparacion, dni, tipoPredefinido));
+    }
 
+    public void GuardarUsuarioDesactivado(string dni, TipoUsuario tipoPredefinido)
+    {
+        using SqlContext preparacion = NuevoContexto();
+        Usuario usuario = CrearUsuario(preparacion, dni, tipoPredefinido);
+        usuario.Desactivar();
         new RepositorioUsuarioSql(preparacion).AgregarUsuario(usuario);
     }
 
@@ -89,6 +90,13 @@ internal sealed class ContextoDePrueba : IDisposable
         {
             contexto.Dispose();
         }
+    }
+
+    private static Usuario CrearUsuario(SqlContext preparacion, string dni, TipoUsuario tipoPredefinido)
+    {
+        Usuario usuario = new Usuario(dni, "Nombre", "Apellido", dni + "@ucd.edu.uy", ContrasenaDePrueba);
+        usuario.AsignarTipo(new RepositorioTipoUsuarioSql(preparacion).ObtenerTipoPorNombre(tipoPredefinido.Nombre)!);
+        return usuario;
     }
 
     // Con HasData los seis tipos ya vienen sembrados; si el mapeo deja de sembrarlos, se cargan aca.

@@ -483,7 +483,7 @@ public class ServicioTiposEquipamientoTests
     public void Listar_UsuarioSinPermiso_LanzaServicioException()
     {
         ServicioTiposEquipamiento servicio = CrearServicio(CrearTipo("Proyector Epson", Categoria.Audiovisual));
-        _entorno.GuardarUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente());
+        _entorno.GuardarUsuario(DniDocente, TipoUsuario.Docente());
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.Listar(_idCatalogo, new FiltroTiposDto(), DniDocente));
@@ -597,10 +597,9 @@ public class ServicioTiposEquipamientoTests
 
         _idCatalogo = _entorno.GuardarCatalogo(catalogo);
 
-        _entorno.GuardarUsuario(DniSupervisor, "supervisor@ucd.edu.uy", TipoUsuario.Supervisor());
-        _entorno.GuardarUsuario(DniFuncionario, "funcionario@ucd.edu.uy", TipoUsuario.FuncionarioCE());
-        _entorno.GuardarUsuario(DniSupervisorDesactivado, "desactivado@ucd.edu.uy", TipoUsuario.Supervisor(),
-            desactivado: true);
+        _entorno.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        _entorno.GuardarUsuario(DniFuncionario, TipoUsuario.FuncionarioCE());
+        _entorno.GuardarUsuarioDesactivado(DniSupervisorDesactivado, TipoUsuario.Supervisor());
         return new ServicioTiposEquipamiento(_entorno.Catalogos, _entorno.Usuarios);
     }
 

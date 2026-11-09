@@ -183,7 +183,7 @@ public class ServicioInventarioTests
     public void ContarPorTipo_UsuarioSinPermiso_LanzaServicioException()
     {
         ServicioInventario servicio = CrearServicio(CrearTipo());
-        _entorno.GuardarUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente());
+        _entorno.GuardarUsuario(DniDocente, TipoUsuario.Docente());
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.ContarPorTipo(_idCatalogo, new FiltroInventarioDto(), DniDocente));
@@ -193,7 +193,7 @@ public class ServicioInventarioTests
     public void ContarPorCategoria_UsuarioSinPermiso_LanzaServicioException()
     {
         ServicioInventario servicio = CrearServicio(CrearTipo());
-        _entorno.GuardarUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente());
+        _entorno.GuardarUsuario(DniDocente, TipoUsuario.Docente());
 
         Assert.ThrowsException<ServicioException>(() => servicio.ContarPorCategoria(_idCatalogo, DniDocente));
     }
@@ -202,8 +202,7 @@ public class ServicioInventarioTests
     public void ContarPorTipo_UsuarioDesactivado_LanzaServicioException()
     {
         ServicioInventario servicio = CrearServicio(CrearTipo());
-        _entorno.GuardarUsuario(DniDesactivado, "desactivado@ucd.edu.uy", TipoUsuario.FuncionarioCE(),
-            desactivado: true);
+        _entorno.GuardarUsuarioDesactivado(DniDesactivado, TipoUsuario.FuncionarioCE());
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.ContarPorTipo(_idCatalogo, new FiltroInventarioDto(), DniDesactivado));
@@ -213,8 +212,7 @@ public class ServicioInventarioTests
     public void ContarPorCategoria_UsuarioDesactivado_LanzaServicioException()
     {
         ServicioInventario servicio = CrearServicio(CrearTipo());
-        _entorno.GuardarUsuario(DniDesactivado, "desactivado@ucd.edu.uy", TipoUsuario.FuncionarioCE(),
-            desactivado: true);
+        _entorno.GuardarUsuarioDesactivado(DniDesactivado, TipoUsuario.FuncionarioCE());
 
         Assert.ThrowsException<ServicioException>(() => servicio.ContarPorCategoria(_idCatalogo, DniDesactivado));
     }
@@ -237,7 +235,7 @@ public class ServicioInventarioTests
         }
 
         _idCatalogo = _entorno.GuardarCatalogo(catalogo);
-        _entorno.GuardarUsuario(DniFuncionario, "funcionario@ucd.edu.uy", TipoUsuario.FuncionarioCE());
+        _entorno.GuardarUsuario(DniFuncionario, TipoUsuario.FuncionarioCE());
         return new ServicioInventario(_entorno.Catalogos, _entorno.Usuarios);
     }
 

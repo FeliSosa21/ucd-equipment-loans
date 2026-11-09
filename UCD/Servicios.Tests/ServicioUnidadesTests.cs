@@ -878,10 +878,9 @@ public class ServicioUnidadesTests
 
         _idCatalogo = _entorno.GuardarCatalogo(catalogo);
 
-        _entorno.GuardarUsuario(DniFuncionario, "funcionario@ucd.edu.uy", TipoUsuario.FuncionarioCE());
-        _entorno.GuardarUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente());
-        _entorno.GuardarUsuario(DniFuncionarioDesactivado, "desactivado@ucd.edu.uy", TipoUsuario.FuncionarioCE(),
-            desactivado: true);
+        _entorno.GuardarUsuario(DniFuncionario, TipoUsuario.FuncionarioCE());
+        _entorno.GuardarUsuario(DniDocente, TipoUsuario.Docente());
+        _entorno.GuardarUsuarioDesactivado(DniFuncionarioDesactivado, TipoUsuario.FuncionarioCE());
         return new ServicioUnidades(_entorno.Catalogos, _entorno.Usuarios);
     }
 
