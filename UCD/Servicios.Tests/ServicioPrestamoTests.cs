@@ -27,6 +27,7 @@ public sealed class ServicioPrestamoTests
     private const string NombreTipoConAprobacionSinUnidades = "Tablet Samsung Galaxy Tab S9";
     private const string NombreTipoDiscontinuado = "Retroproyector 3M";
     private const string NombreTipoInexistente = "Microscopio Zeiss Primo";
+    private const string NombreTipoDeOtroCatalogo = "Osciloscopio Rigol DS1054Z";
 
     private const int CantidadSolicitadaPorDefecto = 2;
 
@@ -346,6 +347,20 @@ public sealed class ServicioPrestamoTests
         SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoDiscontinuado);
 
         Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(datos, DniDocente));
+
+        VerificarQueNoSeGuardoNiSePrestoNada(DniDocente);
+    }
+
+    [TestMethod]
+    public void Solicitar_TipoDeOtroCatalogo_LanzaExcepcion()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        CargarOtroCatalogo();
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoDeOtroCatalogo);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Solicitar(datos, DniDocente));
+        Assert.AreEqual("El tipo de equipamiento no existe", excepcion.Message);
 
         VerificarQueNoSeGuardoNiSePrestoNada(DniDocente);
     }
@@ -1014,6 +1029,19 @@ public sealed class ServicioPrestamoTests
 
         new RepositorioCatalogoSql(_contexto).AgregarCatalogo(catalogo);
         _idCatalogo = catalogo.Id;
+    }
+
+    private void CargarOtroCatalogo()
+    {
+        Catalogo otroCatalogo = new Catalogo("Catalogo de laboratorio");
+
+        otroCatalogo.AgregarTipo(CrearTipoEquipamiento(
+            nombre: NombreTipoDeOtroCatalogo,
+            requiereAprobacion: false,
+            cantidadUnidades: 3,
+            primerNumero: 301));
+
+        new RepositorioCatalogoSql(_contexto).AgregarCatalogo(otroCatalogo);
     }
 
     private static TipoEquipamiento CrearTipoEquipamiento(string nombre, bool requiereAprobacion, int cantidadUnidades,
