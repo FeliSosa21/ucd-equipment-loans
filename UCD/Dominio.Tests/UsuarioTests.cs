@@ -715,6 +715,15 @@ public sealed class UsuarioTests
         Assert.IsTrue(usuario.TienePermiso(Permiso.GestionarUsuarios));
     }
 
+    [TestMethod]
+    public void EstaHabilitadoPara_UsuarioActivoConElPermiso_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Supervisor());
+
+        Assert.IsTrue(usuario.EstaHabilitadoPara(Permiso.EvaluarSolicitud));
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {

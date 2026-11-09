@@ -54,6 +54,11 @@ public class Usuario
         return Tipo.TienePermiso(permiso);
     }
 
+    public bool EstaHabilitadoPara(Permiso permiso)
+    {
+        return false;
+    }
+
     public bool EstaPendienteDeActivacion()
     {
         return Tipo.NoTienePermisos();
