@@ -999,6 +999,24 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    [DataRow("")]
+    [DataRow(" ")]
+    public void ListarPrestamos_EstadoVacio_DevuelveTodosLosEstados(string estado)
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        (Guid idSolicitado, Guid idRechazado, Guid idPrimerActivo, Guid idSegundoActivo) =
+            CrearPrestamosEnVariosEstados(servicio);
+        FiltroDePrestamosDto filtro = servicio.RangoPorDefecto();
+        filtro.Estado = estado;
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamos(DniSupervisor, filtro);
+
+        CollectionAssert.AreEquivalent(
+            new List<Guid> { idSolicitado, idRechazado, idPrimerActivo, idSegundoActivo },
+            resultado.Select(prestamo => prestamo.Id).ToList());
+    }
+
+    [TestMethod]
     public void RangoPorDefecto_RelojFijo_DevuelveLosUltimos30DiasConHoyYSinEstado()
     {
         ServicioPrestamo servicio = CrearServicio();
