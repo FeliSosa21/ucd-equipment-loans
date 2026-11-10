@@ -120,6 +120,19 @@ public sealed class RepositorioMovimientoSqlTests
     }
 
     [TestMethod]
+    public void ObtenerMovimientos_FiltroPorFechas_TraeElResponsableAunqueNoSeaElEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamoActivo();
+        Usuario funcionario = CrearUsuario(dni: "45678905", correo: "laura.diaz@ejemplo.com");
+        GuardarConOtroContexto(Movimiento.DeDevolucion(prestamo, RegistroDeAccion.DeUsuario(funcionario, FechaFija),
+            prestamo.UnidadesAsignadas[0]));
+
+        Movimiento leido = LeerMovimientos(new FiltroPorCatalogoYFechas { Desde = FechaFija }).Single();
+
+        Assert.AreEqual("45678905", leido.Responsable?.Dni);
+    }
+
+    [TestMethod]
     public void ObtenerMovimientos_MovimientoGuardado_TraeElTipoDeEquipamientoDelPrestamo()
     {
         GuardarTresMovimientos();
