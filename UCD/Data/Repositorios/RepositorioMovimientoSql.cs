@@ -42,6 +42,11 @@ public class RepositorioMovimientoSql
         }
 
         return FiltrarPor(filtro)
+            .Include(movimiento => movimiento.Prestamo)
+            .ThenInclude(prestamo => prestamo.Solicitante)
+            .Include(movimiento => movimiento.Evaluador)
+            .Include(movimiento => movimiento.Unidad)
+            .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}")
             .OrderByDescending(movimiento => EF.Property<RegistroDeAccion>(movimiento, CampoRegistro).FechaHora)
             .ThenByDescending(movimiento => movimiento.Id)
             .ToList();
