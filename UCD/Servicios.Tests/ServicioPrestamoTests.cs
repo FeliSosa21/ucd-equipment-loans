@@ -149,7 +149,7 @@ public sealed class ServicioPrestamoTests
         servicio.Solicitar(datos, DniDocente);
 
         Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
-        List<Movimiento> solicitudes = new RepositorioMovimiento(memoria).ObtenerTodos()
+        List<Movimiento> solicitudes = MovimientosDePrueba.Registrados(memoria)
             .Where(movimiento => movimiento.Tipo == TipoMovimiento.Solicitud).ToList();
 
         Assert.AreEqual(1, solicitudes.Count);
@@ -170,7 +170,7 @@ public sealed class ServicioPrestamoTests
 
         Prestamo guardado =
             new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniDocente).Single();
-        List<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos()
+        List<Movimiento> movimientos = MovimientosDePrueba.Registrados(memoria)
             .Where(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo).ToList();
 
         Assert.AreEqual(CantidadSolicitadaPorDefecto, movimientos.Count);
@@ -194,18 +194,18 @@ public sealed class ServicioPrestamoTests
 
         servicio.Solicitar(datos, DniDocente);
 
-        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+        IReadOnlyList<Movimiento> movimientos = MovimientosDePrueba.Registrados(memoria);
 
         CollectionAssert.AreEqual(
-            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Prestamo, TipoMovimiento.Prestamo },
+            new List<TipoMovimiento> { TipoMovimiento.Prestamo, TipoMovimiento.Prestamo, TipoMovimiento.Solicitud },
             movimientos.Select(movimiento => movimiento.Tipo).ToList(),
-            "La solicitud deberia registrarse antes que los prestamos");
-        Assert.AreEqual(FechaFija, movimientos[0].FechaHora);
-        Assert.IsNull(movimientos[0].Evaluador);
-        Assert.IsNull(movimientos[0].Unidad);
+            "Los prestamos deberian quedar antes que la solicitud: se registran despues");
+        Assert.AreEqual(FechaFija, movimientos[2].FechaHora);
+        Assert.IsNull(movimientos[2].Evaluador);
+        Assert.IsNull(movimientos[2].Unidad);
         CollectionAssert.AreEqual(
-            new List<string> { "EQP-0001", "EQP-0002" },
-            movimientos.Skip(1).Select(movimiento => movimiento.Unidad!.IdInstitucional).ToList());
+            new List<string> { "EQP-0002", "EQP-0001" },
+            movimientos.Take(2).Select(movimiento => movimiento.Unidad!.IdInstitucional).ToList());
     }
 
     [TestMethod]
@@ -241,7 +241,7 @@ public sealed class ServicioPrestamoTests
         TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoSinAprobacion)!;
         Assert.AreEqual(3, tipo.CantidadDisponibles());
 
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos()
+        Assert.AreEqual(0, MovimientosDePrueba.Registrados(memoria)
             .Count(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo));
     }
 
@@ -255,12 +255,12 @@ public sealed class ServicioPrestamoTests
         servicio.Solicitar(datos, DniDocente);
 
         Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
-        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+        IReadOnlyList<Movimiento> movimientos = MovimientosDePrueba.Registrados(memoria);
 
         CollectionAssert.AreEqual(
-            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
+            new List<TipoMovimiento> { TipoMovimiento.Rechazo, TipoMovimiento.Solicitud },
             movimientos.Select(movimiento => movimiento.Tipo).ToList(),
-            "Deberia registrarse la solicitud y despues el rechazo");
+            "El rechazo deberia quedar antes que la solicitud: se registra despues");
         foreach (Movimiento movimiento in movimientos)
         {
             Assert.AreEqual(FechaFija, movimiento.FechaHora);
@@ -298,7 +298,7 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(1, guardados.Count);
         Assert.AreEqual(EstadoPrestamo.Solicitado, guardados[0].Estado);
 
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos()
+        Assert.AreEqual(0, MovimientosDePrueba.Registrados(memoria)
             .Count(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo));
     }
 
@@ -396,7 +396,7 @@ public sealed class ServicioPrestamoTests
         Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(tercera, DniEstudiante));
 
         Assert.AreEqual(2, new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(DniEstudiante).Count);
-        Assert.AreEqual(1, new RepositorioMovimiento(memoria).ObtenerTodos()
+        Assert.AreEqual(1, MovimientosDePrueba.Registrados(memoria)
             .Count(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo));
         TipoEquipamiento tipo = new RepositorioCatalogo(memoria).ObtenerTipoPorNombre(NombreTipoSinAprobacion)!;
         Assert.AreEqual(2, tipo.CantidadDisponibles());
@@ -520,7 +520,7 @@ public sealed class ServicioPrestamoTests
 
         Prestamo guardado = ObtenerPrestamoGuardado(memoria, idPrestamo);
         Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
-        List<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos()
+        List<Movimiento> movimientos = MovimientosDePrueba.Registrados(memoria)
             .Where(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo).ToList();
 
         Assert.AreEqual(CantidadSolicitadaPorDefecto, movimientos.Count);
@@ -548,18 +548,18 @@ public sealed class ServicioPrestamoTests
 
         Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
         Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
-        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+        IReadOnlyList<Movimiento> movimientos = MovimientosDePrueba.Registrados(memoria);
         List<Movimiento> aprobaciones = movimientos
             .Where(movimiento => movimiento.Tipo == TipoMovimiento.Aprobacion).ToList();
 
         CollectionAssert.AreEqual(
             new List<TipoMovimiento>
             {
-                TipoMovimiento.Solicitud, TipoMovimiento.Aprobacion, TipoMovimiento.Aprobacion,
-                TipoMovimiento.Prestamo, TipoMovimiento.Prestamo
+                TipoMovimiento.Prestamo, TipoMovimiento.Prestamo,
+                TipoMovimiento.Aprobacion, TipoMovimiento.Aprobacion, TipoMovimiento.Solicitud
             },
             movimientos.Select(movimiento => movimiento.Tipo).ToList(),
-            "Las aprobaciones deberian registrarse despues de la solicitud y antes de los prestamos");
+            "Las aprobaciones deberian quedar despues de los prestamos y antes que la solicitud");
         foreach (Movimiento aprobacion in aprobaciones)
         {
             Assert.AreEqual(FechaDeEvaluacion, aprobacion.FechaHora);
@@ -567,7 +567,7 @@ public sealed class ServicioPrestamoTests
             Assert.AreSame(supervisor, aprobacion.Evaluador);
         }
         CollectionAssert.AreEqual(
-            new List<string> { "EQP-0101", "EQP-0102" },
+            new List<string> { "EQP-0102", "EQP-0101" },
             aprobaciones.Select(aprobacion => aprobacion.Unidad!.IdInstitucional).ToList());
     }
 
@@ -600,12 +600,12 @@ public sealed class ServicioPrestamoTests
         servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
 
         Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
-        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+        IReadOnlyList<Movimiento> movimientos = MovimientosDePrueba.Registrados(memoria);
 
         CollectionAssert.AreEqual(
-            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
+            new List<TipoMovimiento> { TipoMovimiento.Rechazo, TipoMovimiento.Solicitud },
             movimientos.Select(movimiento => movimiento.Tipo).ToList(),
-            "Deberia registrarse la solicitud y despues el rechazo del sistema");
+            "El rechazo del sistema deberia quedar antes que la solicitud: se registra despues");
         Movimiento rechazo =
             movimientos.Single(movimiento => movimiento.Tipo == TipoMovimiento.Rechazo);
         Assert.AreEqual(FechaDeEvaluacion, rechazo.FechaHora);
@@ -750,12 +750,12 @@ public sealed class ServicioPrestamoTests
         servicioDeLaEvaluacion.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor);
         Usuario docente = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniDocente)!;
         Usuario supervisor = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSupervisor)!;
-        IReadOnlyList<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos();
+        IReadOnlyList<Movimiento> movimientos = MovimientosDePrueba.Registrados(memoria);
 
         CollectionAssert.AreEqual(
-            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
+            new List<TipoMovimiento> { TipoMovimiento.Rechazo, TipoMovimiento.Solicitud },
             movimientos.Select(movimiento => movimiento.Tipo).ToList(),
-            "Deberia registrarse la solicitud y despues el rechazo del supervisor");
+            "El rechazo del supervisor deberia quedar antes que la solicitud: se registra despues");
         Movimiento rechazo =
             movimientos.Single(movimiento => movimiento.Tipo == TipoMovimiento.Rechazo);
         Assert.AreEqual(FechaDeEvaluacion, rechazo.FechaHora);
@@ -1062,7 +1062,7 @@ public sealed class ServicioPrestamoTests
     {
         Assert.AreEqual(0, new RepositorioPrestamo(memoria).ObtenerPrestamosDeSolicitante(dni: dni).Count,
             "No deberia haberse guardado ningun prestamo");
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count,
+        Assert.AreEqual(0, MovimientosDePrueba.Registrados(memoria).Count,
             "No deberia haberse registrado ningun movimiento");
 
         Catalogo catalogo = new RepositorioCatalogo(memoria).Obtener()!;
@@ -1078,7 +1078,7 @@ public sealed class ServicioPrestamoTests
             "El prestamo deberia seguir solicitado");
         Assert.AreEqual(0, guardado.UnidadesAsignadas.Count,
             "No deberia haberse asignado ninguna unidad");
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos()
+        Assert.AreEqual(0, MovimientosDePrueba.Registrados(memoria)
                 .Count(movimiento => movimiento.Tipo != TipoMovimiento.Solicitud),
             "No deberia haberse registrado ningun movimiento ademas de la solicitud");
     }

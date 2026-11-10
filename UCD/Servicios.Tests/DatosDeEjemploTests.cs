@@ -176,19 +176,19 @@ public class DatosDeEjemploTests
         CollectionAssert.AreEqual(
             new List<(TipoMovimiento Tipo, string? Unidad)>
             {
-                (TipoMovimiento.Solicitud, null),
+                (TipoMovimiento.Prestamo, "NTB-0002"),
                 (TipoMovimiento.Prestamo, "NTB-0001"),
-                (TipoMovimiento.Prestamo, "NTB-0002")
+                (TipoMovimiento.Solicitud, null)
             },
             MovimientosDe(ObtenerPrestamoActivoDe(DatosDeEjemplo.CorreoDocente)));
         CollectionAssert.AreEqual(
             new List<(TipoMovimiento Tipo, string? Unidad)>
             {
-                (TipoMovimiento.Solicitud, null),
-                (TipoMovimiento.Prestamo, "PRY-0001")
+                (TipoMovimiento.Prestamo, "PRY-0001"),
+                (TipoMovimiento.Solicitud, null)
             },
             MovimientosDe(ObtenerPrestamoActivoDe(DatosDeEjemplo.CorreoEstudiante)));
-        Assert.IsTrue(_movimientos.ObtenerTodos().All(movimiento => movimiento.Evaluador is null),
+        Assert.IsTrue(MovimientosDePrueba.Registrados(_memoria).All(movimiento => movimiento.Evaluador is null),
             "Los movimientos de los datos de ejemplo no tienen evaluador");
     }
 
@@ -215,11 +215,11 @@ public class DatosDeEjemploTests
         return _prestamos.ObtenerPrestamosActivos().Single(prestamo => prestamo.Solicitante.Correo == correo);
     }
 
-    // Movimiento no guarda su prestamo: son los del mismo solicitante con la fecha del prestamo, en el orden
-    // en que se registraron.
+    // Movimiento no guarda su prestamo: son los del mismo solicitante con la fecha del prestamo. Como comparten
+    // la fecha, quedan del ultimo registrado al primero.
     private List<(TipoMovimiento Tipo, string? Unidad)> MovimientosDe(Prestamo prestamo)
     {
-        return _movimientos.ObtenerTodos()
+        return MovimientosDePrueba.Registrados(_memoria)
             .Where(movimiento => movimiento.Solicitante == prestamo.Solicitante
                                  && movimiento.FechaHora == prestamo.FechaHoraPrestamo)
             .Select(movimiento => (Tipo: movimiento.Tipo, Unidad: movimiento.Unidad?.IdInstitucional))
