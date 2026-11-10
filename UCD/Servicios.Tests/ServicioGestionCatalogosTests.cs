@@ -147,6 +147,19 @@ public class ServicioGestionCatalogosTests
         Assert.AreEqual(CampoNombre, error.Campo);
     }
 
+    [TestMethod]
+    public void Modificar_NombreValido_SeLeeConOtroContexto()
+    {
+        int id = _entorno.GuardarCatalogo(new Catalogo("Aulas"));
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        servicio.Modificar(id, NombreValido, DniSupervisor);
+
+        IReadOnlyList<Catalogo> guardados = LeerCatalogosActivos();
+        Assert.AreEqual(1, guardados.Count);
+        Assert.AreEqual(NombreValido, guardados[0].Nombre);
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
