@@ -22,7 +22,7 @@
     </div>
     <div>
         <label class="lbl" for="filtro-hasta">Hasta</label>
-        <input id="filtro-hasta" class="field" type="date" @bind="_hasta" />
+        <input id="filtro-hasta" class="field" type="date" min="@MinimoDeHasta" @bind="_hasta" />
     </div>
     <div>
         <label class="lbl" for="filtro-estado">Estado</label>

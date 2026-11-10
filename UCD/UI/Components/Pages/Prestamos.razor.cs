@@ -1,3 +1,4 @@
+using System.Globalization;
 using DTOs;
 using Servicios;
 using UI.Presentacion;
@@ -10,6 +11,7 @@ public partial class Prestamos
     private const string SinDato = "—";
     private const string TodosLosEstados = "";
     private const string CampoDesde = nameof(FiltroDePrestamosDto.Desde);
+    private const string FormatoDelCampoFecha = "yyyy-MM-dd";
 
     // Estados tal como los devuelve el servicio; tambien arman el filtro.
     private static readonly string[] Estados =
@@ -24,6 +26,9 @@ public partial class Prestamos
     private readonly ErroresDeFormulario _errores = new ErroresDeFormulario(CampoDesde);
 
     private bool HayError => _errores.Tiene(CampoDesde) || _errores.General is not null;
+
+    // El calendario de "Hasta" no ofrece dias anteriores a "Desde"; igual el servicio valida el rango.
+    private string MinimoDeHasta => _desde.ToString(FormatoDelCampoFecha, CultureInfo.InvariantCulture);
 
     protected override void OnInitialized()
     {
