@@ -7,10 +7,12 @@ namespace Servicios;
 public class ServicioPrestamo
 {
     private const string MensajeSinPermisoParaEvaluar = "El usuario no tiene permiso para evaluar solicitudes";
-    private const string MensajeSinPermisoParaMisSolicitudes = "El usuario no tiene permiso para consultar sus solicitudes";
+    private const string MensajeSinPermisoParaMisSolicitudes =
+        "El usuario no tiene permiso para consultar sus solicitudes";
     private const string MensajeSinPermisoParaPrestamosActivos =
         "El usuario no tiene permiso para consultar los prestamos activos";
-    private const string MensajeSinPermisoParaConsultarPrestamos = "El usuario no tiene permiso para consultar prestamos";
+    private const string MensajeSinPermisoParaConsultarPrestamos =
+        "El usuario no tiene permiso para consultar prestamos";
     private const string MensajeRangoInvertido = "La fecha desde no puede ser posterior a la fecha hasta";
     private const string MensajeEstadoNoValido = "El estado del prestamo no es valido";
     private const int DiasPorDefecto = 30;

@@ -909,7 +909,7 @@ public sealed class ServicioPrestamoTests
     {
         ServicioPrestamo servicio = CrearServicio();
         Guid idQueVenceDespues = servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
-        CambiarDuracionDelTipo(NombreTipoSinAprobacion, diasHabiles: 1);
+        CambiarDuracionDelTipo(nombreTipo: NombreTipoSinAprobacion, diasHabiles: 1);
         Guid idQueVenceAntes = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion))
             .Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
 
@@ -928,7 +928,8 @@ public sealed class ServicioPrestamoTests
         ServicioPrestamo servicioDelDiaSiguienteALaFechaEsperada =
             CrearServicioConReloj(new RelojFijo(new DateTime(2026, 10, 13, 9, 0, 0)));
 
-        List<PrestamoDto> resultado = servicioDelDiaSiguienteALaFechaEsperada.ListarPrestamosActivos(DniFuncionario);
+        List<PrestamoDto> resultado =
+            servicioDelDiaSiguienteALaFechaEsperada.ListarPrestamosActivos(DniFuncionario);
 
         Assert.IsTrue(resultado.Single().EstaVencido);
     }
