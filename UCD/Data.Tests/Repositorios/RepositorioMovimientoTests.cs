@@ -106,6 +106,23 @@ public sealed class RepositorioMovimientoTests
     }
 
     [TestMethod]
+    public void ObtenerMovimientos_FiltroPorFechas_IncluyeDesdeYExcluyeHasta()
+    {
+        RepositorioMovimiento repositorio = new RepositorioMovimiento(new Memoria());
+        Movimiento antesDeDesde = CrearMovimiento(idInstitucional: "EQP-0001", FechaFija.AddMinutes(-1));
+        Movimiento enDesde = CrearMovimiento(idInstitucional: "EQP-0002", FechaFija);
+        Movimiento enHasta = CrearMovimiento(idInstitucional: "EQP-0003", FechaFija.AddDays(1));
+        repositorio.AgregarMovimiento(antesDeDesde);
+        repositorio.AgregarMovimiento(enDesde);
+        repositorio.AgregarMovimiento(enHasta);
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { Desde = FechaFija, Hasta = FechaFija.AddDays(1) };
+
+        IReadOnlyList<Movimiento> resultado = repositorio.ObtenerMovimientos(filtro);
+
+        CollectionAssert.AreEqual(new List<Movimiento> { enDesde }, resultado.ToList());
+    }
+
+    [TestMethod]
     public void AgregarMovimiento_MovimientoNulo_LanzaArgumentNullException()
     {
         Memoria memoria = new Memoria();
