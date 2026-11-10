@@ -10,6 +10,7 @@ public class ServicioPrestamo
     private const string MensajeSinPermisoParaMisSolicitudes = "El usuario no tiene permiso para consultar sus solicitudes";
     private const string MensajeSinPermisoParaPrestamosActivos =
         "El usuario no tiene permiso para consultar los prestamos activos";
+    private const int DiasPorDefecto = 30;
 
     private readonly RepositorioPrestamoSql _prestamos;
     private readonly RepositorioUsuarioSql _usuarios;
@@ -97,7 +98,9 @@ public class ServicioPrestamo
 
     public FiltroDePrestamosDto RangoPorDefecto()
     {
-        return new FiltroDePrestamosDto { Desde = default, Hasta = default };
+        DateTime hoy = _reloj.GetLocalNow().Date;
+
+        return new FiltroDePrestamosDto { Desde = hoy.AddDays(1 - DiasPorDefecto), Hasta = hoy };
     }
 
     private Usuario ObtenerSolicitante(string dniSolicitante)
