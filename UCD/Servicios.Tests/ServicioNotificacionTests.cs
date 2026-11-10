@@ -256,6 +256,18 @@ public sealed class ServicioNotificacionTests
         Assert.AreEqual(TipoNotificacion.SolicitudRechazada, LeerNoLeidasDe(DniDocente).Single().Tipo);
     }
 
+    [TestMethod]
+    public void RegistrarResultadoDeEvaluacion_PrestamoSinEvaluar_LanzaArgumentExceptionYNoGuardaNada()
+    {
+        Prestamo sinEvaluar = CargarEnElContextoDelServicio(GuardarPrestamoSolicitado(PedidoQueVencioAyer));
+        ServicioNotificacion servicio = CrearServicio();
+
+        Assert.ThrowsException<ArgumentException>(
+            () => servicio.RegistrarResultadoDeEvaluacion(sinEvaluar, FechaDeEvaluacion));
+
+        Assert.AreEqual(0, LeerNoLeidasDe(DniDocente).Count);
+    }
+
     // Como en ServicioPrestamo, el prestamo evaluado esta en el contexto compartido con el servicio.
     private Prestamo CargarEnElContextoDelServicio(Guid idPrestamo)
     {
@@ -328,6 +340,15 @@ public sealed class ServicioNotificacionTests
         prestamo.UnidadesAsignadas[0].Disponible();
         prestamo.MarcarDevuelto();
         new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
+    }
+
+    private Guid GuardarPrestamoSolicitado(DateTime fechaHoraPedido)
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
+        Prestamo prestamo = CrearPrestamo(preparacion, fechaHoraPedido);
+        new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
+
+        return prestamo.Id;
     }
 
     private Guid GuardarPrestamoRechazadoPorFaltaDeUnidades(DateTime fechaHoraPedido)
