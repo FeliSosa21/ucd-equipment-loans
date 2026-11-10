@@ -24,7 +24,7 @@ public class RepositorioMovimiento
 
     public IReadOnlyList<Movimiento> ObtenerMovimientos(FiltroPorCatalogoYFechas filtro)
     {
-        if (filtro.Desde is null && filtro.Hasta is null)
+        if (filtro.IdCatalogo is null && filtro.Desde is null && filtro.Hasta is null)
         {
             return new List<Movimiento>();
         }
@@ -34,7 +34,17 @@ public class RepositorioMovimiento
         return Enumerable.Reverse(_memoria.Movimientos)
             .Where(movimiento => filtro.Desde is null || movimiento.FechaHora >= filtro.Desde)
             .Where(movimiento => filtro.Hasta is null || movimiento.FechaHora < filtro.Hasta)
+            .Where(movimiento => filtro.IdCatalogo is null || PerteneceAlCatalogo(movimiento, filtro.IdCatalogo.Value))
             .OrderByDescending(movimiento => movimiento.FechaHora)
             .ToList();
+    }
+
+    private bool PerteneceAlCatalogo(Movimiento movimiento, int idCatalogo)
+    {
+        Catalogo? catalogo = _memoria.Catalogo;
+
+        return catalogo is not null
+               && catalogo.Id == idCatalogo
+               && catalogo.Tipos.Contains(movimiento.Prestamo.TipoEquipamiento);
     }
 }
