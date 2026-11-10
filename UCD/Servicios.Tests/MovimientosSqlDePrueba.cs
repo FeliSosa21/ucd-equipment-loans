@@ -39,6 +39,15 @@ internal sealed class MovimientosSqlDePrueba : IDisposable
         return catalogo.Id;
     }
 
+    public void DarDeBajaCatalogo(int idCatalogo)
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(preparacion);
+        Catalogo catalogo = repositorio.ObtenerCatalogoActivoPorId(idCatalogo)!;
+        catalogo.DarDeBaja();
+        repositorio.ActualizarCatalogo(catalogo);
+    }
+
     public void GuardarUsuario(string dni, TipoUsuario tipoPredefinido)
     {
         using SqlContext preparacion = new SqlContext(_opciones);

@@ -129,10 +129,21 @@ public sealed class ServicioHistoricoTests
             servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniSupervisor));
     }
 
+    [TestMethod]
+    public void ListarMovimientos_CatalogoDadoDeBaja_LanzaServicioException()
+    {
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        _datos.DarDeBajaCatalogo(_idCatalogo);
+        ServicioHistorico servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniSupervisor));
+    }
+
     private ServicioHistorico CrearServicio()
     {
-        return new ServicioHistorico(new RepositorioUsuarioSql(_datos.Contexto),
-            new RepositorioMovimientoSql(_datos.Contexto));
+        return new ServicioHistorico(new RepositorioCatalogoSql(_datos.Contexto),
+            new RepositorioUsuarioSql(_datos.Contexto), new RepositorioMovimientoSql(_datos.Contexto));
     }
 
     private void GuardarSolicitud(DateTime fechaHora)

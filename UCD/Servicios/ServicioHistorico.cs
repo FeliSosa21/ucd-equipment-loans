@@ -8,11 +8,14 @@ public class ServicioHistorico
 {
     private const string MensajeSinPermiso = "El usuario no tiene permiso para consultar el historico";
 
+    private readonly RepositorioCatalogoSql _catalogos;
     private readonly RepositorioUsuarioSql _usuarios;
     private readonly RepositorioMovimientoSql _movimientos;
 
-    public ServicioHistorico(RepositorioUsuarioSql usuarios, RepositorioMovimientoSql movimientos)
+    public ServicioHistorico(RepositorioCatalogoSql catalogos, RepositorioUsuarioSql usuarios,
+        RepositorioMovimientoSql movimientos)
     {
+        _catalogos = catalogos;
         _usuarios = usuarios;
         _movimientos = movimientos;
     }
