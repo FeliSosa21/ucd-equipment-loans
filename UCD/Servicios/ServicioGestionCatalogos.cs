@@ -10,6 +10,8 @@ public class ServicioGestionCatalogos
     private const string CampoNombre = nameof(CatalogoDto.Nombre);
     private const string MensajeNoSePudoGuardar =
         "No se pudieron guardar los cambios; verifique que no exista otro catalogo con ese nombre";
+    private const string MensajeConPrestamosVigentes =
+        "No se puede eliminar el catalogo mientras tenga prestamos activos o pendientes de autorizacion";
     private const string MensajeSinPermiso = "El usuario no tiene permiso para gestionar los catalogos";
 
     private readonly RepositorioCatalogoSql _repositorioCatalogo;
@@ -60,6 +62,10 @@ public class ServicioGestionCatalogos
     public void Eliminar(int idCatalogo, string dniResponsable)
     {
         Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
+        if (_repositorioPrestamo.ExistenPrestamosVigentesDelCatalogo(idCatalogo))
+        {
+            throw new ServicioException(MensajeConPrestamosVigentes);
+        }
 
         catalogo.DarDeBaja();
         OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
