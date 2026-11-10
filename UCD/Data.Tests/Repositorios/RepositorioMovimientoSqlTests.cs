@@ -143,6 +143,19 @@ public sealed class RepositorioMovimientoSqlTests
         Assert.AreEqual(0, resultado.Count);
     }
 
+    [TestMethod]
+    public void ObtenerMovimientos_FiltroPorFechas_DelMasRecienteAlMasViejoYEnEmpateElUltimoRegistrado()
+    {
+        GuardarTresMovimientos();
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { Desde = FechaFija, Hasta = FechaFija.AddDays(2) };
+
+        IReadOnlyList<Movimiento> resultado = LeerMovimientos(filtro);
+
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Devolucion, TipoMovimiento.Prestamo, TipoMovimiento.Solicitud },
+            resultado.Select(movimiento => movimiento.Tipo).ToList());
+    }
+
     private void GuardarTresMovimientos()
     {
         Prestamo prestamo = CrearPrestamoActivo();
