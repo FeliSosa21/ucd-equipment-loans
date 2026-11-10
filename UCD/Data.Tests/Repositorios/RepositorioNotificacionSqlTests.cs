@@ -80,6 +80,24 @@ public sealed class RepositorioNotificacionSqlTests
             resultado.Select(notificacion => notificacion.Id).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerNoLeidasDeUsuario_VariasSinLeer_DeLaMasRecienteALaMasViejaYEnEmpateLaUltimaRegistrada()
+    {
+        Prestamo prestamo = CrearPrestamoActivo(DniSolicitante);
+        Notificacion primeraDelDiaSiguiente =
+            new Notificacion(prestamo, TipoNotificacion.PrestamoVencido, FechaFija.AddDays(1));
+        Notificacion delDia = new Notificacion(prestamo, TipoNotificacion.PrestamoVencido, FechaFija);
+        Notificacion segundaDelDiaSiguiente =
+            new Notificacion(prestamo, TipoNotificacion.PrestamoVencido, FechaFija.AddDays(1));
+        GuardarConOtroContexto(primeraDelDiaSiguiente, delDia, segundaDelDiaSiguiente);
+
+        IReadOnlyList<Notificacion> resultado = LeerNoLeidasDe(DniSolicitante);
+
+        CollectionAssert.AreEqual(
+            new List<int> { segundaDelDiaSiguiente.Id, primeraDelDiaSiguiente.Id, delDia.Id },
+            resultado.Select(notificacion => notificacion.Id).ToList());
+    }
+
     private IReadOnlyList<Notificacion> LeerNoLeidasDe(string dni)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
