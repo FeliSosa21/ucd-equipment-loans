@@ -24,6 +24,15 @@ public class RepositorioMovimiento
 
     public IReadOnlyList<Movimiento> ObtenerMovimientos(FiltroPorCatalogoYFechas filtro)
     {
-        return new List<Movimiento>();
+        if (filtro.Desde is null && filtro.Hasta is null)
+        {
+            return new List<Movimiento>();
+        }
+
+        // En memoria no hay Id: invertir el orden de registro y ordenar con OrderByDescending, que es estable,
+        // deja primero el ultimo registrado en los empates, igual que el desempate por Id en la base.
+        return Enumerable.Reverse(_memoria.Movimientos)
+            .OrderByDescending(movimiento => movimiento.FechaHora)
+            .ToList();
     }
 }
