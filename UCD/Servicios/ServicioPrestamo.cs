@@ -100,6 +100,7 @@ public class ServicioPrestamo
         ValidarRango(filtro);
 
         return _prestamos.ObtenerPrestamos(CrearFiltroDeDiasCompletos(filtro), ConvertirEstado(filtro.Estado))
+            .OrderByDescending(prestamo => prestamo.FechaHoraPrestamo)
             .Select(CrearPrestamoDto)
             .ToList();
     }
