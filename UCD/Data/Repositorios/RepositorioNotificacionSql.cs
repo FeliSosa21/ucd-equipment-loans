@@ -16,4 +16,9 @@ public class RepositorioNotificacionSql
         _contexto.Notificaciones.Add(notificacion);
         _contexto.SaveChanges();
     }
+
+    public IReadOnlyList<Notificacion> ObtenerNoLeidasDeUsuario(string dni)
+    {
+        return new List<Notificacion>();
+    }
 }

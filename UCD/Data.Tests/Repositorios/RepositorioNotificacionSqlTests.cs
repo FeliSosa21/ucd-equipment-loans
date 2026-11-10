@@ -9,6 +9,7 @@ public sealed class RepositorioNotificacionSqlTests
 {
     private static readonly DateTime FechaFija = new(2026, 11, 10, 9, 0, 0);
     private const string DniSolicitante = "12345672";
+    private const string DniOtroSolicitante = "45678905";
 
     private DbContextOptions<SqlContext> _opciones = null!;
 
@@ -37,6 +38,31 @@ public sealed class RepositorioNotificacionSqlTests
         Assert.AreEqual(TipoNotificacion.PrestamoVencido, leidas[0].Tipo);
         Assert.AreEqual(FechaFija, leidas[0].FechaHora);
         Assert.IsFalse(leidas[0].EstaLeida);
+    }
+
+    [TestMethod]
+    public void ObtenerNoLeidasDeUsuario_NotificacionesDeDosUsuarios_DevuelveSoloLasDelUsuario()
+    {
+        Notificacion delSolicitante = CrearNotificacionDeVencido(CrearPrestamoActivo(DniSolicitante));
+        Notificacion deOtro = CrearNotificacionDeVencido(CrearPrestamoActivo(DniOtroSolicitante));
+        GuardarConOtroContexto(delSolicitante, deOtro);
+
+        IReadOnlyList<Notificacion> resultado = LeerNoLeidasDe(DniSolicitante);
+
+        CollectionAssert.AreEqual(new List<int> { delSolicitante.Id },
+            resultado.Select(notificacion => notificacion.Id).ToList());
+    }
+
+    private IReadOnlyList<Notificacion> LeerNoLeidasDe(string dni)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+
+        return new RepositorioNotificacionSql(contextoQueLee).ObtenerNoLeidasDeUsuario(dni);
+    }
+
+    private static Notificacion CrearNotificacionDeVencido(Prestamo prestamo)
+    {
+        return new Notificacion(prestamo, TipoNotificacion.PrestamoVencido, FechaFija);
     }
 
     private void GuardarConOtroContexto(params Notificacion[] notificaciones)
