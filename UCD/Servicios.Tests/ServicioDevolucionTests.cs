@@ -162,7 +162,7 @@ public class ServicioDevolucionTests
 
         servicio.RegistrarDevolucion(datos, DniFuncionario);
 
-        List<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos().ToList();
+        List<Movimiento> movimientos = MovimientosDePrueba.Registrados(memoria).ToList();
         Assert.AreEqual(2, movimientos.Count);
         CollectionAssert.AreEquivalent(prestamo.UnidadesAsignadas.ToList(),
             movimientos.Select(movimiento => movimiento.Unidad).ToList());
@@ -177,7 +177,7 @@ public class ServicioDevolucionTests
 
         servicio.RegistrarDevolucion(datos, DniFuncionario);
 
-        Movimiento movimiento = new RepositorioMovimiento(memoria).ObtenerTodos()[0];
+        Movimiento movimiento = MovimientosDePrueba.Registrados(memoria)[0];
         Assert.AreEqual(TipoMovimiento.Devolucion, movimiento.Tipo);
         Assert.AreEqual(MomentoDevolucion, movimiento.FechaHora);
         Assert.AreSame(prestamo.Solicitante, movimiento.Solicitante);
@@ -217,7 +217,7 @@ public class ServicioDevolucionTests
         datos.Unidades.RemoveAt(1);
 
         Assert.ThrowsException<ServicioException>(() => servicio.RegistrarDevolucion(datos, DniFuncionario));
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count);
+        Assert.AreEqual(0, MovimientosDePrueba.Registrados(memoria).Count);
     }
 
     [TestMethod]

@@ -70,6 +70,11 @@ public class Usuario
         return EstaActivo() && TienePermiso(Permiso.GestionarUsuarios);
     }
 
+    public bool EstaHabilitadoPara(Permiso permiso)
+    {
+        return EstaActivo() && TienePermiso(permiso);
+    }
+
     public bool EstaPendienteDeActivacion()
     {
         return Tipo.NoTienePermisos();
