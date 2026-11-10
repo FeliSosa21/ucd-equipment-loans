@@ -1017,6 +1017,21 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    [DataRow("Prestado")]
+    [DataRow("2")]
+    public void ListarPrestamos_EstadoDesconocido_LanzaExcepcionConMensaje(string estado)
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        FiltroDePrestamosDto filtro = servicio.RangoPorDefecto();
+        filtro.Estado = estado;
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.ListarPrestamos(DniSupervisor, filtro));
+
+        Assert.AreEqual("El estado del prestamo no es valido", excepcion.Message);
+    }
+
+    [TestMethod]
     public void RangoPorDefecto_RelojFijo_DevuelveLosUltimos30DiasConHoyYSinEstado()
     {
         ServicioPrestamo servicio = CrearServicio();
