@@ -866,12 +866,7 @@ public sealed class ServicioPrestamoTests
     public void ListarPrestamosActivos_VariosEstados_DevuelveLosActivos()
     {
         ServicioPrestamo servicio = CrearServicio();
-        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion), DniAdministrador);
-        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades), DniAdministrador);
-        Guid idPrimerActivo =
-            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
-        Guid idSegundoActivo =
-            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+        (_, _, Guid idPrimerActivo, Guid idSegundoActivo) = CrearPrestamosEnVariosEstados(servicio);
 
         List<PrestamoDto> resultado = servicio.ListarPrestamosActivos(DniFuncionario);
 
@@ -926,14 +921,8 @@ public sealed class ServicioPrestamoTests
     public void ListarPrestamos_VariosEstados_DevuelveTodos()
     {
         ServicioPrestamo servicio = CrearServicio();
-        Guid idSolicitado =
-            servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion), DniAdministrador).Id;
-        Guid idRechazado =
-            servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades), DniAdministrador).Id;
-        Guid idPrimerActivo =
-            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
-        Guid idSegundoActivo =
-            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+        (Guid idSolicitado, Guid idRechazado, Guid idPrimerActivo, Guid idSegundoActivo) =
+            CrearPrestamosEnVariosEstados(servicio);
 
         List<PrestamoDto> resultado = servicio.ListarPrestamos(DniSupervisor, servicio.RangoPorDefecto());
 
@@ -998,12 +987,7 @@ public sealed class ServicioPrestamoTests
     public void ListarPrestamos_ConEstado_DevuelveSoloLosDeEseEstado()
     {
         ServicioPrestamo servicio = CrearServicio();
-        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion), DniAdministrador);
-        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades), DniAdministrador);
-        Guid idPrimerActivo =
-            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
-        Guid idSegundoActivo =
-            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+        (_, _, Guid idPrimerActivo, Guid idSegundoActivo) = CrearPrestamosEnVariosEstados(servicio);
         FiltroDePrestamosDto filtro = servicio.RangoPorDefecto();
         filtro.Estado = "Activo";
 
@@ -1145,6 +1129,21 @@ public sealed class ServicioPrestamoTests
         PrestamoDto pendiente = servicio.Solicitar(datos, dniSolicitante);
 
         return pendiente.Id;
+    }
+
+    private (Guid idSolicitado, Guid idRechazado, Guid idPrimerActivo, Guid idSegundoActivo)
+        CrearPrestamosEnVariosEstados(ServicioPrestamo servicio)
+    {
+        Guid idSolicitado =
+            servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion), DniAdministrador).Id;
+        Guid idRechazado =
+            servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades), DniAdministrador).Id;
+        Guid idPrimerActivo =
+            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+        Guid idSegundoActivo =
+            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+
+        return (idSolicitado, idRechazado, idPrimerActivo, idSegundoActivo);
     }
 
     private Guid SolicitarEnLaFecha(DateTime fechaHora)
