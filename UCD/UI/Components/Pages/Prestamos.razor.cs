@@ -29,7 +29,7 @@ public partial class Prestamos
             return;
         }
 
-        _prestamos = ServicioPrestamo.ListarPrestamos()
+        _prestamos = ServicioPrestamo.ListarPrestamos(DniUsuario, ServicioPrestamo.RangoPorDefecto())
             .OrderByDescending(prestamo => prestamo.FechaHoraPrestamo)
             .ToList();
     }

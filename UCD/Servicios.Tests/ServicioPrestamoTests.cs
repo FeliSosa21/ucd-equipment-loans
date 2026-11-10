@@ -935,11 +935,24 @@ public sealed class ServicioPrestamoTests
         Guid idSegundoActivo =
             servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
 
-        List<PrestamoDto> resultado = servicio.ListarPrestamos();
+        List<PrestamoDto> resultado = servicio.ListarPrestamos(DniSupervisor, servicio.RangoPorDefecto());
 
         CollectionAssert.AreEquivalent(
             new List<Guid> { idSolicitado, idRechazado, idPrimerActivo, idSegundoActivo },
             resultado.Select(prestamo => prestamo.Id).ToList());
+    }
+
+    [TestMethod]
+    [DataRow(DniFuncionario)]
+    public void ListarPrestamos_ConsultanteNoHabilitado_LanzaExcepcionConMensaje(string dniConsultante)
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        FiltroDePrestamosDto filtro = servicio.RangoPorDefecto();
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.ListarPrestamos(dniConsultante, filtro));
+
+        Assert.AreEqual("El usuario no tiene permiso para consultar prestamos", excepcion.Message);
     }
 
     [TestMethod]

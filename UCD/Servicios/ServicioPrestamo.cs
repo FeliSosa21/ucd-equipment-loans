@@ -91,7 +91,7 @@ public class ServicioPrestamo
             .ToList();
     }
 
-    public List<PrestamoDto> ListarPrestamos()
+    public List<PrestamoDto> ListarPrestamos(string dniConsultante, FiltroDePrestamosDto filtro)
     {
         return _prestamos.ObtenerPrestamos(new FiltroPorCatalogoYFechas()).Select(CrearPrestamoDto).ToList();
     }
