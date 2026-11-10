@@ -910,6 +910,19 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void ListarPrestamosActivos_DespuesDeLaFechaEsperada_LoMarcaVencido()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniDocente);
+        ServicioPrestamo servicioDelDiaSiguienteALaFechaEsperada =
+            CrearServicioConReloj(new RelojFijo(new DateTime(2026, 10, 13, 9, 0, 0)));
+
+        List<PrestamoDto> resultado = servicioDelDiaSiguienteALaFechaEsperada.ListarPrestamosActivos(DniFuncionario);
+
+        Assert.IsTrue(resultado.Single().EstaVencido);
+    }
+
+    [TestMethod]
     public void ListarPrestamos_VariosEstados_DevuelveTodos()
     {
         ServicioPrestamo servicio = CrearServicio();
