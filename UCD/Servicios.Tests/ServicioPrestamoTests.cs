@@ -944,6 +944,7 @@ public sealed class ServicioPrestamoTests
 
     [TestMethod]
     [DataRow(DniFuncionario)]
+    [DataRow(DniSupervisorDesactivado)]
     public void ListarPrestamos_ConsultanteNoHabilitado_LanzaExcepcionConMensaje(string dniConsultante)
     {
         ServicioPrestamo servicio = CrearServicio();
