@@ -24,6 +24,6 @@ public class RepositorioMovimiento
 
     public IReadOnlyList<Movimiento> ObtenerMovimientos(FiltroPorCatalogoYFechas filtro)
     {
-        throw new NotImplementedException();
+        return new List<Movimiento>();
     }
 }
