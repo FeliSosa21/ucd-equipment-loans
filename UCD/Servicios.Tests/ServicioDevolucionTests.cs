@@ -150,6 +150,32 @@ public class ServicioDevolucionTests
     }
 
     [TestMethod]
+    public void RegistrarDevolucion_DosUnidadesEnElMismoContexto_GuardaDevolucionMovimientosYLogDelMismoResponsable()
+    {
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+
+        servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
+
+        Devolucion devolucion = LeerDevoluciones().Single();
+        IReadOnlyList<Movimiento> movimientos = LeerMovimientos();
+        RegistroAuditoria log = LeerAccionesDelFuncionario().Single();
+        Assert.AreEqual(2, movimientos.Count);
+        CollectionAssert.AreEqual(
+            new List<string> { DniFuncionario, DniFuncionario, DniFuncionario, DniFuncionario },
+            new List<string?>
+            {
+                devolucion.RegistradaPor.Dni, movimientos[0].Responsable?.Dni, movimientos[1].Responsable?.Dni,
+                log.Responsable?.Dni
+            });
+        CollectionAssert.AreEqual(
+            new List<DateTime> { MomentoDevolucion, MomentoDevolucion, MomentoDevolucion, MomentoDevolucion },
+            new List<DateTime>
+            {
+                devolucion.FechaHoraDevolucion, movimientos[0].FechaHora, movimientos[1].FechaHora, log.FechaHora
+            });
+    }
+
+    [TestMethod]
     public void RegistrarDevolucion_Supervisor_LaRegistra()
     {
         ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
