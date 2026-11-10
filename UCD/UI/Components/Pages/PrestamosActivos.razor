@@ -1,14 +1,14 @@
-@page "/entregas"
+@page "/prestamos-activos"
 @using DTOs
 @using Servicios
 @inherits PaginaConSesion
 @inject ServicioPrestamo ServicioPrestamo
 
-<PageTitle>UCD · Entregas</PageTitle>
+<PageTitle>UCD · Préstamos activos</PageTitle>
 
 <div class="page-header">
-    <h1>Entregas</h1>
-    <p>Préstamos activos y sus unidades asignadas.</p>
+    <h1>Préstamos activos</h1>
+    <p>Los préstamos entregados y sus unidades, ordenados por devolución esperada: los vencidos van primero.</p>
 </div>
 
 <div class="card table-card">
@@ -32,7 +32,13 @@
                     <td>@prestamo.CantidadSolicitada</td>
                     <td class="mono">@string.Join(", ", prestamo.Unidades)</td>
                     <td>@prestamo.FechaHoraPrestamo.ToString(Formatos.FechaHora)</td>
-                    <td>@prestamo.FechaEsperadaDevolucion.ToString(Formatos.Fecha)</td>
+                    <td>
+                        @prestamo.FechaEsperadaDevolucion.ToString(Formatos.Fecha)
+                        @if (prestamo.EstaVencido)
+                        {
+                            <span class="badge badge-error">Vencido</span>
+                        }
+                    </td>
                 </tr>
             }
         </tbody>
