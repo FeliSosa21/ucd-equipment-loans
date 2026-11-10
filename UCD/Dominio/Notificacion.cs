@@ -16,6 +16,7 @@ public class Notificacion
     public Notificacion(Prestamo prestamo, TipoNotificacion tipo, DateTime fechaHora)
     {
         ValidarPrestamo(prestamo);
+        ValidarTipo(tipo);
 
         Prestamo = prestamo;
         Tipo = tipo;
@@ -27,6 +28,14 @@ public class Notificacion
         if (prestamo is null)
         {
             throw new DominioException("La notificacion debe tener un prestamo");
+        }
+    }
+
+    private static void ValidarTipo(TipoNotificacion tipo)
+    {
+        if (!Enum.IsDefined(tipo))
+        {
+            throw new DominioException("La notificacion debe tener un tipo valido");
         }
     }
 }
