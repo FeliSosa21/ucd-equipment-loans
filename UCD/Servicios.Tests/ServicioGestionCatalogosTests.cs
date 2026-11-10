@@ -10,6 +10,7 @@ public class ServicioGestionCatalogosTests
 {
     private const string DniSupervisor = "12345672";
     private const string NombreValido = "Laboratorio de Informatica";
+    private const string CampoNombre = "Nombre";
 
     private ContextoDePrueba _entorno = null!;
 
@@ -36,6 +37,19 @@ public class ServicioGestionCatalogosTests
         IReadOnlyList<Catalogo> guardados = LeerCatalogosActivos();
         Assert.AreEqual(1, guardados.Count);
         Assert.AreEqual(NombreValido, guardados[0].Nombre);
+    }
+
+    [TestMethod]
+    public void Crear_NombreRepetido_LanzaServicioException()
+    {
+        ServicioGestionCatalogos servicio = CrearServicio();
+        servicio.Crear(NombreValido, DniSupervisor);
+
+        ServicioException error = Assert.ThrowsException<ServicioException>(() =>
+            servicio.Crear(NombreValido, DniSupervisor));
+
+        Assert.AreEqual(CampoNombre, error.Campo);
+        Assert.AreEqual(1, LeerCatalogosActivos().Count);
     }
 
     private ServicioGestionCatalogos CrearServicio()
