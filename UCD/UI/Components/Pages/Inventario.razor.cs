@@ -1,5 +1,6 @@
 ﻿using DTOs;
 using Servicios;
+using UI.Components.Shared;
 using UI.Sesion;
 using UI.Presentacion;
 
@@ -12,6 +13,8 @@ public partial class Inventario
     private string _categoria = string.Empty;
     private string _estado = string.Empty;
     private string? _error;
+    private int _idCatalogo = SelectorCatalogo.SinCatalogo;
+    private SelectorCatalogo? _selector;
 
     protected override void OnInitialized()
     {
@@ -19,11 +22,27 @@ public partial class Inventario
         {
             return;
         }
-
-        Consultar();
     }
 
-    private void Consultar()
+    private bool HayCatalogoElegido()
+    {
+        return _idCatalogo != SelectorCatalogo.SinCatalogo;
+    }
+
+    private async Task AlCambiarCatalogoAsync()
+    {
+        if (!HayCatalogoElegido())
+        {
+            _error = null;
+            _porCategoria = new List<CantidadesPorEstadoDto>();
+            _porTipo = new List<CantidadesPorEstadoDto>();
+            return;
+        }
+
+        await ConsultarAsync();
+    }
+
+    private async Task ConsultarAsync()
     {
         _error = null;
         FiltroInventarioDto filtro = new FiltroInventarioDto
@@ -34,35 +53,34 @@ public partial class Inventario
 
         try
         {
-            int idCatalogo = ObtenerIdCatalogoProvisorio();
-            _porCategoria = ServicioInventario.ContarPorCategoria(idCatalogo, DniUsuario);
-            _porTipo = ServicioInventario.ContarPorTipo(idCatalogo, filtro, DniUsuario);
+            _porCategoria = ServicioInventario.ContarPorCategoria(_idCatalogo, DniUsuario);
+            _porTipo = ServicioInventario.ContarPorTipo(_idCatalogo, filtro, DniUsuario);
         }
         catch (ServicioException ex)
         {
-            _error = ex.Message;
             _porCategoria = new List<CantidadesPorEstadoDto>();
             _porTipo = new List<CantidadesPorEstadoDto>();
+            await MostrarErrorYRecargarSelectorAsync(ex.Message);
         }
     }
 
-    // Provisorio hasta que exista el selector de catalogo (T4): el primer catalogo activo.
-    private int ObtenerIdCatalogoProvisorio()
+    // Si el catalogo se dio de baja con la pagina abierta, el selector se actualiza antes de mostrar el mensaje:
+    // al avisar el selector que ya no hay catalogo elegido, la pagina limpia el error anterior.
+    private async Task MostrarErrorYRecargarSelectorAsync(string mensaje)
     {
-        List<CatalogoDto> catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
-        if (catalogos.Count == 0)
+        if (_selector is not null)
         {
-            throw new ServicioException("No hay catalogos disponibles");
+            await _selector.RecargarAsync();
         }
 
-        return catalogos[0].Id;
+        _error = mensaje;
     }
 
-    private void LimpiarFiltros()
+    private async Task LimpiarFiltrosAsync()
     {
         _categoria = string.Empty;
         _estado = string.Empty;
-        Consultar();
+        await ConsultarAsync();
     }
 
     private bool HayFiltrosAplicados()

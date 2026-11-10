@@ -4,7 +4,6 @@
 @using Servicios
 @using UI.Presentacion
 @inject ServicioInventario ServicioInventario
-@inject ServicioCatalogo ServicioCatalogo
 
 <PageTitle>UCD · Inventario</PageTitle>
 
@@ -13,87 +12,27 @@
     <p>Cantidad de unidades físicas en cada estado, por categoría y por tipo de equipamiento.</p>
 </div>
 
+<SelectorCatalogo @ref="_selector" @bind-IdCatalogo="_idCatalogo" @bind-IdCatalogo:after="AlCambiarCatalogoAsync" />
+
 @if (_error is not null)
 {
     <div class="alert alert-error mensaje" role="alert">@_error</div>
 }
 
-<section class="card table-card" aria-label="Inventario por categoría">
-    <h2 class="titulo-seccion">Por categoría</h2>
-    <table>
-        <thead>
-        <tr>
-            <th>Categoría</th>
-            <th class="numero">Disponibles</th>
-            <th class="numero">Prestadas</th>
-            <th class="numero">En mantenimiento</th>
-            <th class="numero">Dadas de baja</th>
-            <th class="numero">Total</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (CantidadesPorEstadoDto fila in _porCategoria)
-        {
-            <tr>
-                <td><strong>@TextosVisibles.Categoria(fila.Categoria)</strong></td>
-                <td class="@ClaseDeCantidad(fila.Disponibles)">@fila.Disponibles</td>
-                <td class="@ClaseDeCantidad(fila.Prestadas)">@fila.Prestadas</td>
-                <td class="@ClaseDeCantidad(fila.EnMantenimiento)">@fila.EnMantenimiento</td>
-                <td class="@ClaseDeCantidad(fila.DadasDeBaja)">@fila.DadasDeBaja</td>
-                <td class="numero"><strong>@fila.Total</strong></td>
-            </tr>
-        }
-        </tbody>
-    </table>
-</section>
-
-<div class="toolbar filtros-detalle">
-    <label class="filtro">
-        <span class="lbl">Categoría</span>
-        <select class="field" @bind="_categoria" @bind:after="Consultar">
-            <option value="">Todas las categorías</option>
-            @foreach (KeyValuePair<string, string> categoria in TextosVisibles.Categorias)
-            {
-                <option value="@categoria.Key">@categoria.Value</option>
-            }
-        </select>
-    </label>
-    <label class="filtro">
-        <span class="lbl">Con unidades en estado</span>
-        <select class="field" @bind="_estado" @bind:after="Consultar">
-            <option value="">Cualquier estado</option>
-            @foreach (KeyValuePair<string, string> estado in TextosVisibles.EstadosDeUnidad)
-            {
-                <option value="@estado.Key">@estado.Value</option>
-            }
-        </select>
-    </label>
-    <span class="espacio"></span>
-    <button type="button" class="btn btn-ghost btn-sm"
-            @onclick="LimpiarFiltros" disabled="@(!HayFiltrosAplicados())">
-        Limpiar filtros
-    </button>
-</div>
-
-<section class="card table-card" aria-label="Inventario por tipo de equipamiento">
-    <h2 class="titulo-seccion">Por tipo de equipamiento</h2>
-
-    @if (_porTipo.Count == 0 && HayFiltrosAplicados())
-    {
-        <EstadoVacio Titulo="No hay tipos que coincidan con los filtros"
-                     Mensaje="Probá con otra categoría u otro estado, o limpiá los filtros." />
-    }
-    else if (_porTipo.Count == 0)
-    {
-        <EstadoVacio Titulo="Todavía no hay tipos de equipamiento"
-                     Mensaje="Cuando se registren tipos con unidades, su inventario va a aparecer acá." />
-    }
-    else
-    {
+@if (!HayCatalogoElegido())
+{
+    <div class="card">
+        <EstadoVacio Titulo="Elegí un catálogo para ver su inventario"
+                     Mensaje="Cada catálogo tiene sus propias unidades, contadas por estado." />
+    </div>
+}
+else
+{
+    <section class="card table-card" aria-label="Inventario por categoría">
+        <h2 class="titulo-seccion">Por categoría</h2>
         <table>
             <thead>
             <tr>
-                <th>Tipo de equipamiento</th>
                 <th>Categoría</th>
                 <th class="numero">Disponibles</th>
                 <th class="numero">Prestadas</th>
@@ -103,11 +42,10 @@
             </tr>
             </thead>
             <tbody>
-            @foreach (CantidadesPorEstadoDto fila in _porTipo)
+            @foreach (CantidadesPorEstadoDto fila in _porCategoria)
             {
                 <tr>
-                    <td><strong>@fila.Agrupador</strong></td>
-                    <td>@TextosVisibles.Categoria(fila.Categoria)</td>
+                    <td><strong>@TextosVisibles.Categoria(fila.Categoria)</strong></td>
                     <td class="@ClaseDeCantidad(fila.Disponibles)">@fila.Disponibles</td>
                     <td class="@ClaseDeCantidad(fila.Prestadas)">@fila.Prestadas</td>
                     <td class="@ClaseDeCantidad(fila.EnMantenimiento)">@fila.EnMantenimiento</td>
@@ -117,5 +55,78 @@
             }
             </tbody>
         </table>
-    }
-</section>
+    </section>
+
+    <div class="toolbar filtros-detalle">
+        <label class="filtro">
+            <span class="lbl">Categoría</span>
+            <select class="field" @bind="_categoria" @bind:after="ConsultarAsync">
+                <option value="">Todas las categorías</option>
+                @foreach (KeyValuePair<string, string> categoria in TextosVisibles.Categorias)
+                {
+                    <option value="@categoria.Key">@categoria.Value</option>
+                }
+            </select>
+        </label>
+        <label class="filtro">
+            <span class="lbl">Con unidades en estado</span>
+            <select class="field" @bind="_estado" @bind:after="ConsultarAsync">
+                <option value="">Cualquier estado</option>
+                @foreach (KeyValuePair<string, string> estado in TextosVisibles.EstadosDeUnidad)
+                {
+                    <option value="@estado.Key">@estado.Value</option>
+                }
+            </select>
+        </label>
+        <span class="espacio"></span>
+        <button type="button" class="btn btn-ghost btn-sm"
+                @onclick="LimpiarFiltrosAsync" disabled="@(!HayFiltrosAplicados())">
+            Limpiar filtros
+        </button>
+    </div>
+
+    <section class="card table-card" aria-label="Inventario por tipo de equipamiento">
+        <h2 class="titulo-seccion">Por tipo de equipamiento</h2>
+
+        @if (_porTipo.Count == 0 && HayFiltrosAplicados())
+        {
+            <EstadoVacio Titulo="No hay tipos que coincidan con los filtros"
+                         Mensaje="Probá con otra categoría u otro estado, o limpiá los filtros." />
+        }
+        else if (_porTipo.Count == 0)
+        {
+            <EstadoVacio Titulo="Todavía no hay tipos de equipamiento"
+                         Mensaje="Cuando se registren tipos con unidades, su inventario va a aparecer acá." />
+        }
+        else
+        {
+            <table>
+                <thead>
+                <tr>
+                    <th>Tipo de equipamiento</th>
+                    <th>Categoría</th>
+                    <th class="numero">Disponibles</th>
+                    <th class="numero">Prestadas</th>
+                    <th class="numero">En mantenimiento</th>
+                    <th class="numero">Dadas de baja</th>
+                    <th class="numero">Total</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (CantidadesPorEstadoDto fila in _porTipo)
+                {
+                    <tr>
+                        <td><strong>@fila.Agrupador</strong></td>
+                        <td>@TextosVisibles.Categoria(fila.Categoria)</td>
+                        <td class="@ClaseDeCantidad(fila.Disponibles)">@fila.Disponibles</td>
+                        <td class="@ClaseDeCantidad(fila.Prestadas)">@fila.Prestadas</td>
+                        <td class="@ClaseDeCantidad(fila.EnMantenimiento)">@fila.EnMantenimiento</td>
+                        <td class="@ClaseDeCantidad(fila.DadasDeBaja)">@fila.DadasDeBaja</td>
+                        <td class="numero"><strong>@fila.Total</strong></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </section>
+}
