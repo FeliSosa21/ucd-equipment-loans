@@ -17,6 +17,7 @@ public sealed class ServicioNotificacionTests
     private static readonly DateTime PedidoQueVenceHoy = new DateTime(2026, 11, 3, 10, 0, 0);
 
     private const string DniDocente = "12345672";
+    private const string DniEstudiante = "45678905";
 
     private DbContextOptions<SqlContext> _opciones = null!;
     private SqlContext _contexto = null!;
@@ -200,6 +201,20 @@ public sealed class ServicioNotificacionTests
         Assert.AreEqual(0, LeerNoLeidasDe(DniDocente).Count);
     }
 
+    [TestMethod]
+    public void MarcarComoLeida_NotificacionDeOtroUsuario_LanzaServicioExceptionYNoLaMarca()
+    {
+        Guid idPrestamo = GuardarPrestamoActivo(PedidoQueVencioAyer);
+        int idNotificacion = GuardarNotificacion(idPrestamo, TipoNotificacion.PrestamoVencido);
+        ServicioNotificacion servicio = CrearServicio();
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.MarcarComoLeida(idNotificacion, DniEstudiante));
+
+        Assert.AreEqual("La notificacion no es del usuario", excepcion.Message);
+        Assert.IsFalse(LeerNotificacion(idNotificacion).EstaLeida);
+    }
+
     private ServicioNotificacion CrearServicio()
     {
         return CrearServicioSobre(_contexto, NullLogger<ServicioNotificacion>.Instance);
@@ -292,7 +307,9 @@ public sealed class ServicioNotificacionTests
     private void GuardarUsuarios()
     {
         using SqlContext preparacion = new SqlContext(_opciones);
-        new RepositorioUsuarioSql(preparacion).AgregarUsuario(CrearUsuario(DniDocente, TipoUsuario.Docente()));
+        RepositorioUsuarioSql usuarios = new RepositorioUsuarioSql(preparacion);
+        usuarios.AgregarUsuario(CrearUsuario(DniDocente, TipoUsuario.Docente()));
+        usuarios.AgregarUsuario(CrearUsuario(DniEstudiante, TipoUsuario.Estudiante()));
     }
 
     private static Usuario CrearUsuario(string dni, TipoUsuario tipo)
