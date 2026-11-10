@@ -145,6 +145,28 @@ public sealed class RepositorioNotificacionSqlTests
         Assert.IsFalse(existe);
     }
 
+    [TestMethod]
+    public void ObtenerNotificacionPorId_IdExistente_LaTraeConElSolicitanteYElTipoDeEquipamientoDelPrestamo()
+    {
+        Notificacion otra = CrearNotificacionDeVencido(CrearPrestamoActivo(DniOtroSolicitante));
+        Notificacion buscada = CrearNotificacionDeVencido(CrearPrestamoActivo(DniSolicitante));
+        GuardarConOtroContexto(otra, buscada);
+
+        Notificacion? leida = LeerNotificacionPorId(buscada.Id);
+
+        Assert.IsNotNull(leida);
+        Assert.AreEqual(buscada.Id, leida.Id);
+        Assert.AreEqual(DniSolicitante, leida.Prestamo.Solicitante.Dni);
+        Assert.AreEqual("Proyector Epson", leida.Prestamo.TipoEquipamiento.Nombre);
+    }
+
+    private Notificacion? LeerNotificacionPorId(int id)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+
+        return new RepositorioNotificacionSql(contextoQueLee).ObtenerNotificacionPorId(id);
+    }
+
     private bool LeerSiExisteVencidoSinLeer(Guid idPrestamo)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);

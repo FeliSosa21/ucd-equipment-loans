@@ -38,4 +38,9 @@ public class RepositorioNotificacionSql
                                                            && !notificacion.EstaLeida
                                                            && notificacion.Tipo == TipoNotificacion.PrestamoVencido);
     }
+
+    public Notificacion? ObtenerNotificacionPorId(int id)
+    {
+        return null;
+    }
 }
