@@ -244,6 +244,18 @@ public sealed class ServicioNotificacionTests
         Assert.AreEqual(FechaDeEvaluacion, creadas[0].FechaHora);
     }
 
+    [TestMethod]
+    public void RegistrarResultadoDeEvaluacion_PrestamoRechazado_GuardaSolicitudRechazada()
+    {
+        Prestamo evaluado =
+            CargarEnElContextoDelServicio(GuardarPrestamoRechazadoPorFaltaDeUnidades(PedidoQueVencioAyer));
+        ServicioNotificacion servicio = CrearServicio();
+
+        servicio.RegistrarResultadoDeEvaluacion(evaluado, FechaDeEvaluacion);
+
+        Assert.AreEqual(TipoNotificacion.SolicitudRechazada, LeerNoLeidasDe(DniDocente).Single().Tipo);
+    }
+
     // Como en ServicioPrestamo, el prestamo evaluado esta en el contexto compartido con el servicio.
     private Prestamo CargarEnElContextoDelServicio(Guid idPrestamo)
     {
