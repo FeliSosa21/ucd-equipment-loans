@@ -1,6 +1,7 @@
 using Data;
 using Data.Repositorios;
 using Dominio;
+using DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -11,6 +12,7 @@ namespace Servicios.Tests;
 public sealed class ServicioNotificacionTests
 {
     private static readonly DateTime Hoy = new DateTime(2026, 11, 10, 9, 0, 0);
+    private static readonly DateTime Ayer = Hoy.AddDays(-1);
     private static readonly DateTime PedidoQueVencioAyer = new DateTime(2026, 11, 2, 10, 0, 0);
     private static readonly DateTime PedidoQueVenceHoy = new DateTime(2026, 11, 3, 10, 0, 0);
 
@@ -132,6 +134,22 @@ public sealed class ServicioNotificacionTests
         Assert.AreEqual(0, LeerNoLeidasDe(DniDocente).Count);
     }
 
+    [TestMethod]
+    public void ListarNoLeidas_SolicitudAprobada_DevuelveElDtoConIdFechaTipoYTexto()
+    {
+        Guid idPrestamo = GuardarPrestamoActivo(PedidoQueVencioAyer);
+        int idNotificacion = GuardarNotificacion(idPrestamo, TipoNotificacion.SolicitudAprobada);
+        ServicioNotificacion servicio = CrearServicio();
+
+        List<NotificacionDto> notificaciones = servicio.ListarNoLeidas(DniDocente);
+
+        Assert.AreEqual(1, notificaciones.Count);
+        Assert.AreEqual(idNotificacion, notificaciones[0].Id);
+        Assert.AreEqual(Ayer, notificaciones[0].FechaHora);
+        Assert.AreEqual("SolicitudAprobada", notificaciones[0].Tipo);
+        Assert.AreEqual("Tu solicitud de Proyector Epson del 02/11/2026 fue aprobada.", notificaciones[0].Texto);
+    }
+
     private ServicioNotificacion CrearServicio()
     {
         return CrearServicioSobre(_contexto, NullLogger<ServicioNotificacion>.Instance);
@@ -157,7 +175,7 @@ public sealed class ServicioNotificacionTests
     {
         using SqlContext preparacion = new SqlContext(_opciones);
         Prestamo prestamo = new RepositorioPrestamoSql(preparacion).ObtenerPrestamoPorId(idPrestamo)!;
-        Notificacion notificacion = new Notificacion(prestamo, tipo, Hoy.AddDays(-1));
+        Notificacion notificacion = new Notificacion(prestamo, tipo, Ayer);
         new RepositorioNotificacionSql(preparacion).AgregarNotificacion(notificacion);
 
         return notificacion.Id;

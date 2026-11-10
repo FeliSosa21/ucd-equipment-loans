@@ -1,5 +1,6 @@
 using Data.Repositorios;
 using Dominio;
+using DTOs;
 using Microsoft.Extensions.Logging;
 
 namespace Servicios;
@@ -48,5 +49,10 @@ public class ServicioNotificacion
                 return;
             }
         }
+    }
+
+    public List<NotificacionDto> ListarNoLeidas(string dniUsuario)
+    {
+        return new List<NotificacionDto>();
     }
 }
