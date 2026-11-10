@@ -15,8 +15,18 @@ public class Notificacion
 
     public Notificacion(Prestamo prestamo, TipoNotificacion tipo, DateTime fechaHora)
     {
+        ValidarPrestamo(prestamo);
+
         Prestamo = prestamo;
         Tipo = tipo;
         FechaHora = fechaHora;
+    }
+
+    private static void ValidarPrestamo(Prestamo prestamo)
+    {
+        if (prestamo is null)
+        {
+            throw new DominioException("La notificacion debe tener un prestamo");
+        }
     }
 }
