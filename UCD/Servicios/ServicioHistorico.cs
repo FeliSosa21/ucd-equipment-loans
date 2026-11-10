@@ -6,6 +6,8 @@ namespace Servicios;
 
 public class ServicioHistorico
 {
+    private const string MensajeSinPermiso = "El usuario no tiene permiso para consultar el historico";
+
     private readonly RepositorioUsuarioSql _usuarios;
     private readonly RepositorioMovimientoSql _movimientos;
 
@@ -17,7 +19,10 @@ public class ServicioHistorico
 
     public List<MovimientoDto> ListarMovimientos(int idCatalogo, FiltroMovimientosDto filtro, string dniUsuario)
     {
-        throw new NotImplementedException();
+        OperacionesComunes.ValidarResponsable(_usuarios.ObtenerUsuarioPorDni(dniUsuario), Permiso.ConsultarHistorico,
+            MensajeSinPermiso);
+
+        return new List<MovimientoDto>();
     }
 
     // Temporal, hasta que la pagina filtre por catalogo: no recibe quien consulta (el permiso lo controla la pagina).
