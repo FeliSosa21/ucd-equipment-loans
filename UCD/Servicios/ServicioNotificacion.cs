@@ -75,6 +75,8 @@ public class ServicioNotificacion
 
     public void RegistrarResultadoDeEvaluacion(Prestamo prestamo, DateTime fechaHoraEvaluacion)
     {
+        _notificaciones.AgregarNotificacion(
+            new Notificacion(prestamo, TipoNotificacion.SolicitudAprobada, fechaHoraEvaluacion));
     }
 
     private static NotificacionDto CrearNotificacionDto(Notificacion notificacion)
