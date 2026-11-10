@@ -176,6 +176,17 @@ public sealed class ServicioNotificacionTests
             notificacion.Texto);
     }
 
+    [TestMethod]
+    public void MarcarComoLeida_IdInexistente_LanzaServicioException()
+    {
+        ServicioNotificacion servicio = CrearServicio();
+
+        ServicioException excepcion =
+            Assert.ThrowsException<ServicioException>(() => servicio.MarcarComoLeida(999, DniDocente));
+
+        Assert.AreEqual("La notificacion no es del usuario", excepcion.Message);
+    }
+
     private ServicioNotificacion CrearServicio()
     {
         return CrearServicioSobre(_contexto, NullLogger<ServicioNotificacion>.Instance);

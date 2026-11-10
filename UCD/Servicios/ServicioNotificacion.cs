@@ -59,6 +59,10 @@ public class ServicioNotificacion
         return _notificaciones.ObtenerNoLeidasDeUsuario(dniUsuario).Select(CrearNotificacionDto).ToList();
     }
 
+    public void MarcarComoLeida(int idNotificacion, string dniUsuario)
+    {
+    }
+
     private static NotificacionDto CrearNotificacionDto(Notificacion notificacion)
     {
         return new NotificacionDto
