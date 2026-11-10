@@ -966,6 +966,18 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(0, resultado.Count);
     }
 
+    [TestMethod]
+    [DataRow(DniFuncionario)]
+    public void ListarMisSolicitudes_ConsultanteNoHabilitado_LanzaExcepcionConMensaje(string dniConsultante)
+    {
+        ServicioPrestamo servicio = CrearServicio();
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.ListarMisSolicitudes(dniConsultante));
+
+        Assert.AreEqual("El usuario no tiene permiso para consultar sus solicitudes", excepcion.Message);
+    }
+
     private ServicioPrestamo CrearServicio()
     {
         CargarCatalogo();
