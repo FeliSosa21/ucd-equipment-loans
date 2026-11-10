@@ -11,6 +11,7 @@ public class SqlContext : DbContext
     public DbSet<Movimiento> Movimientos { get; set; }
     public DbSet<TipoUsuario> TiposDeUsuario { get; set; }
     public DbSet<Devolucion> Devoluciones { get; set; }
+    public DbSet<RegistroAuditoria> RegistrosAuditoria { get; set; }
 
     public SqlContext(DbContextOptions<SqlContext> options) : base(options)
     {

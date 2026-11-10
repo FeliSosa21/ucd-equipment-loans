@@ -122,12 +122,25 @@ public partial class SolicitarPrestamo
         _cantidad = CantidadPorDefecto;
     }
 
+    // Provisorio hasta que exista el selector de catalogo (T4): el primer catalogo activo.
+    private int ObtenerIdCatalogoProvisorio()
+    {
+        List<CatalogoDto> catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
+        if (catalogos.Count == 0)
+        {
+            throw new ServicioException("No hay catalogos disponibles");
+        }
+
+        return catalogos[0].Id;
+    }
+
     // Se recarga despues de solicitar para que la disponibilidad de cada tipo quede al dia.
     private void CargarTipos()
     {
         try
         {
-            _tipos = ServicioCatalogo.ConsultarTipos(new FiltroCatalogoDto { Estado = EstadoTipoActivo });
+            _tipos = ServicioCatalogo.ConsultarTipos(ObtenerIdCatalogoProvisorio(),
+                new FiltroCatalogoDto { Estado = EstadoTipoActivo }, DniUsuario);
         }
         catch (ServicioException ex)
         {

@@ -23,15 +23,18 @@ public class ServicioDevolucion
     private readonly RepositorioDevolucion _devoluciones;
     private readonly RepositorioMovimiento _movimientos;
     private readonly TimeProvider _reloj;
+    private readonly RegistradorDeAuditoria _auditoria;
 
     public ServicioDevolucion(RepositorioPrestamo prestamos, RepositorioUsuario usuarios,
-        RepositorioDevolucion devoluciones, RepositorioMovimiento movimientos, TimeProvider reloj)
+        RepositorioDevolucion devoluciones, RepositorioMovimiento movimientos, TimeProvider reloj,
+        RegistradorDeAuditoria auditoria)
     {
         _prestamos = prestamos;
         _usuarios = usuarios;
         _devoluciones = devoluciones;
         _movimientos = movimientos;
         _reloj = reloj;
+        _auditoria = auditoria;
     }
 
     public List<string> CondicionesPosibles()
@@ -63,10 +66,23 @@ public class ServicioDevolucion
             nueva.Aplicar();
             _devoluciones.AgregarDevolucion(nueva);
             RegistrarMovimientos(nueva, registro);
+            RegistrarEnAuditoria(nueva, registro);
             return nueva;
         });
 
         return CrearDevolucionRegistradaDto(devolucion);
+    }
+
+    private void RegistrarEnAuditoria(Devolucion devolucion, RegistroDeAccion registro)
+    {
+        _auditoria.Registrar(registro, AccionAuditada.DevolucionDePrestamo,
+            $"Devolución del préstamo de {devolucion.Prestamo.Solicitante.NombreCompletoConDni}: " +
+            DescribirCantidad(devolucion.Unidades.Count));
+    }
+
+    private static string DescribirCantidad(int cantidadUnidades)
+    {
+        return cantidadUnidades == 1 ? "1 unidad" : $"{cantidadUnidades} unidades";
     }
 
     // Registro historico (req. 10): un movimiento por unidad, con la fecha efectiva de devolucion.

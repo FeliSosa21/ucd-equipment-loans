@@ -5,8 +5,8 @@ using UI.Sesion;
 
 namespace UI.Components.Pages;
 
-// Req. 4: el supervisor (o el administrador) registra, modifica, discontinua, reactiva y busca tipos de equipamiento,
-// y cambia el nombre del catalogo. Las reglas las controla ServicioTiposEquipamiento; la pagina solo muestra.
+// Req. 4: el supervisor (o el administrador) registra, modifica, discontinua, reactiva y busca tipos de equipamiento.
+// Las reglas las controla ServicioTiposEquipamiento; la pagina solo muestra.
 public partial class TiposEquipamiento
 {
     private const int DuracionInicial = 1;
@@ -14,13 +14,11 @@ public partial class TiposEquipamiento
     private List<TipoEquipamientoDetalleDto> _tipos = new List<TipoEquipamientoDetalleDto>();
     private string _busqueda = string.Empty;
     private string _categoria = string.Empty;
-    private string _nombreCatalogo = string.Empty;
-    private string _nombreCatalogoEditado = string.Empty;
-    private bool _editandoNombreCatalogo;
     private bool _mostrarFormulario;
     private string? _nombreOriginal;
     private DatosTipoEquipamientoDto _datos = new DatosTipoEquipamientoDto();
     private TipoEquipamientoDetalleDto? _aDiscontinuar;
+    private int _idCatalogo;
     private string? _error;
     private string? _exito;
 
@@ -31,8 +29,27 @@ public partial class TiposEquipamiento
             return;
         }
 
+        ResolverCatalogoProvisorio();
         Recargar();
     }
+
+    // Provisorio hasta que exista el selector de catalogo (T4): el primer catalogo activo.
+    private void ResolverCatalogoProvisorio()
+    {
+        try
+        {
+            List<CatalogoDto> catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
+            if (catalogos.Count > 0)
+            {
+                _idCatalogo = catalogos[0].Id;
+            }
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
 
     // ---------- Listado y filtros ----------
 
@@ -40,9 +57,12 @@ public partial class TiposEquipamiento
     {
         try
         {
-            _nombreCatalogo = ServicioTipos.ObtenerNombreCatalogo();
-            _tipos = ServicioTipos.Listar(ValoresDeFiltro.ValorONulo(_busqueda),
-                ValoresDeFiltro.ValorONulo(_categoria));
+            FiltroTiposDto filtro = new FiltroTiposDto
+            {
+                Nombre = ValoresDeFiltro.ValorONulo(_busqueda),
+                Categoria = ValoresDeFiltro.ValorONulo(_categoria)
+            };
+            _tipos = ServicioTipos.Listar(_idCatalogo, filtro, DniUsuario);
         }
         catch (ServicioException ex)
         {
@@ -126,12 +146,17 @@ public partial class TiposEquipamiento
         {
             if (_nombreOriginal is null)
             {
-                ServicioTipos.Registrar(_datos, DniUsuario);
+                ServicioTipos.Registrar(_idCatalogo, _datos, DniUsuario);
                 _exito = $"Se registró el tipo «{nombre}».";
             }
             else
             {
-                ServicioTipos.Modificar(_nombreOriginal, _datos, DniUsuario);
+                ModificacionTipoEquipamientoDto modificacion = new ModificacionTipoEquipamientoDto
+                {
+                    NombreActual = _nombreOriginal,
+                    Datos = _datos
+                };
+                ServicioTipos.Modificar(_idCatalogo, modificacion, DniUsuario);
                 _exito = $"Se guardaron los cambios de «{nombre}».";
             }
 
@@ -171,7 +196,7 @@ public partial class TiposEquipamiento
         _aDiscontinuar = null;
         try
         {
-            ServicioTipos.Discontinuar(nombre, DniUsuario);
+            ServicioTipos.Discontinuar(_idCatalogo, nombre, DniUsuario);
             _exito = $"Se discontinuó el tipo «{nombre}».";
         }
         catch (ServicioException ex)
@@ -200,7 +225,7 @@ public partial class TiposEquipamiento
         CerrarTodo();
         try
         {
-            ServicioTipos.Reactivar(tipo.Nombre, DniUsuario);
+            ServicioTipos.Reactivar(_idCatalogo, tipo.Nombre, DniUsuario);
             _exito = $"Se reactivó el tipo «{tipo.Nombre}».";
         }
         catch (ServicioException ex)
@@ -225,49 +250,6 @@ public partial class TiposEquipamiento
         return false;
     }
 
-    // ---------- Nombre del catalogo ----------
-
-    private void AbrirEdicionNombreCatalogo()
-    {
-        CerrarTodo();
-        _nombreCatalogoEditado = _nombreCatalogo;
-        _editandoNombreCatalogo = true;
-    }
-
-    private bool NombreCatalogoCompleto()
-    {
-        return !string.IsNullOrWhiteSpace(_nombreCatalogoEditado);
-    }
-
-    private void GuardarNombreCatalogo()
-    {
-        // Un doble clic manda dos envios: el segundo llega con el formulario ya cerrado.
-        if (!_editandoNombreCatalogo)
-        {
-            return;
-        }
-
-        LimpiarMensajes();
-        try
-        {
-            ServicioTipos.ModificarNombreCatalogo(_nombreCatalogoEditado, DniUsuario);
-            _exito = "Se cambió el nombre del catálogo.";
-            _editandoNombreCatalogo = false;
-        }
-        catch (ServicioException ex)
-        {
-            _error = ex.Message;
-        }
-
-        Recargar();
-    }
-
-    private void CancelarNombreCatalogo()
-    {
-        _editandoNombreCatalogo = false;
-        LimpiarMensajes();
-    }
-
     // ---------- Comunes ----------
 
     // Solo un formulario o confirmacion abierto a la vez, y sin mensajes de la accion anterior.
@@ -275,7 +257,6 @@ public partial class TiposEquipamiento
     {
         _mostrarFormulario = false;
         _aDiscontinuar = null;
-        _editandoNombreCatalogo = false;
         LimpiarMensajes();
     }
 
