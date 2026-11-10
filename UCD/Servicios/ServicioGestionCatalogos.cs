@@ -28,7 +28,14 @@ public class ServicioGestionCatalogos
 
     public List<CatalogoDto> Listar(string dniUsuario)
     {
-        return new List<CatalogoDto>();
+        List<CatalogoDto> resultado = new List<CatalogoDto>();
+
+        foreach (Catalogo catalogo in _repositorioCatalogo.ObtenerCatalogosActivos())
+        {
+            resultado.Add(new CatalogoDto { Id = catalogo.Id, Nombre = catalogo.Nombre });
+        }
+
+        return resultado;
     }
 
     public void Crear(string nombre, string dniResponsable)
