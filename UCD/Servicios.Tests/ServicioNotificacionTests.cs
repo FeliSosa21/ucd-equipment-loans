@@ -2,6 +2,7 @@ using Data;
 using Data.Repositorios;
 using Dominio;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Servicios.Tests;
@@ -99,13 +100,35 @@ public sealed class ServicioNotificacionTests
         Assert.AreEqual(idPrestamo, sinLeer[0].Prestamo.Id);
     }
 
+    [TestMethod]
+    public void GenerarNotificacionesDeVencidos_LaBaseRechazaElGuardado_NoLanzaNoGuardaYRegistraElErrorConLaExcepcion()
+    {
+        GuardarPrestamoActivo(PedidoQueVencioAyer);
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<Notificacion>(_opciones);
+        LoggerDePrueba<ServicioNotificacion> logger = new LoggerDePrueba<ServicioNotificacion>();
+        ServicioNotificacion servicio = CrearServicioSobre(contextoQueFalla, logger);
+
+        servicio.GenerarNotificacionesDeVencidos(DniDocente);
+
+        Assert.AreEqual(0, LeerNoLeidasDe(DniDocente).Count);
+        Assert.AreEqual(1, logger.Registros.Count);
+        Assert.AreEqual(LogLevel.Error, logger.Registros[0].Nivel);
+        Assert.IsInstanceOfType(logger.Registros[0].Excepcion, typeof(InvalidOperationException));
+        Assert.IsInstanceOfType(logger.Registros[0].Excepcion!.InnerException, typeof(DbUpdateException));
+    }
+
     private ServicioNotificacion CrearServicio()
     {
+        return CrearServicioSobre(_contexto, NullLogger<ServicioNotificacion>.Instance);
+    }
+
+    private static ServicioNotificacion CrearServicioSobre(SqlContext contexto, ILogger<ServicioNotificacion> logger)
+    {
         return new ServicioNotificacion(
-            notificaciones: new RepositorioNotificacionSql(_contexto),
-            prestamos: new RepositorioPrestamoSql(_contexto),
+            notificaciones: new RepositorioNotificacionSql(contexto),
+            prestamos: new RepositorioPrestamoSql(contexto),
             reloj: new RelojFijo(Hoy),
-            logger: NullLogger<ServicioNotificacion>.Instance);
+            logger: logger);
     }
 
     private IReadOnlyList<Notificacion> LeerNoLeidasDe(string dni)
