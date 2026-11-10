@@ -894,6 +894,22 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void ListarPrestamosActivos_FechasEsperadasEnOtroOrdenQueLasSolicitudes_LosOrdenaPorFechaEsperada()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idQueVenceDespues = servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+        CambiarDuracionDelTipo(NombreTipoSinAprobacion, diasHabiles: 1);
+        Guid idQueVenceAntes = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion))
+            .Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamosActivos(DniFuncionario);
+
+        CollectionAssert.AreEqual(
+            new List<Guid> { idQueVenceAntes, idQueVenceDespues },
+            resultado.Select(prestamo => prestamo.Id).ToList());
+    }
+
+    [TestMethod]
     public void ListarPrestamos_VariosEstados_DevuelveTodos()
     {
         ServicioPrestamo servicio = CrearServicio();
@@ -1113,6 +1129,17 @@ public sealed class ServicioPrestamoTests
         new RepositorioCatalogoSql(_contexto).AgregarCatalogo(otroCatalogo);
 
         return otroCatalogo.Id;
+    }
+
+    // Con el contexto del servicio: la proxima solicitud usa el tipo que ese contexto ya tiene cargado.
+    private void CambiarDuracionDelTipo(string nombreTipo, int diasHabiles)
+    {
+        RepositorioCatalogoSql catalogos = new RepositorioCatalogoSql(_contexto);
+        Catalogo catalogo = catalogos.ObtenerCatalogoActivoPorId(_idCatalogo)!;
+        TipoEquipamiento tipo = catalogo.BuscarTipoPorNombre(nombreTipo)!;
+
+        tipo.Modificar(tipo.Nombre, tipo.Descripcion, diasHabiles, tipo.RequiereAprobacion, tipo.Categoria);
+        catalogos.ActualizarCatalogo(catalogo);
     }
 
     private static TipoEquipamiento CrearTipoEquipamiento(string nombre, bool requiereAprobacion, int cantidadUnidades,
