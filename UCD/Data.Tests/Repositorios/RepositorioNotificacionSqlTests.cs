@@ -109,6 +109,19 @@ public sealed class RepositorioNotificacionSqlTests
         Assert.IsTrue(existe);
     }
 
+    [TestMethod]
+    public void ExisteVencidoSinLeer_LaDeVencidoEstaLeida_DevuelveFalse()
+    {
+        Prestamo prestamo = CrearPrestamoActivo(DniSolicitante);
+        Notificacion leida = CrearNotificacionDeVencido(prestamo);
+        leida.MarcarComoLeida();
+        GuardarConOtroContexto(leida);
+
+        bool existe = LeerSiExisteVencidoSinLeer(prestamo.Id);
+
+        Assert.IsFalse(existe);
+    }
+
     private bool LeerSiExisteVencidoSinLeer(Guid idPrestamo)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
