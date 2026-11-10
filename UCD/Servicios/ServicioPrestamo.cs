@@ -310,7 +310,7 @@ public class ServicioPrestamo
 
     private static EstadoPrestamo? ConvertirEstado(string? estado)
     {
-        if (estado is null)
+        if (string.IsNullOrWhiteSpace(estado))
         {
             return null;
         }
