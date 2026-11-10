@@ -8,6 +8,6 @@ public class FiltroPorCatalogoYFechas
 
     public bool TieneCriterios()
     {
-        throw new NotImplementedException();
+        return false;
     }
 }
