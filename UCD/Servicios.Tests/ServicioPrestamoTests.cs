@@ -1032,6 +1032,21 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void ListarPrestamos_VariasFechas_LosDevuelveDelMasNuevoAlMasViejo()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idDelPrimero = SolicitarEnLaFecha(new DateTime(2026, 10, 1, 10, 0, 0));
+        Guid idDelSegundo = SolicitarEnLaFecha(new DateTime(2026, 10, 2, 10, 0, 0));
+        Guid idDelTercero = SolicitarEnLaFecha(new DateTime(2026, 10, 5, 9, 0, 0));
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamos(DniSupervisor, servicio.RangoPorDefecto());
+
+        CollectionAssert.AreEqual(
+            new List<Guid> { idDelTercero, idDelSegundo, idDelPrimero },
+            resultado.Select(prestamo => prestamo.Id).ToList());
+    }
+
+    [TestMethod]
     public void RangoPorDefecto_RelojFijo_DevuelveLosUltimos30DiasConHoyYSinEstado()
     {
         ServicioPrestamo servicio = CrearServicio();
