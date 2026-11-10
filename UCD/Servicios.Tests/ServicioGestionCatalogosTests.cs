@@ -394,6 +394,19 @@ public class ServicioGestionCatalogosTests
         Assert.AreEqual(0, servicio.Listar(DniSupervisor).Count);
     }
 
+    [TestMethod]
+    public void Eliminar_FallaElGuardado_LanzaServicioExceptionYElCatalogoSigueActivo()
+    {
+        int id = _entorno.GuardarCatalogo(new Catalogo(NombreValido));
+        ServicioGestionCatalogos servicio = CrearServicioQueFallaAlGuardar();
+
+        ServicioException error = Assert.ThrowsException<ServicioException>(() =>
+            servicio.Eliminar(id, DniSupervisor));
+
+        StringAssert.Contains(error.Message, "eliminar");
+        Assert.AreEqual(1, LeerCatalogosActivos().Count);
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
