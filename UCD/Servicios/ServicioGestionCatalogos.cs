@@ -92,7 +92,7 @@ public class ServicioGestionCatalogos
         {
             _repositorioCatalogo.AgregarCatalogo(catalogo);
         }
-        catch (DbUpdateException ex)
+        catch (InvalidOperationException ex)
         {
             throw new ServicioException(CampoNombre, "No se pudo crear el catalogo: ya existe uno con ese nombre", ex);
         }
