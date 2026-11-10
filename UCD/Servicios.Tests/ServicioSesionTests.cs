@@ -23,7 +23,7 @@ public class ServicioSesionTests
         _opciones = new DbContextOptionsBuilder<SqlContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
         using SqlContext preparacion = new SqlContext(_opciones);
-        preparacion.Database.EnsureCreated();
+        TiposDePrueba.GuardarEn(preparacion);
         _contexto = new SqlContext(_opciones);
     }
 

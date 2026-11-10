@@ -33,6 +33,16 @@ public sealed class RepositorioDevolucionSqlTests
     }
 
     [TestMethod]
+    public void ObtenerDevoluciones_FiltroPorFechas_TraeQuienLaRegistro()
+    {
+        GuardarConOtroContexto(CrearDevolucion(diasDespuesDelPrestamo: 1));
+
+        Devolucion leida = LeerDevoluciones(new FiltroPorCatalogoYFechas { Desde = InicioPrestamo }).Single();
+
+        Assert.AreEqual(DniFuncionario, leida.RegistradaPor?.Dni);
+    }
+
+    [TestMethod]
     public void ObtenerDevoluciones_DevolucionAgregada_OtroContextoLeeSusUnidadesConCondicion()
     {
         GuardarConOtroContexto(CrearDevolucion(diasDespuesDelPrestamo: 1, condicion: CondicionDevolucion.ConFallas,

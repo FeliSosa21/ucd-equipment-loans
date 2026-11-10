@@ -18,15 +18,15 @@ public class ServicioDevolucion
             { "Dañada", CondicionDevolucion.Daniada }
         };
 
-    private readonly RepositorioPrestamo _prestamos;
-    private readonly RepositorioUsuario _usuarios;
-    private readonly RepositorioDevolucion _devoluciones;
-    private readonly RepositorioMovimiento _movimientos;
+    private readonly RepositorioPrestamoSql _prestamos;
+    private readonly RepositorioUsuarioSql _usuarios;
+    private readonly RepositorioDevolucionSql _devoluciones;
+    private readonly RepositorioMovimientoSql _movimientos;
     private readonly TimeProvider _reloj;
     private readonly RegistradorDeAuditoria _auditoria;
 
-    public ServicioDevolucion(RepositorioPrestamo prestamos, RepositorioUsuario usuarios,
-        RepositorioDevolucion devoluciones, RepositorioMovimiento movimientos, TimeProvider reloj,
+    public ServicioDevolucion(RepositorioPrestamoSql prestamos, RepositorioUsuarioSql usuarios,
+        RepositorioDevolucionSql devoluciones, RepositorioMovimientoSql movimientos, TimeProvider reloj,
         RegistradorDeAuditoria auditoria)
     {
         _prestamos = prestamos;
@@ -61,12 +61,12 @@ public class ServicioDevolucion
                 .Select(unidad => CrearUnidadDevuelta(unidad, prestamo))
                 .ToList();
             DateTime ahora = _reloj.GetLocalNow().DateTime;
-            RegistroDeAccion registro = RegistroDeAccion.DeUsuario(responsable, ahora);
-            Devolucion nueva = new Devolucion(prestamo, registro, unidades);
+            Func<RegistroDeAccion> crearRegistro = () => RegistroDeAccion.DeUsuario(responsable, ahora);
+            Devolucion nueva = new Devolucion(prestamo, crearRegistro(), unidades);
             nueva.Aplicar();
             _devoluciones.AgregarDevolucion(nueva);
-            RegistrarMovimientos(nueva, registro);
-            RegistrarEnAuditoria(nueva, registro);
+            RegistrarMovimientos(nueva, crearRegistro);
+            RegistrarEnAuditoria(nueva, crearRegistro());
             return nueva;
         });
 
@@ -86,11 +86,13 @@ public class ServicioDevolucion
     }
 
     // Registro historico (req. 10): un movimiento por unidad, con la fecha efectiva de devolucion.
-    private void RegistrarMovimientos(Devolucion devolucion, RegistroDeAccion registro)
+    // Un registro nuevo por movimiento: con EF, RegistroDeAccion es owned y una misma instancia
+    // no puede pertenecer a dos entidades (D18, regla 4).
+    private void RegistrarMovimientos(Devolucion devolucion, Func<RegistroDeAccion> crearRegistro)
     {
         foreach (UnidadDevuelta unidadDevuelta in devolucion.Unidades)
         {
-            _movimientos.AgregarMovimiento(Movimiento.DeDevolucion(devolucion.Prestamo, registro,
+            _movimientos.AgregarMovimiento(Movimiento.DeDevolucion(devolucion.Prestamo, crearRegistro(),
                 unidadDevuelta.Unidad));
         }
     }
@@ -99,8 +101,7 @@ public class ServicioDevolucion
     {
         Usuario? responsable = _usuarios.ObtenerUsuarioPorDni(dniResponsable);
 
-        if (responsable is null || responsable.Estado == EstadoUsuario.Desactivado ||
-            !responsable.TienePermiso(Permiso.RegistrarDevolucion))
+        if (responsable is null || !responsable.EstaHabilitadoPara(Permiso.RegistrarDevolucion))
         {
             throw new ServicioException("El usuario no tiene permiso para registrar devoluciones");
         }

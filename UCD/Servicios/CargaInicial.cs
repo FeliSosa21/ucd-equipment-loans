@@ -6,6 +6,8 @@ namespace Servicios;
 // Datos que el sistema necesita al arrancar: el usuario root (administrador).
 public class CargaInicial
 {
+    private const string NombreTipoAdministrador = "Administrador";
+
     public const string DniRoot = "11111111";
     public const string CorreoRoot = "root@ucd.edu.uy";
     public const string ContrasenaRoot = "Root2026";
@@ -40,7 +42,7 @@ public class CargaInicial
 
         Usuario root = new Usuario(dni: DniRoot, nombre: "Root", apellido: "Admin", correo: CorreoRoot,
             contrasena: ContrasenaRoot);
-        root.AsignarTipo(_repositorioTipoUsuario.ObtenerTipoPorNombre(TipoUsuario.Administrador().Nombre)!);
+        root.AsignarTipo(_repositorioTipoUsuario.ObtenerTipoPorNombre(NombreTipoAdministrador)!);
         // El root no debe cambiar la contrasena en el primer ingreso: la letra lo exceptua ("salvo el root").
         _repositorioUsuario.AgregarUsuario(root);
     }

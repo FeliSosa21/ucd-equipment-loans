@@ -25,22 +25,28 @@ public class RepositorioDevolucionSql
     {
         ArgumentNullException.ThrowIfNull(filtro);
 
-        return FiltrarPor(filtro)
-            .Include(devolucion => devolucion.Prestamo)
-            .ThenInclude(prestamo => prestamo.Solicitante)
-            .Include(devolucion => devolucion.Prestamo)
-            .ThenInclude(prestamo => prestamo.TipoEquipamiento)
-            .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}")
-            .Include($"{CampoUnidades}.{nameof(UnidadDevuelta.Unidad)}")
+        return FiltrarPor(DevolucionesConSusDatos(), filtro)
             .OrderBy(devolucion => EF.Property<RegistroDeAccion>(devolucion, CampoRegistro).FechaHora)
             .ThenBy(devolucion => devolucion.Id)
             .ToList();
     }
 
-    private IQueryable<Devolucion> FiltrarPor(FiltroPorCatalogoYFechas filtro)
+    // Los Include van antes del filtro: filtrar primero por la fecha del registro owned hace que EF no cargue
+    // su responsable.
+    private IQueryable<Devolucion> DevolucionesConSusDatos()
     {
-        IQueryable<Devolucion> devoluciones = _contexto.Devoluciones;
+        return _contexto.Devoluciones
+            .Include(devolucion => devolucion.Prestamo)
+            .ThenInclude(prestamo => prestamo.Solicitante)
+            .Include(devolucion => devolucion.Prestamo)
+            .ThenInclude(prestamo => prestamo.TipoEquipamiento)
+            .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}")
+            .Include($"{CampoUnidades}.{nameof(UnidadDevuelta.Unidad)}");
+    }
 
+    private static IQueryable<Devolucion> FiltrarPor(IQueryable<Devolucion> devoluciones,
+        FiltroPorCatalogoYFechas filtro)
+    {
         if (filtro.IdCatalogo is not null)
         {
             devoluciones = devoluciones.Where(devolucion =>

@@ -27,7 +27,7 @@ public class ServicioTiposUsuarioTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
         using (SqlContext preparacion = new SqlContext(_opciones))
         {
-            preparacion.Database.EnsureCreated();
+            TiposDePrueba.GuardarEn(preparacion);
             Usuario administrador = new Usuario(dni: DniAdministrador, nombre: "Root", apellido: "Admin",
                 correo: "root@ucd.edu.uy", contrasena: "Root2026");
             administrador.AsignarTipo(new RepositorioTipoUsuarioSql(preparacion)
