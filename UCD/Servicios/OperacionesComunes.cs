@@ -1,6 +1,5 @@
 using Data.Repositorios;
 using Dominio;
-using Microsoft.EntityFrameworkCore;
 
 namespace Servicios;
 
@@ -39,7 +38,7 @@ internal static class OperacionesComunes
         {
             repositorioCatalogo.ActualizarCatalogo(catalogo);
         }
-        catch (DbUpdateException ex)
+        catch (InvalidOperationException ex)
         {
             throw new ServicioException(mensajeSiFalla, ex);
         }

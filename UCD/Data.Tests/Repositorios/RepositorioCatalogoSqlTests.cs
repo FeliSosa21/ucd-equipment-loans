@@ -553,6 +553,32 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.ThrowsException<ArgumentNullException>(() => repositorio.ExisteUnidadConNumeroDeSerie(null!, null));
     }
 
+    [TestMethod]
+    public void AgregarCatalogo_LaBaseRechazaElGuardado_LanzaInvalidOperationExceptionYDescartaLosCambios()
+    {
+        using SqlContextQueFallaAlGuardar contexto = new SqlContextQueFallaAlGuardar(_opciones);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contexto);
+        Catalogo catalogo = new Catalogo(NombreCatalogo);
+
+        Assert.ThrowsException<InvalidOperationException>(() => repositorio.AgregarCatalogo(catalogo));
+        Assert.AreEqual(0, contexto.ChangeTracker.Entries().Count());
+    }
+
+    [TestMethod]
+    public void ActualizarCatalogo_LaBaseRechazaElGuardado_LanzaInvalidOperationExceptionYDescartaLosCambios()
+    {
+        Catalogo catalogo = new Catalogo(NombreCatalogo);
+        GuardarConOtroContexto(catalogo);
+
+        using SqlContextQueFallaAlGuardar contexto = new SqlContextQueFallaAlGuardar(_opciones);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contexto);
+        Catalogo obtenido = repositorio.ObtenerCatalogoActivoPorId(catalogo.Id)!;
+        obtenido.ModificarNombre(NombreSegundoCatalogo);
+
+        Assert.ThrowsException<InvalidOperationException>(() => repositorio.ActualizarCatalogo(obtenido));
+        Assert.AreEqual(0, contexto.ChangeTracker.Entries().Count());
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
