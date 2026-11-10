@@ -23,9 +23,13 @@ public class CargaInicialSql
             return;
         }
 
+        TipoUsuario administrador = _repositorioTipoUsuario.ObtenerTipoPorNombre(NombreTipoAdministrador)
+            ?? throw new ServicioException("No se puede crear el root: falta el tipo Administrador. " +
+                "Ejecute el script de datos de instalacion antes de iniciar la aplicacion.");
+
         Usuario root = new Usuario(dni: CargaInicial.DniRoot, nombre: "Root", apellido: "Admin",
             correo: CargaInicial.CorreoRoot, contrasena: CargaInicial.ContrasenaRoot);
-        root.AsignarTipo(_repositorioTipoUsuario.ObtenerTipoPorNombre(NombreTipoAdministrador)!);
+        root.AsignarTipo(administrador);
         _repositorioUsuario.AgregarUsuario(root);
     }
 }
