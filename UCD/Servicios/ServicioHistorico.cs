@@ -65,17 +65,6 @@ public class ServicioHistorico
         return hasta.Value.Date.AddDays(1);
     }
 
-    // Temporal, hasta que la pagina filtre por catalogo: no recibe quien consulta (el permiso lo controla la pagina).
-    // El repositorio no devuelve nada sin criterios, asi que Desde = MinValue pide todo lo registrado.
-    public List<MovimientoDto> ListarMovimientos()
-    {
-        FiltroPorCatalogoYFechas desdeSiempre = new FiltroPorCatalogoYFechas { Desde = DateTime.MinValue };
-
-        return _movimientos.ObtenerMovimientos(desdeSiempre)
-            .Select(CrearMovimientoDto)
-            .ToList();
-    }
-
     private static MovimientoDto CrearMovimientoDto(Movimiento movimiento)
     {
         return new MovimientoDto

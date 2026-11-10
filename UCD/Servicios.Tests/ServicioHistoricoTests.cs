@@ -32,16 +32,6 @@ public sealed class ServicioHistoricoTests
     }
 
     [TestMethod]
-    public void ListarMovimientos_SinMovimientos_DevuelveListaVacia()
-    {
-        ServicioHistorico servicio = CrearServicio();
-
-        List<MovimientoDto> movimientos = servicio.ListarMovimientos();
-
-        Assert.AreEqual(0, movimientos.Count);
-    }
-
-    [TestMethod]
     public void ListarMovimientos_MovimientoDePrestamo_DevuelveSusDatos()
     {
         _datos.GuardarMovimiento(_idCatalogo, TipoConAprobacion, (prestamo, evaluador) =>
