@@ -31,4 +31,9 @@ public class RepositorioNotificacionSql
             .ThenByDescending(notificacion => notificacion.Id)
             .ToList();
     }
+
+    public bool ExisteVencidoSinLeer(Guid idPrestamo)
+    {
+        return false;
+    }
 }

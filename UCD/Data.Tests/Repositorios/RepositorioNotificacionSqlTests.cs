@@ -98,6 +98,24 @@ public sealed class RepositorioNotificacionSqlTests
             resultado.Select(notificacion => notificacion.Id).ToList());
     }
 
+    [TestMethod]
+    public void ExisteVencidoSinLeer_PrestamoConUnaDeVencidoSinLeer_DevuelveTrue()
+    {
+        Prestamo prestamo = CrearPrestamoActivo(DniSolicitante);
+        GuardarConOtroContexto(CrearNotificacionDeVencido(prestamo));
+
+        bool existe = LeerSiExisteVencidoSinLeer(prestamo.Id);
+
+        Assert.IsTrue(existe);
+    }
+
+    private bool LeerSiExisteVencidoSinLeer(Guid idPrestamo)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+
+        return new RepositorioNotificacionSql(contextoQueLee).ExisteVencidoSinLeer(idPrestamo);
+    }
+
     private IReadOnlyList<Notificacion> LeerNoLeidasDe(string dni)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
