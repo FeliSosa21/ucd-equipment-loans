@@ -41,6 +41,11 @@ public class RepositorioNotificacionSql
 
     public Notificacion? ObtenerNotificacionPorId(int id)
     {
-        return null;
+        return _contexto.Notificaciones
+            .Include(notificacion => notificacion.Prestamo)
+            .ThenInclude(prestamo => prestamo.Solicitante)
+            .Include(notificacion => notificacion.Prestamo)
+            .ThenInclude(prestamo => prestamo.TipoEquipamiento)
+            .FirstOrDefault(notificacion => notificacion.Id == id);
     }
 }
