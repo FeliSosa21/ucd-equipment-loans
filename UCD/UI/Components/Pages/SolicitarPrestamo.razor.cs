@@ -1,5 +1,4 @@
 using DTOs;
-using Microsoft.AspNetCore.Components;
 using Servicios;
 using UI.Presentacion;
 using UI.Sesion;
@@ -18,10 +17,6 @@ public partial class SolicitarPrestamo
     private int? _cantidad = CantidadPorDefecto;
     private string? _error;
     private PrestamoDto? _resultado;
-
-    // Nombre del tipo elegido en el catalogo (/solicitar-prestamo?tipo=...).
-    [SupplyParameterFromQuery(Name = "tipo")]
-    public string? Tipo { get; set; }
 
     private TipoEquipamientoDto? TipoSeleccionado => _tipos.FirstOrDefault(tipo => tipo.Nombre == _tipo);
 
@@ -79,12 +74,6 @@ public partial class SolicitarPrestamo
         }
 
         CargarTipos();
-    }
-
-    // Si el tipo de la direccion no existe o no esta activo, la lista queda sin preseleccion y sin aviso.
-    protected override void OnParametersSet()
-    {
-        _tipo = _tipos.FirstOrDefault(tipo => tipo.Nombre == Tipo)?.Nombre ?? string.Empty;
     }
 
     private void Solicitar()
