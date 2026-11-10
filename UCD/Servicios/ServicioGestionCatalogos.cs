@@ -44,6 +44,7 @@ public class ServicioGestionCatalogos
 
     public void Modificar(int idCatalogo, string nombre, string dniResponsable)
     {
+        ValidarResponsable(dniResponsable);
         Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
 
         string nombreNormalizado = OperacionesComunes.Normalizar(nombre);
