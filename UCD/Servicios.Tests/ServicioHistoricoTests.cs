@@ -204,6 +204,24 @@ public sealed class ServicioHistoricoTests
             servicio.ListarMovimientos(_idCatalogo, null!, DniSupervisor));
     }
 
+    [TestMethod]
+    public void ListarMovimientos_HastaEsLaUltimaFecha_DevuelveLosMovimientosSinLimiteSuperior()
+    {
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        GuardarSolicitud(FechaFija);
+        ServicioHistorico servicio = CrearServicio();
+        FiltroMovimientosDto filtro = new FiltroMovimientosDto
+        {
+            Desde = FechaFija.Date,
+            Hasta = DateTime.MaxValue.Date
+        };
+
+        List<MovimientoDto> movimientos = servicio.ListarMovimientos(_idCatalogo, filtro, DniSupervisor);
+
+        CollectionAssert.AreEqual(new List<DateTime> { FechaFija },
+            movimientos.Select(movimiento => movimiento.FechaHora).ToList());
+    }
+
     private List<MovimientoDto> ListarTodoElCatalogo(ServicioHistorico servicio)
     {
         return servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniSupervisor);
