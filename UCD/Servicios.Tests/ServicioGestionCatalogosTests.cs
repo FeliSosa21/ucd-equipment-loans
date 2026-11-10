@@ -281,6 +281,52 @@ public class ServicioGestionCatalogosTests
         Assert.AreEqual(1, LeerCatalogosActivos().Count);
     }
 
+    [TestMethod]
+    public void Eliminar_ConUnPrestamoPendiente_LanzaServicioException()
+    {
+        int id = GuardarCatalogoConUnTipoYUnaUnidad(NombreValido);
+        _entorno.GuardarUsuario(DniDocente, TipoUsuario.Docente());
+        _entorno.GuardarPrestamoSolicitado(id, NombreTipo, DniDocente);
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Eliminar(id, DniSupervisor));
+
+        Assert.AreEqual(1, LeerCatalogosActivos().Count);
+    }
+
+    [TestMethod]
+    public void Eliminar_ConPrestamosVigentesSoloEnOtroCatalogo_LoElimina()
+    {
+        int idConPrestamo = GuardarCatalogoConUnTipoYUnaUnidad(NombreValido);
+        int idLibre = _entorno.GuardarCatalogo(new Catalogo("Aulas"));
+        _entorno.GuardarUsuario(DniDocente, TipoUsuario.Docente());
+        _entorno.GuardarPrestamoActivo(idConPrestamo, NombreTipo, DniDocente);
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        servicio.Eliminar(idLibre, DniSupervisor);
+
+        Assert.AreEqual(1, LeerCatalogosActivos().Count);
+        Assert.AreEqual(idConPrestamo, LeerCatalogosActivos()[0].Id);
+    }
+
+    [TestMethod]
+    public void Eliminar_CatalogoInexistente_LanzaServicioException()
+    {
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Eliminar(1, DniSupervisor));
+    }
+
+    [TestMethod]
+    public void Eliminar_CatalogoYaEliminado_LanzaServicioException()
+    {
+        int id = _entorno.GuardarCatalogo(new Catalogo(NombreValido));
+        ServicioGestionCatalogos servicio = CrearServicio();
+        servicio.Eliminar(id, DniSupervisor);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Eliminar(id, DniSupervisor));
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
