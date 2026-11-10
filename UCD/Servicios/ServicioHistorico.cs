@@ -8,6 +8,7 @@ public class ServicioHistorico
 {
     private const string MensajeSinPermiso = "El usuario no tiene permiso para consultar el historico";
     private const string MensajeDesdePosteriorAHasta = "La fecha desde no puede ser posterior a la fecha hasta";
+    private const string ResponsableSistema = "Sistema";
 
     private readonly RepositorioCatalogoSql _catalogos;
     private readonly RepositorioUsuarioSql _usuarios;
@@ -83,7 +84,7 @@ public class ServicioHistorico
             Tipo = movimiento.Tipo.ToString(),
             Solicitante = movimiento.Solicitante.NombreCompleto,
             Evaluador = movimiento.Evaluador?.NombreCompleto,
-            Responsable = movimiento.Responsable?.NombreCompleto ?? "Sistema",
+            Responsable = movimiento.Responsable?.NombreCompleto ?? ResponsableSistema,
             Unidad = movimiento.Unidad?.IdInstitucional
         };
     }
