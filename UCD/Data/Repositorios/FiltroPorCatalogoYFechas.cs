@@ -8,6 +8,6 @@ public class FiltroPorCatalogoYFechas
 
     public bool TieneCriterios()
     {
-        return false;
+        return IdCatalogo is not null;
     }
 }
