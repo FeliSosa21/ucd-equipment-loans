@@ -10,67 +10,79 @@ public sealed class RepositorioMovimientoTests
     private static readonly DateTime FechaFija = new(2026, 10, 5, 10, 0, 0);
 
     [TestMethod]
-    public void ObtenerTodos_DosMovimientosAgregados_LosDevuelveEnElOrdenEnQueSeAgregaron()
+    public void ObtenerMovimientos_FiltroSinCriterios_DevuelveListaVacia()
     {
-        Memoria memoria = new Memoria();
-        RepositorioMovimiento repositorio = new RepositorioMovimiento(memoria);
-        Movimiento primero = CrearMovimiento(idInstitucional: "EQP-0001");
-        Movimiento segundo = CrearMovimiento(idInstitucional: "EQP-0002");
-        repositorio.AgregarMovimiento(primero);
-        repositorio.AgregarMovimiento(segundo);
+        RepositorioMovimiento repositorio = new RepositorioMovimiento(new Memoria());
+        repositorio.AgregarMovimiento(CrearMovimiento(idInstitucional: "EQP-0001"));
 
-        IReadOnlyList<Movimiento> resultado = repositorio.ObtenerTodos();
-
-        CollectionAssert.AreEqual(new List<Movimiento> { primero, segundo }, resultado.ToList());
-    }
-
-    [TestMethod]
-    public void ObtenerTodos_SinMovimientos_DevuelveListaVacia()
-    {
-        Memoria memoria = new Memoria();
-        RepositorioMovimiento repositorio = new RepositorioMovimiento(memoria);
-
-        IReadOnlyList<Movimiento> resultado = repositorio.ObtenerTodos();
+        IReadOnlyList<Movimiento> resultado = repositorio.ObtenerMovimientos(new FiltroPorCatalogoYFechas());
 
         Assert.AreEqual(0, resultado.Count);
     }
 
     [TestMethod]
-    public void ObtenerTodos_OtroRepositorioSobreLaMismaMemoria_LosEncuentra()
+    public void ObtenerMovimientos_FiltroPorFechas_DelMasRecienteAlMasViejoYEnEmpateElUltimoRegistrado()
     {
-        Memoria memoria = new Memoria();
-        RepositorioMovimiento repositorioQueGuarda = new RepositorioMovimiento(memoria);
-        RepositorioMovimiento repositorioQueBusca = new RepositorioMovimiento(memoria);
-        Movimiento movimiento = CrearMovimiento(idInstitucional: "EQP-0001");
-        repositorioQueGuarda.AgregarMovimiento(movimiento);
+        RepositorioMovimiento repositorio = new RepositorioMovimiento(new Memoria());
+        Movimiento masViejo = CrearMovimiento(idInstitucional: "EQP-0001", FechaFija);
+        Movimiento masReciente = CrearMovimiento(idInstitucional: "EQP-0002", FechaFija.AddDays(2));
+        Movimiento intermedio = CrearMovimiento(idInstitucional: "EQP-0003", FechaFija.AddDays(1));
+        Movimiento empatadoConElMasReciente = CrearMovimiento(idInstitucional: "EQP-0004", FechaFija.AddDays(2));
+        repositorio.AgregarMovimiento(masViejo);
+        repositorio.AgregarMovimiento(masReciente);
+        repositorio.AgregarMovimiento(intermedio);
+        repositorio.AgregarMovimiento(empatadoConElMasReciente);
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { Desde = FechaFija, Hasta = FechaFija.AddDays(3) };
 
-        IReadOnlyList<Movimiento> resultado = repositorioQueBusca.ObtenerTodos();
+        IReadOnlyList<Movimiento> resultado = repositorio.ObtenerMovimientos(filtro);
 
-        CollectionAssert.AreEqual(new List<Movimiento> { movimiento }, resultado.ToList());
+        CollectionAssert.AreEqual(
+            new List<Movimiento> { empatadoConElMasReciente, masReciente, intermedio, masViejo },
+            resultado.ToList());
     }
 
     [TestMethod]
-    public void ObtenerTodos_ListaDevuelta_EsDeSoloLectura()
+    public void ObtenerMovimientos_FiltroPorFechas_IncluyeDesdeYExcluyeHasta()
     {
-        Memoria memoria = new Memoria();
-        RepositorioMovimiento repositorio = new RepositorioMovimiento(memoria);
+        RepositorioMovimiento repositorio = new RepositorioMovimiento(new Memoria());
+        Movimiento antesDeDesde = CrearMovimiento(idInstitucional: "EQP-0001", FechaFija.AddMinutes(-1));
+        Movimiento enDesde = CrearMovimiento(idInstitucional: "EQP-0002", FechaFija);
+        Movimiento enHasta = CrearMovimiento(idInstitucional: "EQP-0003", FechaFija.AddDays(1));
+        repositorio.AgregarMovimiento(antesDeDesde);
+        repositorio.AgregarMovimiento(enDesde);
+        repositorio.AgregarMovimiento(enHasta);
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { Desde = FechaFija, Hasta = FechaFija.AddDays(1) };
 
-        IReadOnlyList<Movimiento> resultado = repositorio.ObtenerTodos();
+        IReadOnlyList<Movimiento> resultado = repositorio.ObtenerMovimientos(filtro);
 
-        Assert.IsTrue(((ICollection<Movimiento>)resultado).IsReadOnly);
+        CollectionAssert.AreEqual(new List<Movimiento> { enDesde }, resultado.ToList());
     }
 
     [TestMethod]
-    public void ObtenerTodos_AgregarDespuesDeObtener_NoCambiaLaListaYaDevuelta()
+    public void ObtenerMovimientos_FiltroPorCatalogo_DevuelveSoloLosDeTiposDeEseCatalogo()
     {
         Memoria memoria = new Memoria();
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        Catalogo catalogo = new Catalogo("Catalogo de la facultad");
+        catalogo.AgregarTipo(proyector);
+        new RepositorioCatalogo(memoria).Guardar(catalogo);
         RepositorioMovimiento repositorio = new RepositorioMovimiento(memoria);
-        IReadOnlyList<Movimiento> resultado = repositorio.ObtenerTodos();
-        Movimiento movimiento = CrearMovimiento(idInstitucional: "EQP-0001");
+        Movimiento delCatalogo = CrearMovimiento(idInstitucional: "EQP-0001", FechaFija, proyector);
+        repositorio.AgregarMovimiento(delCatalogo);
+        repositorio.AgregarMovimiento(CrearMovimiento(idInstitucional: "EQP-0002", FechaFija, CrearTipo("Camara Sony")));
 
-        repositorio.AgregarMovimiento(movimiento);
+        IReadOnlyList<Movimiento> resultado =
+            repositorio.ObtenerMovimientos(new FiltroPorCatalogoYFechas { IdCatalogo = catalogo.Id });
 
-        Assert.AreEqual(0, resultado.Count);
+        CollectionAssert.AreEqual(new List<Movimiento> { delCatalogo }, resultado.ToList());
+    }
+
+    [TestMethod]
+    public void ObtenerMovimientos_FiltroNulo_LanzaArgumentNullException()
+    {
+        RepositorioMovimiento repositorio = new RepositorioMovimiento(new Memoria());
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.ObtenerMovimientos(null!));
     }
 
     [TestMethod]
@@ -120,16 +132,30 @@ public sealed class RepositorioMovimientoTests
         return unidad;
     }
 
+    private static TipoEquipamiento CrearTipo(string nombre)
+    {
+        return new TipoEquipamiento(nombre: nombre, descripcion: "Equipo para aulas", duracionMaxPrestamo: 5,
+            requiereAprobacion: true, categoria: Categoria.Audiovisual);
+    }
+
     private static Movimiento CrearMovimiento(string idInstitucional)
+    {
+        return CrearMovimiento(idInstitucional, FechaFija);
+    }
+
+    private static Movimiento CrearMovimiento(string idInstitucional, DateTime fechaHora)
+    {
+        return CrearMovimiento(idInstitucional, fechaHora, CrearTipo("Proyector Epson"));
+    }
+
+    private static Movimiento CrearMovimiento(string idInstitucional, DateTime fechaHora, TipoEquipamiento tipo)
     {
         Usuario evaluador = CrearEvaluador();
         UnidadFisica unidad = CrearUnidad(idInstitucional: idInstitucional);
-        TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",
-            duracionMaxPrestamo: 5, requiereAprobacion: true, categoria: Categoria.Audiovisual);
         tipo.AgregarUnidad(unidad);
         Prestamo prestamo = new Prestamo(CrearSolicitante(), tipo, cantidadSolicitada: 1, fechaHoraPrestamo: FechaFija);
         prestamo.Aprobar(evaluador, new List<UnidadFisica> { unidad });
 
-        return Movimiento.DePrestamo(prestamo, RegistroDeAccion.DeUsuario(evaluador, FechaFija), unidad);
+        return Movimiento.DePrestamo(prestamo, RegistroDeAccion.DeUsuario(evaluador, fechaHora), unidad);
     }
 }
