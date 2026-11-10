@@ -43,10 +43,7 @@ public class ServicioGestionCatalogos
     {
         ValidarResponsable(dniResponsable);
         string nombreNormalizado = OperacionesComunes.Normalizar(nombre);
-        if (_repositorioCatalogo.ExisteActivoConNombre(nombreNormalizado, null))
-        {
-            throw new ServicioException(CampoNombre, "Ya existe un catalogo con ese nombre");
-        }
+        ValidarNombreDisponible(nombreNormalizado, null);
 
         Catalogo catalogo = TraduccionDeErrores.Ejecutar(() => new Catalogo(nombreNormalizado), CampoNombre);
         AgregarCatalogo(catalogo);
@@ -58,10 +55,7 @@ public class ServicioGestionCatalogos
         Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
 
         string nombreNormalizado = OperacionesComunes.Normalizar(nombre);
-        if (_repositorioCatalogo.ExisteActivoConNombre(nombreNormalizado, idCatalogo))
-        {
-            throw new ServicioException(CampoNombre, "Ya existe un catalogo con ese nombre");
-        }
+        ValidarNombreDisponible(nombreNormalizado, idCatalogo);
 
         TraduccionDeErrores.Ejecutar(() => catalogo.ModificarNombre(nombreNormalizado), CampoNombre);
         OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
@@ -78,6 +72,15 @@ public class ServicioGestionCatalogos
 
         catalogo.DarDeBaja();
         OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
+    }
+
+    // El nombre es unico entre los catalogos activos; el de uno eliminado se puede reutilizar (foro 2.2).
+    private void ValidarNombreDisponible(string nombre, int? idExcluido)
+    {
+        if (_repositorioCatalogo.ExisteActivoConNombre(nombre, idExcluido))
+        {
+            throw new ServicioException(CampoNombre, "Ya existe un catalogo con ese nombre");
+        }
     }
 
     // Dos usuarios pueden crear el mismo nombre a la vez: el indice unico de la base rechaza al segundo.
