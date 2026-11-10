@@ -32,6 +32,8 @@ public class RepositorioMovimiento
         // En memoria no hay Id: invertir el orden de registro y ordenar con OrderByDescending, que es estable,
         // deja primero el ultimo registrado en los empates, igual que el desempate por Id en la base.
         return Enumerable.Reverse(_memoria.Movimientos)
+            .Where(movimiento => filtro.Desde is null || movimiento.FechaHora >= filtro.Desde)
+            .Where(movimiento => filtro.Hasta is null || movimiento.FechaHora < filtro.Hasta)
             .OrderByDescending(movimiento => movimiento.FechaHora)
             .ToList();
     }
