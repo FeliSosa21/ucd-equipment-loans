@@ -46,7 +46,13 @@ public class ServicioGestionCatalogos
     {
         Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
 
-        catalogo.ModificarNombre(OperacionesComunes.Normalizar(nombre));
+        string nombreNormalizado = OperacionesComunes.Normalizar(nombre);
+        if (_repositorioCatalogo.ExisteActivoConNombre(nombreNormalizado, idCatalogo))
+        {
+            throw new ServicioException(CampoNombre, "Ya existe un catalogo con ese nombre");
+        }
+
+        catalogo.ModificarNombre(nombreNormalizado);
         OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
