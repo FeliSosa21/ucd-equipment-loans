@@ -24,6 +24,7 @@ public class ServicioHistorico
     {
         OperacionesComunes.ValidarResponsable(_usuarios.ObtenerUsuarioPorDni(dniUsuario), Permiso.ConsultarHistorico,
             MensajeSinPermiso);
+        OperacionesComunes.ObtenerCatalogoActivo(_catalogos, idCatalogo);
 
         return new List<MovimientoDto>();
     }
