@@ -101,8 +101,7 @@ public class ServicioDevolucion
     {
         Usuario? responsable = _usuarios.ObtenerUsuarioPorDni(dniResponsable);
 
-        if (responsable is null || responsable.Estado == EstadoUsuario.Desactivado ||
-            !responsable.TienePermiso(Permiso.RegistrarDevolucion))
+        if (responsable is null || !responsable.EstaHabilitadoPara(Permiso.RegistrarDevolucion))
         {
             throw new ServicioException("El usuario no tiene permiso para registrar devoluciones");
         }
