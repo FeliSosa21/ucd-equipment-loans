@@ -19,8 +19,12 @@ public class ServicioUsuarioTests
     {
         _opciones = new DbContextOptionsBuilder<SqlContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        using (SqlContext preparacion = new SqlContext(_opciones))
+        {
+            TiposDePrueba.GuardarEn(preparacion);
+        }
+
         _contexto = new SqlContext(_opciones);
-        _contexto.Database.EnsureCreated();
         RegistradorDeAuditoria auditoria = new RegistradorDeAuditoria(
             new RepositorioAuditoriaSql(_contexto), new RelojFijo(Ahora));
         _servicio = new ServicioUsuario(new RepositorioUsuarioSql(_contexto),

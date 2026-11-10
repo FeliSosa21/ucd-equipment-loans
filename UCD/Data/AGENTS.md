@@ -26,7 +26,7 @@ El resto (por ejemplo `MovimientoConfiguracion`, `TipoUsuarioConfiguracion`, `Re
 - `OrderBy` con desempate (por `Id` u otro campo único).
 - Los filtros por fechas usan `FiltroPorCatalogoYFechas`: `Desde` incluido y `Hasta` excluido.
 - Las consultas para la exportación (req. 2.7), `ObtenerDevoluciones(filtro)` y `ObtenerPrestamos(filtro)`, devuelven todo el rango filtrado aunque el filtro no tenga criterios. Tienen la misma firma en memoria y en EF, acordada con el equipo: no la cambies aunque una revisión lo sugiera.
-- Los datos que la app necesita para arrancar (los 6 tipos de usuario) van con `HasData` en la configuración; los datos de prueba no van en el código.
+- Los seis tipos de usuario y los demás datos de instalación se cargan mediante scripts; no van embebidos en C# ni con `HasData` (foro, d=155847 y d=155880). El root es la excepción permitida por código: debe usar el Administrador ya persistido, sin crear tipos como reparación implícita. Los tests preparan sus propios datos. La retirada de las cargas actuales en memoria y el cambio de `Program.cs` se coordinan con el equipo.
 
 ## Tests de persistencia
 
