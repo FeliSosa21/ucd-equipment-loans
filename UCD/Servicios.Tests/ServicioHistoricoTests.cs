@@ -171,6 +171,22 @@ public sealed class ServicioHistoricoTests
             movimientos.Select(movimiento => movimiento.FechaHora).ToList());
     }
 
+    [TestMethod]
+    public void ListarMovimientos_MovimientoAlFinalDelDiaHasta_LoIncluyeYExcluyeElDiaSiguiente()
+    {
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        DateTime diaHasta = FechaFija.Date;
+        GuardarSolicitud(diaHasta.AddHours(23).AddMinutes(59));
+        GuardarSolicitud(diaHasta.AddDays(1));
+        ServicioHistorico servicio = CrearServicio();
+        FiltroMovimientosDto filtro = new FiltroMovimientosDto { Desde = diaHasta, Hasta = diaHasta };
+
+        List<MovimientoDto> movimientos = servicio.ListarMovimientos(_idCatalogo, filtro, DniSupervisor);
+
+        CollectionAssert.AreEqual(new List<DateTime> { diaHasta.AddHours(23).AddMinutes(59) },
+            movimientos.Select(movimiento => movimiento.FechaHora).ToList());
+    }
+
     private ServicioHistorico CrearServicio()
     {
         return new ServicioHistorico(new RepositorioCatalogoSql(_datos.Contexto),
