@@ -46,6 +46,14 @@ internal sealed class MovimientosSqlDePrueba : IDisposable
         new RepositorioUsuarioSql(preparacion).AgregarUsuario(usuario);
     }
 
+    public void GuardarUsuarioDesactivado(string dni, TipoUsuario tipoPredefinido)
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
+        Usuario usuario = CrearUsuario(preparacion, new DatosDeUsuario(dni, "Nombre", "Apellido"), tipoPredefinido);
+        usuario.Desactivar();
+        new RepositorioUsuarioSql(preparacion).AgregarUsuario(usuario);
+    }
+
     // El prestamo es de Ana Perez (Docente) con un tipo del catalogo guardado; el evaluador es Felipe Sosa (Supervisor).
     public void GuardarMovimiento(int idCatalogo, string nombreTipo, Func<Prestamo, Usuario, Movimiento> crear)
     {

@@ -10,6 +10,7 @@ public sealed class ServicioHistoricoTests
     private const string TipoConAprobacion = "Proyector Epson";
     private const string TipoSinAprobacion = "Notebook Lenovo ThinkPad";
     private const string DniFuncionario = "45678905";
+    private const string DniSupervisor = "89012349";
     private static readonly DateTime FechaFija = new DateTime(2026, 9, 22, 10, 30, 0);
 
     private MovimientosSqlDePrueba _datos = null!;
@@ -107,6 +108,25 @@ public sealed class ServicioHistoricoTests
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniFuncionario));
+    }
+
+    [TestMethod]
+    public void ListarMovimientos_UsuarioInexistente_LanzaServicioException()
+    {
+        ServicioHistorico servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniSupervisor));
+    }
+
+    [TestMethod]
+    public void ListarMovimientos_UsuarioDesactivado_LanzaServicioException()
+    {
+        _datos.GuardarUsuarioDesactivado(DniSupervisor, TipoUsuario.Supervisor());
+        ServicioHistorico servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniSupervisor));
     }
 
     private ServicioHistorico CrearServicio()
