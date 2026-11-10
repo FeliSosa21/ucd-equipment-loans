@@ -938,7 +938,7 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void ListarPrestamosDeSolicitante_ConPrestamosDeVariosUsuarios_DevuelveSoloLosSuyos()
+    public void ListarMisSolicitudes_ConPrestamosDeVariosUsuarios_DevuelveSoloLosSuyos()
     {
         ServicioPrestamo servicio = CrearServicio();
         PrestamoDto activoDelDocente =
@@ -947,7 +947,7 @@ public sealed class ServicioPrestamoTests
             servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1), DniDocente);
         servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniEstudiante);
 
-        List<PrestamoDto> resultado = servicio.ListarPrestamosDeSolicitante(DniDocente);
+        List<PrestamoDto> resultado = servicio.ListarMisSolicitudes(DniDocente);
 
         Assert.AreEqual(2, resultado.Count);
         CollectionAssert.AreEquivalent(new List<Guid>
@@ -955,12 +955,12 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void ListarPrestamosDeSolicitante_SinPrestamos_DevuelveListaVacia()
+    public void ListarMisSolicitudes_SinPrestamos_DevuelveListaVacia()
     {
         ServicioPrestamo servicio = CrearServicio();
         servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniDocente);
 
-        List<PrestamoDto> resultado = servicio.ListarPrestamosDeSolicitante(DniAdministrador);
+        List<PrestamoDto> resultado = servicio.ListarMisSolicitudes(DniAdministrador);
 
         Assert.IsNotNull(resultado);
         Assert.AreEqual(0, resultado.Count);

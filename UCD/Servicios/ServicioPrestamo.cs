@@ -69,9 +69,9 @@ public class ServicioPrestamo
         return _prestamos.ObtenerPrestamosPendientes().Select(CrearPrestamoDto).ToList();
     }
 
-    public List<PrestamoDto> ListarPrestamosDeSolicitante(string dniSolicitante)
+    public List<PrestamoDto> ListarMisSolicitudes(string dniConsultante)
     {
-        return _prestamos.ObtenerPrestamosDeSolicitante(dniSolicitante).Select(CrearPrestamoDto).ToList();
+        return _prestamos.ObtenerPrestamosDeSolicitante(dniConsultante).Select(CrearPrestamoDto).ToList();
     }
 
     public List<PrestamoDto> ListarPrestamosPorEntregar()
