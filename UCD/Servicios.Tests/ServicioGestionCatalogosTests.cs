@@ -12,6 +12,8 @@ public class ServicioGestionCatalogosTests
     private const string NombreValido = "Laboratorio de Informatica";
     private const string CampoNombre = "Nombre";
     private const string DniDocente = "45678905";
+    private const string DniDesactivado = "23456783";
+    private const string DniInexistente = "34567894";
 
     private ContextoDePrueba _entorno = null!;
 
@@ -115,6 +117,23 @@ public class ServicioGestionCatalogosTests
         Assert.ThrowsException<ServicioException>(() => servicio.Crear(NombreValido, DniDocente));
 
         Assert.AreEqual(0, LeerCatalogosActivos().Count);
+    }
+
+    [TestMethod]
+    public void Crear_UsuarioDesactivado_LanzaServicioException()
+    {
+        ServicioGestionCatalogos servicio = CrearServicio();
+        _entorno.GuardarUsuarioDesactivado(DniDesactivado, TipoUsuario.Supervisor());
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Crear(NombreValido, DniDesactivado));
+    }
+
+    [TestMethod]
+    public void Crear_DniInexistente_LanzaServicioException()
+    {
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Crear(NombreValido, DniInexistente));
     }
 
     private ServicioGestionCatalogos CrearServicio()
