@@ -173,6 +173,48 @@ public class ServicioGestionCatalogosTests
         Assert.AreEqual(CampoNombre, error.Campo);
     }
 
+    [DataTestMethod]
+    [DataRow("Aulas")]
+    [DataRow("AULAS")]
+    [DataRow("  Aulas  ")]
+    public void Modificar_SinCambiarElNombreOSoloSuCapitalizacion_LoPermite(string nombre)
+    {
+        int id = _entorno.GuardarCatalogo(new Catalogo("Aulas"));
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        servicio.Modificar(id, nombre, DniSupervisor);
+
+        Assert.AreEqual(nombre.Trim(), LeerCatalogosActivos()[0].Nombre);
+    }
+
+    [TestMethod]
+    public void Modificar_CatalogoInexistente_LanzaServicioException()
+    {
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Modificar(1, NombreValido, DniSupervisor));
+    }
+
+    [TestMethod]
+    public void Modificar_CatalogoEliminado_LanzaServicioException()
+    {
+        Catalogo eliminado = new Catalogo("Aulas");
+        eliminado.DarDeBaja();
+        int id = _entorno.GuardarCatalogo(eliminado);
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Modificar(id, NombreValido, DniSupervisor));
+    }
+
+    [TestMethod]
+    public void Modificar_FallaElGuardado_LanzaServicioException()
+    {
+        int id = _entorno.GuardarCatalogo(new Catalogo("Aulas"));
+        ServicioGestionCatalogos servicio = CrearServicioQueFallaAlGuardar();
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Modificar(id, NombreValido, DniSupervisor));
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
