@@ -7,6 +7,7 @@ namespace Servicios;
 public class ServicioGestionCatalogos
 {
     private const string CampoNombre = nameof(CatalogoDto.Nombre);
+    private const string MensajeSinPermiso = "El usuario no tiene permiso para gestionar los catalogos";
 
     private readonly RepositorioCatalogoSql _repositorioCatalogo;
     private readonly RepositorioUsuarioSql _repositorioUsuario;
@@ -27,6 +28,7 @@ public class ServicioGestionCatalogos
 
     public void Crear(string nombre, string dniResponsable)
     {
+        ValidarResponsable(dniResponsable);
         string nombreNormalizado = OperacionesComunes.Normalizar(nombre);
         if (_repositorioCatalogo.ExisteActivoConNombre(nombreNormalizado, null))
         {
@@ -43,5 +45,11 @@ public class ServicioGestionCatalogos
 
     public void Eliminar(int idCatalogo, string dniResponsable)
     {
+    }
+
+    private void ValidarResponsable(string dniResponsable)
+    {
+        OperacionesComunes.ValidarResponsable(_repositorioUsuario.ObtenerUsuarioPorDni(dniResponsable),
+            Permiso.GestionarCatalogo, MensajeSinPermiso);
     }
 }
