@@ -36,7 +36,15 @@ public class RepositorioMovimientoSql
 
     public IReadOnlyList<Movimiento> ObtenerMovimientos(FiltroPorCatalogoYFechas filtro)
     {
-        return new List<Movimiento>();
+        if (filtro.Desde is null && filtro.Hasta is null)
+        {
+            return new List<Movimiento>();
+        }
+
+        return _contexto.Movimientos
+            .OrderByDescending(movimiento => EF.Property<RegistroDeAccion>(movimiento, CampoRegistro).FechaHora)
+            .ThenByDescending(movimiento => movimiento.Id)
+            .ToList();
     }
 
     public int ContarMovimientos(FiltroPorCatalogoYFechas filtro)
