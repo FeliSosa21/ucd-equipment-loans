@@ -1,6 +1,5 @@
 using DTOs;
 using Servicios;
-using UI.Components.Shared;
 using UI.Presentacion;
 using UI.Sesion;
 
@@ -19,22 +18,12 @@ public partial class TiposEquipamiento
     private string? _nombreOriginal;
     private DatosTipoEquipamientoDto _datos = new DatosTipoEquipamientoDto();
     private TipoEquipamientoDetalleDto? _aDiscontinuar;
-    private int _idCatalogo = SelectorCatalogo.SinCatalogo;
-    private SelectorCatalogo? _selector;
     private string? _error;
     private string? _exito;
 
     protected override void OnInitialized()
     {
-        if (RedirigirSiNoTienePermiso(Permisos.GestionarCatalogo))
-        {
-            return;
-        }
-    }
-
-    private bool HayCatalogoElegido()
-    {
-        return _idCatalogo != SelectorCatalogo.SinCatalogo;
+        RedirigirSiNoTienePermiso(Permisos.GestionarCatalogo);
     }
 
     private async Task AlCambiarCatalogoAsync()
@@ -60,25 +49,14 @@ public partial class TiposEquipamiento
                 Nombre = ValoresDeFiltro.ValorONulo(_busqueda),
                 Categoria = ValoresDeFiltro.ValorONulo(_categoria)
             };
-            _tipos = ServicioTipos.Listar(_idCatalogo, filtro, DniUsuario);
+            _tipos = ServicioTipos.Listar(IdCatalogo, filtro, DniUsuario);
         }
         catch (ServicioException ex)
         {
             _tipos = new List<TipoEquipamientoDetalleDto>();
-            await MostrarErrorYRecargarSelectorAsync(ex.Message);
+            await RecargarSelectorAsync();
+            _error = ex.Message;
         }
-    }
-
-    // Si el catalogo se dio de baja con la pagina abierta, el selector se actualiza antes de mostrar el mensaje:
-    // al avisar el selector que ya no hay catalogo elegido, la pagina limpia el error anterior.
-    private async Task MostrarErrorYRecargarSelectorAsync(string mensaje)
-    {
-        if (_selector is not null)
-        {
-            await _selector.RecargarAsync();
-        }
-
-        _error = mensaje;
     }
 
     // Al cambiar un filtro no queda en pantalla el mensaje de la accion anterior.
@@ -156,7 +134,7 @@ public partial class TiposEquipamiento
         {
             if (_nombreOriginal is null)
             {
-                ServicioTipos.Registrar(_idCatalogo, _datos, DniUsuario);
+                ServicioTipos.Registrar(IdCatalogo, _datos, DniUsuario);
                 _exito = $"Se registró el tipo «{nombre}».";
             }
             else
@@ -166,7 +144,7 @@ public partial class TiposEquipamiento
                     NombreActual = _nombreOriginal,
                     Datos = _datos
                 };
-                ServicioTipos.Modificar(_idCatalogo, modificacion, DniUsuario);
+                ServicioTipos.Modificar(IdCatalogo, modificacion, DniUsuario);
                 _exito = $"Se guardaron los cambios de «{nombre}».";
             }
 
@@ -206,7 +184,7 @@ public partial class TiposEquipamiento
         _aDiscontinuar = null;
         try
         {
-            ServicioTipos.Discontinuar(_idCatalogo, nombre, DniUsuario);
+            ServicioTipos.Discontinuar(IdCatalogo, nombre, DniUsuario);
             _exito = $"Se discontinuó el tipo «{nombre}».";
         }
         catch (ServicioException ex)
@@ -235,7 +213,7 @@ public partial class TiposEquipamiento
         CerrarTodo();
         try
         {
-            ServicioTipos.Reactivar(_idCatalogo, tipo.Nombre, DniUsuario);
+            ServicioTipos.Reactivar(IdCatalogo, tipo.Nombre, DniUsuario);
             _exito = $"Se reactivó el tipo «{tipo.Nombre}».";
         }
         catch (ServicioException ex)

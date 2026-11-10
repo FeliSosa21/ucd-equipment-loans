@@ -1,5 +1,5 @@
 @page "/catalogo"
-@inherits PaginaConSesion
+@inherits PaginaConCatalogo
 @using DTOs
 @using Servicios
 @using UI.Presentacion
@@ -12,7 +12,7 @@
     <p>Elegí un tipo de equipamiento para ver cuántas unidades tiene disponibles y dónde están.</p>
 </div>
 
-<SelectorCatalogo @ref="_selector" @bind-IdCatalogo="_idCatalogo" @bind-IdCatalogo:after="AlCambiarCatalogoAsync" />
+<SelectorCatalogo @ref="Selector" @bind-IdCatalogo="IdCatalogo" @bind-IdCatalogo:after="AlCambiarCatalogoAsync" />
 
 @if (_error is not null)
 {

@@ -1,5 +1,5 @@
 @page "/inventario"
-@inherits PaginaConSesion
+@inherits PaginaConCatalogo
 @using DTOs
 @using Servicios
 @using UI.Presentacion
@@ -12,7 +12,7 @@
     <p>Cantidad de unidades físicas en cada estado, por categoría y por tipo de equipamiento.</p>
 </div>
 
-<SelectorCatalogo @ref="_selector" @bind-IdCatalogo="_idCatalogo" @bind-IdCatalogo:after="AlCambiarCatalogoAsync" />
+<SelectorCatalogo @ref="Selector" @bind-IdCatalogo="IdCatalogo" @bind-IdCatalogo:after="AlCambiarCatalogoAsync" />
 
 @if (_error is not null)
 {

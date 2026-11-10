@@ -1,6 +1,5 @@
 ﻿using DTOs;
 using Servicios;
-using UI.Components.Shared;
 using UI.Sesion;
 using UI.Presentacion;
 
@@ -13,20 +12,10 @@ public partial class Inventario
     private string _categoria = string.Empty;
     private string _estado = string.Empty;
     private string? _error;
-    private int _idCatalogo = SelectorCatalogo.SinCatalogo;
-    private SelectorCatalogo? _selector;
 
     protected override void OnInitialized()
     {
-        if (RedirigirSiNoTienePermiso(Permisos.GestionarUnidades))
-        {
-            return;
-        }
-    }
-
-    private bool HayCatalogoElegido()
-    {
-        return _idCatalogo != SelectorCatalogo.SinCatalogo;
+        RedirigirSiNoTienePermiso(Permisos.GestionarUnidades);
     }
 
     private async Task AlCambiarCatalogoAsync()
@@ -53,27 +42,16 @@ public partial class Inventario
 
         try
         {
-            _porCategoria = ServicioInventario.ContarPorCategoria(_idCatalogo, DniUsuario);
-            _porTipo = ServicioInventario.ContarPorTipo(_idCatalogo, filtro, DniUsuario);
+            _porCategoria = ServicioInventario.ContarPorCategoria(IdCatalogo, DniUsuario);
+            _porTipo = ServicioInventario.ContarPorTipo(IdCatalogo, filtro, DniUsuario);
         }
         catch (ServicioException ex)
         {
             _porCategoria = new List<CantidadesPorEstadoDto>();
             _porTipo = new List<CantidadesPorEstadoDto>();
-            await MostrarErrorYRecargarSelectorAsync(ex.Message);
+            await RecargarSelectorAsync();
+            _error = ex.Message;
         }
-    }
-
-    // Si el catalogo se dio de baja con la pagina abierta, el selector se actualiza antes de mostrar el mensaje:
-    // al avisar el selector que ya no hay catalogo elegido, la pagina limpia el error anterior.
-    private async Task MostrarErrorYRecargarSelectorAsync(string mensaje)
-    {
-        if (_selector is not null)
-        {
-            await _selector.RecargarAsync();
-        }
-
-        _error = mensaje;
     }
 
     private async Task LimpiarFiltrosAsync()

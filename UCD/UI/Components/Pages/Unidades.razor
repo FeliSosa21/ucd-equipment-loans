@@ -1,5 +1,5 @@
 @page "/unidades"
-@inherits PaginaConSesion
+@inherits PaginaConCatalogo
 @using DTOs
 @using Servicios
 @using UI.Presentacion
@@ -13,7 +13,7 @@
     <p>Registrá unidades, modificá su información, cambiá su estado o dalas de baja.</p>
 </div>
 
-<SelectorCatalogo @ref="_selector" @bind-IdCatalogo="_idCatalogo" @bind-IdCatalogo:after="AlCambiarCatalogoAsync" />
+<SelectorCatalogo @ref="Selector" @bind-IdCatalogo="IdCatalogo" @bind-IdCatalogo:after="AlCambiarCatalogoAsync" />
 
 @if (_exito is not null)
 {

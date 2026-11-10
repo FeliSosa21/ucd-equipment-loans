@@ -1,5 +1,5 @@
 @page "/tipos-equipamiento"
-@inherits PaginaConSesion
+@inherits PaginaConCatalogo
 @using DTOs
 @using Servicios
 @using UI.Presentacion
@@ -12,7 +12,7 @@
     <p>Registrá, modificá, discontinuá o reactivá los modelos de equipamiento del catálogo.</p>
 </div>
 
-<SelectorCatalogo @ref="_selector" @bind-IdCatalogo="_idCatalogo" @bind-IdCatalogo:after="AlCambiarCatalogoAsync" />
+<SelectorCatalogo @ref="Selector" @bind-IdCatalogo="IdCatalogo" @bind-IdCatalogo:after="AlCambiarCatalogoAsync" />
 
 @if (_exito is not null)
 {

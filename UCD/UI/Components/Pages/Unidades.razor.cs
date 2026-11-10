@@ -1,6 +1,5 @@
 using DTOs;
 using Servicios;
-using UI.Components.Shared;
 using UI.Presentacion;
 using UI.Sesion;
 
@@ -19,22 +18,12 @@ public partial class Unidades
     private string _tipoEditando = string.Empty;
     private DatosUnidadDto _datos = new DatosUnidadDto();
     private UnidadDetalleDto? _aDarDeBaja;
-    private int _idCatalogo = SelectorCatalogo.SinCatalogo;
-    private SelectorCatalogo? _selector;
     private string? _error;
     private string? _exito;
 
     protected override void OnInitialized()
     {
-        if (RedirigirSiNoTienePermiso(Permisos.GestionarUnidades))
-        {
-            return;
-        }
-    }
-
-    private bool HayCatalogoElegido()
-    {
-        return _idCatalogo != SelectorCatalogo.SinCatalogo;
+        RedirigirSiNoTienePermiso(Permisos.GestionarUnidades);
     }
 
     private async Task AlCambiarCatalogoAsync()
@@ -58,31 +47,20 @@ public partial class Unidades
     {
         try
         {
-            _tipos = ServicioTipos.Listar(_idCatalogo, new FiltroTiposDto(), DniUsuario);
+            _tipos = ServicioTipos.Listar(IdCatalogo, new FiltroTiposDto(), DniUsuario);
             FiltroUnidadesDto filtro = new FiltroUnidadesDto
             {
                 NombreTipo = ValoresDeFiltro.ValorONulo(_tipoFiltro),
                 Estado = ValoresDeFiltro.ValorONulo(_estadoFiltro)
             };
-            _unidades = ServicioUnidades.Listar(_idCatalogo, filtro, DniUsuario);
+            _unidades = ServicioUnidades.Listar(IdCatalogo, filtro, DniUsuario);
         }
         catch (ServicioException ex)
         {
             _unidades = new List<UnidadDetalleDto>();
-            await MostrarErrorYRecargarSelectorAsync(ex.Message);
+            await RecargarSelectorAsync();
+            _error = ex.Message;
         }
-    }
-
-    // Si el catalogo se dio de baja con la pagina abierta, el selector se actualiza antes de mostrar el mensaje:
-    // al avisar el selector que ya no hay catalogo elegido, la pagina limpia el error anterior.
-    private async Task MostrarErrorYRecargarSelectorAsync(string mensaje)
-    {
-        if (_selector is not null)
-        {
-            await _selector.RecargarAsync();
-        }
-
-        _error = mensaje;
     }
 
     // Al cambiar un filtro no queda en pantalla el mensaje de la accion anterior.
@@ -179,12 +157,12 @@ public partial class Unidades
         {
             if (EsAlta())
             {
-                ServicioUnidades.Registrar(_idCatalogo, _datos, DniUsuario);
+                ServicioUnidades.Registrar(IdCatalogo, _datos, DniUsuario);
                 _exito = $"Se registró la unidad {id}.";
             }
             else
             {
-                ServicioUnidades.Modificar(_idCatalogo, _datos, DniUsuario);
+                ServicioUnidades.Modificar(IdCatalogo, _datos, DniUsuario);
                 _exito = $"Se guardaron los cambios de la unidad {id}.";
             }
 
@@ -217,7 +195,7 @@ public partial class Unidades
         CerrarTodo();
         try
         {
-            ServicioUnidades.EnviarAMantenimiento(_idCatalogo, unidad.IdInstitucional, DniUsuario);
+            ServicioUnidades.EnviarAMantenimiento(IdCatalogo, unidad.IdInstitucional, DniUsuario);
             _exito = $"La unidad {unidad.IdInstitucional} pasó a mantenimiento.";
         }
         catch (ServicioException ex)
@@ -239,7 +217,7 @@ public partial class Unidades
         CerrarTodo();
         try
         {
-            ServicioUnidades.VolverADisponible(_idCatalogo, unidad.IdInstitucional, DniUsuario);
+            ServicioUnidades.VolverADisponible(IdCatalogo, unidad.IdInstitucional, DniUsuario);
             _exito = $"La unidad {unidad.IdInstitucional} volvió a estar disponible.";
         }
         catch (ServicioException ex)
@@ -270,7 +248,7 @@ public partial class Unidades
         _aDarDeBaja = null;
         try
         {
-            ServicioUnidades.DarDeBaja(_idCatalogo, id, DniUsuario);
+            ServicioUnidades.DarDeBaja(IdCatalogo, id, DniUsuario);
             _exito = $"Se dio de baja la unidad {id}.";
         }
         catch (ServicioException ex)
