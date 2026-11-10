@@ -215,6 +215,19 @@ public sealed class ServicioNotificacionTests
         Assert.IsFalse(LeerNotificacion(idNotificacion).EstaLeida);
     }
 
+    [TestMethod]
+    public void MarcarComoLeida_YaLeida_NoLanzaYSigueLeida()
+    {
+        Guid idPrestamo = GuardarPrestamoActivo(PedidoQueVencioAyer);
+        int idNotificacion = GuardarNotificacion(idPrestamo, TipoNotificacion.PrestamoVencido);
+        ServicioNotificacion servicio = CrearServicio();
+        servicio.MarcarComoLeida(idNotificacion, DniDocente);
+
+        servicio.MarcarComoLeida(idNotificacion, DniDocente);
+
+        Assert.IsTrue(LeerNotificacion(idNotificacion).EstaLeida);
+    }
+
     private ServicioNotificacion CrearServicio()
     {
         return CrearServicioSobre(_contexto, NullLogger<ServicioNotificacion>.Instance);
