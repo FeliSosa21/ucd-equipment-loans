@@ -268,6 +268,19 @@ public class ServicioGestionCatalogosTests
         Assert.IsFalse(guardado.Activo);
     }
 
+    [TestMethod]
+    public void Eliminar_ConUnPrestamoActivo_LanzaServicioException()
+    {
+        int id = GuardarCatalogoConUnTipoYUnaUnidad(NombreValido);
+        _entorno.GuardarUsuario(DniDocente, TipoUsuario.Docente());
+        _entorno.GuardarPrestamoActivo(id, NombreTipo, DniDocente);
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Eliminar(id, DniSupervisor));
+
+        Assert.AreEqual(1, LeerCatalogosActivos().Count);
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
