@@ -934,6 +934,17 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void ListarPrestamosActivos_AntesDeLaFechaEsperada_NoLoMarcaVencido()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniDocente);
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamosActivos(DniFuncionario);
+
+        Assert.IsFalse(resultado.Single().EstaVencido);
+    }
+
+    [TestMethod]
     public void ListarPrestamos_VariosEstados_DevuelveTodos()
     {
         ServicioPrestamo servicio = CrearServicio();
