@@ -212,6 +212,17 @@ public sealed class RepositorioMovimientoSqlTests
         Assert.AreEqual("45678905", leido.Responsable?.Dni);
     }
 
+    [TestMethod]
+    public void ObtenerMovimientos_MovimientoGuardado_TraeElTipoDeEquipamientoDelPrestamo()
+    {
+        GuardarTresMovimientos();
+
+        Movimiento leido = LeerMovimientos(new FiltroPorCatalogoYFechas { Desde = FechaFija }).First();
+
+        Assert.IsNotNull(leido.Prestamo.TipoEquipamiento);
+        Assert.AreEqual("Notebook Lenovo ThinkPad", leido.Prestamo.TipoEquipamiento.Nombre);
+    }
+
     private void GuardarTresMovimientos()
     {
         Prestamo prestamo = CrearPrestamoActivo();
