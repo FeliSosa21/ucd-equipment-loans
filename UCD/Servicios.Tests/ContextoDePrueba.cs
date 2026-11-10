@@ -25,8 +25,7 @@ internal sealed class ContextoDePrueba : IDisposable
         _opciones = new DbContextOptionsBuilder<SqlContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
         using SqlContext preparacion = new SqlContext(_opciones);
-        preparacion.Database.EnsureCreated();
-        GuardarTiposDeUsuarioSiFaltan(preparacion);
+        TiposDePrueba.GuardarEn(preparacion);
         Contexto = new SqlContext(_opciones);
         Usuarios = new RepositorioUsuarioSql(Contexto);
         Catalogos = new RepositorioCatalogoSql(Contexto);
@@ -125,18 +124,4 @@ internal sealed class ContextoDePrueba : IDisposable
         return usuario;
     }
 
-    // Con HasData los seis tipos ya vienen sembrados; si el mapeo deja de sembrarlos, se cargan aca.
-    private static void GuardarTiposDeUsuarioSiFaltan(SqlContext preparacion)
-    {
-        RepositorioTipoUsuarioSql tipos = new RepositorioTipoUsuarioSql(preparacion);
-        if (tipos.ObtenerTodos().Count > 0)
-        {
-            return;
-        }
-
-        foreach (TipoUsuario tipo in TipoUsuario.Todos())
-        {
-            tipos.AgregarTipo(tipo);
-        }
-    }
 }
