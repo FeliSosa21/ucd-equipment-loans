@@ -368,6 +368,15 @@ public class ServicioGestionCatalogosTests
         Assert.AreEqual(NombreValido, catalogos[1].Nombre);
     }
 
+    [TestMethod]
+    public void Listar_UsuarioSinPermiso_LanzaServicioException()
+    {
+        ServicioGestionCatalogos servicio = CrearServicio();
+        _entorno.GuardarUsuario(DniDocente, TipoUsuario.Docente());
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Listar(DniDocente));
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
