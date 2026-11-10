@@ -82,6 +82,23 @@ public class CargaInicialSqlTests
         Assert.AreEqual(1, lectura.Usuarios.Count());
     }
 
+    [TestMethod]
+    public void CargarRoot_SinAdministrador_InformaErrorDeInstalacionYNoCreaDatos()
+    {
+        using (SqlContext preparacion = new SqlContext(_opciones))
+        {
+            preparacion.Database.EnsureCreated();
+        }
+
+        ServicioException error = Assert.ThrowsException<ServicioException>(CargarRootConOtroContexto);
+
+        Assert.AreEqual("No se puede crear el root: falta el tipo Administrador. " +
+            "Ejecute el script de datos de instalacion antes de iniciar la aplicacion.", error.Message);
+        using SqlContext lectura = new SqlContext(_opciones);
+        Assert.AreEqual(0, lectura.Usuarios.Count());
+        Assert.AreEqual(0, lectura.TiposDeUsuario.Count());
+    }
+
     private int GuardarAdministrador()
     {
         using SqlContext preparacion = new SqlContext(_opciones);
