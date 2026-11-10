@@ -327,6 +327,18 @@ public class ServicioGestionCatalogosTests
         Assert.ThrowsException<ServicioException>(() => servicio.Eliminar(id, DniSupervisor));
     }
 
+    [TestMethod]
+    public void Eliminar_UsuarioSinPermiso_LanzaServicioException()
+    {
+        int id = _entorno.GuardarCatalogo(new Catalogo(NombreValido));
+        ServicioGestionCatalogos servicio = CrearServicio();
+        _entorno.GuardarUsuario(DniDocente, TipoUsuario.Docente());
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Eliminar(id, DniDocente));
+
+        Assert.AreEqual(1, LeerCatalogosActivos().Count);
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
