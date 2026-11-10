@@ -978,6 +978,23 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void ListarPrestamos_DesdePosteriorAHasta_LanzaExcepcionConMensaje()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        FiltroDePrestamosDto filtro = new FiltroDePrestamosDto
+        {
+            Desde = new DateTime(2026, 10, 6),
+            Hasta = new DateTime(2026, 10, 5)
+        };
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.ListarPrestamos(DniSupervisor, filtro));
+
+        Assert.AreEqual("La fecha desde no puede ser posterior a la fecha hasta", excepcion.Message);
+        Assert.AreEqual(nameof(FiltroDePrestamosDto.Desde), excepcion.Campo);
+    }
+
+    [TestMethod]
     public void RangoPorDefecto_RelojFijo_DevuelveLosUltimos30DiasConHoyYSinEstado()
     {
         ServicioPrestamo servicio = CrearServicio();
