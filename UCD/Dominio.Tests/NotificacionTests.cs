@@ -18,6 +18,13 @@ public sealed class NotificacionTests
         Assert.IsFalse(notificacion.EstaLeida);
     }
 
+    [TestMethod]
+    public void Constructor_PrestamoNulo_LanzaDominioException()
+    {
+        Assert.ThrowsException<DominioException>(() =>
+            new Notificacion(null!, TipoNotificacion.PrestamoVencido, FechaFija));
+    }
+
     private static Prestamo CrearPrestamo()
     {
         TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",
