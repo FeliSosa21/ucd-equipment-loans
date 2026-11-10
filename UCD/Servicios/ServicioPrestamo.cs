@@ -82,10 +82,11 @@ public class ServicioPrestamo
     public List<PrestamoDto> ListarPrestamosActivos(string dniConsultante)
     {
         ObtenerUsuarioHabilitado(dniConsultante, Permiso.RealizarPrestamo, MensajeSinPermisoParaPrestamosActivos);
+        DateTime ahora = _reloj.GetLocalNow().DateTime;
 
         return _prestamos.ObtenerPrestamosActivos()
             .OrderBy(prestamo => prestamo.FechaEsperadaDevolucion)
-            .Select(CrearPrestamoDto)
+            .Select(prestamo => CrearPrestamoDtoConVencimiento(prestamo, ahora))
             .ToList();
     }
 
@@ -289,5 +290,13 @@ public class ServicioPrestamo
             MotivoRechazo = prestamo.MotivoRechazo,
             Unidades = prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList()
         };
+    }
+
+    private static PrestamoDto CrearPrestamoDtoConVencimiento(Prestamo prestamo, DateTime ahora)
+    {
+        PrestamoDto prestamoDto = CrearPrestamoDto(prestamo);
+        prestamoDto.EstaVencido = prestamo.EstaVencido(ahora);
+
+        return prestamoDto;
     }
 }
