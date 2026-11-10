@@ -168,6 +168,27 @@ public sealed class RepositorioMovimientoSqlTests
             resultado.Select(movimiento => movimiento.Tipo).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerMovimientos_FiltroPorCatalogo_DevuelveSoloLosDeEseCatalogo()
+    {
+        Usuario solicitante = CrearUsuario(dni: "12345672", correo: "renato.alves@ejemplo.com");
+        TipoEquipamiento notebook = CrearTipo("Notebook Lenovo ThinkPad", Categoria.Computacion);
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson", Categoria.Audiovisual);
+        Catalogo electronica = CrearCatalogoCon("Electronica", notebook);
+        Catalogo audiovisuales = CrearCatalogoCon("Audiovisuales", proyector);
+        Prestamo deNotebook = new Prestamo(solicitante, notebook, cantidadSolicitada: 1, fechaHoraPrestamo: FechaFija);
+        Prestamo deProyector = new Prestamo(solicitante, proyector, cantidadSolicitada: 1, fechaHoraPrestamo: FechaFija);
+        GuardarCatalogosYMovimientos(new[] { electronica, audiovisuales },
+            Movimiento.DeSolicitud(deNotebook, RegistroDeAccion.DeUsuario(solicitante, FechaFija)),
+            Movimiento.DeRechazo(deProyector, RegistroDeAccion.DelSistema(FechaFija)));
+
+        IReadOnlyList<Movimiento> resultado =
+            LeerMovimientos(new FiltroPorCatalogoYFechas { IdCatalogo = electronica.Id });
+
+        CollectionAssert.AreEqual(new List<TipoMovimiento> { TipoMovimiento.Solicitud },
+            resultado.Select(movimiento => movimiento.Tipo).ToList());
+    }
+
     private void GuardarTresMovimientos()
     {
         Prestamo prestamo = CrearPrestamoActivo();
