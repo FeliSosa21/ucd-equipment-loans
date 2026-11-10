@@ -68,6 +68,9 @@ public class ServicioNotificacion
         {
             throw new ServicioException(MensajeNotificacionAjena);
         }
+
+        notificacion.MarcarComoLeida();
+        _notificaciones.ActualizarNotificacion(notificacion);
     }
 
     private static NotificacionDto CrearNotificacionDto(Notificacion notificacion)
