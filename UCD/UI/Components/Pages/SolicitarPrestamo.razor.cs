@@ -9,9 +9,6 @@ public partial class SolicitarPrestamo
 {
     private const int CantidadPorDefecto = 1;
 
-    // Estado de un tipo de equipamiento: solo se pueden solicitar los activos.
-    private const string EstadoTipoActivo = "Activo";
-
     private List<CatalogoDto> _catalogos = new List<CatalogoDto>();
     private int? _idCatalogo;
     private List<TipoEquipamientoDto> _tipos = new List<TipoEquipamientoDto>();
@@ -164,7 +161,7 @@ public partial class SolicitarPrestamo
         try
         {
             _tipos = ServicioCatalogo.ConsultarTipos(_idCatalogo.Value,
-                new FiltroCatalogoDto { Estado = EstadoTipoActivo }, DniUsuario);
+                new FiltroCatalogoDto { Estado = EstadosCatalogo.TipoActivo }, DniUsuario);
         }
         catch (ServicioException ex)
         {
