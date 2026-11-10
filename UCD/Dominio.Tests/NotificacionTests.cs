@@ -42,6 +42,17 @@ public sealed class NotificacionTests
         Assert.IsTrue(notificacion.EstaLeida);
     }
 
+    [TestMethod]
+    public void MarcarComoLeida_YaLeida_SigueLeida()
+    {
+        Notificacion notificacion = CrearNotificacion();
+        notificacion.MarcarComoLeida();
+
+        notificacion.MarcarComoLeida();
+
+        Assert.IsTrue(notificacion.EstaLeida);
+    }
+
     private static Notificacion CrearNotificacion()
     {
         return new Notificacion(CrearPrestamo(), TipoNotificacion.PrestamoVencido, FechaFija);
