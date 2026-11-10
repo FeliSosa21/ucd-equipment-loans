@@ -24,7 +24,15 @@ public class RepositorioNotificacionSql
     public void AgregarNotificacion(Notificacion notificacion)
     {
         _contexto.Notificaciones.Add(notificacion);
-        _contexto.SaveChanges();
+
+        try
+        {
+            _contexto.SaveChanges();
+        }
+        catch (DbUpdateException excepcion)
+        {
+            throw new InvalidOperationException("No se pudo guardar la notificacion", excepcion);
+        }
     }
 
     public IReadOnlyList<Notificacion> ObtenerNoLeidasDeUsuario(string dni)
