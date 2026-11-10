@@ -1,3 +1,4 @@
+using System.Globalization;
 using Data.Repositorios;
 using Dominio;
 using DTOs;
@@ -9,6 +10,7 @@ public class ServicioNotificacion
 {
     private const string MensajeFallaAlGuardarVencido =
         "No se pudo guardar la notificacion de vencido del prestamo {IdPrestamo}";
+    private const string FormatoFecha = "dd/MM/yyyy";
 
     private readonly RepositorioNotificacionSql _notificaciones;
     private readonly RepositorioPrestamoSql _prestamos;
@@ -53,6 +55,29 @@ public class ServicioNotificacion
 
     public List<NotificacionDto> ListarNoLeidas(string dniUsuario)
     {
-        return new List<NotificacionDto>();
+        return _notificaciones.ObtenerNoLeidasDeUsuario(dniUsuario).Select(CrearNotificacionDto).ToList();
+    }
+
+    private static NotificacionDto CrearNotificacionDto(Notificacion notificacion)
+    {
+        return new NotificacionDto
+        {
+            Id = notificacion.Id,
+            Texto = ArmarTexto(notificacion),
+            FechaHora = notificacion.FechaHora,
+            Tipo = notificacion.Tipo.ToString()
+        };
+    }
+
+    private static string ArmarTexto(Notificacion notificacion)
+    {
+        Prestamo prestamo = notificacion.Prestamo;
+
+        return $"Tu solicitud de {prestamo.TipoEquipamiento.Nombre} del {FormatearFecha(prestamo.FechaHoraPrestamo)} fue aprobada.";
+    }
+
+    private static string FormatearFecha(DateTime fecha)
+    {
+        return fecha.ToString(FormatoFecha, CultureInfo.InvariantCulture);
     }
 }
