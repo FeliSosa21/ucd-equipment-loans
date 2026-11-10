@@ -19,6 +19,8 @@ public class RepositorioNotificacionSql
 
     public IReadOnlyList<Notificacion> ObtenerNoLeidasDeUsuario(string dni)
     {
-        return new List<Notificacion>();
+        return _contexto.Notificaciones
+            .Where(notificacion => notificacion.Prestamo.Solicitante.Dni == dni)
+            .ToList();
     }
 }
