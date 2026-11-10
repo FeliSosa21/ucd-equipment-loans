@@ -25,9 +25,9 @@ public class CargaInicialSqlTests
         CargarRootConOtroContexto();
 
         using SqlContext lectura = new SqlContext(_opciones);
-        Usuario? root = new RepositorioUsuarioSql(lectura).ObtenerUsuarioPorDni(CargaInicial.DniRoot);
+        Usuario? root = new RepositorioUsuarioSql(lectura).ObtenerUsuarioPorDni(CargaInicialSql.DniRoot);
         Assert.IsNotNull(root);
-        Assert.AreEqual(CargaInicial.CorreoRoot, root.Correo);
+        Assert.AreEqual(CargaInicialSql.CorreoRoot, root.Correo);
         Assert.AreEqual("Administrador", root.Tipo.Nombre);
         Assert.IsFalse(root.DebeCambiarContrasena);
     }
@@ -40,7 +40,7 @@ public class CargaInicialSqlTests
         CargarRootConOtroContexto();
 
         using SqlContext lectura = new SqlContext(_opciones);
-        Usuario? root = new RepositorioUsuarioSql(lectura).ObtenerUsuarioPorDni(CargaInicial.DniRoot);
+        Usuario? root = new RepositorioUsuarioSql(lectura).ObtenerUsuarioPorDni(CargaInicialSql.DniRoot);
         Assert.IsNotNull(root);
         Assert.AreEqual(idAdministrador, root.Tipo.Id);
         Assert.AreEqual(2, lectura.TiposDeUsuario.Count());
@@ -56,7 +56,7 @@ public class CargaInicialSqlTests
 
         using SqlContext lectura = new SqlContext(_opciones);
         Assert.AreEqual(1, lectura.Usuarios.Count());
-        Assert.AreEqual(CargaInicial.DniRoot, lectura.Usuarios.Single().Dni);
+        Assert.AreEqual(CargaInicialSql.DniRoot, lectura.Usuarios.Single().Dni);
     }
 
     [TestMethod]
@@ -68,7 +68,7 @@ public class CargaInicialSqlTests
         using (SqlContext modificacion = new SqlContext(_opciones))
         {
             RepositorioUsuarioSql usuarios = new RepositorioUsuarioSql(modificacion);
-            Usuario root = usuarios.ObtenerUsuarioPorDni(CargaInicial.DniRoot)!;
+            Usuario root = usuarios.ObtenerUsuarioPorDni(CargaInicialSql.DniRoot)!;
             root.ModificarDatos(root.Nombre, root.Apellido, correoModificado);
             usuarios.ActualizarUsuario(root);
         }
@@ -76,7 +76,7 @@ public class CargaInicialSqlTests
         CargarRootConOtroContexto();
 
         using SqlContext lectura = new SqlContext(_opciones);
-        Usuario? guardado = new RepositorioUsuarioSql(lectura).ObtenerUsuarioPorDni(CargaInicial.DniRoot);
+        Usuario? guardado = new RepositorioUsuarioSql(lectura).ObtenerUsuarioPorDni(CargaInicialSql.DniRoot);
         Assert.IsNotNull(guardado);
         Assert.AreEqual(correoModificado, guardado.Correo);
         Assert.AreEqual(1, lectura.Usuarios.Count());
@@ -90,10 +90,10 @@ public class CargaInicialSqlTests
             preparacion.Database.EnsureCreated();
         }
 
-        ServicioException error = Assert.ThrowsException<ServicioException>(CargarRootConOtroContexto);
+        InvalidOperationException error = Assert.ThrowsException<InvalidOperationException>(CargarRootConOtroContexto);
 
-        Assert.AreEqual("No se puede crear el root: falta el tipo Administrador. " +
-            "Ejecute el script de datos de instalacion antes de iniciar la aplicacion.", error.Message);
+        Assert.AreEqual("Falta el tipo de usuario Administrador. Ejecute el script de datos de la carpeta Respaldos " +
+            "antes de iniciar la aplicación (ver sección Instalación de la documentación).", error.Message);
         using SqlContext lectura = new SqlContext(_opciones);
         Assert.AreEqual(0, lectura.Usuarios.Count());
         Assert.AreEqual(0, lectura.TiposDeUsuario.Count());

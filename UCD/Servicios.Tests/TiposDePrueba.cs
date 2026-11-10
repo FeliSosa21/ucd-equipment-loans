@@ -14,15 +14,4 @@ internal static class TiposDePrueba
             repositorioTipos.AgregarTipo(tipo);
         }
     }
-
-    public static RepositorioTipoUsuario Cargados(Memoria memoria)
-    {
-        RepositorioTipoUsuario repositorioTipos = new RepositorioTipoUsuario(memoria);
-        foreach (TipoUsuario tipo in TipoUsuario.Todos())
-        {
-            repositorioTipos.AgregarTipo(tipo);
-        }
-
-        return repositorioTipos;
-    }
 }
