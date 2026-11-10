@@ -23,7 +23,7 @@ public partial class Catalogo
             return;
         }
 
-        // Solo quien gestiona el catalogo ve el filtro por estado; los discontinuados los oculta el servicio.
+        // Foro: Docente y Estudiante solo ven los tipos activos; filtrar por estado es de quien gestiona el catalogo.
         _puedeFiltrarPorEstado = SesionActual.Usuario!.Permisos.Contains(Permisos.GestionarCatalogo);
         Consultar();
     }
@@ -35,13 +35,13 @@ public partial class Catalogo
         FiltroCatalogoDto filtro = new FiltroCatalogoDto
         {
             Categoria = ValoresDeFiltro.ValorONulo(_categoria),
-            Estado = ValoresDeFiltro.ValorONulo(_estado),
+            Estado = EstadoAFiltrar(),
             MinimoDisponibles = _minimoDisponibles
         };
 
         try
         {
-            _tipos = ServicioCatalogo.ConsultarTipos(ObtenerIdCatalogoProvisorio(), filtro, DniUsuario);
+            _tipos = ServicioCatalogo.ConsultarTipos(filtro);
             CerrarUnidadesSiElTipoNoEstaEnLaLista();
         }
         catch (ServicioException ex)
@@ -52,16 +52,14 @@ public partial class Catalogo
         }
     }
 
-    // Provisorio hasta que exista el selector de catalogo (T4): el primer catalogo activo.
-    private int ObtenerIdCatalogoProvisorio()
+    private string? EstadoAFiltrar()
     {
-        List<CatalogoDto> catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
-        if (catalogos.Count == 0)
+        if (_puedeFiltrarPorEstado)
         {
-            throw new ServicioException("No hay catalogos disponibles");
+            return ValoresDeFiltro.ValorONulo(_estado);
         }
 
-        return catalogos[0].Id;
+        return EstadosCatalogo.TipoActivo;
     }
 
     private void LimpiarFiltros()
@@ -87,8 +85,7 @@ public partial class Catalogo
         _error = null;
         try
         {
-            _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(ObtenerIdCatalogoProvisorio(), nombreTipo,
-                DniUsuario);
+            _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(nombreTipo);
             _tipoSeleccionado = nombreTipo;
         }
         catch (ServicioException ex)

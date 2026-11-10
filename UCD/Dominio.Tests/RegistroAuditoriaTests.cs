@@ -104,19 +104,6 @@ public sealed class RegistroAuditoriaTests
         Assert.AreEqual(AccionAuditada.IntentoDeAprobacion, registro.Accion);
     }
 
-    [TestMethod]
-    [DataRow(AccionAuditada.AprobacionDePrestamo)]
-    [DataRow(AccionAuditada.AltaDeUsuario)]
-    [DataRow(AccionAuditada.CambioDeTipoDeUsuario)]
-    [DataRow(AccionAuditada.DesactivacionDeUsuario)]
-    [DataRow(AccionAuditada.ReactivacionDeUsuario)]
-    public void Constructor_AccionesNuevas_SeCrea(AccionAuditada accion)
-    {
-        RegistroAuditoria registro = CrearRegistro(accion: accion);
-
-        Assert.AreEqual(accion, registro.Accion);
-    }
-
     private static RegistroAuditoria CrearRegistro(
         AccionAuditada accion = AccionAuditada.SolicitudDePrestamo,
         string detalle = "Prestamo de 2 Notebook")

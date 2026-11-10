@@ -12,21 +12,6 @@ public class ServicioUnidadesTests
     private const string DniDocente = "45678905";
     private const string DniFuncionarioDesactivado = "23456783";
 
-    private ContextoDePrueba _entorno = null!;
-    private int _idCatalogo;
-
-    [TestInitialize]
-    public void Inicializar()
-    {
-        _entorno = new ContextoDePrueba();
-    }
-
-    [TestCleanup]
-    public void Limpiar()
-    {
-        _entorno.Dispose();
-    }
-
     [TestMethod]
     public void Listar_SinFiltros_DevuelveLasUnidadesDeTodosLosTipos()
     {
@@ -38,7 +23,7 @@ public class ServicioUnidadesTests
         notebook.AgregarUnidad(conObservaciones);
         ServicioUnidades servicio = CrearServicio(proyector, notebook);
 
-        List<UnidadDetalleDto> unidades = ListarTodas(servicio);
+        List<UnidadDetalleDto> unidades = servicio.Listar(null, null);
 
         Assert.AreEqual(2, unidades.Count);
         Assert.AreEqual("PRY-0001", unidades[0].IdInstitucional);
@@ -58,8 +43,7 @@ public class ServicioUnidadesTests
         notebook.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0001"));
         ServicioUnidades servicio = CrearServicio(proyector, notebook);
 
-        List<UnidadDetalleDto> unidades = servicio.Listar(_idCatalogo,
-            new FiltroUnidadesDto { NombreTipo = "Notebook Lenovo" }, DniFuncionario);
+        List<UnidadDetalleDto> unidades = servicio.Listar("Notebook Lenovo", null);
 
         Assert.AreEqual(1, unidades.Count);
         Assert.AreEqual("NTB-0001", unidades[0].IdInstitucional);
@@ -72,8 +56,7 @@ public class ServicioUnidadesTests
         notebook.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0001"));
         ServicioUnidades servicio = CrearServicio(notebook);
 
-        List<UnidadDetalleDto> unidades = servicio.Listar(_idCatalogo,
-            new FiltroUnidadesDto { NombreTipo = "notebook lenovo" }, DniFuncionario);
+        List<UnidadDetalleDto> unidades = servicio.Listar("notebook lenovo", null);
 
         Assert.AreEqual(1, unidades.Count);
     }
@@ -88,8 +71,7 @@ public class ServicioUnidadesTests
         proyector.AgregarUnidad(enMantenimiento);
         ServicioUnidades servicio = CrearServicio(proyector);
 
-        List<UnidadDetalleDto> unidades = servicio.Listar(_idCatalogo,
-            new FiltroUnidadesDto { Estado = "EnMantenimiento" }, DniFuncionario);
+        List<UnidadDetalleDto> unidades = servicio.Listar(null, "EnMantenimiento");
 
         Assert.AreEqual(1, unidades.Count);
         Assert.AreEqual("PRY-0002", unidades[0].IdInstitucional);
@@ -103,9 +85,9 @@ public class ServicioUnidadesTests
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
             numeroSerie: "SN123");
 
-        servicio.Registrar(_idCatalogo, datos, DniFuncionario);
+        servicio.Registrar(datos, DniFuncionario);
 
-        List<UnidadDetalleDto> unidades = ListarTodas(servicio);
+        List<UnidadDetalleDto> unidades = servicio.Listar(null, null);
         Assert.AreEqual(1, unidades.Count);
         Assert.AreEqual("PRY-0001", unidades[0].IdInstitucional);
         Assert.AreEqual("Proyector Epson", unidades[0].Tipo);
@@ -122,7 +104,7 @@ public class ServicioUnidadesTests
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
             numeroSerie: null);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniDocente));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniDocente));
     }
 
     [TestMethod]
@@ -133,7 +115,7 @@ public class ServicioUnidadesTests
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
             numeroSerie: null);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionarioDesactivado));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniFuncionarioDesactivado));
     }
 
     [TestMethod]
@@ -143,7 +125,7 @@ public class ServicioUnidadesTests
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
             numeroSerie: null);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniFuncionario));
     }
 
     [TestMethod]
@@ -156,7 +138,7 @@ public class ServicioUnidadesTests
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Notebook Lenovo", idInstitucional: "EQP-0001",
             numeroSerie: null);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniFuncionario));
     }
 
     [TestMethod]
@@ -169,7 +151,7 @@ public class ServicioUnidadesTests
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Notebook Lenovo", idInstitucional: "NTB-0001",
             numeroSerie: "sn123");
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniFuncionario));
     }
 
     [TestMethod]
@@ -181,9 +163,9 @@ public class ServicioUnidadesTests
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0002",
             numeroSerie: null);
 
-        servicio.Registrar(_idCatalogo, datos, DniFuncionario);
+        servicio.Registrar(datos, DniFuncionario);
 
-        Assert.AreEqual(2, ListarTodas(servicio).Count);
+        Assert.AreEqual(2, servicio.Listar(null, null).Count);
     }
 
     [TestMethod]
@@ -195,7 +177,7 @@ public class ServicioUnidadesTests
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
             numeroSerie: null);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniFuncionario));
     }
 
     [DataTestMethod]
@@ -209,7 +191,7 @@ public class ServicioUnidadesTests
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: idInstitucional,
             numeroSerie: null);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniFuncionario));
     }
 
     [TestMethod]
@@ -225,9 +207,9 @@ public class ServicioUnidadesTests
             NumeroSerie = "   "
         };
 
-        servicio.Registrar(_idCatalogo, datos, DniFuncionario);
+        servicio.Registrar(datos, DniFuncionario);
 
-        UnidadDetalleDto unidad = ListarTodas(servicio)[0];
+        UnidadDetalleDto unidad = servicio.Listar(null, null)[0];
         Assert.AreEqual("PRY-0001", unidad.IdInstitucional);
         Assert.AreEqual("Deposito A", unidad.UbicacionFisica);
         Assert.IsNull(unidad.NumeroSerie);
@@ -240,9 +222,9 @@ public class ServicioUnidadesTests
         proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001", numeroSerie: "SN123"));
         ServicioUnidades servicio = CrearServicio(proyector);
 
-        servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: "SN999"), DniFuncionario);
+        servicio.Modificar(CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: "SN999"), DniFuncionario);
 
-        UnidadDetalleDto unidad = ListarTodas(servicio)[0];
+        UnidadDetalleDto unidad = servicio.Listar(null, null)[0];
         Assert.AreEqual("Laboratorio 3", unidad.UbicacionFisica);
         Assert.AreEqual("SN999", unidad.NumeroSerie);
         Assert.AreEqual("Lampara nueva", unidad.Observaciones);
@@ -256,7 +238,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(proyector);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: null), DniDocente));
+            servicio.Modificar(CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: null), DniDocente));
     }
 
     [TestMethod]
@@ -267,7 +249,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(proyector);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: null),
+            servicio.Modificar(CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: null),
                 DniFuncionarioDesactivado));
     }
 
@@ -277,7 +259,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: null), DniFuncionario));
+            servicio.Modificar(CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: null), DniFuncionario));
     }
 
     [TestMethod]
@@ -289,7 +271,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(proyector);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0002", numeroSerie: "SN123"), DniFuncionario));
+            servicio.Modificar(CrearEdicion(idInstitucional: "PRY-0002", numeroSerie: "SN123"), DniFuncionario));
     }
 
     [TestMethod]
@@ -299,9 +281,9 @@ public class ServicioUnidadesTests
         proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001", numeroSerie: "SN123"));
         ServicioUnidades servicio = CrearServicio(proyector);
 
-        servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: "SN123"), DniFuncionario);
+        servicio.Modificar(CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: "SN123"), DniFuncionario);
 
-        Assert.AreEqual("Laboratorio 3", ListarTodas(servicio)[0].UbicacionFisica);
+        Assert.AreEqual("Laboratorio 3", servicio.Listar(null, null)[0].UbicacionFisica);
     }
 
     [TestMethod]
@@ -313,7 +295,7 @@ public class ServicioUnidadesTests
         DatosUnidadDto datos = CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: null);
         datos.UbicacionFisica = "AB";
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Modificar(_idCatalogo, datos, DniFuncionario));
+        Assert.ThrowsException<ServicioException>(() => servicio.Modificar(datos, DniFuncionario));
     }
 
     [TestMethod]
@@ -323,9 +305,9 @@ public class ServicioUnidadesTests
         proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
         ServicioUnidades servicio = CrearServicio(proyector);
 
-        servicio.EnviarAMantenimiento(_idCatalogo, "PRY-0001", DniFuncionario);
+        servicio.EnviarAMantenimiento("PRY-0001", DniFuncionario);
 
-        Assert.AreEqual("EnMantenimiento", ListarTodas(servicio)[0].Estado);
+        Assert.AreEqual("EnMantenimiento", servicio.Listar(null, null)[0].Estado);
     }
 
     [TestMethod]
@@ -338,7 +320,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(proyector);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.EnviarAMantenimiento(_idCatalogo, "PRY-0001", DniFuncionario));
+            servicio.EnviarAMantenimiento("PRY-0001", DniFuncionario));
     }
 
     [TestMethod]
@@ -351,7 +333,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(proyector);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.EnviarAMantenimiento(_idCatalogo, "PRY-0001", DniFuncionario));
+            servicio.EnviarAMantenimiento("PRY-0001", DniFuncionario));
     }
 
     [TestMethod]
@@ -364,9 +346,9 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(proyector);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.EnviarAMantenimiento(_idCatalogo, "PRY-0001", DniFuncionario));
+            servicio.EnviarAMantenimiento("PRY-0001", DniFuncionario));
 
-        Assert.AreEqual("Prestada", ListarTodas(servicio)[0].Estado);
+        Assert.AreEqual(EstadoUnidadFisica.Prestada, unidad.Estado);
     }
 
     [TestMethod]
@@ -376,7 +358,7 @@ public class ServicioUnidadesTests
         proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
         ServicioUnidades servicio = CrearServicio(proyector);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.EnviarAMantenimiento(_idCatalogo, "PRY-0001", DniDocente));
+        Assert.ThrowsException<ServicioException>(() => servicio.EnviarAMantenimiento("PRY-0001", DniDocente));
     }
 
     [TestMethod]
@@ -387,7 +369,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(proyector);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.EnviarAMantenimiento(_idCatalogo, "PRY-0001", DniFuncionarioDesactivado));
+            servicio.EnviarAMantenimiento("PRY-0001", DniFuncionarioDesactivado));
     }
 
     [TestMethod]
@@ -399,9 +381,9 @@ public class ServicioUnidadesTests
         proyector.AgregarUnidad(unidad);
         ServicioUnidades servicio = CrearServicio(proyector);
 
-        servicio.VolverADisponible(_idCatalogo, "PRY-0001", DniFuncionario);
+        servicio.VolverADisponible("PRY-0001", DniFuncionario);
 
-        Assert.AreEqual("Disponible", ListarTodas(servicio)[0].Estado);
+        Assert.AreEqual("Disponible", servicio.Listar(null, null)[0].Estado);
     }
 
     [TestMethod]
@@ -414,7 +396,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(proyector);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.VolverADisponible(_idCatalogo, "PRY-0001", DniFuncionario));
+            servicio.VolverADisponible("PRY-0001", DniFuncionario));
     }
 
     [TestMethod]
@@ -426,7 +408,7 @@ public class ServicioUnidadesTests
         proyector.AgregarUnidad(unidad);
         ServicioUnidades servicio = CrearServicio(proyector);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.VolverADisponible(_idCatalogo, "PRY-0001", DniDocente));
+        Assert.ThrowsException<ServicioException>(() => servicio.VolverADisponible("PRY-0001", DniDocente));
     }
 
     [TestMethod]
@@ -439,7 +421,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(proyector);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.VolverADisponible(_idCatalogo, "PRY-0001", DniFuncionarioDesactivado));
+            servicio.VolverADisponible("PRY-0001", DniFuncionarioDesactivado));
     }
 
     [TestMethod]
@@ -449,9 +431,9 @@ public class ServicioUnidadesTests
         proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
         ServicioUnidades servicio = CrearServicio(proyector);
 
-        servicio.DarDeBaja(_idCatalogo, "PRY-0001", DniFuncionario);
+        servicio.DarDeBaja("PRY-0001", DniFuncionario);
 
-        Assert.AreEqual("DadaDeBaja", ListarTodas(servicio)[0].Estado);
+        Assert.AreEqual("DadaDeBaja", servicio.Listar(null, null)[0].Estado);
     }
 
     [TestMethod]
@@ -463,7 +445,7 @@ public class ServicioUnidadesTests
         proyector.AgregarUnidad(unidad);
         ServicioUnidades servicio = CrearServicio(proyector);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.DarDeBaja(_idCatalogo, "PRY-0001", DniFuncionario));
+        Assert.ThrowsException<ServicioException>(() => servicio.DarDeBaja("PRY-0001", DniFuncionario));
     }
 
     [TestMethod]
@@ -475,7 +457,7 @@ public class ServicioUnidadesTests
         proyector.AgregarUnidad(unidad);
         ServicioUnidades servicio = CrearServicio(proyector);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.DarDeBaja(_idCatalogo, "PRY-0001", DniFuncionario));
+        Assert.ThrowsException<ServicioException>(() => servicio.DarDeBaja("PRY-0001", DniFuncionario));
     }
 
     [TestMethod]
@@ -485,7 +467,7 @@ public class ServicioUnidadesTests
         proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
         ServicioUnidades servicio = CrearServicio(proyector);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.DarDeBaja(_idCatalogo, "PRY-0001", DniDocente));
+        Assert.ThrowsException<ServicioException>(() => servicio.DarDeBaja("PRY-0001", DniDocente));
     }
 
     [TestMethod]
@@ -496,7 +478,7 @@ public class ServicioUnidadesTests
         ServicioUnidades servicio = CrearServicio(proyector);
 
         Assert.ThrowsException<ServicioException>(() =>
-            servicio.DarDeBaja(_idCatalogo, "PRY-0001", DniFuncionarioDesactivado));
+            servicio.DarDeBaja("PRY-0001", DniFuncionarioDesactivado));
     }
 
     [TestMethod]
@@ -509,7 +491,7 @@ public class ServicioUnidadesTests
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Notebook Lenovo", idInstitucional: " EQP-0001 ",
             numeroSerie: null);
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniFuncionario));
     }
 
     [TestMethod]
@@ -522,386 +504,37 @@ public class ServicioUnidadesTests
         DatosUnidadDto datos = CrearDatos(nombreTipo: "Notebook Lenovo", idInstitucional: "NTB-0001",
             numeroSerie: " SN123 ");
 
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
+        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(datos, DniFuncionario));
     }
 
-    [TestMethod]
-    public void Listar_UnidadesDeOtroCatalogo_NoAparecen()
+    private static ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
     {
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
-        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
-        ServicioUnidades servicio = CrearServicio(proyector);
-        TipoEquipamiento proyectorDelOtroCatalogo = CrearTipo("Proyector Epson");
-        proyectorDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0002"));
-        _entorno.GuardarCatalogo("Catalogo Secundario", proyectorDelOtroCatalogo);
-
-        List<UnidadDetalleDto> unidades = ListarTodas(servicio);
-
-        Assert.AreEqual(1, unidades.Count);
-        Assert.AreEqual("PRY-0001", unidades[0].IdInstitucional);
-    }
-
-    [TestMethod]
-    public void Listar_CatalogoDadoDeBaja_LanzaServicioException()
-    {
-        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-        _entorno.DarDeBajaCatalogo(_idCatalogo);
-
-        Assert.ThrowsException<ServicioException>(() => ListarTodas(servicio));
-    }
-
-    [TestMethod]
-    public void Registrar_CatalogoInexistente_LanzaServicioException()
-    {
-        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-        DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
-            numeroSerie: null);
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.Registrar(_idCatalogo + 1, datos, DniFuncionario));
-    }
-
-    [TestMethod]
-    public void Registrar_CatalogoDadoDeBaja_LanzaServicioException()
-    {
-        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-        _entorno.DarDeBajaCatalogo(_idCatalogo);
-        DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
-            numeroSerie: null);
-
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
-    }
-
-    [TestMethod]
-    public void Registrar_TipoDeOtroCatalogo_LanzaServicioException()
-    {
-        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-        _entorno.GuardarCatalogo("Catalogo Secundario", CrearTipo("Notebook Lenovo"));
-        DatosUnidadDto datos = CrearDatos(nombreTipo: "Notebook Lenovo", idInstitucional: "NTB-0001",
-            numeroSerie: null);
-
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
-    }
-
-    [TestMethod]
-    public void Modificar_CatalogoDadoDeBaja_LanzaServicioException()
-    {
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
-        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
-        ServicioUnidades servicio = CrearServicio(proyector);
-        _entorno.DarDeBajaCatalogo(_idCatalogo);
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: null),
-                DniFuncionario));
-    }
-
-    [TestMethod]
-    public void Modificar_UnidadDeOtroCatalogo_LanzaServicioException()
-    {
-        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-        TipoEquipamiento proyectorDelOtroCatalogo = CrearTipo("Proyector Epson");
-        proyectorDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0002"));
-        _entorno.GuardarCatalogo("Catalogo Secundario", proyectorDelOtroCatalogo);
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0002", numeroSerie: null),
-                DniFuncionario));
-    }
-
-    [TestMethod]
-    public void EnviarAMantenimiento_CatalogoDadoDeBaja_LanzaServicioException()
-    {
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
-        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
-        ServicioUnidades servicio = CrearServicio(proyector);
-        _entorno.DarDeBajaCatalogo(_idCatalogo);
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.EnviarAMantenimiento(_idCatalogo, "PRY-0001", DniFuncionario));
-    }
-
-    [TestMethod]
-    public void EnviarAMantenimiento_UnidadDeOtroCatalogo_LanzaServicioException()
-    {
-        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-        TipoEquipamiento proyectorDelOtroCatalogo = CrearTipo("Proyector Epson");
-        proyectorDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0002"));
-        _entorno.GuardarCatalogo("Catalogo Secundario", proyectorDelOtroCatalogo);
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.EnviarAMantenimiento(_idCatalogo, "PRY-0002", DniFuncionario));
-    }
-
-    [TestMethod]
-    public void VolverADisponible_CatalogoDadoDeBaja_LanzaServicioException()
-    {
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
-        UnidadFisica unidad = CrearUnidad(idInstitucional: "PRY-0001");
-        unidad.AMantenimiento();
-        proyector.AgregarUnidad(unidad);
-        ServicioUnidades servicio = CrearServicio(proyector);
-        _entorno.DarDeBajaCatalogo(_idCatalogo);
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.VolverADisponible(_idCatalogo, "PRY-0001", DniFuncionario));
-    }
-
-    [TestMethod]
-    public void DarDeBaja_CatalogoDadoDeBaja_LanzaServicioException()
-    {
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
-        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
-        ServicioUnidades servicio = CrearServicio(proyector);
-        _entorno.DarDeBajaCatalogo(_idCatalogo);
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.DarDeBaja(_idCatalogo, "PRY-0001", DniFuncionario));
-    }
-
-    [TestMethod]
-    public void Listar_UsuarioSinPermiso_LanzaServicioException()
-    {
-        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.Listar(_idCatalogo, new FiltroUnidadesDto(), DniDocente));
-    }
-
-    [TestMethod]
-    public void Listar_UsuarioDesactivado_LanzaServicioException()
-    {
-        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.Listar(_idCatalogo, new FiltroUnidadesDto(), DniFuncionarioDesactivado));
-    }
-
-    [TestMethod]
-    public void Listar_DniInexistente_LanzaServicioException()
-    {
-        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.Listar(_idCatalogo, new FiltroUnidadesDto(), "11111111"));
-    }
-
-    [TestMethod]
-    public void Registrar_DatosValidos_SeLeeConOtroContexto()
-    {
-        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-        DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
-            numeroSerie: "SN123");
-
-        servicio.Registrar(_idCatalogo, datos, DniFuncionario);
-
-        UnidadFisica? guardada = LeerUnidad("PRY-0001");
-        Assert.IsNotNull(guardada);
-        Assert.AreEqual("Deposito A", guardada.UbiFisica);
-        Assert.AreEqual("SN123", guardada.NumSerie);
-    }
-
-    [DataTestMethod]
-    [DataRow("")]
-    [DataRow("   ")]
-    public void Registrar_NumeroDeSerieVacioOConEspacios_SeGuardaNull(string numeroSerie)
-    {
-        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-        DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
-            numeroSerie: numeroSerie);
-
-        servicio.Registrar(_idCatalogo, datos, DniFuncionario);
-
-        Assert.IsNull(LeerUnidad("PRY-0001")!.NumSerie);
-    }
-
-    [TestMethod]
-    public void Registrar_IdInstitucionalRepetidoEnOtroCatalogo_LanzaServicioException()
-    {
-        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-        TipoEquipamiento notebookDelOtroCatalogo = CrearTipo("Notebook Lenovo");
-        notebookDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "EQP-0001"));
-        _entorno.GuardarCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
-        DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "EQP-0001",
-            numeroSerie: null);
-
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
-    }
-
-    [TestMethod]
-    public void Registrar_NumeroDeSerieRepetidoEnOtroCatalogo_LanzaServicioException()
-    {
-        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-        TipoEquipamiento notebookDelOtroCatalogo = CrearTipo("Notebook Lenovo");
-        notebookDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0001", numeroSerie: "SN123"));
-        _entorno.GuardarCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
-        DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
-            numeroSerie: "SN123");
-
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
-    }
-
-    [TestMethod]
-    public void Registrar_NumeroDeSerieConOtrasMayusculasYEspaciosEnOtroCatalogo_LanzaServicioException()
-    {
-        ServicioUnidades servicio = CrearServicio(CrearTipo("Proyector Epson"));
-        TipoEquipamiento notebookDelOtroCatalogo = CrearTipo("Notebook Lenovo");
-        notebookDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0001", numeroSerie: "SN123"));
-        _entorno.GuardarCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
-        DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
-            numeroSerie: " sn123 ");
-
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
-    }
-
-    [TestMethod]
-    public void Modificar_NumeroDeSerieDeUnidadDeOtroCatalogo_LanzaServicioException()
-    {
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
-        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
-        ServicioUnidades servicio = CrearServicio(proyector);
-        TipoEquipamiento notebookDelOtroCatalogo = CrearTipo("Notebook Lenovo");
-        notebookDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0001", numeroSerie: "SN123"));
-        _entorno.GuardarCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: "SN123"),
-                DniFuncionario));
-    }
-
-    [TestMethod]
-    public void Modificar_DatosValidos_SeLeeConOtroContexto()
-    {
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
-        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
-        ServicioUnidades servicio = CrearServicio(proyector);
-
-        servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: "SN999"),
-            DniFuncionario);
-
-        UnidadFisica guardada = LeerUnidad("PRY-0001")!;
-        Assert.AreEqual("Laboratorio 3", guardada.UbiFisica);
-        Assert.AreEqual("SN999", guardada.NumSerie);
-        Assert.AreEqual("Lampara nueva", guardada.Observaciones);
-    }
-
-    [DataTestMethod]
-    [DataRow("")]
-    [DataRow("   ")]
-    public void Modificar_NumeroDeSerieVacioOConEspacios_SeGuardaNull(string numeroSerie)
-    {
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
-        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001", numeroSerie: "SN123"));
-        ServicioUnidades servicio = CrearServicio(proyector);
-
-        servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: numeroSerie),
-            DniFuncionario);
-
-        Assert.IsNull(LeerUnidad("PRY-0001")!.NumSerie);
-    }
-
-    [TestMethod]
-    public void EnviarAMantenimiento_UnidadDisponible_SeLeeConOtroContexto()
-    {
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
-        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
-        ServicioUnidades servicio = CrearServicio(proyector);
-
-        servicio.EnviarAMantenimiento(_idCatalogo, "PRY-0001", DniFuncionario);
-
-        Assert.AreEqual(EstadoUnidadFisica.EnMantenimiento, LeerUnidad("PRY-0001")!.Estado);
-    }
-
-    [TestMethod]
-    public void VolverADisponible_UnidadEnMantenimiento_SeLeeConOtroContexto()
-    {
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
-        UnidadFisica unidad = CrearUnidad(idInstitucional: "PRY-0001");
-        unidad.AMantenimiento();
-        proyector.AgregarUnidad(unidad);
-        ServicioUnidades servicio = CrearServicio(proyector);
-
-        servicio.VolverADisponible(_idCatalogo, "PRY-0001", DniFuncionario);
-
-        Assert.AreEqual(EstadoUnidadFisica.Disponible, LeerUnidad("PRY-0001")!.Estado);
-    }
-
-    [TestMethod]
-    public void DarDeBaja_UnidadDisponible_SeLeeConOtroContexto()
-    {
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
-        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
-        ServicioUnidades servicio = CrearServicio(proyector);
-
-        servicio.DarDeBaja(_idCatalogo, "PRY-0001", DniFuncionario);
-
-        Assert.AreEqual(EstadoUnidadFisica.DadaDeBaja, LeerUnidad("PRY-0001")!.Estado);
-    }
-
-    [TestMethod]
-    public void Registrar_FallaElGuardado_LanzaServicioException()
-    {
-        ServicioUnidades servicio = CrearServicioQueFallaAlGuardar(CrearTipo("Proyector Epson"));
-        DatosUnidadDto datos = CrearDatos(nombreTipo: "Proyector Epson", idInstitucional: "PRY-0001",
-            numeroSerie: "SN123");
-
-        Assert.ThrowsException<ServicioException>(() => servicio.Registrar(_idCatalogo, datos, DniFuncionario));
-    }
-
-    [TestMethod]
-    public void Modificar_FallaElGuardado_LanzaServicioException()
-    {
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
-        proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
-        ServicioUnidades servicio = CrearServicioQueFallaAlGuardar(proyector);
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.Modificar(_idCatalogo, CrearEdicion(idInstitucional: "PRY-0001", numeroSerie: "SN999"),
-                DniFuncionario));
-    }
-
-    [TestMethod]
-    public void Listar_FiltroNull_LanzaArgumentNullException()
-    {
-        ServicioUnidades servicio = CrearServicio();
-
-        Assert.ThrowsException<ArgumentNullException>(() => servicio.Listar(_idCatalogo, null!, DniFuncionario));
-    }
-
-    private ServicioUnidades CrearServicio(params TipoEquipamiento[] tipos)
-    {
+        Memoria memoria = new Memoria();
+        RepositorioCatalogo repositorioCatalogo = new RepositorioCatalogo(memoria);
         Catalogo catalogo = new Catalogo("Catalogo UCD");
         foreach (TipoEquipamiento tipo in tipos)
         {
             catalogo.AgregarTipo(tipo);
         }
 
-        _idCatalogo = _entorno.GuardarCatalogo(catalogo);
+        repositorioCatalogo.Guardar(catalogo);
 
-        _entorno.GuardarUsuario(DniFuncionario, TipoUsuario.FuncionarioCE());
-        _entorno.GuardarUsuario(DniDocente, TipoUsuario.Docente());
-        _entorno.GuardarUsuarioDesactivado(DniFuncionarioDesactivado, TipoUsuario.FuncionarioCE());
-        return new ServicioUnidades(_entorno.Catalogos, _entorno.Usuarios);
+        RepositorioUsuario repositorioUsuario = new RepositorioUsuario(memoria);
+        repositorioUsuario.AgregarUsuario(CrearUsuario(DniFuncionario, "funcionario@ucd.edu.uy",
+            TipoUsuario.FuncionarioCE()));
+        repositorioUsuario.AgregarUsuario(CrearUsuario(DniDocente, "docente@ucd.edu.uy", TipoUsuario.Docente()));
+        Usuario desactivado = CrearUsuario(DniFuncionarioDesactivado, "desactivado@ucd.edu.uy",
+            TipoUsuario.FuncionarioCE());
+        desactivado.Desactivar();
+        repositorioUsuario.AgregarUsuario(desactivado);
+        return new ServicioUnidades(repositorioCatalogo, repositorioUsuario);
     }
 
-    private UnidadFisica? LeerUnidad(string idInstitucional)
+    private static Usuario CrearUsuario(string dni, string correo, TipoUsuario tipo)
     {
-        using SqlContext lectura = _entorno.NuevoContexto();
-        Catalogo catalogo = new RepositorioCatalogoSql(lectura).ObtenerCatalogoActivoPorId(_idCatalogo)!;
-        return catalogo.Tipos.SelectMany(tipo => tipo.Unidades)
-            .FirstOrDefault(unidad => unidad.IdInstitucional == idInstitucional);
-    }
-
-    private ServicioUnidades CrearServicioQueFallaAlGuardar(params TipoEquipamiento[] tipos)
-    {
-        CrearServicio(tipos);
-        SqlContext contexto = _entorno.NuevoContextoQueFallaAlGuardar();
-        return new ServicioUnidades(new RepositorioCatalogoSql(contexto), new RepositorioUsuarioSql(contexto));
-    }
-
-    private List<UnidadDetalleDto> ListarTodas(ServicioUnidades servicio)
-    {
-        return servicio.Listar(_idCatalogo, new FiltroUnidadesDto(), DniFuncionario);
+        Usuario usuario = new Usuario(dni, "Nombre", "Apellido", correo, "VivaLaOrt2026");
+        usuario.AsignarTipo(tipo);
+        return usuario;
     }
 
     private static TipoEquipamiento CrearTipo(string nombre)

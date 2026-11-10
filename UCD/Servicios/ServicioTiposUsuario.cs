@@ -8,10 +8,10 @@ namespace Servicios;
 // su descripcion, imagen y topes. No se crean ni eliminan tipos, ni se cambia su nombre o permisos (foro 2.1).
 public class ServicioTiposUsuario
 {
-    private readonly RepositorioTipoUsuarioSql _repositorioTipos;
-    private readonly RepositorioUsuarioSql _repositorioUsuarios;
+    private readonly RepositorioTipoUsuario _repositorioTipos;
+    private readonly RepositorioUsuario _repositorioUsuarios;
 
-    public ServicioTiposUsuario(RepositorioTipoUsuarioSql repositorioTipos, RepositorioUsuarioSql repositorioUsuarios)
+    public ServicioTiposUsuario(RepositorioTipoUsuario repositorioTipos, RepositorioUsuario repositorioUsuarios)
     {
         _repositorioTipos = repositorioTipos;
         _repositorioUsuarios = repositorioUsuarios;
@@ -44,14 +44,14 @@ public class ServicioTiposUsuario
 
             tipo.Modificar(dto.Descripcion, dto.Imagen, topes);
         });
-        _repositorioTipos.ActualizarTipo(tipo);
     }
 
     private void ValidarQueSeaAdministradorActivo(string dniResponsable)
     {
         Usuario? responsable = _repositorioUsuarios.ObtenerUsuarioPorDni(dniResponsable);
 
-        if (responsable is null || !responsable.PuedeGestionarUsuarios())
+        if (responsable is null || responsable.Estado != EstadoUsuario.Activo
+            || !responsable.TienePermiso(Permiso.GestionarUsuarios))
         {
             throw new ServicioException("Solo un administrador activo puede gestionar los tipos de usuario");
         }

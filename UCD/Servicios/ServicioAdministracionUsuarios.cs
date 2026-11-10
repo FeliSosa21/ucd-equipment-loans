@@ -13,27 +13,25 @@ public class ServicioAdministracionUsuarios
 {
     public const string ContrasenaPredeterminada = "Ucd12345";
     public static readonly string NombreTipoAdministrador = TipoUsuario.Administrador().Nombre;
-    public static readonly string NombreTipoPendiente = TipoUsuario.SinPermisos().Nombre;
+    public const int TamanoPagina = 50;
     private const string MensajeSoloAdministrador = "Solo un administrador activo puede gestionar usuarios";
 
-    private readonly RepositorioUsuarioSql _repositorio;
+    private readonly RepositorioUsuario _repositorio;
     private readonly ServicioUsuario _servicioUsuario;
-    private readonly RepositorioTipoUsuarioSql _repositorioTipos;
-    private readonly RegistradorDeAuditoria _auditoria;
+    private readonly RepositorioTipoUsuario _repositorioTipos;
 
-    public ServicioAdministracionUsuarios(RepositorioUsuarioSql repositorio, ServicioUsuario servicioUsuario,
-        RepositorioTipoUsuarioSql repositorioTipos, RegistradorDeAuditoria auditoria)
+    public ServicioAdministracionUsuarios(RepositorioUsuario repositorio, ServicioUsuario servicioUsuario,
+        RepositorioTipoUsuario repositorioTipos)
     {
         _repositorio = repositorio;
         _servicioUsuario = servicioUsuario;
         _repositorioTipos = repositorioTipos;
-        _auditoria = auditoria;
     }
 
     public void CrearUsuario(UsuarioDto dto, string nombreTipo, string dniResponsable)
     {
         ArgumentNullException.ThrowIfNull(dto);
-        Usuario administrador = ObtenerAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
+        ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         TipoUsuario tipo = ObtenerTipo(nombreTipo);
 
         Usuario creado = _servicioUsuario.Agregar(new UsuarioDto
@@ -47,22 +45,21 @@ public class ServicioAdministracionUsuarios
 
         creado.AsignarTipo(tipo);
         creado.ExigirCambioDeContrasena();
-        _repositorio.ActualizarUsuario(creado);
-        _auditoria.RegistrarDeUsuario(AccionAuditada.AltaDeUsuario, administrador,
-            $"Alta de {creado.NombreCompletoConDni} como {tipo.Nombre}");
     }
 
-    public List<UsuarioResumenDto> ListarUsuarios(FiltroUsuariosDto filtro, string dniResponsable)
+    public PaginaDto<UsuarioResumenDto> ListarUsuarios(string dniResponsable, string? busqueda, int pagina)
     {
-        ArgumentNullException.ThrowIfNull(filtro);
+        ArgumentOutOfRangeException.ThrowIfLessThan(pagina, 1);
         ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
+        int total = _repositorio.ContarUsuarios(busqueda);
 
-        return _repositorio.ObtenerUsuarios(CrearFiltro(filtro)).Select(CrearResumen).ToList();
-    }
-
-    public bool TieneCriterios(FiltroUsuariosDto filtro)
-    {
-        return CrearFiltro(filtro).TieneCriterios();
+        return new PaginaDto<UsuarioResumenDto>
+        {
+            Elementos = _repositorio.ObtenerPaginaDeUsuarios(busqueda, pagina, TamanoPagina).Select(CrearResumen).ToList(),
+            Pagina = pagina,
+            HayPaginaAnterior = pagina > 1,
+            HayPaginaSiguiente = pagina * TamanoPagina < total
+        };
     }
 
     public List<string> NombresDeTipos()
@@ -73,20 +70,9 @@ public class ServicioAdministracionUsuarios
     public void AsignarTipo(string dni, string nombreTipo, string dniResponsable)
     {
         ValidarQueNoSeaElMismo(dni, dniResponsable, "Un administrador no puede cambiar su propio tipo");
-        Usuario administrador = ObtenerAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
+        ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         Usuario usuario = ObtenerUsuario(dni);
-        string tipoAnterior = usuario.Tipo.Nombre;
-        TipoUsuario tipoNuevo = ObtenerTipo(nombreTipo);
-
-        if (usuario.TieneTipo(tipoNuevo))
-        {
-            return;
-        }
-
-        usuario.AsignarTipo(tipoNuevo);
-        _repositorio.ActualizarUsuario(usuario);
-        _auditoria.RegistrarDeUsuario(AccionAuditada.CambioDeTipoDeUsuario, administrador,
-            $"{usuario.NombreCompletoConDni} pasó de {tipoAnterior} a {tipoNuevo.Nombre}");
+        usuario.AsignarTipo(ObtenerTipo(nombreTipo));
     }
 
     public UsuarioResumenDto ObtenerResumen(string dni, string dniResponsable)
@@ -108,40 +94,20 @@ public class ServicioAdministracionUsuarios
         }
 
         TraduccionDeErrores.Ejecutar(() => usuario.ModificarDatos(datos.Nombre, datos.Apellido, datos.Correo));
-        _repositorio.ActualizarUsuario(usuario);
     }
 
     public void Desactivar(string dni, string dniResponsable)
     {
         ValidarQueNoSeaElMismo(dni, dniResponsable, "Un administrador no puede desactivarse a si mismo");
-        Usuario administrador = ObtenerAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
-        Usuario usuario = ObtenerUsuario(dni);
-
-        if (!usuario.EstaActivo())
-        {
-            return;
-        }
-
-        usuario.Desactivar();
-        _repositorio.ActualizarUsuario(usuario);
-        _auditoria.RegistrarDeUsuario(AccionAuditada.DesactivacionDeUsuario, administrador,
-            $"Se desactivó la cuenta de {usuario.NombreCompletoConDni}");
+        ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
+        ObtenerUsuario(dni).Desactivar();
     }
 
     public void Reactivar(string dni, string dniResponsable)
     {
-        Usuario administrador = ObtenerAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
+        ValidarQueSeaAdministradorActivo(dniResponsable, MensajeSoloAdministrador);
         Usuario usuario = ObtenerUsuario(dni);
-
-        if (usuario.EstaActivo())
-        {
-            return;
-        }
-
         TraduccionDeErrores.Ejecutar(() => usuario.Reactivar());
-        _repositorio.ActualizarUsuario(usuario);
-        _auditoria.RegistrarDeUsuario(AccionAuditada.ReactivacionDeUsuario, administrador,
-            $"Se reactivó la cuenta de {usuario.NombreCompletoConDni}");
     }
 
     // El mismo usuario puede ver y modificar sus datos mientras siga activo; a otro, solo un administrador.
@@ -159,19 +125,12 @@ public class ServicioAdministracionUsuarios
 
     private void ValidarQueSeaAdministradorActivo(string dniResponsable, string mensaje)
     {
-        ObtenerAdministradorActivo(dniResponsable, mensaje);
-    }
-
-    private Usuario ObtenerAdministradorActivo(string dniResponsable, string mensaje)
-    {
         Usuario? responsable = _repositorio.ObtenerUsuarioPorDni(dniResponsable);
 
-        if (responsable is null || !responsable.PuedeGestionarUsuarios())
+        if (responsable is null || !PuedeGestionarUsuarios(responsable))
         {
             throw new ServicioException(mensaje);
         }
-
-        return responsable;
     }
 
     private void ValidarQueEsteActivo(string dni)
@@ -192,13 +151,9 @@ public class ServicioAdministracionUsuarios
         }
     }
 
-    private FiltroUsuarios CrearFiltro(FiltroUsuariosDto filtro)
+    private static bool PuedeGestionarUsuarios(Usuario usuario)
     {
-        return new FiltroUsuarios
-        {
-            Texto = filtro.Texto,
-            Tipo = string.IsNullOrWhiteSpace(filtro.NombreTipo) ? null : ObtenerTipo(filtro.NombreTipo)
-        };
+        return usuario.Estado == EstadoUsuario.Activo && usuario.TienePermiso(Permiso.GestionarUsuarios);
     }
 
     private TipoUsuario ObtenerTipo(string nombreTipo)
