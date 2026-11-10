@@ -23,6 +23,7 @@ public class ServicioHistorico
 
     public List<MovimientoDto> ListarMovimientos(int idCatalogo, FiltroMovimientosDto filtro, string dniUsuario)
     {
+        ArgumentNullException.ThrowIfNull(filtro);
         OperacionesComunes.ValidarResponsable(_usuarios.ObtenerUsuarioPorDni(dniUsuario), Permiso.ConsultarHistorico,
             MensajeSinPermiso);
         Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_catalogos, idCatalogo);
