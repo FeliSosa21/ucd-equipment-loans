@@ -28,6 +28,11 @@ public class Notificacion
         EstaLeida = true;
     }
 
+    public bool EsDe(string dni)
+    {
+        return false;
+    }
+
     private static void ValidarPrestamo(Prestamo prestamo)
     {
         if (prestamo is null)

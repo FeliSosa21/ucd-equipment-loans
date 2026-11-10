@@ -4,6 +4,7 @@ namespace Dominio.Tests;
 public sealed class NotificacionTests
 {
     private static readonly DateTime FechaFija = new(2026, 11, 10, 9, 0, 0);
+    private const string DniSolicitante = "12345672";
 
     [TestMethod]
     public void Constructor_DatosValidos_QuedaSinLeerConSuPrestamoTipoYFechaHora()
@@ -53,6 +54,16 @@ public sealed class NotificacionTests
         Assert.IsTrue(notificacion.EstaLeida);
     }
 
+    [TestMethod]
+    public void EsDe_DniDelSolicitante_DevuelveTrue()
+    {
+        Notificacion notificacion = CrearNotificacion();
+
+        bool esDelSolicitante = notificacion.EsDe(DniSolicitante);
+
+        Assert.IsTrue(esDelSolicitante);
+    }
+
     private static Notificacion CrearNotificacion()
     {
         return new Notificacion(CrearPrestamo(), TipoNotificacion.PrestamoVencido, FechaFija);
@@ -68,7 +79,7 @@ public sealed class NotificacionTests
 
     private static Usuario CrearSolicitante()
     {
-        return new Usuario(dni: "12345672", nombre: "Renato", apellido: "Alves", correo: "renato.alves@ejemplo.com",
+        return new Usuario(dni: DniSolicitante, nombre: "Renato", apellido: "Alves", correo: "renato.alves@ejemplo.com",
             contrasena: "VivalaOrt2026");
     }
 }
