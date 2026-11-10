@@ -18,15 +18,15 @@ public class ServicioDevolucion
             { "Dañada", CondicionDevolucion.Daniada }
         };
 
-    private readonly RepositorioPrestamo _prestamos;
-    private readonly RepositorioUsuario _usuarios;
-    private readonly RepositorioDevolucion _devoluciones;
-    private readonly RepositorioMovimiento _movimientos;
+    private readonly RepositorioPrestamoSql _prestamos;
+    private readonly RepositorioUsuarioSql _usuarios;
+    private readonly RepositorioDevolucionSql _devoluciones;
+    private readonly RepositorioMovimientoSql _movimientos;
     private readonly TimeProvider _reloj;
     private readonly RegistradorDeAuditoria _auditoria;
 
-    public ServicioDevolucion(RepositorioPrestamo prestamos, RepositorioUsuario usuarios,
-        RepositorioDevolucion devoluciones, RepositorioMovimiento movimientos, TimeProvider reloj,
+    public ServicioDevolucion(RepositorioPrestamoSql prestamos, RepositorioUsuarioSql usuarios,
+        RepositorioDevolucionSql devoluciones, RepositorioMovimientoSql movimientos, TimeProvider reloj,
         RegistradorDeAuditoria auditoria)
     {
         _prestamos = prestamos;
