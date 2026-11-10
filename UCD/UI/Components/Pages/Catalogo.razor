@@ -21,10 +21,13 @@
 
 @if (!HayCatalogoElegido())
 {
-    <div class="card">
-        <EstadoVacio Titulo="Elegí un catálogo para ver su equipamiento"
-                     Mensaje="Cada catálogo tiene sus propios tipos de equipamiento y unidades." />
-    </div>
+    @if (HayCatalogosParaElegir())
+    {
+        <div class="card">
+            <EstadoVacio Titulo="Elegí un catálogo para ver su equipamiento"
+                         Mensaje="Cada catálogo tiene sus propios tipos de equipamiento y unidades." />
+        </div>
+    }
 }
 else
 {

@@ -21,10 +21,13 @@
 
 @if (!HayCatalogoElegido())
 {
-    <div class="card">
-        <EstadoVacio Titulo="Elegí un catálogo para ver su inventario"
-                     Mensaje="Cada catálogo tiene sus propias unidades, contadas por estado." />
-    </div>
+    @if (HayCatalogosParaElegir())
+    {
+        <div class="card">
+            <EstadoVacio Titulo="Elegí un catálogo para ver su inventario"
+                         Mensaje="Cada catálogo tiene sus propias unidades, contadas por estado." />
+        </div>
+    }
 }
 else
 {

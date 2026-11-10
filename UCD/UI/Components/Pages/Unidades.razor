@@ -27,10 +27,13 @@
 
 @if (!HayCatalogoElegido())
 {
-    <div class="card">
-        <EstadoVacio Titulo="Elegí un catálogo para ver sus unidades"
-                     Mensaje="Cada catálogo tiene sus propias unidades físicas." />
-    </div>
+    @if (HayCatalogosParaElegir())
+    {
+        <div class="card">
+            <EstadoVacio Titulo="Elegí un catálogo para ver sus unidades"
+                         Mensaje="Cada catálogo tiene sus propias unidades físicas." />
+        </div>
+    }
 }
 else
 {

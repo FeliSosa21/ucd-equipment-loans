@@ -21,6 +21,9 @@ public partial class SelectorCatalogo
     [Parameter] public int IdCatalogo { get; set; } = SinCatalogo;
     [Parameter] public EventCallback<int> IdCatalogoChanged { get; set; }
 
+    // Lo consulta la pagina (por el @ref) para no pedir que elija cuando no hay nada para elegir.
+    public bool HayCatalogos => _catalogos.Count > 0;
+
     protected override async Task OnInitializedAsync()
     {
         if (!SesionActual.EstaIniciada)
