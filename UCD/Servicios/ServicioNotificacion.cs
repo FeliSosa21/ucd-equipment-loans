@@ -76,6 +76,8 @@ public class ServicioNotificacion
 
     public void RegistrarResultadoDeEvaluacion(Prestamo prestamo, DateTime fechaHoraEvaluacion)
     {
+        ArgumentNullException.ThrowIfNull(prestamo);
+
         TipoNotificacion tipo = prestamo.Estado switch
         {
             EstadoPrestamo.Activo => TipoNotificacion.SolicitudAprobada,
