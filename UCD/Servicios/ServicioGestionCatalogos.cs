@@ -6,6 +6,8 @@ namespace Servicios;
 
 public class ServicioGestionCatalogos
 {
+    private const string CampoNombre = nameof(CatalogoDto.Nombre);
+
     private readonly RepositorioCatalogoSql _repositorioCatalogo;
     private readonly RepositorioUsuarioSql _repositorioUsuario;
     private readonly RepositorioPrestamoSql _repositorioPrestamo;
@@ -26,6 +28,10 @@ public class ServicioGestionCatalogos
     public void Crear(string nombre, string dniResponsable)
     {
         string nombreNormalizado = OperacionesComunes.Normalizar(nombre);
+        if (_repositorioCatalogo.ExisteActivoConNombre(nombreNormalizado, null))
+        {
+            throw new ServicioException(CampoNombre, "Ya existe un catalogo con ese nombre");
+        }
 
         _repositorioCatalogo.AgregarCatalogo(new Catalogo(nombreNormalizado));
     }
