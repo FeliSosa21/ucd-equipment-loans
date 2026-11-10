@@ -96,6 +96,8 @@ public class ServicioPrestamo
 
     public List<PrestamoDto> ListarPrestamos(string dniConsultante, FiltroDePrestamosDto filtro)
     {
+        ArgumentNullException.ThrowIfNull(filtro);
+
         ObtenerUsuarioHabilitado(dniConsultante, Permiso.ConsultarPrestamos, MensajeSinPermisoParaConsultarPrestamos);
         ValidarRango(filtro);
 
