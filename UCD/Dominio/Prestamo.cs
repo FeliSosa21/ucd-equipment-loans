@@ -90,7 +90,7 @@ public class Prestamo
 
     public bool EstaVencido(DateTime ahora)
     {
-        return false;
+        return true;
     }
 
     private static void ValidarSolicitante(Usuario solicitante)
