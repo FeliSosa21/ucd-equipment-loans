@@ -5,6 +5,10 @@ namespace Servicios;
 
 public class CargaInicialSql
 {
+    public const string DniRoot = "11111111";
+    public const string CorreoRoot = "root@ucd.edu.uy";
+    public const string ContrasenaRoot = "Root2026";
+
     private const string NombreTipoAdministrador = "Administrador";
 
     private readonly RepositorioUsuarioSql _repositorioUsuario;
@@ -18,17 +22,18 @@ public class CargaInicialSql
 
     public void CargarRoot()
     {
-        if (_repositorioUsuario.ObtenerUsuarioPorDni(CargaInicial.DniRoot) != null)
+        if (_repositorioUsuario.ObtenerUsuarioPorDni(DniRoot) != null)
         {
             return;
         }
 
         TipoUsuario administrador = _repositorioTipoUsuario.ObtenerTipoPorNombre(NombreTipoAdministrador)
-            ?? throw new ServicioException("No se puede crear el root: falta el tipo Administrador. " +
-                "Ejecute el script de datos de instalacion antes de iniciar la aplicacion.");
+            ?? throw new InvalidOperationException("Falta el tipo de usuario Administrador. Ejecute el script de " +
+                "datos de la carpeta Respaldos antes de iniciar la aplicación " +
+                "(ver sección Instalación de la documentación).");
 
-        Usuario root = new Usuario(dni: CargaInicial.DniRoot, nombre: "Root", apellido: "Admin",
-            correo: CargaInicial.CorreoRoot, contrasena: CargaInicial.ContrasenaRoot);
+        Usuario root = new Usuario(dni: DniRoot, nombre: "Root", apellido: "Admin",
+            correo: CorreoRoot, contrasena: ContrasenaRoot);
         root.AsignarTipo(administrador);
         _repositorioUsuario.AgregarUsuario(root);
     }
