@@ -59,6 +59,17 @@ public sealed class ServicioNotificacionTests
         Assert.AreEqual(0, LeerNoLeidasDe(DniDocente).Count);
     }
 
+    [TestMethod]
+    public void GenerarNotificacionesDeVencidos_PrestamoDevuelto_NoCreaNinguna()
+    {
+        GuardarPrestamoDevuelto(PedidoQueVencioAyer);
+        ServicioNotificacion servicio = CrearServicio();
+
+        servicio.GenerarNotificacionesDeVencidos(DniDocente);
+
+        Assert.AreEqual(0, LeerNoLeidasDe(DniDocente).Count);
+    }
+
     private ServicioNotificacion CrearServicio()
     {
         return new ServicioNotificacion(
@@ -84,6 +95,16 @@ public sealed class ServicioNotificacionTests
         new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
 
         return prestamo.Id;
+    }
+
+    private void GuardarPrestamoDevuelto(DateTime fechaHoraPedido)
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
+        Prestamo prestamo = CrearPrestamo(preparacion, fechaHoraPedido);
+        prestamo.Activar(prestamo.TipoEquipamiento.Unidades.ToList());
+        prestamo.UnidadesAsignadas[0].Disponible();
+        prestamo.MarcarDevuelto();
+        new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
     }
 
     private static Prestamo CrearPrestamo(SqlContext preparacion, DateTime fechaHoraPedido)
