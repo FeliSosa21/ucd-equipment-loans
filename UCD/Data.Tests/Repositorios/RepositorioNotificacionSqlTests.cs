@@ -160,6 +160,23 @@ public sealed class RepositorioNotificacionSqlTests
         Assert.AreEqual("Proyector Epson", leida.Prestamo.TipoEquipamiento.Nombre);
     }
 
+    [TestMethod]
+    public void ActualizarNotificacion_MarcadaComoLeida_OtroContextoLaLeeLeida()
+    {
+        Notificacion notificacion = CrearNotificacionDeVencido(CrearPrestamoActivo(DniSolicitante));
+        GuardarConOtroContexto(notificacion);
+
+        using (SqlContext contextoQueModifica = new SqlContext(_opciones))
+        {
+            RepositorioNotificacionSql repositorio = new RepositorioNotificacionSql(contextoQueModifica);
+            Notificacion guardada = repositorio.ObtenerNotificacionPorId(notificacion.Id)!;
+            guardada.MarcarComoLeida();
+            repositorio.ActualizarNotificacion(guardada);
+        }
+
+        Assert.IsTrue(LeerNotificacionPorId(notificacion.Id)!.EstaLeida);
+    }
+
     private Notificacion? LeerNotificacionPorId(int id)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);

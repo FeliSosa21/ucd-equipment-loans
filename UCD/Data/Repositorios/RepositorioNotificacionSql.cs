@@ -48,4 +48,8 @@ public class RepositorioNotificacionSql
     {
         return NotificacionesConSolicitanteYTipo.FirstOrDefault(notificacion => notificacion.Id == id);
     }
+
+    public void ActualizarNotificacion(Notificacion notificacion)
+    {
+    }
 }
