@@ -349,6 +349,25 @@ public class ServicioGestionCatalogosTests
         Assert.ThrowsException<ServicioException>(() => servicio.Eliminar(id, DniDesactivado));
     }
 
+    [TestMethod]
+    public void Listar_UsuarioConPermiso_DevuelveSoloLosActivosOrdenadosPorNombre()
+    {
+        int idAulas = _entorno.GuardarCatalogo(new Catalogo("Aulas"));
+        int idLaboratorio = _entorno.GuardarCatalogo(new Catalogo(NombreValido));
+        Catalogo eliminado = new Catalogo("Zeta");
+        eliminado.DarDeBaja();
+        _entorno.GuardarCatalogo(eliminado);
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        List<CatalogoDto> catalogos = servicio.Listar(DniSupervisor);
+
+        Assert.AreEqual(2, catalogos.Count);
+        Assert.AreEqual(idAulas, catalogos[0].Id);
+        Assert.AreEqual("Aulas", catalogos[0].Nombre);
+        Assert.AreEqual(idLaboratorio, catalogos[1].Id);
+        Assert.AreEqual(NombreValido, catalogos[1].Nombre);
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
