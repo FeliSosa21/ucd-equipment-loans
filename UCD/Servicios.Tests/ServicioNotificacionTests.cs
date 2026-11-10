@@ -150,6 +150,19 @@ public sealed class ServicioNotificacionTests
         Assert.AreEqual("Tu solicitud de Proyector Epson del 02/11/2026 fue aprobada.", notificaciones[0].Texto);
     }
 
+    [TestMethod]
+    public void ListarNoLeidas_SolicitudRechazada_ElTextoLlevaElMotivo()
+    {
+        Guid idPrestamo = GuardarPrestamoRechazadoPorFaltaDeUnidades(PedidoQueVencioAyer);
+        GuardarNotificacion(idPrestamo, TipoNotificacion.SolicitudRechazada);
+        ServicioNotificacion servicio = CrearServicio();
+
+        NotificacionDto notificacion = servicio.ListarNoLeidas(DniDocente).Single();
+
+        Assert.AreEqual("Tu solicitud de Proyector Epson del 02/11/2026 fue rechazada. " +
+                        "Motivo: No hay unidades suficientes para el tipo de equipamiento", notificacion.Texto);
+    }
+
     private ServicioNotificacion CrearServicio()
     {
         return CrearServicioSobre(_contexto, NullLogger<ServicioNotificacion>.Instance);
@@ -209,6 +222,16 @@ public sealed class ServicioNotificacionTests
         prestamo.UnidadesAsignadas[0].Disponible();
         prestamo.MarcarDevuelto();
         new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
+    }
+
+    private Guid GuardarPrestamoRechazadoPorFaltaDeUnidades(DateTime fechaHoraPedido)
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
+        Prestamo prestamo = CrearPrestamo(preparacion, fechaHoraPedido);
+        prestamo.RechazarPorFaltaDeUnidades();
+        new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
+
+        return prestamo.Id;
     }
 
     private static Prestamo CrearPrestamo(SqlContext preparacion, DateTime fechaHoraPedido)
