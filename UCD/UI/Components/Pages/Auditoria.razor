@@ -3,6 +3,7 @@
 @using Servicios
 @inherits PaginaConSesion
 @inject ServicioHistorico ServicioHistorico
+@inject ServicioCatalogo ServicioCatalogo
 
 <PageTitle>UCD · Registro histórico</PageTitle>
 
@@ -10,6 +11,11 @@
     <h1>Registro histórico</h1>
     <p>Solicitudes, aprobaciones, rechazos, préstamos y devoluciones registrados en el sistema. Los movimientos no se pueden modificar ni eliminar.</p>
 </div>
+
+@if (_error is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_error</div>
+}
 
 <div class="toolbar">
     <div>
