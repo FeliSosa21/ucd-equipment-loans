@@ -1,4 +1,5 @@
 using Dominio;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositorios;
 
@@ -20,6 +21,10 @@ public class RepositorioNotificacionSql
     public IReadOnlyList<Notificacion> ObtenerNoLeidasDeUsuario(string dni)
     {
         return _contexto.Notificaciones
+            .Include(notificacion => notificacion.Prestamo)
+            .ThenInclude(prestamo => prestamo.Solicitante)
+            .Include(notificacion => notificacion.Prestamo)
+            .ThenInclude(prestamo => prestamo.TipoEquipamiento)
             .Where(notificacion => notificacion.Prestamo.Solicitante.Dni == dni)
             .ToList();
     }
