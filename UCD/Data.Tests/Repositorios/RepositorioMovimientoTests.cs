@@ -85,6 +85,27 @@ public sealed class RepositorioMovimientoTests
     }
 
     [TestMethod]
+    public void ObtenerMovimientos_FiltroPorFechas_DelMasRecienteAlMasViejoYEnEmpateElUltimoRegistrado()
+    {
+        RepositorioMovimiento repositorio = new RepositorioMovimiento(new Memoria());
+        Movimiento masViejo = CrearMovimiento(idInstitucional: "EQP-0001", FechaFija);
+        Movimiento masReciente = CrearMovimiento(idInstitucional: "EQP-0002", FechaFija.AddDays(2));
+        Movimiento intermedio = CrearMovimiento(idInstitucional: "EQP-0003", FechaFija.AddDays(1));
+        Movimiento empatadoConElMasReciente = CrearMovimiento(idInstitucional: "EQP-0004", FechaFija.AddDays(2));
+        repositorio.AgregarMovimiento(masViejo);
+        repositorio.AgregarMovimiento(masReciente);
+        repositorio.AgregarMovimiento(intermedio);
+        repositorio.AgregarMovimiento(empatadoConElMasReciente);
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { Desde = FechaFija, Hasta = FechaFija.AddDays(3) };
+
+        IReadOnlyList<Movimiento> resultado = repositorio.ObtenerMovimientos(filtro);
+
+        CollectionAssert.AreEqual(
+            new List<Movimiento> { empatadoConElMasReciente, masReciente, intermedio, masViejo },
+            resultado.ToList());
+    }
+
+    [TestMethod]
     public void AgregarMovimiento_MovimientoNulo_LanzaArgumentNullException()
     {
         Memoria memoria = new Memoria();
@@ -133,6 +154,11 @@ public sealed class RepositorioMovimientoTests
 
     private static Movimiento CrearMovimiento(string idInstitucional)
     {
+        return CrearMovimiento(idInstitucional, FechaFija);
+    }
+
+    private static Movimiento CrearMovimiento(string idInstitucional, DateTime fechaHora)
+    {
         Usuario evaluador = CrearEvaluador();
         UnidadFisica unidad = CrearUnidad(idInstitucional: idInstitucional);
         TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",
@@ -141,6 +167,6 @@ public sealed class RepositorioMovimientoTests
         Prestamo prestamo = new Prestamo(CrearSolicitante(), tipo, cantidadSolicitada: 1, fechaHoraPrestamo: FechaFija);
         prestamo.Aprobar(evaluador, new List<UnidadFisica> { unidad });
 
-        return Movimiento.DePrestamo(prestamo, RegistroDeAccion.DeUsuario(evaluador, FechaFija), unidad);
+        return Movimiento.DePrestamo(prestamo, RegistroDeAccion.DeUsuario(evaluador, fechaHora), unidad);
     }
 }
