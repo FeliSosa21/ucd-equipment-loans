@@ -1,5 +1,6 @@
 using DTOs;
 using Servicios;
+using UI.Components.Shared;
 using UI.Presentacion;
 using UI.Sesion;
 
@@ -18,7 +19,8 @@ public partial class Unidades
     private string _tipoEditando = string.Empty;
     private DatosUnidadDto _datos = new DatosUnidadDto();
     private UnidadDetalleDto? _aDarDeBaja;
-    private int _idCatalogo;
+    private int _idCatalogo = SelectorCatalogo.SinCatalogo;
+    private SelectorCatalogo? _selector;
     private string? _error;
     private string? _exito;
 
@@ -28,32 +30,31 @@ public partial class Unidades
         {
             return;
         }
-
-        ResolverCatalogoProvisorio();
-        Recargar();
     }
 
-    // Provisorio hasta que exista el selector de catalogo (T4): el primer catalogo activo.
-    private void ResolverCatalogoProvisorio()
+    private bool HayCatalogoElegido()
     {
-        try
-        {
-            List<CatalogoDto> catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
-            if (catalogos.Count > 0)
-            {
-                _idCatalogo = catalogos[0].Id;
-            }
-        }
-        catch (ServicioException ex)
-        {
-            _error = ex.Message;
-        }
+        return _idCatalogo != SelectorCatalogo.SinCatalogo;
     }
 
+    private async Task AlCambiarCatalogoAsync()
+    {
+        CerrarTodo();
+        // El tipo elegido en el filtro es de otro catalogo: no existe en el nuevo.
+        _tipoFiltro = string.Empty;
+        if (!HayCatalogoElegido())
+        {
+            _tipos = new List<TipoEquipamientoDetalleDto>();
+            _unidades = new List<UnidadDetalleDto>();
+            return;
+        }
+
+        await RecargarAsync();
+    }
 
     // ---------- Listado y filtros ----------
 
-    private void Recargar()
+    private async Task RecargarAsync()
     {
         try
         {
@@ -68,22 +69,34 @@ public partial class Unidades
         catch (ServicioException ex)
         {
             _unidades = new List<UnidadDetalleDto>();
-            _error = ex.Message;
+            await MostrarErrorYRecargarSelectorAsync(ex.Message);
         }
     }
 
-    // Al cambiar un filtro no queda en pantalla el mensaje de la accion anterior.
-    private void Filtrar()
+    // Si el catalogo se dio de baja con la pagina abierta, el selector se actualiza antes de mostrar el mensaje:
+    // al avisar el selector que ya no hay catalogo elegido, la pagina limpia el error anterior.
+    private async Task MostrarErrorYRecargarSelectorAsync(string mensaje)
     {
-        LimpiarMensajes();
-        Recargar();
+        if (_selector is not null)
+        {
+            await _selector.RecargarAsync();
+        }
+
+        _error = mensaje;
     }
 
-    private void LimpiarFiltros()
+    // Al cambiar un filtro no queda en pantalla el mensaje de la accion anterior.
+    private async Task FiltrarAsync()
+    {
+        LimpiarMensajes();
+        await RecargarAsync();
+    }
+
+    private async Task LimpiarFiltrosAsync()
     {
         _tipoFiltro = string.Empty;
         _estadoFiltro = string.Empty;
-        Filtrar();
+        await FiltrarAsync();
     }
 
     private bool HayFiltrosAplicados()
@@ -152,7 +165,7 @@ public partial class Unidades
         return true;
     }
 
-    private void Guardar()
+    private async Task GuardarAsync()
     {
         // Un doble clic manda dos envios: el segundo llega con el formulario ya cerrado.
         if (!_mostrarFormulario)
@@ -182,7 +195,7 @@ public partial class Unidades
             _error = ex.Message;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
     private void CancelarFormulario()
@@ -193,7 +206,7 @@ public partial class Unidades
 
     // ---------- Cambios de estado ----------
 
-    private void EnviarAMantenimiento(UnidadDetalleDto unidad)
+    private async Task EnviarAMantenimientoAsync(UnidadDetalleDto unidad)
     {
         // Un doble clic manda dos envios: el segundo llega con la unidad ya en mantenimiento.
         if (!SigueEnEstado(unidad, EstadosCatalogo.UnidadDisponible))
@@ -212,10 +225,10 @@ public partial class Unidades
             _error = ex.Message;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
-    private void VolverADisponible(UnidadDetalleDto unidad)
+    private async Task VolverADisponibleAsync(UnidadDetalleDto unidad)
     {
         // Un doble clic manda dos envios: el segundo llega con la unidad ya disponible.
         if (!SigueEnEstado(unidad, EstadosCatalogo.UnidadEnMantenimiento))
@@ -234,7 +247,7 @@ public partial class Unidades
             _error = ex.Message;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
     // ---------- Baja (con confirmacion: no se puede deshacer) ----------
@@ -245,7 +258,7 @@ public partial class Unidades
         _aDarDeBaja = unidad;
     }
 
-    private void ConfirmarBaja()
+    private async Task ConfirmarBajaAsync()
     {
         // Un doble clic manda dos envios: el segundo llega con la confirmacion ya cerrada.
         if (_aDarDeBaja is null)
@@ -265,7 +278,7 @@ public partial class Unidades
             _error = ex.Message;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
     private void CancelarBaja()
