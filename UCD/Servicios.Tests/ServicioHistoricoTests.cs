@@ -140,6 +140,19 @@ public sealed class ServicioHistoricoTests
             servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniSupervisor));
     }
 
+    [TestMethod]
+    public void ListarMovimientos_DesdePosteriorAHasta_LanzaServicioExceptionDelCampoDesde()
+    {
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        ServicioHistorico servicio = CrearServicio();
+        FiltroMovimientosDto filtro = new FiltroMovimientosDto { Desde = FechaFija.AddDays(1), Hasta = FechaFija };
+
+        ServicioException error = Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarMovimientos(_idCatalogo, filtro, DniSupervisor));
+
+        Assert.AreEqual(nameof(FiltroMovimientosDto.Desde), error.Campo);
+    }
+
     private ServicioHistorico CrearServicio()
     {
         return new ServicioHistorico(new RepositorioCatalogoSql(_datos.Contexto),
