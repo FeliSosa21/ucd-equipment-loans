@@ -90,10 +90,10 @@ public class CargaInicialSqlTests
             preparacion.Database.EnsureCreated();
         }
 
-        ServicioException error = Assert.ThrowsException<ServicioException>(CargarRootConOtroContexto);
+        InvalidOperationException error = Assert.ThrowsException<InvalidOperationException>(CargarRootConOtroContexto);
 
-        Assert.AreEqual("No se puede crear el root: falta el tipo Administrador. " +
-            "Ejecute el script de datos de instalacion antes de iniciar la aplicacion.", error.Message);
+        Assert.AreEqual("Falta el tipo de usuario Administrador. Ejecute el script de datos de la carpeta Respaldos " +
+            "antes de iniciar la aplicación (ver sección Instalación de la documentación).", error.Message);
         using SqlContext lectura = new SqlContext(_opciones);
         Assert.AreEqual(0, lectura.Usuarios.Count());
         Assert.AreEqual(0, lectura.TiposDeUsuario.Count());
