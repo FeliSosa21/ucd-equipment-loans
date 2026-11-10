@@ -268,6 +268,15 @@ public sealed class ServicioNotificacionTests
         Assert.AreEqual(0, LeerNoLeidasDe(DniDocente).Count);
     }
 
+    [TestMethod]
+    public void RegistrarResultadoDeEvaluacion_PrestamoNulo_LanzaArgumentNullException()
+    {
+        ServicioNotificacion servicio = CrearServicio();
+
+        Assert.ThrowsException<ArgumentNullException>(
+            () => servicio.RegistrarResultadoDeEvaluacion(null!, FechaDeEvaluacion));
+    }
+
     // Como en ServicioPrestamo, el prestamo evaluado esta en el contexto compartido con el servicio.
     private Prestamo CargarEnElContextoDelServicio(Guid idPrestamo)
     {
