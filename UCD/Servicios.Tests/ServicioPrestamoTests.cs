@@ -380,6 +380,22 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_CatalogoDadoDeBaja_LanzaExcepcionConMensaje()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        RepositorioCatalogoSql catalogos = new RepositorioCatalogoSql(_contexto);
+        Catalogo catalogo = catalogos.ObtenerCatalogoActivoPorId(_idCatalogo)!;
+        catalogo.DarDeBaja();
+        catalogos.ActualizarCatalogo(catalogo);
+        SolicitudPrestamoDto datos = CrearSolicitud();
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Solicitar(datos, DniDocente));
+
+        Assert.AreEqual("El tipo de equipamiento no existe", excepcion.Message);
+    }
+
+    [TestMethod]
     public void Solicitar_SuperaUnidadesPorPrestamo_LanzaExcepcion()
     {
         ServicioPrestamo servicio = CrearServicio();
