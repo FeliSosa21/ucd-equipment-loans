@@ -31,6 +31,9 @@ public class RepositorioNotificacionSql
         }
         catch (DbUpdateException excepcion)
         {
+            // Regla 5: quien llama atrapa el error y sigue usando este contexto; sin esto, el proximo guardado
+            // reintentaria lo que fallo.
+            _contexto.ChangeTracker.Clear();
             throw new InvalidOperationException("No se pudo guardar la notificacion", excepcion);
         }
     }
