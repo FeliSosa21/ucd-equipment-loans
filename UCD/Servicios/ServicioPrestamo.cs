@@ -83,7 +83,10 @@ public class ServicioPrestamo
     {
         ObtenerUsuarioHabilitado(dniConsultante, Permiso.RealizarPrestamo, MensajeSinPermisoParaPrestamosActivos);
 
-        return _prestamos.ObtenerPrestamosActivos().Select(CrearPrestamoDto).ToList();
+        return _prestamos.ObtenerPrestamosActivos()
+            .OrderBy(prestamo => prestamo.FechaEsperadaDevolucion)
+            .Select(CrearPrestamoDto)
+            .ToList();
     }
 
     public List<PrestamoDto> ListarPrestamos()
