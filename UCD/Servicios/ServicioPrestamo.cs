@@ -91,7 +91,7 @@ public class ServicioPrestamo
             throw new ServicioException("El solicitante no existe");
         }
 
-        if (solicitante.Estado == EstadoUsuario.Desactivado)
+        if (!solicitante.EstaActivo())
         {
             throw new ServicioException("El solicitante esta desactivado");
         }
