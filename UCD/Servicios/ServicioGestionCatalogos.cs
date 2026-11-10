@@ -52,7 +52,7 @@ public class ServicioGestionCatalogos
             throw new ServicioException(CampoNombre, "Ya existe un catalogo con ese nombre");
         }
 
-        catalogo.ModificarNombre(nombreNormalizado);
+        TraduccionDeErrores.Ejecutar(() => catalogo.ModificarNombre(nombreNormalizado), CampoNombre);
         OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 

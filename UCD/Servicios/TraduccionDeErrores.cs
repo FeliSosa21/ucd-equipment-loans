@@ -18,6 +18,15 @@ internal static class TraduccionDeErrores
     }
 
     // Los errores del dominio que no traen campo se informan en el campo que la pantalla indica.
+    public static void Ejecutar(Action operacion, string campoPorDefecto)
+    {
+        Ejecutar(() =>
+        {
+            operacion();
+            return true;
+        }, campoPorDefecto);
+    }
+
     public static T Ejecutar<T>(Func<T> operacion, string campoPorDefecto)
     {
         try
