@@ -12,8 +12,8 @@ public class RepositorioNotificacionSql
         _contexto = contexto;
     }
 
-    // Los Include van antes de cualquier Where: filtrar antes de incluir puede dejar sin cargar lo incluido
-    // (lo vio Felipe en InMemory con una propiedad owned).
+    // Los Include van antes de cualquier Where, como en RepositorioMovimientoSql: filtrar antes de incluir puede
+    // dejar sin cargar lo incluido.
     private IQueryable<Notificacion> NotificacionesConSolicitanteYTipo =>
         _contexto.Notificaciones
             .Include(notificacion => notificacion.Prestamo)
@@ -60,6 +60,8 @@ public class RepositorioNotificacionSql
         return NotificacionesConSolicitanteYTipo.FirstOrDefault(notificacion => notificacion.Id == id);
     }
 
+    // La notificacion tiene que venir de este contexto (la trae ObtenerNotificacionPorId): solo se guardan los
+    // cambios que este contexto sigue.
     public void ActualizarNotificacion(Notificacion notificacion)
     {
         _contexto.SaveChanges();
