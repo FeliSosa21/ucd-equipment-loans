@@ -1,4 +1,5 @@
 using Data.Repositorios;
+using Dominio;
 using Microsoft.Extensions.Logging;
 
 namespace Servicios;
@@ -21,5 +22,12 @@ public class ServicioNotificacion
 
     public void GenerarNotificacionesDeVencidos(string dniUsuario)
     {
+        DateTimeOffset ahora = _reloj.GetLocalNow();
+
+        foreach (Prestamo prestamo in _prestamos.ObtenerPrestamosVencidosDeSolicitante(dniUsuario, ahora.DateTime))
+        {
+            Notificacion notificacion = new Notificacion(prestamo, TipoNotificacion.PrestamoVencido, ahora.DateTime);
+            _notificaciones.AgregarNotificacion(notificacion);
+        }
     }
 }
