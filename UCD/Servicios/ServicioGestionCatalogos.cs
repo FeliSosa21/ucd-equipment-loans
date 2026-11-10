@@ -1,4 +1,5 @@
 using Data.Repositorios;
+using Dominio;
 using DTOs;
 
 namespace Servicios;
@@ -24,6 +25,9 @@ public class ServicioGestionCatalogos
 
     public void Crear(string nombre, string dniResponsable)
     {
+        string nombreNormalizado = OperacionesComunes.Normalizar(nombre);
+
+        _repositorioCatalogo.AgregarCatalogo(new Catalogo(nombreNormalizado));
     }
 
     public void Modificar(int idCatalogo, string nombre, string dniResponsable)
