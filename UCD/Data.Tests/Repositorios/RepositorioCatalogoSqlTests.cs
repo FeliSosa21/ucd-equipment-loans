@@ -553,6 +553,17 @@ public sealed class RepositorioCatalogoSqlTests
         Assert.ThrowsException<ArgumentNullException>(() => repositorio.ExisteUnidadConNumeroDeSerie(null!, null));
     }
 
+    [TestMethod]
+    public void AgregarCatalogo_LaBaseRechazaElGuardado_LanzaInvalidOperationExceptionYDescartaLosCambios()
+    {
+        using SqlContextQueFallaAlGuardar contexto = new SqlContextQueFallaAlGuardar(_opciones);
+        RepositorioCatalogoSql repositorio = new RepositorioCatalogoSql(contexto);
+        Catalogo catalogo = new Catalogo(NombreCatalogo);
+
+        Assert.ThrowsException<InvalidOperationException>(() => repositorio.AgregarCatalogo(catalogo));
+        Assert.AreEqual(0, contexto.ChangeTracker.Entries().Count());
+    }
+
     private void GuardarConOtroContexto(params Catalogo[] catalogos)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
