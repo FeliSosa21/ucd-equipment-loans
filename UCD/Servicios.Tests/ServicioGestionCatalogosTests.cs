@@ -377,6 +377,23 @@ public class ServicioGestionCatalogosTests
         Assert.ThrowsException<ServicioException>(() => servicio.Listar(DniDocente));
     }
 
+    [TestMethod]
+    public void Listar_UsuarioDesactivado_LanzaServicioException()
+    {
+        ServicioGestionCatalogos servicio = CrearServicio();
+        _entorno.GuardarUsuarioDesactivado(DniDesactivado, TipoUsuario.Supervisor());
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Listar(DniDesactivado));
+    }
+
+    [TestMethod]
+    public void Listar_SinCatalogos_DevuelveListaVacia()
+    {
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        Assert.AreEqual(0, servicio.Listar(DniSupervisor).Count);
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
