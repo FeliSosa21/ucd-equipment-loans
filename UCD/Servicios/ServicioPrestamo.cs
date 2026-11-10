@@ -12,6 +12,7 @@ public class ServicioPrestamo
         "El usuario no tiene permiso para consultar los prestamos activos";
     private const string MensajeSinPermisoParaConsultarPrestamos = "El usuario no tiene permiso para consultar prestamos";
     private const string MensajeRangoInvertido = "La fecha desde no puede ser posterior a la fecha hasta";
+    private const string MensajeEstadoNoValido = "El estado del prestamo no es valido";
     private const int DiasPorDefecto = 30;
 
     private readonly RepositorioPrestamoSql _prestamos;
@@ -313,6 +314,11 @@ public class ServicioPrestamo
         if (string.IsNullOrWhiteSpace(estado))
         {
             return null;
+        }
+
+        if (!Enum.GetNames<EstadoPrestamo>().Contains(estado))
+        {
+            throw new ServicioException(MensajeEstadoNoValido);
         }
 
         return Enum.Parse<EstadoPrestamo>(estado);
