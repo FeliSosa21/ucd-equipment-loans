@@ -52,6 +52,43 @@ public class ServicioGestionCatalogosTests
         Assert.AreEqual(1, LeerCatalogosActivos().Count);
     }
 
+    [DataTestMethod]
+    [DataRow("laboratorio de informatica")]
+    [DataRow("  Laboratorio de Informatica  ")]
+    public void Crear_NombreEquivalenteConMayusculasOEspacios_LanzaServicioException(string nombre)
+    {
+        ServicioGestionCatalogos servicio = CrearServicio();
+        servicio.Crear(NombreValido, DniSupervisor);
+
+        ServicioException error = Assert.ThrowsException<ServicioException>(() =>
+            servicio.Crear(nombre, DniSupervisor));
+
+        Assert.AreEqual(CampoNombre, error.Campo);
+    }
+
+    [TestMethod]
+    public void Crear_NombreConEspacios_LoGuardaRecortado()
+    {
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        servicio.Crear("  " + NombreValido + "  ", DniSupervisor);
+
+        Assert.AreEqual(NombreValido, LeerCatalogosActivos()[0].Nombre);
+    }
+
+    [TestMethod]
+    public void Crear_NombreDeUnCatalogoEliminado_LoCrea()
+    {
+        Catalogo eliminado = new Catalogo(NombreValido);
+        eliminado.DarDeBaja();
+        _entorno.GuardarCatalogo(eliminado);
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        servicio.Crear(NombreValido, DniSupervisor);
+
+        Assert.AreEqual(1, LeerCatalogosActivos().Count);
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
