@@ -983,6 +983,22 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void ListarPrestamos_HastaEnLaUltimaFechaPosible_DevuelveLosDelRangoSinFallar()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        (Guid idSolicitado, Guid idRechazado, Guid idPrimerActivo, Guid idSegundoActivo) =
+            CrearPrestamosEnVariosEstados(servicio);
+        FiltroDePrestamosDto filtro = servicio.RangoPorDefecto();
+        filtro.Hasta = DateTime.MaxValue.Date;
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamos(DniSupervisor, filtro);
+
+        CollectionAssert.AreEquivalent(
+            new List<Guid> { idSolicitado, idRechazado, idPrimerActivo, idSegundoActivo },
+            resultado.Select(prestamo => prestamo.Id).ToList());
+    }
+
+    [TestMethod]
     public void ListarPrestamos_DesdePosteriorAHasta_LanzaExcepcionConMensaje()
     {
         ServicioPrestamo servicio = CrearServicio();
