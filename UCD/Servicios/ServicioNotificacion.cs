@@ -24,7 +24,7 @@ public class ServicioNotificacion
     {
         DateTimeOffset ahora = _reloj.GetLocalNow();
 
-        foreach (Prestamo prestamo in _prestamos.ObtenerPrestamosVencidosDeSolicitante(dniUsuario, ahora.DateTime))
+        foreach (Prestamo prestamo in _prestamos.ObtenerPrestamosVencidosDeSolicitante(dniUsuario, ahora.Date))
         {
             Notificacion notificacion = new Notificacion(prestamo, TipoNotificacion.PrestamoVencido, ahora.DateTime);
             _notificaciones.AgregarNotificacion(notificacion);
