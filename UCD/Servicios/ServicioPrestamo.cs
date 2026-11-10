@@ -98,7 +98,9 @@ public class ServicioPrestamo
         ObtenerUsuarioHabilitado(dniConsultante, Permiso.ConsultarPrestamos, MensajeSinPermisoParaConsultarPrestamos);
         ValidarRango(filtro);
 
-        return _prestamos.ObtenerPrestamos(CrearFiltroDeDiasCompletos(filtro)).Select(CrearPrestamoDto).ToList();
+        return _prestamos.ObtenerPrestamos(CrearFiltroDeDiasCompletos(filtro), ConvertirEstado(filtro.Estado))
+            .Select(CrearPrestamoDto)
+            .ToList();
     }
 
     public FiltroDePrestamosDto RangoPorDefecto()
@@ -304,6 +306,16 @@ public class ServicioPrestamo
             Desde = filtro.Desde.Date,
             Hasta = filtro.Hasta.Date.AddDays(1)
         };
+    }
+
+    private static EstadoPrestamo? ConvertirEstado(string? estado)
+    {
+        if (estado is null)
+        {
+            return null;
+        }
+
+        return Enum.Parse<EstadoPrestamo>(estado);
     }
 
     private static PrestamoDto CrearPrestamoDto(Prestamo prestamo)
