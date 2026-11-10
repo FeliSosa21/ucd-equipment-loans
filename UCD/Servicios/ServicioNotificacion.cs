@@ -43,6 +43,9 @@ public class ServicioNotificacion
             catch (InvalidOperationException excepcion)
             {
                 _logger.LogError(excepcion, MensajeFallaAlGuardarVencido, prestamo.Id);
+
+                // El repositorio vacio el seguimiento: seguir agregaria de nuevo los prestamos ya cargados.
+                return;
             }
         }
     }
