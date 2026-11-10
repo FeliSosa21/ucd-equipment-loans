@@ -7,7 +7,6 @@ public partial class PrestamosActivos
 {
     private List<PrestamoDto> _prestamos = new List<PrestamoDto>();
 
-    // Los listados no reciben quien los pide: el permiso lo controla la pagina al abrirse.
     protected override void OnInitialized()
     {
         if (RedirigirSiNoTienePermiso(Permisos.RealizarPrestamo))
@@ -15,6 +14,6 @@ public partial class PrestamosActivos
             return;
         }
 
-        _prestamos = ServicioPrestamo.ListarPrestamosActivos();
+        _prestamos = ServicioPrestamo.ListarPrestamosActivos(DniUsuario);
     }
 }
