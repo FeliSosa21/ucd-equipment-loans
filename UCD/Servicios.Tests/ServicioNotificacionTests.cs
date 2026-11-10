@@ -13,6 +13,7 @@ public sealed class ServicioNotificacionTests
 {
     private static readonly DateTime Hoy = new DateTime(2026, 11, 10, 9, 0, 0);
     private static readonly DateTime Ayer = Hoy.AddDays(-1);
+    private static readonly DateTime FechaDeEvaluacion = new DateTime(2026, 11, 4, 11, 30, 0);
     private static readonly DateTime PedidoQueVencioAyer = new DateTime(2026, 11, 2, 10, 0, 0);
     private static readonly DateTime PedidoQueVenceHoy = new DateTime(2026, 11, 3, 10, 0, 0);
 
@@ -226,6 +227,27 @@ public sealed class ServicioNotificacionTests
         servicio.MarcarComoLeida(idNotificacion, DniDocente);
 
         Assert.IsTrue(LeerNotificacion(idNotificacion).EstaLeida);
+    }
+
+    [TestMethod]
+    public void RegistrarResultadoDeEvaluacion_PrestamoActivo_GuardaSolicitudAprobadaConLaFechaRecibida()
+    {
+        Prestamo evaluado = CargarEnElContextoDelServicio(GuardarPrestamoActivo(PedidoQueVencioAyer));
+        ServicioNotificacion servicio = CrearServicio();
+
+        servicio.RegistrarResultadoDeEvaluacion(evaluado, FechaDeEvaluacion);
+
+        IReadOnlyList<Notificacion> creadas = LeerNoLeidasDe(DniDocente);
+        Assert.AreEqual(1, creadas.Count);
+        Assert.AreEqual(evaluado.Id, creadas[0].Prestamo.Id);
+        Assert.AreEqual(TipoNotificacion.SolicitudAprobada, creadas[0].Tipo);
+        Assert.AreEqual(FechaDeEvaluacion, creadas[0].FechaHora);
+    }
+
+    // Como en ServicioPrestamo, el prestamo evaluado esta en el contexto compartido con el servicio.
+    private Prestamo CargarEnElContextoDelServicio(Guid idPrestamo)
+    {
+        return new RepositorioPrestamoSql(_contexto).ObtenerPrestamoPorId(idPrestamo)!;
     }
 
     private ServicioNotificacion CrearServicio()

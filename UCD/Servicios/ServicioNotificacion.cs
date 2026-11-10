@@ -73,6 +73,10 @@ public class ServicioNotificacion
         _notificaciones.ActualizarNotificacion(notificacion);
     }
 
+    public void RegistrarResultadoDeEvaluacion(Prestamo prestamo, DateTime fechaHoraEvaluacion)
+    {
+    }
+
     private static NotificacionDto CrearNotificacionDto(Notificacion notificacion)
     {
         return new NotificacionDto
