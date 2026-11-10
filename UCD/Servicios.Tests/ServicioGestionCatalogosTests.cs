@@ -12,6 +12,7 @@ public class ServicioGestionCatalogosTests
     private const string NombreValido = "Laboratorio de Informatica";
     private const string CampoNombre = "Nombre";
     private const string DniDocente = "45678905";
+    private const string NombreTipo = "Proyector Epson";
     private const string DniDesactivado = "23456783";
     private const string DniInexistente = "34567894";
 
@@ -254,6 +255,19 @@ public class ServicioGestionCatalogosTests
         Assert.ThrowsException<ServicioException>(() => servicio.Modificar(id, NombreValido, DniDesactivado));
     }
 
+    [TestMethod]
+    public void Eliminar_CatalogoSinPrestamos_QuedaDadoDeBaja()
+    {
+        int id = _entorno.GuardarCatalogo(new Catalogo(NombreValido));
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        servicio.Eliminar(id, DniSupervisor);
+
+        Assert.AreEqual(0, LeerCatalogosActivos().Count);
+        Catalogo guardado = LeerTodosLosCatalogos().Single();
+        Assert.IsFalse(guardado.Activo);
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
@@ -264,6 +278,21 @@ public class ServicioGestionCatalogosTests
         SqlContext contexto = _entorno.NuevoContextoQueFallaAlGuardar();
         return new ServicioGestionCatalogos(new RepositorioCatalogoSql(contexto),
             new RepositorioUsuarioSql(contexto), new RepositorioPrestamoSql(contexto));
+    }
+
+    private IReadOnlyList<Catalogo> LeerTodosLosCatalogos()
+    {
+        using SqlContext lectura = _entorno.NuevoContexto();
+        return new RepositorioCatalogoSql(lectura).ObtenerCatalogosParaExportar();
+    }
+
+    private int GuardarCatalogoConUnTipoYUnaUnidad(string nombre)
+    {
+        TipoEquipamiento tipo = new TipoEquipamiento(NombreTipo, "Para aulas", 3, false, Categoria.Audiovisual);
+        tipo.AgregarUnidad(new UnidadFisica("PRY-0001", "Deposito A", null));
+        Catalogo catalogo = new Catalogo(nombre);
+        catalogo.AgregarTipo(tipo);
+        return _entorno.GuardarCatalogo(catalogo);
     }
 
     private IReadOnlyList<Catalogo> LeerCatalogosActivos()
