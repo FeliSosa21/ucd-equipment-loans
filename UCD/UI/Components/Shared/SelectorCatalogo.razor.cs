@@ -23,11 +23,20 @@ public partial class SelectorCatalogo
 
     protected override async Task OnInitializedAsync()
     {
-        CargarCatalogos();
-        if (_catalogos.Count == 1)
+        if (!SesionActual.EstaIniciada)
         {
-            await IdCatalogoChanged.InvokeAsync(_catalogos[0].Id);
+            return;
         }
+
+        CargarCatalogos();
+        await AjustarSeleccionAsync();
+    }
+
+    // Lo llama la pagina (por una referencia @ref) cuando el servicio le informa que el catalogo ya no esta activo.
+    public async Task RecargarAsync()
+    {
+        CargarCatalogos();
+        await AjustarSeleccionAsync();
     }
 
     private void CargarCatalogos()
@@ -41,6 +50,21 @@ public partial class SelectorCatalogo
         {
             _error = ex.Message;
             _catalogos = new List<CatalogoDto>();
+        }
+    }
+
+    // Con un solo catalogo se elige solo; si el elegido ya no esta entre los activos, se avisa que no hay ninguno.
+    private async Task AjustarSeleccionAsync()
+    {
+        if (_catalogos.Count == 1 && IdCatalogo != _catalogos[0].Id)
+        {
+            await IdCatalogoChanged.InvokeAsync(_catalogos[0].Id);
+            return;
+        }
+
+        if (IdCatalogo != SinCatalogo && !_catalogos.Any(catalogo => catalogo.Id == IdCatalogo))
+        {
+            await IdCatalogoChanged.InvokeAsync(SinCatalogo);
         }
     }
 
