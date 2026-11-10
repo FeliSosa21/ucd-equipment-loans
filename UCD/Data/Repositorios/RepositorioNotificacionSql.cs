@@ -34,6 +34,6 @@ public class RepositorioNotificacionSql
 
     public bool ExisteVencidoSinLeer(Guid idPrestamo)
     {
-        return false;
+        return _contexto.Notificaciones.Any();
     }
 }
