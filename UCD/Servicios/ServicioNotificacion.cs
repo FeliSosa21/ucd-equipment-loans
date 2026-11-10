@@ -73,6 +73,11 @@ public class ServicioNotificacion
     {
         Prestamo prestamo = notificacion.Prestamo;
 
+        if (notificacion.Tipo == TipoNotificacion.SolicitudRechazada)
+        {
+            return $"Tu solicitud de {prestamo.TipoEquipamiento.Nombre} del {FormatearFecha(prestamo.FechaHoraPrestamo)} fue rechazada. Motivo: {prestamo.MotivoRechazo}";
+        }
+
         return $"Tu solicitud de {prestamo.TipoEquipamiento.Nombre} del {FormatearFecha(prestamo.FechaHoraPrestamo)} fue aprobada.";
     }
 
