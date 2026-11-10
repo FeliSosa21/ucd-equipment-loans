@@ -50,9 +50,10 @@ public sealed class ServicioHistoricoTests
             prestamo.Aprobar(evaluador, new List<UnidadFisica> { unidad });
             return Movimiento.DePrestamo(prestamo, RegistroDeAccion.DeUsuario(evaluador, FechaFija), unidad);
         });
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
         ServicioHistorico servicio = CrearServicio();
 
-        MovimientoDto movimiento = servicio.ListarMovimientos().Single();
+        MovimientoDto movimiento = ListarTodoElCatalogo(servicio).Single();
 
         Assert.AreEqual(FechaFija, movimiento.FechaHora);
         Assert.AreEqual("Prestamo", movimiento.Tipo);
@@ -65,9 +66,10 @@ public sealed class ServicioHistoricoTests
     public void ListarMovimientos_MovimientoSinEvaluadorNiUnidad_DevuelveNulos()
     {
         GuardarSolicitud(FechaFija);
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
         ServicioHistorico servicio = CrearServicio();
 
-        MovimientoDto movimiento = servicio.ListarMovimientos().Single();
+        MovimientoDto movimiento = ListarTodoElCatalogo(servicio).Single();
 
         Assert.IsNull(movimiento.Evaluador);
         Assert.IsNull(movimiento.Unidad);
@@ -77,9 +79,10 @@ public sealed class ServicioHistoricoTests
     public void ListarMovimientos_MovimientoDeUnUsuario_DevuelveSuNombreComoResponsable()
     {
         GuardarSolicitud(FechaFija);
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
         ServicioHistorico servicio = CrearServicio();
 
-        MovimientoDto movimiento = servicio.ListarMovimientos().Single();
+        MovimientoDto movimiento = ListarTodoElCatalogo(servicio).Single();
 
         Assert.AreEqual("Ana Perez", movimiento.Responsable);
     }
@@ -93,9 +96,10 @@ public sealed class ServicioHistoricoTests
             prestamo.Activar(new List<UnidadFisica> { unidad });
             return Movimiento.DePrestamo(prestamo, RegistroDeAccion.DelSistema(FechaFija), unidad);
         });
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
         ServicioHistorico servicio = CrearServicio();
 
-        MovimientoDto movimiento = servicio.ListarMovimientos().Single();
+        MovimientoDto movimiento = ListarTodoElCatalogo(servicio).Single();
 
         Assert.AreEqual("Sistema", movimiento.Responsable);
     }
@@ -163,7 +167,11 @@ public sealed class ServicioHistoricoTests
         GuardarSolicitud(idOtroCatalogo, "Camara Sony", FechaFija.AddHours(1));
         GuardarSolicitud(FechaFija.AddDays(5));
         ServicioHistorico servicio = CrearServicio();
-        FiltroMovimientosDto filtro = new FiltroMovimientosDto { Desde = FechaFija.AddDays(-1), Hasta = FechaFija.AddDays(1) };
+        FiltroMovimientosDto filtro = new FiltroMovimientosDto
+        {
+            Desde = FechaFija.AddDays(-1),
+            Hasta = FechaFija.AddDays(1)
+        };
 
         List<MovimientoDto> movimientos = servicio.ListarMovimientos(_idCatalogo, filtro, DniSupervisor);
 
@@ -185,6 +193,11 @@ public sealed class ServicioHistoricoTests
 
         CollectionAssert.AreEqual(new List<DateTime> { diaHasta.AddHours(23).AddMinutes(59) },
             movimientos.Select(movimiento => movimiento.FechaHora).ToList());
+    }
+
+    private List<MovimientoDto> ListarTodoElCatalogo(ServicioHistorico servicio)
+    {
+        return servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniSupervisor);
     }
 
     private ServicioHistorico CrearServicio()
