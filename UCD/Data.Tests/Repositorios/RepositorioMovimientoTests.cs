@@ -78,6 +78,14 @@ public sealed class RepositorioMovimientoTests
     }
 
     [TestMethod]
+    public void ObtenerMovimientos_FiltroNulo_LanzaArgumentNullException()
+    {
+        RepositorioMovimiento repositorio = new RepositorioMovimiento(new Memoria());
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.ObtenerMovimientos(null!));
+    }
+
+    [TestMethod]
     public void AgregarMovimiento_MovimientoNulo_LanzaArgumentNullException()
     {
         Memoria memoria = new Memoria();
