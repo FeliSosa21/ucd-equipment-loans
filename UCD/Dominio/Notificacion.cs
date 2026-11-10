@@ -25,6 +25,7 @@ public class Notificacion
 
     public void MarcarComoLeida()
     {
+        EstaLeida = true;
     }
 
     private static void ValidarPrestamo(Prestamo prestamo)
