@@ -64,6 +64,8 @@ public class ServicioPrestamo
 
     public List<PrestamoDto> ListarSolicitudesPendientes(string dniConsultante)
     {
+        ObtenerUsuarioHabilitado(dniConsultante, Permiso.EvaluarSolicitud, MensajeSinPermisoParaEvaluar);
+
         return _prestamos.ObtenerPrestamosPendientes().Select(CrearPrestamoDto).ToList();
     }
 
