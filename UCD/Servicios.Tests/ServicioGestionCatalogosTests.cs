@@ -215,6 +215,23 @@ public class ServicioGestionCatalogosTests
         Assert.ThrowsException<ServicioException>(() => servicio.Modificar(id, NombreValido, DniSupervisor));
     }
 
+    [DataTestMethod]
+    [DataRow("")]
+    [DataRow("   ")]
+    [DataRow("ab")]
+    [DataRow("Un nombre de catalogo demasiado largo: supera los ochenta caracteres permitidos por el sistema")]
+    public void Modificar_NombreFueraDeLargo_LanzaServicioExceptionEnElCampo(string nombre)
+    {
+        int id = _entorno.GuardarCatalogo(new Catalogo("Aulas"));
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        ServicioException error = Assert.ThrowsException<ServicioException>(() =>
+            servicio.Modificar(id, nombre, DniSupervisor));
+
+        Assert.AreEqual(CampoNombre, error.Campo);
+        Assert.AreEqual("Aulas", LeerCatalogosActivos()[0].Nombre);
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
