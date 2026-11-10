@@ -962,6 +962,15 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void ListarPrestamos_FiltroNulo_LanzaArgumentNullException()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+
+        Assert.ThrowsException<ArgumentNullException>(
+            () => servicio.ListarPrestamos(DniSupervisor, null!));
+    }
+
+    [TestMethod]
     public void ListarPrestamos_RangoConHoras_DevuelveLosDeLosDiasCompletos()
     {
         ServicioPrestamo servicio = CrearServicio();
