@@ -995,6 +995,26 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void ListarPrestamos_ConEstado_DevuelveSoloLosDeEseEstado()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion), DniAdministrador);
+        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades), DniAdministrador);
+        Guid idPrimerActivo =
+            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+        Guid idSegundoActivo =
+            servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
+        FiltroDePrestamosDto filtro = servicio.RangoPorDefecto();
+        filtro.Estado = "Activo";
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamos(DniSupervisor, filtro);
+
+        CollectionAssert.AreEquivalent(
+            new List<Guid> { idPrimerActivo, idSegundoActivo },
+            resultado.Select(prestamo => prestamo.Id).ToList());
+    }
+
+    [TestMethod]
     public void RangoPorDefecto_RelojFijo_DevuelveLosUltimos30DiasConHoyYSinEstado()
     {
         ServicioPrestamo servicio = CrearServicio();
