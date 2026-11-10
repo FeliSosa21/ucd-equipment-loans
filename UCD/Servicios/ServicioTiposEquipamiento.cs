@@ -4,28 +4,36 @@ using DTOs;
 
 namespace Servicios;
 
-// Gestion de tipos de equipamiento y del nombre del catalogo (req. 4).
+// Gestion de tipos de equipamiento (req. 4).
 // Registrar, modificar, discontinuar y reactivar requieren el permiso GestionarCatalogo (Supervisor y Administrador).
 public class ServicioTiposEquipamiento
 {
     private const string MensajeSinPermiso = "El usuario no tiene permiso para gestionar el catalogo";
+    private const string MensajeNoSePudoGuardar =
+        "No se pudieron guardar los cambios; verifique que no exista otro tipo con ese nombre";
+    private const string MensajeSinPermisoParaListar =
+        "El usuario no tiene permiso para ver los tipos de equipamiento";
 
-    private readonly RepositorioCatalogo _repositorioCatalogo;
-    private readonly RepositorioUsuario _repositorioUsuario;
+    private readonly RepositorioCatalogoSql _repositorioCatalogo;
+    private readonly RepositorioUsuarioSql _repositorioUsuario;
 
-    public ServicioTiposEquipamiento(RepositorioCatalogo repositorioCatalogo, RepositorioUsuario repositorioUsuario)
+    public ServicioTiposEquipamiento(RepositorioCatalogoSql repositorioCatalogo,
+        RepositorioUsuarioSql repositorioUsuario)
     {
         _repositorioCatalogo = repositorioCatalogo;
         _repositorioUsuario = repositorioUsuario;
     }
 
-    public List<TipoEquipamientoDetalleDto> Listar(string? nombre, string? categoria)
+    public List<TipoEquipamientoDetalleDto> Listar(int idCatalogo, FiltroTiposDto filtro, string dniUsuario)
     {
+        ArgumentNullException.ThrowIfNull(filtro);
+        ValidarQuePuedaListar(dniUsuario);
         List<TipoEquipamientoDetalleDto> resultado = new List<TipoEquipamientoDetalleDto>();
 
-        foreach (TipoEquipamiento tipo in OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo).Tipos)
+        foreach (TipoEquipamiento tipo in
+                 OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo).Tipos)
         {
-            if (CumpleFiltro(tipo, nombre, categoria))
+            if (CumpleFiltro(tipo, filtro.Nombre, filtro.Categoria))
             {
                 resultado.Add(CrearDetalle(tipo));
             }
@@ -34,12 +42,12 @@ public class ServicioTiposEquipamiento
         return resultado;
     }
 
-    public void Registrar(DatosTipoEquipamientoDto datos, string dniResponsable)
+    public void Registrar(int idCatalogo, DatosTipoEquipamientoDto datos, string dniResponsable)
     {
         ArgumentNullException.ThrowIfNull(datos);
         ValidarResponsable(dniResponsable);
         Categoria categoria = ObtenerCategoria(datos.Categoria);
-        Catalogo catalogo = OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo);
+        Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
         string nombre = OperacionesComunes.Normalizar(datos.Nombre);
         string descripcion = OperacionesComunes.Normalizar(datos.Descripcion);
 
@@ -49,14 +57,17 @@ public class ServicioTiposEquipamiento
                 datos.RequiereAprobacion, categoria);
             catalogo.AgregarTipo(tipo);
         });
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
-    public void Modificar(string nombreActual, DatosTipoEquipamientoDto datos, string dniResponsable)
+    public void Modificar(int idCatalogo, ModificacionTipoEquipamientoDto modificacion, string dniResponsable)
     {
-        ArgumentNullException.ThrowIfNull(datos);
+        ArgumentNullException.ThrowIfNull(modificacion);
+        DatosTipoEquipamientoDto datos = modificacion.Datos;
         ValidarResponsable(dniResponsable);
-        Catalogo catalogo = OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo);
-        TipoEquipamiento tipo = ObtenerTipo(catalogo, nombreActual);
+        Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
+        TipoEquipamiento tipo = OperacionesComunes.ObtenerTipo(_repositorioCatalogo, idCatalogo,
+            modificacion.NombreActual);
         Categoria categoria = ObtenerCategoria(datos.Categoria);
         string nombreNuevo = OperacionesComunes.Normalizar(datos.Nombre);
         ValidarNombreDisponible(catalogo, tipo, nombreNuevo);
@@ -64,47 +75,28 @@ public class ServicioTiposEquipamiento
         TraduccionDeErrores.Ejecutar(() =>
             tipo.Modificar(nombreNuevo, OperacionesComunes.Normalizar(datos.Descripcion), datos.DuracionMaxPrestamo,
                 datos.RequiereAprobacion, categoria));
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
-    public void Discontinuar(string nombre, string dniResponsable)
+    public void Discontinuar(int idCatalogo, string nombre, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        TipoEquipamiento tipo = ObtenerTipo(OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo), nombre);
+        Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
+        TipoEquipamiento tipo = OperacionesComunes.ObtenerTipo(_repositorioCatalogo, idCatalogo, nombre);
 
         TraduccionDeErrores.Ejecutar(tipo.Discontinuar);
+        _repositorioCatalogo.ActualizarCatalogo(catalogo);
     }
 
     // Foro del curso: un tipo discontinuado puede volver a activarse.
-    public void Reactivar(string nombre, string dniResponsable)
+    public void Reactivar(int idCatalogo, string nombre, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        TipoEquipamiento tipo = ObtenerTipo(OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo), nombre);
+        Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
+        TipoEquipamiento tipo = OperacionesComunes.ObtenerTipo(_repositorioCatalogo, idCatalogo, nombre);
 
         TraduccionDeErrores.Ejecutar(tipo.Reactivar);
-    }
-
-    public string ObtenerNombreCatalogo()
-    {
-        return OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo).Nombre;
-    }
-
-    public void ModificarNombreCatalogo(string nombre, string dniResponsable)
-    {
-        ValidarResponsable(dniResponsable);
-        Catalogo catalogo = OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo);
-
-        TraduccionDeErrores.Ejecutar(() => catalogo.ModificarNombre(OperacionesComunes.Normalizar(nombre)));
-    }
-
-    private static TipoEquipamiento ObtenerTipo(Catalogo catalogo, string nombre)
-    {
-        TipoEquipamiento? tipo = catalogo.BuscarTipoPorNombre(nombre);
-        if (tipo is null)
-        {
-            throw new ServicioException("El tipo de equipamiento no existe");
-        }
-
-        return tipo;
+        _repositorioCatalogo.ActualizarCatalogo(catalogo);
     }
 
     private static void ValidarNombreDisponible(Catalogo catalogo, TipoEquipamiento tipo, string nombreNuevo)
@@ -116,10 +108,21 @@ public class ServicioTiposEquipamiento
         }
     }
 
+    // Listan los tipos quien gestiona el catalogo y quien gestiona unidades (necesita elegir el tipo de cada unidad).
+    private void ValidarQuePuedaListar(string dniUsuario)
+    {
+        Usuario usuario = OperacionesComunes.ObtenerResponsableActivo(
+            _repositorioUsuario.ObtenerUsuarioPorDni(dniUsuario), MensajeSinPermisoParaListar);
+        if (!usuario.TienePermiso(Permiso.GestionarCatalogo) && !usuario.TienePermiso(Permiso.GestionarUnidades))
+        {
+            throw new ServicioException(MensajeSinPermisoParaListar);
+        }
+    }
+
     private void ValidarResponsable(string dniResponsable)
     {
-        OperacionesComunes.ValidarResponsable(_repositorioUsuario, dniResponsable, Permiso.GestionarCatalogo,
-            MensajeSinPermiso);
+        OperacionesComunes.ValidarResponsable(_repositorioUsuario.ObtenerUsuarioPorDni(dniResponsable),
+            Permiso.GestionarCatalogo, MensajeSinPermiso);
     }
 
     // Solo nombres de la enumeracion: Enum.TryParse tambien aceptaria numeros como "1".

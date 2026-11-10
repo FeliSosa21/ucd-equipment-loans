@@ -27,6 +27,7 @@
         <div class="nav-section">Gestión</div>
         @if (Puede(Permisos.GestionarCatalogo))
         {
+            <NavLink class="nav-item" href="catalogos">Catálogos</NavLink>
             <NavLink class="nav-item" href="tipos-equipamiento">Tipos de equipamiento</NavLink>
         }
         @if (Puede(Permisos.GestionarUnidades))
