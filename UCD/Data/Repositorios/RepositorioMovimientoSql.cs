@@ -41,7 +41,7 @@ public class RepositorioMovimientoSql
             return new List<Movimiento>();
         }
 
-        return _contexto.Movimientos
+        return FiltrarPor(filtro)
             .OrderByDescending(movimiento => EF.Property<RegistroDeAccion>(movimiento, CampoRegistro).FechaHora)
             .ThenByDescending(movimiento => movimiento.Id)
             .ToList();
