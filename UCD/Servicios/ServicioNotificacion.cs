@@ -12,6 +12,7 @@ public class ServicioNotificacion
     private const string MensajeFallaAlGuardarVencido =
         "No se pudo guardar la notificacion de vencido del prestamo {IdPrestamo}";
     private const string FormatoFecha = "dd/MM/yyyy";
+    private const string MensajeNotificacionAjena = "La notificacion no es del usuario";
 
     private readonly RepositorioNotificacionSql _notificaciones;
     private readonly RepositorioPrestamoSql _prestamos;
@@ -61,6 +62,12 @@ public class ServicioNotificacion
 
     public void MarcarComoLeida(int idNotificacion, string dniUsuario)
     {
+        Notificacion? notificacion = _notificaciones.ObtenerNotificacionPorId(idNotificacion);
+
+        if (notificacion is null)
+        {
+            throw new ServicioException(MensajeNotificacionAjena);
+        }
     }
 
     private static NotificacionDto CrearNotificacionDto(Notificacion notificacion)
