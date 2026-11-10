@@ -3,7 +3,7 @@ using UI.Sesion;
 
 namespace UI.Components.Pages;
 
-public partial class Entregas
+public partial class PrestamosActivos
 {
     private List<PrestamoDto> _prestamos = new List<PrestamoDto>();
 
