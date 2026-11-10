@@ -59,6 +59,10 @@ public class ServicioGestionCatalogos
 
     public void Eliminar(int idCatalogo, string dniResponsable)
     {
+        Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
+
+        catalogo.DarDeBaja();
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
     // Dos usuarios pueden crear el mismo nombre a la vez: el indice unico de la base rechaza al segundo.
