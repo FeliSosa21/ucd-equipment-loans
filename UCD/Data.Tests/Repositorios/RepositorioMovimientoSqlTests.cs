@@ -130,6 +130,15 @@ public sealed class RepositorioMovimientoSqlTests
         Assert.AreEqual("Notebook Lenovo ThinkPad", leido.Prestamo.TipoEquipamiento.Nombre);
     }
 
+    [TestMethod]
+    public void ObtenerMovimientos_FiltroNulo_LanzaArgumentNullException()
+    {
+        using SqlContext contexto = new SqlContext(_opciones);
+        RepositorioMovimientoSql repositorio = new RepositorioMovimientoSql(contexto);
+
+        Assert.ThrowsException<ArgumentNullException>(() => repositorio.ObtenerMovimientos(null!));
+    }
+
     private void GuardarTresMovimientos()
     {
         Prestamo prestamo = CrearPrestamoActivo();
