@@ -7,6 +7,7 @@ namespace Servicios;
 public class ServicioHistorico
 {
     private const string MensajeSinPermiso = "El usuario no tiene permiso para consultar el historico";
+    private const string MensajeDesdePosteriorAHasta = "La fecha desde no puede ser posterior a la fecha hasta";
 
     private readonly RepositorioCatalogoSql _catalogos;
     private readonly RepositorioUsuarioSql _usuarios;
@@ -25,8 +26,17 @@ public class ServicioHistorico
         OperacionesComunes.ValidarResponsable(_usuarios.ObtenerUsuarioPorDni(dniUsuario), Permiso.ConsultarHistorico,
             MensajeSinPermiso);
         OperacionesComunes.ObtenerCatalogoActivo(_catalogos, idCatalogo);
+        ValidarRangoDeFechas(filtro);
 
         return new List<MovimientoDto>();
+    }
+
+    private static void ValidarRangoDeFechas(FiltroMovimientosDto filtro)
+    {
+        if (filtro.Desde > filtro.Hasta)
+        {
+            throw new ServicioException(nameof(FiltroMovimientosDto.Desde), MensajeDesdePosteriorAHasta);
+        }
     }
 
     // Temporal, hasta que la pagina filtre por catalogo: no recibe quien consulta (el permiso lo controla la pagina).
