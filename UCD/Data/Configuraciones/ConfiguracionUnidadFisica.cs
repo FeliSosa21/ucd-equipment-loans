@@ -22,6 +22,8 @@ public class ConfiguracionUnidadFisica : IEntityTypeConfiguration<UnidadFisica>
 
         builder.Property(unidad => unidad.Observaciones).HasMaxLength(UnidadFisica.LargoMaxObservaciones);
 
+        builder.HasIndex(unidad => unidad.NumSerie).IsUnique().HasFilter("[NumSerie] IS NOT NULL");
+
         builder.Property(unidad => unidad.Estado).HasConversion<string>();
 
         builder.Property<int>("TipoEquipamientoId");

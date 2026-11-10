@@ -294,6 +294,10 @@ namespace Data.Migrations
                     b.HasIndex("IdInstitucional")
                         .IsUnique();
 
+                    b.HasIndex("NumSerie")
+                        .IsUnique()
+                        .HasFilter("[NumSerie] IS NOT NULL");
+
                     b.HasIndex("TipoEquipamientoId");
 
                     b.ToTable("UnidadesFisicas", (string)null);
