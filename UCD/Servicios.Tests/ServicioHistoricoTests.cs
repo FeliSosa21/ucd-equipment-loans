@@ -153,6 +153,24 @@ public sealed class ServicioHistoricoTests
         Assert.AreEqual(nameof(FiltroMovimientosDto.Desde), error.Campo);
     }
 
+    [TestMethod]
+    public void ListarMovimientos_CatalogoYFechas_DevuelveSoloLosDelCatalogoEnElRango()
+    {
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        int idOtroCatalogo = _datos.GuardarCatalogo("Catalogo del laboratorio",
+            CrearTipo("Camara Sony", requiereAprobacion: true, idInstitucional: "EQP-0003"));
+        GuardarSolicitud(FechaFija);
+        GuardarSolicitud(idOtroCatalogo, "Camara Sony", FechaFija.AddHours(1));
+        GuardarSolicitud(FechaFija.AddDays(5));
+        ServicioHistorico servicio = CrearServicio();
+        FiltroMovimientosDto filtro = new FiltroMovimientosDto { Desde = FechaFija.AddDays(-1), Hasta = FechaFija.AddDays(1) };
+
+        List<MovimientoDto> movimientos = servicio.ListarMovimientos(_idCatalogo, filtro, DniSupervisor);
+
+        CollectionAssert.AreEqual(new List<DateTime> { FechaFija },
+            movimientos.Select(movimiento => movimiento.FechaHora).ToList());
+    }
+
     private ServicioHistorico CrearServicio()
     {
         return new ServicioHistorico(new RepositorioCatalogoSql(_datos.Contexto),
@@ -161,7 +179,12 @@ public sealed class ServicioHistoricoTests
 
     private void GuardarSolicitud(DateTime fechaHora)
     {
-        _datos.GuardarMovimiento(_idCatalogo, TipoConAprobacion, (prestamo, _) =>
+        GuardarSolicitud(_idCatalogo, TipoConAprobacion, fechaHora);
+    }
+
+    private void GuardarSolicitud(int idCatalogo, string nombreTipo, DateTime fechaHora)
+    {
+        _datos.GuardarMovimiento(idCatalogo, nombreTipo, (prestamo, _) =>
             Movimiento.DeSolicitud(prestamo, RegistroDeAccion.DeUsuario(prestamo.Solicitante, fechaHora)));
     }
 
