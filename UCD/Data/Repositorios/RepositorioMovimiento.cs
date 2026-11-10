@@ -21,4 +21,9 @@ public class RepositorioMovimiento
     {
         return _memoria.Movimientos.ToList().AsReadOnly();
     }
+
+    public IReadOnlyList<Movimiento> ObtenerMovimientos(FiltroPorCatalogoYFechas filtro)
+    {
+        throw new NotImplementedException();
+    }
 }

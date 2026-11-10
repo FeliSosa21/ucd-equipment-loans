@@ -74,6 +74,17 @@ public sealed class RepositorioMovimientoTests
     }
 
     [TestMethod]
+    public void ObtenerMovimientos_FiltroSinCriterios_DevuelveListaVacia()
+    {
+        RepositorioMovimiento repositorio = new RepositorioMovimiento(new Memoria());
+        repositorio.AgregarMovimiento(CrearMovimiento(idInstitucional: "EQP-0001"));
+
+        IReadOnlyList<Movimiento> resultado = repositorio.ObtenerMovimientos(new FiltroPorCatalogoYFechas());
+
+        Assert.AreEqual(0, resultado.Count);
+    }
+
+    [TestMethod]
     public void AgregarMovimiento_MovimientoNulo_LanzaArgumentNullException()
     {
         Memoria memoria = new Memoria();
