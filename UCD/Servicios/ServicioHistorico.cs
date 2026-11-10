@@ -6,22 +6,63 @@ namespace Servicios;
 
 public class ServicioHistorico
 {
-    private readonly RepositorioMovimiento _movimientos;
+    private const string MensajeSinPermiso = "El usuario no tiene permiso para consultar el historico";
+    private const string MensajeDesdePosteriorAHasta = "La fecha desde no puede ser posterior a la fecha hasta";
+    private const string ResponsableSistema = "Sistema";
 
-    public ServicioHistorico(RepositorioMovimiento movimientos)
+    private readonly RepositorioCatalogoSql _catalogos;
+    private readonly RepositorioUsuarioSql _usuarios;
+    private readonly RepositorioMovimientoSql _movimientos;
+
+    public ServicioHistorico(RepositorioCatalogoSql catalogos, RepositorioUsuarioSql usuarios,
+        RepositorioMovimientoSql movimientos)
     {
+        _catalogos = catalogos;
+        _usuarios = usuarios;
         _movimientos = movimientos;
     }
 
-    // No recibe quien consulta: el permiso lo controla la pagina, como en ListarSolicitudesPendientes.
-    // Del mas reciente al mas viejo; con la misma fecha va primero el ultimo registrado: se invierte el orden
-    // del repositorio y OrderByDescending, que es estable, lo respeta en los empates.
-    public List<MovimientoDto> ListarMovimientos()
+    public List<MovimientoDto> ListarMovimientos(int idCatalogo, FiltroMovimientosDto filtro, string dniUsuario)
     {
-        return Enumerable.Reverse(_movimientos.ObtenerTodos())
-            .OrderByDescending(movimiento => movimiento.FechaHora)
+        ArgumentNullException.ThrowIfNull(filtro);
+        OperacionesComunes.ValidarResponsable(_usuarios.ObtenerUsuarioPorDni(dniUsuario), Permiso.ConsultarHistorico,
+            MensajeSinPermiso);
+        Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_catalogos, idCatalogo);
+        ValidarRangoDeFechas(filtro);
+
+        return _movimientos.ObtenerMovimientos(CrearFiltroDelRepositorio(catalogo.Id, filtro))
             .Select(CrearMovimientoDto)
             .ToList();
+    }
+
+    private static void ValidarRangoDeFechas(FiltroMovimientosDto filtro)
+    {
+        if (filtro.Desde > filtro.Hasta)
+        {
+            throw new ServicioException(nameof(FiltroMovimientosDto.Desde), MensajeDesdePosteriorAHasta);
+        }
+    }
+
+    private static FiltroPorCatalogoYFechas CrearFiltroDelRepositorio(int idCatalogo, FiltroMovimientosDto filtro)
+    {
+        return new FiltroPorCatalogoYFechas
+        {
+            IdCatalogo = idCatalogo,
+            Desde = filtro.Desde,
+            Hasta = InicioDelDiaSiguiente(filtro.Hasta)
+        };
+    }
+
+    // Hasta es un dia completo: pasa como el inicio del dia siguiente porque el repositorio lo excluye (B11).
+    // La ultima fecha posible no tiene dia siguiente: se toma como sin limite, igual que en ServicioAuditoria.
+    private static DateTime? InicioDelDiaSiguiente(DateTime? hasta)
+    {
+        if (hasta is null || hasta.Value.Date == DateTime.MaxValue.Date)
+        {
+            return null;
+        }
+
+        return hasta.Value.Date.AddDays(1);
     }
 
     private static MovimientoDto CrearMovimientoDto(Movimiento movimiento)
@@ -32,7 +73,7 @@ public class ServicioHistorico
             Tipo = movimiento.Tipo.ToString(),
             Solicitante = movimiento.Solicitante.NombreCompleto,
             Evaluador = movimiento.Evaluador?.NombreCompleto,
-            Responsable = movimiento.Responsable?.NombreCompleto ?? "Sistema",
+            Responsable = movimiento.Responsable?.NombreCompleto ?? ResponsableSistema,
             Unidad = movimiento.Unidad?.IdInstitucional
         };
     }

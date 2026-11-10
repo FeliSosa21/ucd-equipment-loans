@@ -1,4 +1,5 @@
 using DTOs;
+using Servicios;
 using UI.Sesion;
 
 namespace UI.Components.Pages;
@@ -20,11 +21,11 @@ public partial class Auditoria
 
     private List<MovimientoDto> _movimientos = new List<MovimientoDto>();
     private string _tipo = TodosLosTipos;
+    private string? _error;
 
     private IEnumerable<MovimientoDto> MovimientosFiltrados =>
         _movimientos.Where(movimiento => _tipo == TodosLosTipos || movimiento.Tipo == _tipo);
 
-    // El listado no recibe quien lo pide: el permiso lo controla la pagina al abrirse.
     protected override void OnInitialized()
     {
         if (RedirigirSiNoTienePermiso(Permisos.ConsultarHistorico))
@@ -32,7 +33,28 @@ public partial class Auditoria
             return;
         }
 
-        _movimientos = ServicioHistorico.ListarMovimientos();
+        try
+        {
+            _movimientos = ServicioHistorico.ListarMovimientos(ObtenerIdCatalogoProvisorio(),
+                new FiltroMovimientosDto(), DniUsuario);
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+            _movimientos = new List<MovimientoDto>();
+        }
+    }
+
+    // Provisorio hasta que exista el selector de catalogo (T4): el primer catalogo activo.
+    private int ObtenerIdCatalogoProvisorio()
+    {
+        List<CatalogoDto> catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
+        if (catalogos.Count == 0)
+        {
+            throw new ServicioException("No hay catalogos disponibles");
+        }
+
+        return catalogos[0].Id;
     }
 
     private static string TraducirTipo(string tipo) => NombresDeTipo.GetValueOrDefault(tipo, tipo);

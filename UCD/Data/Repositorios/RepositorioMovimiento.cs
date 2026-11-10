@@ -17,8 +17,30 @@ public class RepositorioMovimiento
         _memoria.Movimientos.Add(movimiento);
     }
 
-    public IReadOnlyList<Movimiento> ObtenerTodos()
+    public IReadOnlyList<Movimiento> ObtenerMovimientos(FiltroPorCatalogoYFechas filtro)
     {
-        return _memoria.Movimientos.ToList().AsReadOnly();
+        ArgumentNullException.ThrowIfNull(filtro);
+        if (!filtro.TieneCriterios())
+        {
+            return new List<Movimiento>();
+        }
+
+        // En memoria no hay Id: invertir el orden de registro y ordenar con OrderByDescending, que es estable,
+        // deja primero el ultimo registrado en los empates, igual que el desempate por Id en la base.
+        return Enumerable.Reverse(_memoria.Movimientos)
+            .Where(movimiento => filtro.Desde is null || movimiento.FechaHora >= filtro.Desde)
+            .Where(movimiento => filtro.Hasta is null || movimiento.FechaHora < filtro.Hasta)
+            .Where(movimiento => filtro.IdCatalogo is null || PerteneceAlCatalogo(movimiento, filtro.IdCatalogo.Value))
+            .OrderByDescending(movimiento => movimiento.FechaHora)
+            .ToList();
+    }
+
+    private bool PerteneceAlCatalogo(Movimiento movimiento, int idCatalogo)
+    {
+        Catalogo? catalogo = _memoria.Catalogo;
+
+        return catalogo is not null
+               && catalogo.Id == idCatalogo
+               && catalogo.Tipos.Contains(movimiento.Prestamo.TipoEquipamiento);
     }
 }
