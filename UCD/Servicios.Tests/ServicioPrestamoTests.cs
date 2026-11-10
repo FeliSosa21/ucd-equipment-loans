@@ -911,7 +911,7 @@ public sealed class ServicioPrestamoTests
         servicio.Rechazar(idRechazada, MotivoDeRechazo, DniSupervisor);
         servicio.Solicitar(CrearSolicitud(), DniAdministrador);
 
-        List<PrestamoDto> resultado = servicio.ListarSolicitudesPendientes();
+        List<PrestamoDto> resultado = servicio.ListarSolicitudesPendientes(DniSupervisor);
 
         Assert.AreEqual(2, resultado.Count);
         CollectionAssert.AreEquivalent(
@@ -922,6 +922,18 @@ public sealed class ServicioPrestamoTests
             prestamo => prestamo.Id == idPendienteDocente).Solicitante);
         Assert.AreEqual("Lucia Fernandez", resultado.Single(
             prestamo => prestamo.Id == idPendienteAdministrador).Solicitante);
+    }
+
+    [TestMethod]
+    [DataRow(DniFuncionario)]
+    public void ListarSolicitudesPendientes_ConsultanteNoHabilitado_LanzaExcepcionConMensaje(string dniConsultante)
+    {
+        ServicioPrestamo servicio = CrearServicio();
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.ListarSolicitudesPendientes(dniConsultante));
+
+        Assert.AreEqual("El usuario no tiene permiso para evaluar solicitudes", excepcion.Message);
     }
 
     [TestMethod]

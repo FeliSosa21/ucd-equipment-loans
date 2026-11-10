@@ -62,7 +62,7 @@ public class ServicioPrestamo
         return CrearPrestamoDto(prestamo);
     }
 
-    public List<PrestamoDto> ListarSolicitudesPendientes()
+    public List<PrestamoDto> ListarSolicitudesPendientes(string dniConsultante)
     {
         return _prestamos.ObtenerPrestamosPendientes().Select(CrearPrestamoDto).ToList();
     }

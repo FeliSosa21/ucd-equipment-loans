@@ -143,9 +143,8 @@ public partial class Aprobaciones
         _avisoLista = null;
     }
 
-    // Los listados no reciben quien los pide: el permiso lo controla la pagina al abrirse.
     private void Recargar()
     {
-        _pendientes = ServicioPrestamo.ListarSolicitudesPendientes();
+        _pendientes = ServicioPrestamo.ListarSolicitudesPendientes(DniUsuario);
     }
 }
