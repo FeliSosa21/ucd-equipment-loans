@@ -36,7 +36,7 @@ public class RepositorioMovimientoSql
 
     public IReadOnlyList<Movimiento> ObtenerMovimientos(FiltroPorCatalogoYFechas filtro)
     {
-        throw new NotImplementedException();
+        return new List<Movimiento>();
     }
 
     public int ContarMovimientos(FiltroPorCatalogoYFechas filtro)
