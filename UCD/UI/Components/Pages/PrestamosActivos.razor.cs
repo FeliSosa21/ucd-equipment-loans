@@ -3,11 +3,10 @@ using UI.Sesion;
 
 namespace UI.Components.Pages;
 
-public partial class Entregas
+public partial class PrestamosActivos
 {
     private List<PrestamoDto> _prestamos = new List<PrestamoDto>();
 
-    // Los listados no reciben quien los pide: el permiso lo controla la pagina al abrirse.
     protected override void OnInitialized()
     {
         if (RedirigirSiNoTienePermiso(Permisos.RealizarPrestamo))
@@ -15,6 +14,6 @@ public partial class Entregas
             return;
         }
 
-        _prestamos = ServicioPrestamo.ListarPrestamosPorEntregar();
+        _prestamos = ServicioPrestamo.ListarPrestamosActivos(DniUsuario);
     }
 }

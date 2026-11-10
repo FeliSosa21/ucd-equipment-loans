@@ -661,6 +661,39 @@ public sealed class PrestamoTests
         Assert.IsFalse(vigente);
     }
 
+    [TestMethod]
+    public void EstaVencido_PrestamoActivoDespuesDeLaFechaEsperada_DevuelveVerdadero()
+    {
+        (Prestamo prestamo, _) = CrearPrestamoActivo();
+        DateTime diaSiguienteALaFechaEsperada = new DateTime(2026, 10, 13, 9, 0, 0);
+
+        bool vencido = prestamo.EstaVencido(diaSiguienteALaFechaEsperada);
+
+        Assert.IsTrue(vencido);
+    }
+
+    [TestMethod]
+    public void EstaVencido_PrestamoActivoElDiaDeLaFechaEsperada_DevuelveFalso()
+    {
+        (Prestamo prestamo, _) = CrearPrestamoActivo();
+        DateTime finDelDiaDeLaFechaEsperada = new DateTime(2026, 10, 12, 18, 0, 0);
+
+        bool vencido = prestamo.EstaVencido(finDelDiaDeLaFechaEsperada);
+
+        Assert.IsFalse(vencido);
+    }
+
+    [TestMethod]
+    public void EstaVencido_PrestamoSolicitadoDespuesDeLaFechaEsperada_DevuelveFalso()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        DateTime diaSiguienteALaFechaEsperada = new DateTime(2026, 10, 13, 9, 0, 0);
+
+        bool vencido = prestamo.EstaVencido(diaSiguienteALaFechaEsperada);
+
+        Assert.IsFalse(vencido);
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(

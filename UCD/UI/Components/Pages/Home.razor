@@ -94,7 +94,7 @@ else
             return;
         }
 
-        _prestamos = ServicioPrestamo.ListarPrestamosDeSolicitante(SesionActual.Usuario!.Dni)
+        _prestamos = ServicioPrestamo.ListarMisSolicitudes(SesionActual.Usuario!.Dni)
             .OrderByDescending(prestamo => prestamo.FechaHoraPrestamo)
             .ToList();
     }

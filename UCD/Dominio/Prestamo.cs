@@ -88,6 +88,11 @@ public class Prestamo
                || Estado == EstadoPrestamo.Activo;
     }
 
+    public bool EstaVencido(DateTime ahora)
+    {
+        return Estado == EstadoPrestamo.Activo && FechaEsperadaDevolucion < ahora.Date;
+    }
+
     private static void ValidarSolicitante(Usuario solicitante)
     {
         if (solicitante is null)
