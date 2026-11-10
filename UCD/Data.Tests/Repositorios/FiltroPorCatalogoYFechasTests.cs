@@ -24,4 +24,14 @@ public sealed class FiltroPorCatalogoYFechasTests
 
         Assert.IsTrue(tieneCriterios);
     }
+
+    [TestMethod]
+    public void TieneCriterios_ConDesde_DevuelveTrue()
+    {
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { Desde = new DateTime(2026, 11, 10) };
+
+        bool tieneCriterios = filtro.TieneCriterios();
+
+        Assert.IsTrue(tieneCriterios);
+    }
 }
