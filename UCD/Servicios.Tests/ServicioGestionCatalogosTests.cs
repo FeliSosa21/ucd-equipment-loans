@@ -244,6 +244,16 @@ public class ServicioGestionCatalogosTests
         Assert.AreEqual("Aulas", LeerCatalogosActivos()[0].Nombre);
     }
 
+    [TestMethod]
+    public void Modificar_UsuarioDesactivado_LanzaServicioException()
+    {
+        int id = _entorno.GuardarCatalogo(new Catalogo("Aulas"));
+        ServicioGestionCatalogos servicio = CrearServicio();
+        _entorno.GuardarUsuarioDesactivado(DniDesactivado, TipoUsuario.Supervisor());
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Modificar(id, NombreValido, DniDesactivado));
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
