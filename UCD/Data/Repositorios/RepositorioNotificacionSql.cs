@@ -26,6 +26,7 @@ public class RepositorioNotificacionSql
             .Include(notificacion => notificacion.Prestamo)
             .ThenInclude(prestamo => prestamo.TipoEquipamiento)
             .Where(notificacion => notificacion.Prestamo.Solicitante.Dni == dni)
+            .Where(notificacion => !notificacion.EstaLeida)
             .ToList();
     }
 }
