@@ -14,4 +14,14 @@ public sealed class FiltroPorCatalogoYFechasTests
 
         Assert.IsFalse(tieneCriterios);
     }
+
+    [TestMethod]
+    public void TieneCriterios_ConCatalogo_DevuelveTrue()
+    {
+        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { IdCatalogo = 1 };
+
+        bool tieneCriterios = filtro.TieneCriterios();
+
+        Assert.IsTrue(tieneCriterios);
+    }
 }
