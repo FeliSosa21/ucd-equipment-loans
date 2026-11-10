@@ -8,10 +8,22 @@
 
 <div class="page-header">
     <h1>Préstamos</h1>
-    <p>Todas las solicitudes y préstamos con su estado, del más reciente al más viejo.</p>
+    <p>Las solicitudes y préstamos del período elegido, con su estado, del más reciente al más viejo. Las fechas incluyen el día completo.</p>
 </div>
 
 <div class="toolbar">
+    <div>
+        <label class="lbl" for="filtro-desde">Desde</label>
+        <input id="filtro-desde" class="field" type="date"
+               aria-invalid="@_errores.AriaInvalid(CampoDesde)"
+               aria-describedby="@_errores.IdDelError(CampoDesde, "filtro-desde")"
+               @bind="_desde" />
+        <ErrorDeCampo Errores="_errores" Campo="@CampoDesde" IdDelCampo="filtro-desde" />
+    </div>
+    <div>
+        <label class="lbl" for="filtro-hasta">Hasta</label>
+        <input id="filtro-hasta" class="field" type="date" @bind="_hasta" />
+    </div>
     <div>
         <label class="lbl" for="filtro-estado">Estado</label>
         <select id="filtro-estado" class="field" @bind="_estado">
@@ -22,7 +34,13 @@
             }
         </select>
     </div>
+    <button type="button" class="btn btn-primary btn-sm" @onclick="Buscar">Buscar</button>
 </div>
+
+@if (_errores.General is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_errores.General</div>
+}
 
 <div class="card table-card">
     <table>
@@ -39,7 +57,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (PrestamoDto prestamo in PrestamosFiltrados)
+            @foreach (PrestamoDto prestamo in _prestamos)
             {
                 <tr>
                     <td>@prestamo.Solicitante</td>
@@ -54,14 +72,9 @@
             }
         </tbody>
     </table>
-    @if (!_prestamos.Any())
+    @if (!_prestamos.Any() && !HayError)
     {
-        <EstadoVacio Titulo="Todavía no hay préstamos"
-                     Mensaje="Las solicitudes y préstamos van a aparecer acá a medida que se registren." />
-    }
-    else if (!PrestamosFiltrados.Any())
-    {
-        <EstadoVacio Titulo="No hay préstamos en este estado"
-                     Mensaje="Probá eligiendo otro estado o «Todos»." />
+        <EstadoVacio Titulo="No hay préstamos en ese período"
+                     Mensaje="Probá con otro rango de fechas o con «Todos»." />
     }
 </div>
