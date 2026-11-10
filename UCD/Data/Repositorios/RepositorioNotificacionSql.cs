@@ -51,5 +51,6 @@ public class RepositorioNotificacionSql
 
     public void ActualizarNotificacion(Notificacion notificacion)
     {
+        _contexto.SaveChanges();
     }
 }
