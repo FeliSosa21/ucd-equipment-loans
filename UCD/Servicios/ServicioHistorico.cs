@@ -25,10 +25,18 @@ public class ServicioHistorico
     {
         OperacionesComunes.ValidarResponsable(_usuarios.ObtenerUsuarioPorDni(dniUsuario), Permiso.ConsultarHistorico,
             MensajeSinPermiso);
-        OperacionesComunes.ObtenerCatalogoActivo(_catalogos, idCatalogo);
+        Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_catalogos, idCatalogo);
         ValidarRangoDeFechas(filtro);
+        FiltroPorCatalogoYFechas filtroDelRepositorio = new FiltroPorCatalogoYFechas
+        {
+            IdCatalogo = catalogo.Id,
+            Desde = filtro.Desde,
+            Hasta = filtro.Hasta
+        };
 
-        return new List<MovimientoDto>();
+        return _movimientos.ObtenerMovimientos(filtroDelRepositorio)
+            .Select(CrearMovimientoDto)
+            .ToList();
     }
 
     private static void ValidarRangoDeFechas(FiltroMovimientosDto filtro)
