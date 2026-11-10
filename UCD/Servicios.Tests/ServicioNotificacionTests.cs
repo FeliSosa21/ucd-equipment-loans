@@ -333,41 +333,42 @@ public sealed class ServicioNotificacionTests
     // Un pedido de 5 dias habiles: el del 02/11 vence el 09/11 (vencido para hoy, 10/11) y el del 03/11 vence hoy.
     private Guid GuardarPrestamoActivo(DateTime fechaHoraPedido)
     {
-        using SqlContext preparacion = new SqlContext(_opciones);
-        Prestamo prestamo = CrearPrestamo(preparacion, fechaHoraPedido);
-        prestamo.Activar(prestamo.TipoEquipamiento.Unidades.ToList());
-        new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
-
-        return prestamo.Id;
+        return GuardarPrestamo(fechaHoraPedido, ActivarConSusUnidades);
     }
 
-    private void GuardarPrestamoDevuelto(DateTime fechaHoraPedido)
+    private Guid GuardarPrestamoDevuelto(DateTime fechaHoraPedido)
     {
-        using SqlContext preparacion = new SqlContext(_opciones);
-        Prestamo prestamo = CrearPrestamo(preparacion, fechaHoraPedido);
-        prestamo.Activar(prestamo.TipoEquipamiento.Unidades.ToList());
-        prestamo.UnidadesAsignadas[0].Disponible();
-        prestamo.MarcarDevuelto();
-        new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
+        return GuardarPrestamo(fechaHoraPedido, prestamo =>
+        {
+            ActivarConSusUnidades(prestamo);
+            prestamo.UnidadesAsignadas[0].Disponible();
+            prestamo.MarcarDevuelto();
+        });
     }
 
     private Guid GuardarPrestamoSolicitado(DateTime fechaHoraPedido)
     {
+        return GuardarPrestamo(fechaHoraPedido, prestamo => { });
+    }
+
+    private Guid GuardarPrestamoRechazadoPorFaltaDeUnidades(DateTime fechaHoraPedido)
+    {
+        return GuardarPrestamo(fechaHoraPedido, prestamo => prestamo.RechazarPorFaltaDeUnidades());
+    }
+
+    private Guid GuardarPrestamo(DateTime fechaHoraPedido, Action<Prestamo> llevarAlEstado)
+    {
         using SqlContext preparacion = new SqlContext(_opciones);
         Prestamo prestamo = CrearPrestamo(preparacion, fechaHoraPedido);
+        llevarAlEstado(prestamo);
         new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
 
         return prestamo.Id;
     }
 
-    private Guid GuardarPrestamoRechazadoPorFaltaDeUnidades(DateTime fechaHoraPedido)
+    private static void ActivarConSusUnidades(Prestamo prestamo)
     {
-        using SqlContext preparacion = new SqlContext(_opciones);
-        Prestamo prestamo = CrearPrestamo(preparacion, fechaHoraPedido);
-        prestamo.RechazarPorFaltaDeUnidades();
-        new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
-
-        return prestamo.Id;
+        prestamo.Activar(prestamo.TipoEquipamiento.Unidades.ToList());
     }
 
     private static Prestamo CrearPrestamo(SqlContext preparacion, DateTime fechaHoraPedido)
