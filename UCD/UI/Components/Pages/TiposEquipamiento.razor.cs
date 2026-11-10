@@ -1,5 +1,6 @@
 using DTOs;
 using Servicios;
+using UI.Components.Shared;
 using UI.Presentacion;
 using UI.Sesion;
 
@@ -18,7 +19,8 @@ public partial class TiposEquipamiento
     private string? _nombreOriginal;
     private DatosTipoEquipamientoDto _datos = new DatosTipoEquipamientoDto();
     private TipoEquipamientoDetalleDto? _aDiscontinuar;
-    private int _idCatalogo;
+    private int _idCatalogo = SelectorCatalogo.SinCatalogo;
+    private SelectorCatalogo? _selector;
     private string? _error;
     private string? _exito;
 
@@ -28,32 +30,28 @@ public partial class TiposEquipamiento
         {
             return;
         }
-
-        ResolverCatalogoProvisorio();
-        Recargar();
     }
 
-    // Provisorio hasta que exista el selector de catalogo (T4): el primer catalogo activo.
-    private void ResolverCatalogoProvisorio()
+    private bool HayCatalogoElegido()
     {
-        try
-        {
-            List<CatalogoDto> catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
-            if (catalogos.Count > 0)
-            {
-                _idCatalogo = catalogos[0].Id;
-            }
-        }
-        catch (ServicioException ex)
-        {
-            _error = ex.Message;
-        }
+        return _idCatalogo != SelectorCatalogo.SinCatalogo;
     }
 
+    private async Task AlCambiarCatalogoAsync()
+    {
+        CerrarTodo();
+        if (!HayCatalogoElegido())
+        {
+            _tipos = new List<TipoEquipamientoDetalleDto>();
+            return;
+        }
+
+        await RecargarAsync();
+    }
 
     // ---------- Listado y filtros ----------
 
-    private void Recargar()
+    private async Task RecargarAsync()
     {
         try
         {
@@ -67,22 +65,34 @@ public partial class TiposEquipamiento
         catch (ServicioException ex)
         {
             _tipos = new List<TipoEquipamientoDetalleDto>();
-            _error = ex.Message;
+            await MostrarErrorYRecargarSelectorAsync(ex.Message);
         }
     }
 
-    // Al cambiar un filtro no queda en pantalla el mensaje de la accion anterior.
-    private void Filtrar()
+    // Si el catalogo se dio de baja con la pagina abierta, el selector se actualiza antes de mostrar el mensaje:
+    // al avisar el selector que ya no hay catalogo elegido, la pagina limpia el error anterior.
+    private async Task MostrarErrorYRecargarSelectorAsync(string mensaje)
     {
-        LimpiarMensajes();
-        Recargar();
+        if (_selector is not null)
+        {
+            await _selector.RecargarAsync();
+        }
+
+        _error = mensaje;
     }
 
-    private void LimpiarFiltros()
+    // Al cambiar un filtro no queda en pantalla el mensaje de la accion anterior.
+    private async Task FiltrarAsync()
+    {
+        LimpiarMensajes();
+        await RecargarAsync();
+    }
+
+    private async Task LimpiarFiltrosAsync()
     {
         _busqueda = string.Empty;
         _categoria = string.Empty;
-        Filtrar();
+        await FiltrarAsync();
     }
 
     private bool HayFiltrosAplicados()
@@ -132,7 +142,7 @@ public partial class TiposEquipamiento
                _datos.DuracionMaxPrestamo > 0;
     }
 
-    private void Guardar()
+    private async Task GuardarAsync()
     {
         // Un doble clic manda dos envios: el segundo llega con el formulario ya cerrado.
         if (!_mostrarFormulario)
@@ -167,7 +177,7 @@ public partial class TiposEquipamiento
             _error = ex.Message;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
     private void CancelarFormulario()
@@ -184,7 +194,7 @@ public partial class TiposEquipamiento
         _aDiscontinuar = tipo;
     }
 
-    private void ConfirmarDiscontinuar()
+    private async Task ConfirmarDiscontinuarAsync()
     {
         // Un doble clic manda dos envios: el segundo llega con la confirmacion ya cerrada.
         if (_aDiscontinuar is null)
@@ -204,7 +214,7 @@ public partial class TiposEquipamiento
             _error = ex.Message;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
     private void CancelarDiscontinuar()
@@ -214,7 +224,7 @@ public partial class TiposEquipamiento
 
     // ---------- Reactivar (foro: un tipo discontinuado puede volver a activarse) ----------
 
-    private void Reactivar(TipoEquipamientoDetalleDto tipo)
+    private async Task ReactivarAsync(TipoEquipamientoDetalleDto tipo)
     {
         // Un doble clic manda dos envios: el segundo llega con el tipo ya activo.
         if (!SigueDiscontinuado(tipo))
@@ -233,7 +243,7 @@ public partial class TiposEquipamiento
             _error = ex.Message;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
     // La fila del clic puede ser de un listado viejo: se compara con el estado del listado actual.
