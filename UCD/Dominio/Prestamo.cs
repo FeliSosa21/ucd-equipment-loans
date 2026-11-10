@@ -90,7 +90,7 @@ public class Prestamo
 
     public bool EstaVencido(DateTime ahora)
     {
-        return true;
+        return FechaEsperadaDevolucion < ahora.Date;
     }
 
     private static void ValidarSolicitante(Usuario solicitante)
