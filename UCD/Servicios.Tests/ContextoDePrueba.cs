@@ -17,6 +17,7 @@ internal sealed class ContextoDePrueba : IDisposable
     public SqlContext Contexto { get; }
     public RepositorioUsuarioSql Usuarios { get; }
     public RepositorioCatalogoSql Catalogos { get; }
+    public RepositorioPrestamoSql Prestamos { get; }
 
     public ContextoDePrueba()
     {
@@ -28,6 +29,7 @@ internal sealed class ContextoDePrueba : IDisposable
         Contexto = new SqlContext(_opciones);
         Usuarios = new RepositorioUsuarioSql(Contexto);
         Catalogos = new RepositorioCatalogoSql(Contexto);
+        Prestamos = new RepositorioPrestamoSql(Contexto);
     }
 
     public SqlContext NuevoContexto()
