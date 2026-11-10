@@ -10,6 +10,7 @@ namespace Servicios.Tests;
 internal sealed class ContextoDePrueba : IDisposable
 {
     private const string ContrasenaDePrueba = "VivaLaOrt2026";
+    private static readonly DateTime FechaDePrestamo = new DateTime(2026, 11, 9, 10, 0, 0);
 
     private readonly DbContextOptions<SqlContext> _opciones;
     private readonly List<SqlContext> _contextosQueFallan = new List<SqlContext>();
@@ -17,6 +18,7 @@ internal sealed class ContextoDePrueba : IDisposable
     public SqlContext Contexto { get; }
     public RepositorioUsuarioSql Usuarios { get; }
     public RepositorioCatalogoSql Catalogos { get; }
+    public RepositorioPrestamoSql Prestamos { get; }
 
     public ContextoDePrueba()
     {
@@ -28,6 +30,7 @@ internal sealed class ContextoDePrueba : IDisposable
         Contexto = new SqlContext(_opciones);
         Usuarios = new RepositorioUsuarioSql(Contexto);
         Catalogos = new RepositorioCatalogoSql(Contexto);
+        Prestamos = new RepositorioPrestamoSql(Contexto);
     }
 
     public SqlContext NuevoContexto()
@@ -69,6 +72,21 @@ internal sealed class ContextoDePrueba : IDisposable
         return catalogo.Id;
     }
 
+    public void GuardarPrestamoSolicitado(int idCatalogo, string nombreTipo, string dniSolicitante)
+    {
+        using SqlContext preparacion = NuevoContexto();
+        Prestamo prestamo = CrearPrestamo(preparacion, idCatalogo, nombreTipo, dniSolicitante);
+        new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
+    }
+
+    public void GuardarPrestamoActivo(int idCatalogo, string nombreTipo, string dniSolicitante)
+    {
+        using SqlContext preparacion = NuevoContexto();
+        Prestamo prestamo = CrearPrestamo(preparacion, idCatalogo, nombreTipo, dniSolicitante);
+        prestamo.Activar(prestamo.TipoEquipamiento.Unidades.Take(1).ToList());
+        new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
+    }
+
     public void GuardarUsuario(string dni, TipoUsuario tipoPredefinido)
     {
         using SqlContext preparacion = NuevoContexto();
@@ -90,6 +108,14 @@ internal sealed class ContextoDePrueba : IDisposable
         {
             contexto.Dispose();
         }
+    }
+
+    private static Prestamo CrearPrestamo(SqlContext preparacion, int idCatalogo, string nombreTipo,
+        string dniSolicitante)
+    {
+        TipoEquipamiento tipo = new RepositorioCatalogoSql(preparacion).ObtenerTipoPorNombre(idCatalogo, nombreTipo)!;
+        Usuario solicitante = new RepositorioUsuarioSql(preparacion).ObtenerUsuarioPorDni(dniSolicitante)!;
+        return new Prestamo(solicitante, tipo, 1, FechaDePrestamo);
     }
 
     private static Usuario CrearUsuario(SqlContext preparacion, string dni, TipoUsuario tipoPredefinido)

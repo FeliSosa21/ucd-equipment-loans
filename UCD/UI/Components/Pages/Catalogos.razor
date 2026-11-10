@@ -1,0 +1,104 @@
+@page "/catalogos"
+@inherits PaginaConSesion
+@using DTOs
+@using Servicios
+@using UI.Presentacion
+@inject ServicioGestionCatalogos ServicioGestion
+
+<PageTitle>UCD · Catálogos</PageTitle>
+
+<div class="page-header">
+    <h1>Catálogos</h1>
+    <p>Creá, renombrá o eliminá los catálogos. Cada catálogo tiene sus propios tipos de equipamiento y unidades.</p>
+</div>
+
+<div class="toolbar">
+    <button type="button" class="btn btn-primary btn-sm" @onclick="AbrirAlta" disabled="@_mostrarFormulario">
+        Nuevo catálogo
+    </button>
+</div>
+
+@if (_mostrarFormulario)
+{
+    <div class="card alta">
+        <form class="form-grid" @onsubmit="Guardar" novalidate>
+            <div class="lbl">@TituloFormulario()</div>
+            <div>
+                <label class="lbl" for="@IdNombre">Nombre</label>
+                <input id="@IdNombre" class="field" maxlength="@LargoMaximoNombre"
+                       aria-invalid="@_errores.AriaInvalid(CampoNombre)" aria-describedby="@DescripcionDelNombre"
+                       @bind="_nombre" @bind:event="oninput" @bind:after="() => _errores.QuitarDe(CampoNombre)" />
+                <ErrorDeCampo Errores="_errores" Campo="@CampoNombre" IdDelCampo="@IdNombre" />
+                <div class="pie-campo">
+                    <div id="@IdAyudaNombre" class="hint">
+                        Entre 3 y @LargoMaximoNombre caracteres. No puede repetirse entre los catálogos.
+                    </div>
+                    <div class="hint contador">@_nombre.Length / @LargoMaximoNombre</div>
+                </div>
+            </div>
+            <div class="acciones">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <button type="button" class="btn btn-ghost" @onclick="CancelarFormulario">Cancelar</button>
+            </div>
+        </form>
+    </div>
+}
+
+@if (_aEliminar is not null)
+{
+    <div class="card alta" role="alertdialog" aria-labelledby="confirmacion-pregunta">
+        <p id="confirmacion-pregunta" class="pregunta">
+            ¿Querés eliminar el catálogo <strong>@_aEliminar.Nombre</strong>? Es una baja lógica y no se puede
+            deshacer: el catálogo deja de aparecer en las pantallas, pero sus tipos, unidades y préstamos quedan
+            guardados y el nombre queda libre para otro catálogo. No se puede eliminar si tiene préstamos activos
+            o pendientes de autorización.
+        </p>
+        <div class="acciones">
+            <button type="button" class="btn btn-primary" @onclick="ConfirmarEliminar">Sí, eliminar</button>
+            <button type="button" class="btn btn-ghost" @onclick="CancelarEliminar">Cancelar</button>
+        </div>
+    </div>
+}
+
+@if (_exito is not null)
+{
+    <div class="alert alert-success mensaje" role="status">@_exito</div>
+}
+
+@if (_errores.General is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_errores.General</div>
+}
+
+<div class="card table-card">
+    <table>
+        <thead>
+        <tr>
+            <th>Nombre</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (CatalogoDto catalogo in _catalogos)
+        {
+            <tr>
+                <td><strong>@catalogo.Nombre</strong></td>
+                <td class="celda-acciones">
+                    <button type="button" class="btn btn-ghost btn-sm" @onclick="() => AbrirEdicion(catalogo)">
+                        Editar
+                    </button>
+                    <button type="button" class="btn btn-ghost btn-sm" @onclick="() => PedirEliminar(catalogo)">
+                        Eliminar
+                    </button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    @if (_catalogos.Count == 0)
+    {
+        <EstadoVacio Titulo="Todavía no hay catálogos"
+                     Mensaje="Creá el primero con «Nuevo catálogo»." />
+    }
+</div>
