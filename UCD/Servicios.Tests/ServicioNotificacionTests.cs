@@ -11,6 +11,7 @@ public sealed class ServicioNotificacionTests
 {
     private static readonly DateTime Hoy = new DateTime(2026, 11, 10, 9, 0, 0);
     private static readonly DateTime PedidoQueVencioAyer = new DateTime(2026, 11, 2, 10, 0, 0);
+    private static readonly DateTime PedidoQueVenceHoy = new DateTime(2026, 11, 3, 10, 0, 0);
 
     private const string DniDocente = "12345672";
 
@@ -47,6 +48,17 @@ public sealed class ServicioNotificacionTests
         Assert.AreEqual(Hoy, creadas[0].FechaHora);
     }
 
+    [TestMethod]
+    public void GenerarNotificacionesDeVencidos_PrestamoQueVenceHoy_NoCreaNinguna()
+    {
+        GuardarPrestamoActivo(PedidoQueVenceHoy);
+        ServicioNotificacion servicio = CrearServicio();
+
+        servicio.GenerarNotificacionesDeVencidos(DniDocente);
+
+        Assert.AreEqual(0, LeerNoLeidasDe(DniDocente).Count);
+    }
+
     private ServicioNotificacion CrearServicio()
     {
         return new ServicioNotificacion(
@@ -63,7 +75,7 @@ public sealed class ServicioNotificacionTests
         return new RepositorioNotificacionSql(contextoQueLee).ObtenerNoLeidasDeUsuario(dni);
     }
 
-    // Un pedido de 5 dias habiles: el del 02/11 vence el 09/11 (vencido para hoy, 10/11).
+    // Un pedido de 5 dias habiles: el del 02/11 vence el 09/11 (vencido para hoy, 10/11) y el del 03/11 vence hoy.
     private Guid GuardarPrestamoActivo(DateTime fechaHoraPedido)
     {
         using SqlContext preparacion = new SqlContext(_opciones);
