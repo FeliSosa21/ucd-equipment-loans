@@ -26,6 +26,11 @@ public class ServicioNotificacion
 
         foreach (Prestamo prestamo in _prestamos.ObtenerPrestamosVencidosDeSolicitante(dniUsuario, ahora.Date))
         {
+            if (_notificaciones.ExisteVencidoSinLeer(prestamo.Id))
+            {
+                continue;
+            }
+
             Notificacion notificacion = new Notificacion(prestamo, TipoNotificacion.PrestamoVencido, ahora.DateTime);
             _notificaciones.AgregarNotificacion(notificacion);
         }
