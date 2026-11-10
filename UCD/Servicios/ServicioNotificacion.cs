@@ -75,8 +75,11 @@ public class ServicioNotificacion
 
     public void RegistrarResultadoDeEvaluacion(Prestamo prestamo, DateTime fechaHoraEvaluacion)
     {
-        _notificaciones.AgregarNotificacion(
-            new Notificacion(prestamo, TipoNotificacion.SolicitudAprobada, fechaHoraEvaluacion));
+        TipoNotificacion tipo = prestamo.Estado == EstadoPrestamo.Rechazado
+            ? TipoNotificacion.SolicitudRechazada
+            : TipoNotificacion.SolicitudAprobada;
+
+        _notificaciones.AgregarNotificacion(new Notificacion(prestamo, tipo, fechaHoraEvaluacion));
     }
 
     private static NotificacionDto CrearNotificacionDto(Notificacion notificacion)
