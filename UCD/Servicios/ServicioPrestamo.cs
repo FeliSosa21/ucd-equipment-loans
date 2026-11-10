@@ -8,6 +8,8 @@ public class ServicioPrestamo
 {
     private const string MensajeSinPermisoParaEvaluar = "El usuario no tiene permiso para evaluar solicitudes";
     private const string MensajeSinPermisoParaMisSolicitudes = "El usuario no tiene permiso para consultar sus solicitudes";
+    private const string MensajeSinPermisoParaPrestamosActivos =
+        "El usuario no tiene permiso para consultar los prestamos activos";
 
     private readonly RepositorioPrestamoSql _prestamos;
     private readonly RepositorioUsuarioSql _usuarios;
@@ -79,6 +81,8 @@ public class ServicioPrestamo
 
     public List<PrestamoDto> ListarPrestamosActivos(string dniConsultante)
     {
+        ObtenerUsuarioHabilitado(dniConsultante, Permiso.RealizarPrestamo, MensajeSinPermisoParaPrestamosActivos);
+
         return _prestamos.ObtenerPrestamosActivos().Select(CrearPrestamoDto).ToList();
     }
 
