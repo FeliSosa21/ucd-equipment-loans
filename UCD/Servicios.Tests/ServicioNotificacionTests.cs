@@ -1,0 +1,102 @@
+using Data;
+using Data.Repositorios;
+using Dominio;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
+
+namespace Servicios.Tests;
+
+[TestClass]
+public sealed class ServicioNotificacionTests
+{
+    private static readonly DateTime Hoy = new DateTime(2026, 11, 10, 9, 0, 0);
+    private static readonly DateTime PedidoQueVencioAyer = new DateTime(2026, 11, 2, 10, 0, 0);
+
+    private const string DniDocente = "12345672";
+
+    private DbContextOptions<SqlContext> _opciones = null!;
+    private SqlContext _contexto = null!;
+
+    [TestInitialize]
+    public void Inicializar()
+    {
+        _opciones = new DbContextOptionsBuilder<SqlContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        _contexto = new SqlContext(_opciones);
+        GuardarUsuarios();
+    }
+
+    [TestCleanup]
+    public void Limpiar()
+    {
+        _contexto.Dispose();
+    }
+
+    [TestMethod]
+    public void GenerarNotificacionesDeVencidos_UnPrestamoVencido_CreaUnaDeVencidoSinLeerConLaFechaDeHoy()
+    {
+        Guid idPrestamo = GuardarPrestamoActivo(PedidoQueVencioAyer);
+        ServicioNotificacion servicio = CrearServicio();
+
+        servicio.GenerarNotificacionesDeVencidos(DniDocente);
+
+        IReadOnlyList<Notificacion> creadas = LeerNoLeidasDe(DniDocente);
+        Assert.AreEqual(1, creadas.Count);
+        Assert.AreEqual(idPrestamo, creadas[0].Prestamo.Id);
+        Assert.AreEqual(TipoNotificacion.PrestamoVencido, creadas[0].Tipo);
+        Assert.AreEqual(Hoy, creadas[0].FechaHora);
+    }
+
+    private ServicioNotificacion CrearServicio()
+    {
+        return new ServicioNotificacion(
+            notificaciones: new RepositorioNotificacionSql(_contexto),
+            prestamos: new RepositorioPrestamoSql(_contexto),
+            reloj: new RelojFijo(Hoy),
+            logger: NullLogger<ServicioNotificacion>.Instance);
+    }
+
+    private IReadOnlyList<Notificacion> LeerNoLeidasDe(string dni)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+
+        return new RepositorioNotificacionSql(contextoQueLee).ObtenerNoLeidasDeUsuario(dni);
+    }
+
+    // Un pedido de 5 dias habiles: el del 02/11 vence el 09/11 (vencido para hoy, 10/11).
+    private Guid GuardarPrestamoActivo(DateTime fechaHoraPedido)
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
+        Prestamo prestamo = CrearPrestamo(preparacion, fechaHoraPedido);
+        prestamo.Activar(prestamo.TipoEquipamiento.Unidades.ToList());
+        new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
+
+        return prestamo.Id;
+    }
+
+    private static Prestamo CrearPrestamo(SqlContext preparacion, DateTime fechaHoraPedido)
+    {
+        Usuario solicitante = new RepositorioUsuarioSql(preparacion).ObtenerUsuarioPorDni(DniDocente)!;
+        TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",
+            duracionMaxPrestamo: 5, requiereAprobacion: false, categoria: Categoria.Audiovisual);
+        tipo.AgregarUnidad(new UnidadFisica(idInstitucional: "EQP-0001", ubiFisica: "Deposito A", numSerie: null));
+
+        return new Prestamo(solicitante, tipo, cantidadSolicitada: 1, fechaHoraPrestamo: fechaHoraPedido);
+    }
+
+    // Cada tipo de usuario se crea en el test: no se depende de datos sembrados en la base.
+    private void GuardarUsuarios()
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
+        new RepositorioUsuarioSql(preparacion).AgregarUsuario(CrearUsuario(DniDocente, TipoUsuario.Docente()));
+    }
+
+    private static Usuario CrearUsuario(string dni, TipoUsuario tipo)
+    {
+        Usuario usuario = new Usuario(dni: dni, nombre: "Renato", apellido: "Alves",
+            correo: $"usuario{dni}@ejemplo.com", contrasena: "VivaLaOrt2026");
+        usuario.AsignarTipo(tipo);
+
+        return usuario;
+    }
+}
