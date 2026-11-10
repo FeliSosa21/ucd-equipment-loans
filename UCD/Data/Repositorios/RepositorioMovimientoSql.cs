@@ -44,6 +44,8 @@ public class RepositorioMovimientoSql
         return FiltrarPor(filtro)
             .Include(movimiento => movimiento.Prestamo)
             .ThenInclude(prestamo => prestamo.Solicitante)
+            .Include(movimiento => movimiento.Prestamo)
+            .ThenInclude(prestamo => prestamo.TipoEquipamiento)
             .Include(movimiento => movimiento.Evaluador)
             .Include(movimiento => movimiento.Unidad)
             .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}")
