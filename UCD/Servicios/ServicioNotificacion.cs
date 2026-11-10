@@ -6,6 +6,9 @@ namespace Servicios;
 
 public class ServicioNotificacion
 {
+    private const string MensajeFallaAlGuardarVencido =
+        "No se pudo guardar la notificacion de vencido del prestamo {IdPrestamo}";
+
     private readonly RepositorioNotificacionSql _notificaciones;
     private readonly RepositorioPrestamoSql _prestamos;
     private readonly TimeProvider _reloj;
@@ -32,7 +35,15 @@ public class ServicioNotificacion
             }
 
             Notificacion notificacion = new Notificacion(prestamo, TipoNotificacion.PrestamoVencido, ahora.DateTime);
-            _notificaciones.AgregarNotificacion(notificacion);
+
+            try
+            {
+                _notificaciones.AgregarNotificacion(notificacion);
+            }
+            catch (InvalidOperationException excepcion)
+            {
+                _logger.LogError(excepcion, MensajeFallaAlGuardarVencido, prestamo.Id);
+            }
         }
     }
 }
