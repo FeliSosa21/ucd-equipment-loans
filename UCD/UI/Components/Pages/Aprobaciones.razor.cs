@@ -44,8 +44,12 @@ public partial class Aprobaciones
         catch (ServicioException ex)
         {
             _avisoLista = ex.Message;
-            Recargar();
-            AvisarSiYaNoEstaPendiente(prestamo);
+
+            if (Recargar())
+            {
+                AvisarSiYaNoEstaPendiente(prestamo);
+            }
+
             return;
         }
 
@@ -110,8 +114,11 @@ public partial class Aprobaciones
         catch (ServicioException ex)
         {
             _error = ex.Message;
-            Recargar();
-            CerrarSiYaNoSePuedeRechazar(prestamo);
+
+            if (Recargar())
+            {
+                CerrarSiYaNoSePuedeRechazar(prestamo);
+            }
         }
     }
 
@@ -143,8 +150,22 @@ public partial class Aprobaciones
         _avisoLista = null;
     }
 
-    private void Recargar()
+    // Si quien evalua perdio el permiso, el servicio niega la lista: se cierra el formulario y se avisa.
+    private bool Recargar()
     {
-        _pendientes = ServicioPrestamo.ListarSolicitudesPendientes(DniUsuario);
+        try
+        {
+            _pendientes = ServicioPrestamo.ListarSolicitudesPendientes(DniUsuario);
+            return true;
+        }
+        catch (ServicioException ex)
+        {
+            _pendientes = new List<PrestamoDto>();
+            _rechazando = null;
+            _error = null;
+            _exito = null;
+            _avisoLista = ex.Message;
+            return false;
+        }
     }
 }
