@@ -30,7 +30,7 @@ public class Notificacion
 
     public bool EsDe(string dni)
     {
-        return false;
+        return Prestamo.Solicitante.Dni == dni;
     }
 
     private static void ValidarPrestamo(Prestamo prestamo)
