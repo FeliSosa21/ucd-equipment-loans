@@ -20,6 +20,7 @@ public sealed class ServicioPrestamoTests
     private const string DniSupervisor = "67890127";
     private const string DniSupervisorDesactivado = "78901238";
     private const string DniAdministrador = "89012349";
+    private const string DniFuncionarioDesactivado = "90123450";
 
     private const string NombreTipoSinAprobacion = "Proyector Epson PowerLite";
     private const string NombreTipoSinUnidades = "Parlante JBL Flip";
@@ -881,6 +882,7 @@ public sealed class ServicioPrestamoTests
 
     [TestMethod]
     [DataRow(DniSupervisor)]
+    [DataRow(DniFuncionarioDesactivado)]
     public void ListarPrestamosActivos_ConsultanteNoHabilitado_LanzaExcepcionConMensaje(string dniConsultante)
     {
         ServicioPrestamo servicio = CrearServicio();
@@ -1141,11 +1143,12 @@ public sealed class ServicioPrestamoTests
     {
         RepositorioUsuarioSql usuarios = new RepositorioUsuarioSql(_contexto);
         TipoUsuario docente = TipoUsuario.Docente();
+        TipoUsuario funcionario = TipoUsuario.FuncionarioCE();
         TipoUsuario supervisor = TipoUsuario.Supervisor();
 
         usuarios.AgregarUsuario(CrearUsuario(dni: DniDocente, tipoUsuario: docente));
         usuarios.AgregarUsuario(CrearUsuario(dni: DniEstudiante, tipoUsuario: TipoUsuario.Estudiante()));
-        usuarios.AgregarUsuario(CrearUsuario(dni: DniFuncionario, tipoUsuario: TipoUsuario.FuncionarioCE()));
+        usuarios.AgregarUsuario(CrearUsuario(dni: DniFuncionario, tipoUsuario: funcionario));
         usuarios.AgregarUsuario(CrearUsuario(dni: DniSupervisor, tipoUsuario: supervisor,
             nombre: "Sofia", apellido: "Martinez"));
         usuarios.AgregarUsuario(CrearUsuario(dni: DniAdministrador, tipoUsuario: TipoUsuario.Administrador(),
@@ -1159,6 +1162,10 @@ public sealed class ServicioPrestamoTests
             nombre: "Diego", apellido: "Rodriguez");
         supervisorDesactivado.Desactivar();
         usuarios.AgregarUsuario(supervisorDesactivado);
+
+        Usuario funcionarioDesactivado = CrearUsuario(dni: DniFuncionarioDesactivado, tipoUsuario: funcionario);
+        funcionarioDesactivado.Desactivar();
+        usuarios.AgregarUsuario(funcionarioDesactivado);
     }
 
     private static Usuario CrearUsuario(
