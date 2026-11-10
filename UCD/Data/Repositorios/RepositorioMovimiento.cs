@@ -20,7 +20,7 @@ public class RepositorioMovimiento
     public IReadOnlyList<Movimiento> ObtenerMovimientos(FiltroPorCatalogoYFechas filtro)
     {
         ArgumentNullException.ThrowIfNull(filtro);
-        if (filtro.IdCatalogo is null && filtro.Desde is null && filtro.Hasta is null)
+        if (!filtro.TieneCriterios())
         {
             return new List<Movimiento>();
         }
