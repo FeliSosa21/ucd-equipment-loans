@@ -943,6 +943,18 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void RangoPorDefecto_RelojFijo_DevuelveLosUltimos30DiasConHoyYSinEstado()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+
+        FiltroDePrestamosDto rango = servicio.RangoPorDefecto();
+
+        Assert.AreEqual(new DateTime(2026, 9, 6), rango.Desde);
+        Assert.AreEqual(new DateTime(2026, 10, 5), rango.Hasta);
+        Assert.IsNull(rango.Estado);
+    }
+
+    [TestMethod]
     public void ListarSolicitudesPendientes_VariosEstados_DevuelveSoloLasPendientesConSuSolicitante()
     {
         ServicioPrestamo servicio = CrearServicio();

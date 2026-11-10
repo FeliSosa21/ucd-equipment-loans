@@ -95,6 +95,11 @@ public class ServicioPrestamo
         return _prestamos.ObtenerPrestamos(new FiltroPorCatalogoYFechas()).Select(CrearPrestamoDto).ToList();
     }
 
+    public FiltroDePrestamosDto RangoPorDefecto()
+    {
+        return new FiltroDePrestamosDto { Desde = default, Hasta = default };
+    }
+
     private Usuario ObtenerSolicitante(string dniSolicitante)
     {
         Usuario? solicitante = _usuarios.ObtenerUsuarioPorDni(dniSolicitante);
