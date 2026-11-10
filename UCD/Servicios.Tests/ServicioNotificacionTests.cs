@@ -83,6 +83,22 @@ public sealed class ServicioNotificacionTests
             LeerNoLeidasDe(DniDocente).Select(notificacion => notificacion.Id).ToList());
     }
 
+    [TestMethod]
+    public void GenerarNotificacionesDeVencidos_LaAnteriorEstaLeida_CreaOtra()
+    {
+        Guid idPrestamo = GuardarPrestamoActivo(PedidoQueVencioAyer);
+        int idAnterior = GuardarNotificacion(idPrestamo, TipoNotificacion.PrestamoVencido);
+        MarcarLeidaConOtroContexto(idAnterior);
+        ServicioNotificacion servicio = CrearServicio();
+
+        servicio.GenerarNotificacionesDeVencidos(DniDocente);
+
+        IReadOnlyList<Notificacion> sinLeer = LeerNoLeidasDe(DniDocente);
+        Assert.AreEqual(1, sinLeer.Count);
+        Assert.AreNotEqual(idAnterior, sinLeer[0].Id);
+        Assert.AreEqual(idPrestamo, sinLeer[0].Prestamo.Id);
+    }
+
     private ServicioNotificacion CrearServicio()
     {
         return new ServicioNotificacion(
@@ -107,6 +123,15 @@ public sealed class ServicioNotificacionTests
         new RepositorioNotificacionSql(preparacion).AgregarNotificacion(notificacion);
 
         return notificacion.Id;
+    }
+
+    private void MarcarLeidaConOtroContexto(int idNotificacion)
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
+        RepositorioNotificacionSql repositorio = new RepositorioNotificacionSql(preparacion);
+        Notificacion notificacion = repositorio.ObtenerNotificacionPorId(idNotificacion)!;
+        notificacion.MarcarComoLeida();
+        repositorio.ActualizarNotificacion(notificacion);
     }
 
     // Un pedido de 5 dias habiles: el del 02/11 vence el 09/11 (vencido para hoy, 10/11) y el del 03/11 vence hoy.
