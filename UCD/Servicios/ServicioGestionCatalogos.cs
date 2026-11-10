@@ -8,6 +8,8 @@ namespace Servicios;
 public class ServicioGestionCatalogos
 {
     private const string CampoNombre = nameof(CatalogoDto.Nombre);
+    private const string MensajeNoSePudoGuardar =
+        "No se pudieron guardar los cambios; verifique que no exista otro catalogo con ese nombre";
     private const string MensajeSinPermiso = "El usuario no tiene permiso para gestionar los catalogos";
 
     private readonly RepositorioCatalogoSql _repositorioCatalogo;
@@ -42,6 +44,10 @@ public class ServicioGestionCatalogos
 
     public void Modificar(int idCatalogo, string nombre, string dniResponsable)
     {
+        Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
+
+        catalogo.ModificarNombre(OperacionesComunes.Normalizar(nombre));
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
     public void Eliminar(int idCatalogo, string dniResponsable)
