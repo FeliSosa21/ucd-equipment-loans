@@ -11,6 +11,7 @@ public class ServicioPrestamo
     private const string MensajeSinPermisoParaPrestamosActivos =
         "El usuario no tiene permiso para consultar los prestamos activos";
     private const string MensajeSinPermisoParaConsultarPrestamos = "El usuario no tiene permiso para consultar prestamos";
+    private const string MensajeRangoInvertido = "La fecha desde no puede ser posterior a la fecha hasta";
     private const int DiasPorDefecto = 30;
 
     private readonly RepositorioPrestamoSql _prestamos;
@@ -95,6 +96,7 @@ public class ServicioPrestamo
     public List<PrestamoDto> ListarPrestamos(string dniConsultante, FiltroDePrestamosDto filtro)
     {
         ObtenerUsuarioHabilitado(dniConsultante, Permiso.ConsultarPrestamos, MensajeSinPermisoParaConsultarPrestamos);
+        ValidarRango(filtro);
 
         return _prestamos.ObtenerPrestamos(CrearFiltroDeDiasCompletos(filtro)).Select(CrearPrestamoDto).ToList();
     }
@@ -284,6 +286,14 @@ public class ServicioPrestamo
         foreach (UnidadFisica unidad in prestamo.UnidadesAsignadas)
         {
             _movimientos.AgregarMovimiento(Movimiento.DePrestamo(prestamo, crearRegistro(), unidad));
+        }
+    }
+
+    private static void ValidarRango(FiltroDePrestamosDto filtro)
+    {
+        if (filtro.Desde > filtro.Hasta)
+        {
+            throw new ServicioException(nameof(FiltroDePrestamosDto.Desde), MensajeRangoInvertido);
         }
     }
 
