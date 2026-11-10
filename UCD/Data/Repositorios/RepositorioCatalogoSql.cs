@@ -75,7 +75,15 @@ public class RepositorioCatalogoSql
     {
         ArgumentNullException.ThrowIfNull(catalogo);
 
-        _contexto.SaveChanges();
+        try
+        {
+            _contexto.SaveChanges();
+        }
+        catch (DbUpdateException ex)
+        {
+            _contexto.ChangeTracker.Clear();
+            throw new InvalidOperationException("La base rechazo los cambios del catalogo", ex);
+        }
     }
 
     public TipoEquipamiento? ObtenerTipoPorNombre(int idCatalogo, string nombre)
