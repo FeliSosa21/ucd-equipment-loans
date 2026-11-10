@@ -104,6 +104,20 @@ public sealed class RepositorioTipoUsuarioSqlTests
             tipos.Select(tipo => tipo.Nombre).ToList());
     }
 
+    [TestMethod]
+    public void EnsureCreated_BaseNueva_NoInsertaTiposDeUsuario()
+    {
+        using (SqlContext contextoQueCrea = new SqlContext(_opciones))
+        {
+            contextoQueCrea.Database.EnsureCreated();
+        }
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<TipoUsuario> tipos = new RepositorioTipoUsuarioSql(contextoQueLee).ObtenerTodos();
+
+        Assert.AreEqual(0, tipos.Count);
+    }
+
     private void GuardarConOtroContexto(TipoUsuario tipo)
     {
         using SqlContext contextoQueGuarda = new SqlContext(_opciones);
