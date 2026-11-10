@@ -136,9 +136,27 @@ public class ServicioGestionCatalogosTests
         Assert.ThrowsException<ServicioException>(() => servicio.Crear(NombreValido, DniInexistente));
     }
 
+    [TestMethod]
+    public void Crear_FallaElGuardado_LanzaServicioExceptionEnElCampo()
+    {
+        ServicioGestionCatalogos servicio = CrearServicioQueFallaAlGuardar();
+
+        ServicioException error = Assert.ThrowsException<ServicioException>(() =>
+            servicio.Crear(NombreValido, DniSupervisor));
+
+        Assert.AreEqual(CampoNombre, error.Campo);
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
+    }
+
+    private ServicioGestionCatalogos CrearServicioQueFallaAlGuardar()
+    {
+        SqlContext contexto = _entorno.NuevoContextoQueFallaAlGuardar();
+        return new ServicioGestionCatalogos(new RepositorioCatalogoSql(contexto),
+            new RepositorioUsuarioSql(contexto), new RepositorioPrestamoSql(contexto));
     }
 
     private IReadOnlyList<Catalogo> LeerCatalogosActivos()
