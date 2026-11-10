@@ -64,7 +64,7 @@ public class ServicioNotificacion
     {
         Notificacion? notificacion = _notificaciones.ObtenerNotificacionPorId(idNotificacion);
 
-        if (notificacion is null)
+        if (notificacion is null || !notificacion.EsDe(dniUsuario))
         {
             throw new ServicioException(MensajeNotificacionAjena);
         }
