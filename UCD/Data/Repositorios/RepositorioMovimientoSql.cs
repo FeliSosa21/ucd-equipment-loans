@@ -34,6 +34,11 @@ public class RepositorioMovimientoSql
             .ToList();
     }
 
+    public IReadOnlyList<Movimiento> ObtenerMovimientos(FiltroPorCatalogoYFechas filtro)
+    {
+        throw new NotImplementedException();
+    }
+
     public int ContarMovimientos(FiltroPorCatalogoYFechas filtro)
     {
         return FiltrarPor(filtro).Count();

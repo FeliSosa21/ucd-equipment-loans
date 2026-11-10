@@ -133,6 +133,16 @@ public sealed class RepositorioMovimientoSqlTests
         Assert.AreEqual("45678905", leido.Responsable?.Dni);
     }
 
+    [TestMethod]
+    public void ObtenerMovimientos_FiltroSinCriterios_DevuelveListaVacia()
+    {
+        GuardarTresMovimientos();
+
+        IReadOnlyList<Movimiento> resultado = LeerMovimientos(new FiltroPorCatalogoYFechas());
+
+        Assert.AreEqual(0, resultado.Count);
+    }
+
     private void GuardarTresMovimientos()
     {
         Prestamo prestamo = CrearPrestamoActivo();
@@ -149,6 +159,14 @@ public sealed class RepositorioMovimientoSqlTests
         RepositorioMovimientoSql repositorio = new RepositorioMovimientoSql(contextoQueLee);
 
         return repositorio.ObtenerPaginaDeMovimientos(filtro, pagina, tamanoPagina);
+    }
+
+    private IReadOnlyList<Movimiento> LeerMovimientos(FiltroPorCatalogoYFechas filtro)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        RepositorioMovimientoSql repositorio = new RepositorioMovimientoSql(contextoQueLee);
+
+        return repositorio.ObtenerMovimientos(filtro);
     }
 
     private void GuardarCatalogosYMovimientos(IEnumerable<Catalogo> catalogos, params Movimiento[] movimientos)
