@@ -12,6 +12,15 @@ public class RepositorioNotificacionSql
         _contexto = contexto;
     }
 
+    // Los Include van antes de cualquier Where: filtrar antes de incluir puede dejar sin cargar lo incluido
+    // (lo vio Felipe en InMemory con una propiedad owned).
+    private IQueryable<Notificacion> NotificacionesConSolicitanteYTipo =>
+        _contexto.Notificaciones
+            .Include(notificacion => notificacion.Prestamo)
+            .ThenInclude(prestamo => prestamo.Solicitante)
+            .Include(notificacion => notificacion.Prestamo)
+            .ThenInclude(prestamo => prestamo.TipoEquipamiento);
+
     public void AgregarNotificacion(Notificacion notificacion)
     {
         _contexto.Notificaciones.Add(notificacion);
@@ -20,11 +29,7 @@ public class RepositorioNotificacionSql
 
     public IReadOnlyList<Notificacion> ObtenerNoLeidasDeUsuario(string dni)
     {
-        return _contexto.Notificaciones
-            .Include(notificacion => notificacion.Prestamo)
-            .ThenInclude(prestamo => prestamo.Solicitante)
-            .Include(notificacion => notificacion.Prestamo)
-            .ThenInclude(prestamo => prestamo.TipoEquipamiento)
+        return NotificacionesConSolicitanteYTipo
             .Where(notificacion => notificacion.Prestamo.Solicitante.Dni == dni)
             .Where(notificacion => !notificacion.EstaLeida)
             .OrderByDescending(notificacion => notificacion.FechaHora)
@@ -41,11 +46,6 @@ public class RepositorioNotificacionSql
 
     public Notificacion? ObtenerNotificacionPorId(int id)
     {
-        return _contexto.Notificaciones
-            .Include(notificacion => notificacion.Prestamo)
-            .ThenInclude(prestamo => prestamo.Solicitante)
-            .Include(notificacion => notificacion.Prestamo)
-            .ThenInclude(prestamo => prestamo.TipoEquipamiento)
-            .FirstOrDefault(notificacion => notificacion.Id == id);
+        return NotificacionesConSolicitanteYTipo.FirstOrDefault(notificacion => notificacion.Id == id);
     }
 }
