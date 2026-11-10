@@ -957,6 +957,27 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void ListarPrestamos_RangoConHoras_DevuelveLosDeLosDiasCompletos()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitarEnLaFecha(new DateTime(2026, 10, 1, 10, 0, 0));
+        Guid idDelPrimerDia = SolicitarEnLaFecha(new DateTime(2026, 10, 2, 10, 0, 0));
+        Guid idDelUltimoDia = SolicitarEnLaFecha(new DateTime(2026, 10, 5, 18, 0, 0));
+        SolicitarEnLaFecha(new DateTime(2026, 10, 6, 9, 30, 0));
+        FiltroDePrestamosDto filtro = new FiltroDePrestamosDto
+        {
+            Desde = new DateTime(2026, 10, 2, 12, 0, 0),
+            Hasta = new DateTime(2026, 10, 5, 12, 0, 0)
+        };
+
+        List<PrestamoDto> resultado = servicio.ListarPrestamos(DniSupervisor, filtro);
+
+        CollectionAssert.AreEquivalent(
+            new List<Guid> { idDelPrimerDia, idDelUltimoDia },
+            resultado.Select(prestamo => prestamo.Id).ToList());
+    }
+
+    [TestMethod]
     public void RangoPorDefecto_RelojFijo_DevuelveLosUltimos30DiasConHoyYSinEstado()
     {
         ServicioPrestamo servicio = CrearServicio();
@@ -1087,6 +1108,14 @@ public sealed class ServicioPrestamoTests
         PrestamoDto pendiente = servicio.Solicitar(datos, dniSolicitante);
 
         return pendiente.Id;
+    }
+
+    private Guid SolicitarEnLaFecha(DateTime fechaHora)
+    {
+        ServicioPrestamo servicioDeEsaFecha = CrearServicioConReloj(new RelojFijo(fechaHora));
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion);
+
+        return servicioDeEsaFecha.Solicitar(datos, DniAdministrador).Id;
     }
 
     private Guid CrearSolicitudAprobada(ServicioPrestamo servicio)
