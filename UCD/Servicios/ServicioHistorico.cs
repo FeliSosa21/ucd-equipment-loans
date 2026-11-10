@@ -28,14 +28,8 @@ public class ServicioHistorico
             MensajeSinPermiso);
         Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_catalogos, idCatalogo);
         ValidarRangoDeFechas(filtro);
-        FiltroPorCatalogoYFechas filtroDelRepositorio = new FiltroPorCatalogoYFechas
-        {
-            IdCatalogo = catalogo.Id,
-            Desde = filtro.Desde,
-            Hasta = filtro.Hasta?.Date == DateTime.MaxValue.Date ? null : filtro.Hasta?.Date.AddDays(1)
-        };
 
-        return _movimientos.ObtenerMovimientos(filtroDelRepositorio)
+        return _movimientos.ObtenerMovimientos(CrearFiltroDelRepositorio(catalogo.Id, filtro))
             .Select(CrearMovimientoDto)
             .ToList();
     }
@@ -46,6 +40,28 @@ public class ServicioHistorico
         {
             throw new ServicioException(nameof(FiltroMovimientosDto.Desde), MensajeDesdePosteriorAHasta);
         }
+    }
+
+    private static FiltroPorCatalogoYFechas CrearFiltroDelRepositorio(int idCatalogo, FiltroMovimientosDto filtro)
+    {
+        return new FiltroPorCatalogoYFechas
+        {
+            IdCatalogo = idCatalogo,
+            Desde = filtro.Desde,
+            Hasta = InicioDelDiaSiguiente(filtro.Hasta)
+        };
+    }
+
+    // Hasta es un dia completo: pasa como el inicio del dia siguiente porque el repositorio lo excluye (B11).
+    // La ultima fecha posible no tiene dia siguiente: se toma como sin limite, igual que en ServicioAuditoria.
+    private static DateTime? InicioDelDiaSiguiente(DateTime? hasta)
+    {
+        if (hasta is null || hasta.Value.Date == DateTime.MaxValue.Date)
+        {
+            return null;
+        }
+
+        return hasta.Value.Date.AddDays(1);
     }
 
     // Temporal, hasta que la pagina filtre por catalogo: no recibe quien consulta (el permiso lo controla la pagina).
