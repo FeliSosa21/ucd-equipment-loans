@@ -64,6 +64,16 @@ public sealed class NotificacionTests
         Assert.IsTrue(esDelSolicitante);
     }
 
+    [TestMethod]
+    public void EsDe_OtroDni_DevuelveFalse()
+    {
+        Notificacion notificacion = CrearNotificacion();
+
+        bool esDeOtro = notificacion.EsDe("45678905");
+
+        Assert.IsFalse(esDeOtro);
+    }
+
     private static Notificacion CrearNotificacion()
     {
         return new Notificacion(CrearPrestamo(), TipoNotificacion.PrestamoVencido, FechaFija);
