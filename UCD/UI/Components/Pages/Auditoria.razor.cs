@@ -28,33 +28,33 @@ public partial class Auditoria
 
     protected override void OnInitialized()
     {
-        if (RedirigirSiNoTienePermiso(Permisos.ConsultarHistorico))
+        RedirigirSiNoTienePermiso(Permisos.ConsultarHistorico);
+    }
+
+    private async Task AlCambiarCatalogoAsync()
+    {
+        _error = null;
+        if (!HayCatalogoElegido())
         {
+            _movimientos = new List<MovimientoDto>();
             return;
         }
 
+        await CargarMovimientosAsync();
+    }
+
+    private async Task CargarMovimientosAsync()
+    {
         try
         {
-            _movimientos = ServicioHistorico.ListarMovimientos(ObtenerIdCatalogoProvisorio(),
-                new FiltroMovimientosDto(), DniUsuario);
+            _movimientos = ServicioHistorico.ListarMovimientos(IdCatalogo, new FiltroMovimientosDto(), DniUsuario);
         }
         catch (ServicioException ex)
         {
-            _error = ex.Message;
             _movimientos = new List<MovimientoDto>();
+            await RecargarSelectorAsync();
+            _error = ex.Message;
         }
-    }
-
-    // Provisorio hasta que exista el selector de catalogo (T4): el primer catalogo activo.
-    private int ObtenerIdCatalogoProvisorio()
-    {
-        List<CatalogoDto> catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
-        if (catalogos.Count == 0)
-        {
-            throw new ServicioException("No hay catalogos disponibles");
-        }
-
-        return catalogos[0].Id;
     }
 
     private static string TraducirTipo(string tipo) => NombresDeTipo.GetValueOrDefault(tipo, tipo);
