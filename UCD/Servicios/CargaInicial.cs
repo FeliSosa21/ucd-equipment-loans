@@ -8,9 +8,9 @@ public class CargaInicial
 {
     private const string NombreTipoAdministrador = "Administrador";
 
-    public const string DniRoot = "11111111";
-    public const string CorreoRoot = "root@ucd.edu.uy";
-    public const string ContrasenaRoot = "Root2026";
+    public const string DniRoot = CargaInicialSql.DniRoot;
+    public const string CorreoRoot = CargaInicialSql.CorreoRoot;
+    public const string ContrasenaRoot = CargaInicialSql.ContrasenaRoot;
     public const string NombreCatalogo = "Catalogo UCD";
 
     private readonly RepositorioUsuario _repositorioUsuario;
