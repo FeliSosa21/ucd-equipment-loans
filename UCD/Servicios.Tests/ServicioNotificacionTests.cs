@@ -163,6 +163,19 @@ public sealed class ServicioNotificacionTests
                         "Motivo: No hay unidades suficientes para el tipo de equipamiento", notificacion.Texto);
     }
 
+    [TestMethod]
+    public void ListarNoLeidas_PrestamoVencido_ElTextoDiceEnPasadoCuandoHabiaQueDevolverlo()
+    {
+        Guid idPrestamo = GuardarPrestamoActivo(PedidoQueVencioAyer);
+        GuardarNotificacion(idPrestamo, TipoNotificacion.PrestamoVencido);
+        ServicioNotificacion servicio = CrearServicio();
+
+        NotificacionDto notificacion = servicio.ListarNoLeidas(DniDocente).Single();
+
+        Assert.AreEqual("Tu préstamo de Proyector Epson venció: tenías que devolverlo el 09/11/2026.",
+            notificacion.Texto);
+    }
+
     private ServicioNotificacion CrearServicio()
     {
         return CrearServicioSobre(_contexto, NullLogger<ServicioNotificacion>.Instance);
