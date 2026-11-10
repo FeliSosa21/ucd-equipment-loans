@@ -53,6 +53,18 @@ public sealed class RepositorioNotificacionSqlTests
             resultado.Select(notificacion => notificacion.Id).ToList());
     }
 
+    [TestMethod]
+    public void ObtenerNoLeidasDeUsuario_NotificacionGuardada_TraeElSolicitanteYElTipoDeEquipamientoDelPrestamo()
+    {
+        GuardarConOtroContexto(CrearNotificacionDeVencido(CrearPrestamoActivo(DniSolicitante)));
+
+        Notificacion leida = LeerNoLeidasDe(DniSolicitante).Single();
+
+        Assert.IsNotNull(leida.Prestamo);
+        Assert.AreEqual(DniSolicitante, leida.Prestamo.Solicitante.Dni);
+        Assert.AreEqual("Proyector Epson", leida.Prestamo.TipoEquipamiento.Nombre);
+    }
+
     private IReadOnlyList<Notificacion> LeerNoLeidasDe(string dni)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
