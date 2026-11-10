@@ -13,7 +13,10 @@ public class Notificacion
         Prestamo = null!;
     }
 
-    public Notificacion(Prestamo prestamo, TipoNotificacion tipo, DateTime fechaHora) : this()
+    public Notificacion(Prestamo prestamo, TipoNotificacion tipo, DateTime fechaHora)
     {
+        Prestamo = prestamo;
+        Tipo = tipo;
+        FechaHora = fechaHora;
     }
 }
