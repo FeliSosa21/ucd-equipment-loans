@@ -61,6 +61,7 @@ public class ServicioGestionCatalogos
 
     public void Eliminar(int idCatalogo, string dniResponsable)
     {
+        ValidarResponsable(dniResponsable);
         Catalogo catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
         if (_repositorioPrestamo.ExistenPrestamosVigentesDelCatalogo(idCatalogo))
         {
