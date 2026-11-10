@@ -32,7 +32,7 @@ public class ServicioHistorico
         {
             IdCatalogo = catalogo.Id,
             Desde = filtro.Desde,
-            Hasta = filtro.Hasta?.Date.AddDays(1)
+            Hasta = filtro.Hasta?.Date == DateTime.MaxValue.Date ? null : filtro.Hasta?.Date.AddDays(1)
         };
 
         return _movimientos.ObtenerMovimientos(filtroDelRepositorio)
