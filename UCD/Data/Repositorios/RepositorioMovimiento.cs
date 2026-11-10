@@ -17,11 +17,6 @@ public class RepositorioMovimiento
         _memoria.Movimientos.Add(movimiento);
     }
 
-    public IReadOnlyList<Movimiento> ObtenerTodos()
-    {
-        return _memoria.Movimientos.ToList().AsReadOnly();
-    }
-
     public IReadOnlyList<Movimiento> ObtenerMovimientos(FiltroPorCatalogoYFechas filtro)
     {
         if (filtro.IdCatalogo is null && filtro.Desde is null && filtro.Hasta is null)

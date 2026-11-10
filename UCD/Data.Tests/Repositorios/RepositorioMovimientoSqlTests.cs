@@ -41,99 +41,6 @@ public sealed class RepositorioMovimientoSqlTests
     }
 
     [TestMethod]
-    public void ObtenerPaginaDeMovimientos_SinFiltro_DelMasRecienteAlMasViejoYEnEmpateElUltimoRegistrado()
-    {
-        GuardarTresMovimientos();
-
-        IReadOnlyList<Movimiento> resultado =
-            LeerPagina(new FiltroPorCatalogoYFechas(), pagina: 1, tamanoPagina: 10);
-
-        CollectionAssert.AreEqual(
-            new List<TipoMovimiento> { TipoMovimiento.Devolucion, TipoMovimiento.Prestamo, TipoMovimiento.Solicitud },
-            resultado.Select(movimiento => movimiento.Tipo).ToList());
-    }
-
-    [TestMethod]
-    public void ObtenerPaginaDeMovimientos_SegundaPaginaDeUno_DevuelveSoloElSegundo()
-    {
-        GuardarTresMovimientos();
-
-        IReadOnlyList<Movimiento> resultado =
-            LeerPagina(new FiltroPorCatalogoYFechas(), pagina: 2, tamanoPagina: 1);
-
-        CollectionAssert.AreEqual(new List<TipoMovimiento> { TipoMovimiento.Prestamo },
-            resultado.Select(movimiento => movimiento.Tipo).ToList());
-    }
-
-    [TestMethod]
-    public void ObtenerPaginaDeMovimientos_FiltroPorCatalogo_DevuelveSoloLosDeEseCatalogo()
-    {
-        Usuario solicitante = CrearUsuario(dni: "12345672", correo: "renato.alves@ejemplo.com");
-        TipoEquipamiento notebook = CrearTipo("Notebook Lenovo ThinkPad", Categoria.Computacion);
-        TipoEquipamiento proyector = CrearTipo("Proyector Epson", Categoria.Audiovisual);
-        Catalogo electronica = CrearCatalogoCon("Electronica", notebook);
-        Catalogo audiovisuales = CrearCatalogoCon("Audiovisuales", proyector);
-        Prestamo deNotebook = new Prestamo(solicitante, notebook, cantidadSolicitada: 1, fechaHoraPrestamo: FechaFija);
-        Prestamo deProyector = new Prestamo(solicitante, proyector, cantidadSolicitada: 1, fechaHoraPrestamo: FechaFija);
-        GuardarCatalogosYMovimientos(new[] { electronica, audiovisuales },
-            Movimiento.DeSolicitud(deNotebook, RegistroDeAccion.DeUsuario(solicitante, FechaFija)),
-            Movimiento.DeRechazo(deProyector, RegistroDeAccion.DelSistema(FechaFija)));
-
-        IReadOnlyList<Movimiento> resultado =
-            LeerPagina(new FiltroPorCatalogoYFechas { IdCatalogo = electronica.Id }, pagina: 1, tamanoPagina: 10);
-
-        CollectionAssert.AreEqual(new List<TipoMovimiento> { TipoMovimiento.Solicitud },
-            resultado.Select(movimiento => movimiento.Tipo).ToList());
-    }
-
-    [TestMethod]
-    public void ObtenerPaginaDeMovimientos_FiltroPorFechas_IncluyeDesdeYExcluyeHasta()
-    {
-        GuardarTresMovimientos();
-        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { Desde = FechaFija, Hasta = FechaFija.AddDays(1) };
-
-        IReadOnlyList<Movimiento> resultado = LeerPagina(filtro, pagina: 1, tamanoPagina: 10);
-
-        CollectionAssert.AreEqual(new List<TipoMovimiento> { TipoMovimiento.Prestamo, TipoMovimiento.Solicitud },
-            resultado.Select(movimiento => movimiento.Tipo).ToList());
-    }
-
-    [TestMethod]
-    public void ContarMovimientos_FiltroPorFechas_CuentaSoloLosDelRango()
-    {
-        GuardarTresMovimientos();
-        FiltroPorCatalogoYFechas filtro = new FiltroPorCatalogoYFechas { Desde = FechaFija, Hasta = FechaFija.AddDays(1) };
-
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        int cantidad = new RepositorioMovimientoSql(contextoQueLee).ContarMovimientos(filtro);
-
-        Assert.AreEqual(2, cantidad);
-    }
-
-    [TestMethod]
-    public void ObtenerPaginaDeMovimientos_Aprobacion_TraeSolicitanteEvaluadorUnidadYResponsable()
-    {
-        Usuario solicitante = CrearUsuario(dni: "12345672", correo: "renato.alves@ejemplo.com");
-        Usuario evaluador = CrearUsuario(dni: "45678905", correo: "sofia.martinez@ejemplo.com");
-        TipoEquipamiento tipo = CrearTipo("Notebook Lenovo ThinkPad", Categoria.Computacion);
-        UnidadFisica unidad = new UnidadFisica(idInstitucional: "EQP-0001", ubiFisica: "Laboratorio Prueba",
-            numSerie: null);
-        tipo.AgregarUnidad(unidad);
-        Prestamo prestamo = new Prestamo(solicitante, tipo, cantidadSolicitada: 1, fechaHoraPrestamo: FechaFija);
-        prestamo.Aprobar(evaluador, new List<UnidadFisica> { unidad });
-        GuardarConOtroContexto(
-            Movimiento.DeAprobacion(prestamo, RegistroDeAccion.DeUsuario(evaluador, FechaFija), unidad));
-
-        Movimiento leido = LeerPagina(new FiltroPorCatalogoYFechas(), pagina: 1, tamanoPagina: 10).Single();
-
-        Assert.IsNotNull(leido.Prestamo);
-        Assert.AreEqual("12345672", leido.Solicitante.Dni);
-        Assert.AreEqual("45678905", leido.Evaluador?.Dni);
-        Assert.AreEqual("EQP-0001", leido.Unidad?.IdInstitucional);
-        Assert.AreEqual("45678905", leido.Responsable?.Dni);
-    }
-
-    [TestMethod]
     public void ObtenerMovimientos_FiltroSinCriterios_DevuelveListaVacia()
     {
         GuardarTresMovimientos();
@@ -231,14 +138,6 @@ public sealed class RepositorioMovimientoSqlTests
             Movimiento.DeSolicitud(prestamo, RegistroDeAccion.DeUsuario(prestamo.Solicitante, FechaFija)),
             Movimiento.DePrestamo(prestamo, RegistroDeAccion.DelSistema(FechaFija), unidad),
             Movimiento.DeDevolucion(prestamo, RegistroDeAccion.DelSistema(FechaFija.AddDays(1)), unidad));
-    }
-
-    private IReadOnlyList<Movimiento> LeerPagina(FiltroPorCatalogoYFechas filtro, int pagina, int tamanoPagina)
-    {
-        using SqlContext contextoQueLee = new SqlContext(_opciones);
-        RepositorioMovimientoSql repositorio = new RepositorioMovimientoSql(contextoQueLee);
-
-        return repositorio.ObtenerPaginaDeMovimientos(filtro, pagina, tamanoPagina);
     }
 
     private IReadOnlyList<Movimiento> LeerMovimientos(FiltroPorCatalogoYFechas filtro)

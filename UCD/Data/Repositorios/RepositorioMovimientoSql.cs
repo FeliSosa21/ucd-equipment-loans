@@ -19,21 +19,6 @@ public class RepositorioMovimientoSql
         _contexto.SaveChanges();
     }
 
-    public IReadOnlyList<Movimiento> ObtenerPaginaDeMovimientos(FiltroPorCatalogoYFechas filtro, int pagina, int tamanoPagina)
-    {
-        return FiltrarPor(filtro)
-            .Include(movimiento => movimiento.Prestamo)
-            .ThenInclude(prestamo => prestamo.Solicitante)
-            .Include(movimiento => movimiento.Evaluador)
-            .Include(movimiento => movimiento.Unidad)
-            .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}")
-            .OrderByDescending(movimiento => EF.Property<RegistroDeAccion>(movimiento, CampoRegistro).FechaHora)
-            .ThenByDescending(movimiento => movimiento.Id)
-            .Skip((pagina - 1) * tamanoPagina)
-            .Take(tamanoPagina)
-            .ToList();
-    }
-
     public IReadOnlyList<Movimiento> ObtenerMovimientos(FiltroPorCatalogoYFechas filtro)
     {
         if (filtro.IdCatalogo is null && filtro.Desde is null && filtro.Hasta is null)
@@ -52,11 +37,6 @@ public class RepositorioMovimientoSql
             .OrderByDescending(movimiento => EF.Property<RegistroDeAccion>(movimiento, CampoRegistro).FechaHora)
             .ThenByDescending(movimiento => movimiento.Id)
             .ToList();
-    }
-
-    public int ContarMovimientos(FiltroPorCatalogoYFechas filtro)
-    {
-        return FiltrarPor(filtro).Count();
     }
 
     private IQueryable<Movimiento> FiltrarPor(FiltroPorCatalogoYFechas filtro)
