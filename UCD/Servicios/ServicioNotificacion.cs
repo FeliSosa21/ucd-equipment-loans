@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using Data.Repositorios;
 using Dominio;
@@ -72,18 +73,17 @@ public class ServicioNotificacion
     private static string ArmarTexto(Notificacion notificacion)
     {
         Prestamo prestamo = notificacion.Prestamo;
+        string tipoEquipamiento = prestamo.TipoEquipamiento.Nombre;
+        string solicitud = $"Tu solicitud de {tipoEquipamiento} del {FormatearFecha(prestamo.FechaHoraPrestamo)}";
 
-        if (notificacion.Tipo == TipoNotificacion.PrestamoVencido)
+        return notificacion.Tipo switch
         {
-            return $"Tu préstamo de {prestamo.TipoEquipamiento.Nombre} venció: tenías que devolverlo el {FormatearFecha(prestamo.FechaEsperadaDevolucion)}.";
-        }
-
-        if (notificacion.Tipo == TipoNotificacion.SolicitudRechazada)
-        {
-            return $"Tu solicitud de {prestamo.TipoEquipamiento.Nombre} del {FormatearFecha(prestamo.FechaHoraPrestamo)} fue rechazada. Motivo: {prestamo.MotivoRechazo}";
-        }
-
-        return $"Tu solicitud de {prestamo.TipoEquipamiento.Nombre} del {FormatearFecha(prestamo.FechaHoraPrestamo)} fue aprobada.";
+            TipoNotificacion.SolicitudAprobada => $"{solicitud} fue aprobada.",
+            TipoNotificacion.SolicitudRechazada => $"{solicitud} fue rechazada. Motivo: {prestamo.MotivoRechazo}",
+            TipoNotificacion.PrestamoVencido => $"Tu préstamo de {tipoEquipamiento} venció: " +
+                                                $"tenías que devolverlo el {FormatearFecha(prestamo.FechaEsperadaDevolucion)}.",
+            _ => throw new UnreachableException($"Tipo de notificacion sin texto: {notificacion.Tipo}")
+        };
     }
 
     private static string FormatearFecha(DateTime fecha)
