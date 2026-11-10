@@ -107,15 +107,8 @@ public class ServicioDevolucionTests
     public void RegistrarDevolucion_UnaUnidad_ElDetalleDiceUnaUnidad()
     {
         ServicioDevolucion servicio = CrearServicio(out _);
-        Prestamo deUnaUnidad = AgregarPrestamoDeUnaUnidad();
-        DevolucionDto datos = new DevolucionDto
-        {
-            IdPrestamo = deUnaUnidad.Id,
-            Unidades = new List<UnidadDevueltaDto>
-            {
-                new UnidadDevueltaDto { IdInstitucional = "EQP-0003", Condicion = "Sin observaciones" }
-            }
-        };
+        Prestamo deUnaUnidad = GuardarPrestamoActivo(TipoDeUnaUnidad, cantidad: 1);
+        DevolucionDto datos = CrearDatosDeUnaUnidad(deUnaUnidad.Id);
 
         servicio.RegistrarDevolucion(datos, DniFuncionario);
 
@@ -179,15 +172,8 @@ public class ServicioDevolucionTests
     public void RegistrarDevolucion_UnaUnidadEnElMismoContexto_GuardaDevolucionMovimientoYLogDelMismoResponsable()
     {
         ServicioDevolucion servicio = CrearServicio(out _);
-        Prestamo deUnaUnidad = AgregarPrestamoDeUnaUnidad();
-        DevolucionDto datos = new DevolucionDto
-        {
-            IdPrestamo = deUnaUnidad.Id,
-            Unidades = new List<UnidadDevueltaDto>
-            {
-                new UnidadDevueltaDto { IdInstitucional = "EQP-0003", Condicion = "Sin observaciones" }
-            }
-        };
+        Prestamo deUnaUnidad = GuardarPrestamoActivo(TipoDeUnaUnidad, cantidad: 1);
+        DevolucionDto datos = CrearDatosDeUnaUnidad(deUnaUnidad.Id);
 
         servicio.RegistrarDevolucion(datos, DniFuncionario);
 
@@ -428,6 +414,18 @@ public class ServicioDevolucionTests
         };
     }
 
+    private static DevolucionDto CrearDatosDeUnaUnidad(Guid idPrestamo)
+    {
+        return new DevolucionDto
+        {
+            IdPrestamo = idPrestamo,
+            Unidades = new List<UnidadDevueltaDto>
+            {
+                new UnidadDevueltaDto { IdInstitucional = "EQP-0003", Condicion = "Sin observaciones" }
+            }
+        };
+    }
+
     private ServicioDevolucion CrearServicio(out Prestamo prestamo)
     {
         return CrearServicio(out prestamo, MomentoDevolucion);
@@ -435,7 +433,9 @@ public class ServicioDevolucionTests
 
     private ServicioDevolucion CrearServicio(out Prestamo prestamo, DateTime ahora)
     {
-        prestamo = GuardarUsuariosCatalogoYPrestamo();
+        GuardarTiposYUsuarios();
+        _idCatalogo = GuardarCatalogo();
+        prestamo = GuardarPrestamoActivo(TipoQueSeDevuelve, cantidad: 2);
         TimeProvider reloj = new RelojFijo(ahora);
 
         return new ServicioDevolucion(new RepositorioPrestamoSql(_contexto), new RepositorioUsuarioSql(_contexto),
@@ -444,7 +444,7 @@ public class ServicioDevolucionTests
     }
 
     // Los tipos de usuario se guardan aca y no se toman de la base: la carga inicial puede no traerlos (D19).
-    private Prestamo GuardarUsuariosCatalogoYPrestamo()
+    private void GuardarTiposYUsuarios()
     {
         using SqlContext preparacion = new SqlContext(_opciones);
         RepositorioTipoUsuarioSql tipos = new RepositorioTipoUsuarioSql(preparacion);
@@ -463,19 +463,16 @@ public class ServicioDevolucionTests
         solicitante.AsignarTipo(docente);
         usuarios.AgregarUsuario(funcionario);
         usuarios.AgregarUsuario(solicitante);
+    }
 
+    private int GuardarCatalogo()
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
         TipoEquipamiento proyector = new TipoEquipamiento(nombre: TipoQueSeDevuelve,
             descripcion: "Proyector para aulas", duracionMaxPrestamo: 5, requiereAprobacion: false,
             categoria: Categoria.Audiovisual);
-        List<UnidadFisica> unidades = new List<UnidadFisica>
-        {
-            new UnidadFisica(idInstitucional: "EQP-0001", ubiFisica: "Deposito A", numSerie: null),
-            new UnidadFisica(idInstitucional: "EQP-0002", ubiFisica: "Deposito A", numSerie: null)
-        };
-        foreach (UnidadFisica unidad in unidades)
-        {
-            proyector.AgregarUnidad(unidad);
-        }
+        proyector.AgregarUnidad(new UnidadFisica(idInstitucional: "EQP-0001", ubiFisica: "Deposito A", numSerie: null));
+        proyector.AgregarUnidad(new UnidadFisica(idInstitucional: "EQP-0002", ubiFisica: "Deposito A", numSerie: null));
         TipoEquipamiento notebook = new TipoEquipamiento(nombre: TipoDeUnaUnidad,
             descripcion: "Notebook para clases", duracionMaxPrestamo: 5, requiereAprobacion: false,
             categoria: Categoria.Computacion);
@@ -484,25 +481,20 @@ public class ServicioDevolucionTests
         catalogo.AgregarTipo(proyector);
         catalogo.AgregarTipo(notebook);
         new RepositorioCatalogoSql(preparacion).AgregarCatalogo(catalogo);
-        _idCatalogo = catalogo.Id;
-
-        Prestamo prestamo = new Prestamo(solicitante, proyector, cantidadSolicitada: 2,
-            fechaHoraPrestamo: InicioPrestamo);
-        prestamo.Activar(unidades);
-        new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
-        return prestamo;
+        return catalogo.Id;
     }
 
-    private Prestamo AgregarPrestamoDeUnaUnidad()
+    // El prestamo de Ana Perez queda activo con las primeras unidades del tipo, por id institucional.
+    private Prestamo GuardarPrestamoActivo(string nombreTipo, int cantidad)
     {
         using SqlContext preparacion = new SqlContext(_opciones);
         Usuario solicitante = new RepositorioUsuarioSql(preparacion).ObtenerUsuarioPorDni(DniSolicitante)
             ?? throw new InvalidOperationException($"No existe el usuario con DNI {DniSolicitante}");
-        TipoEquipamiento tipo = new RepositorioCatalogoSql(preparacion)
-                .ObtenerTipoPorNombre(_idCatalogo, TipoDeUnaUnidad)
-            ?? throw new InvalidOperationException($"No existe el tipo {TipoDeUnaUnidad}");
-        Prestamo prestamo = new Prestamo(solicitante, tipo, cantidadSolicitada: 1, fechaHoraPrestamo: InicioPrestamo);
-        prestamo.Activar(tipo.Unidades.ToList());
+        TipoEquipamiento tipo = new RepositorioCatalogoSql(preparacion).ObtenerTipoPorNombre(_idCatalogo, nombreTipo)
+            ?? throw new InvalidOperationException($"No existe el tipo {nombreTipo}");
+        Prestamo prestamo = new Prestamo(solicitante, tipo, cantidadSolicitada: cantidad,
+            fechaHoraPrestamo: InicioPrestamo);
+        prestamo.Activar(tipo.Unidades.OrderBy(unidad => unidad.IdInstitucional).Take(cantidad).ToList());
         new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
         return prestamo;
     }
