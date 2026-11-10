@@ -10,6 +10,8 @@ public class ServicioGestionCatalogos
     private const string CampoNombre = nameof(CatalogoDto.Nombre);
     private const string MensajeNoSePudoGuardar =
         "No se pudieron guardar los cambios; verifique que no exista otro catalogo con ese nombre";
+    private const string MensajeNoSePudoEliminar =
+        "No se pudo eliminar el catalogo; vuelva a intentarlo en unos instantes";
     private const string MensajeConPrestamosVigentes =
         "No se puede eliminar el catalogo mientras tenga prestamos activos o pendientes de autorizacion";
     private const string MensajeSinPermiso = "El usuario no tiene permiso para gestionar los catalogos";
@@ -71,7 +73,7 @@ public class ServicioGestionCatalogos
         }
 
         catalogo.DarDeBaja();
-        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoEliminar);
     }
 
     // El nombre es unico entre los catalogos activos; el de uno eliminado se puede reutilizar (foro 2.2).
