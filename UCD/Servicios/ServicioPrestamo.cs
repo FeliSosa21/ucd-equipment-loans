@@ -306,8 +306,19 @@ public class ServicioPrestamo
         return new FiltroPorCatalogoYFechas
         {
             Desde = filtro.Desde.Date,
-            Hasta = filtro.Hasta.Date.AddDays(1)
+            Hasta = InicioDelDiaSiguiente(filtro.Hasta)
         };
+    }
+
+    // El ultimo dia que DateTime puede representar no tiene dia siguiente: se toma hasta el ultimo instante.
+    private static DateTime InicioDelDiaSiguiente(DateTime dia)
+    {
+        if (dia.Date == DateTime.MaxValue.Date)
+        {
+            return DateTime.MaxValue;
+        }
+
+        return dia.Date.AddDays(1);
     }
 
     private static EstadoPrestamo? ConvertirEstado(string? estado)
