@@ -6,20 +6,20 @@ namespace Servicios;
 
 public class ServicioHistorico
 {
-    private readonly RepositorioMovimiento _movimientos;
+    private readonly RepositorioMovimientoSql _movimientos;
 
-    public ServicioHistorico(RepositorioMovimiento movimientos)
+    public ServicioHistorico(RepositorioMovimientoSql movimientos)
     {
         _movimientos = movimientos;
     }
 
-    // No recibe quien consulta: el permiso lo controla la pagina, como en ListarSolicitudesPendientes.
-    // Del mas reciente al mas viejo; con la misma fecha va primero el ultimo registrado: se invierte el orden
-    // del repositorio y OrderByDescending, que es estable, lo respeta en los empates.
+    // Temporal, hasta que la pagina filtre por catalogo: no recibe quien consulta (el permiso lo controla la pagina).
+    // El repositorio no devuelve nada sin criterios, asi que Desde = MinValue pide todo lo registrado.
     public List<MovimientoDto> ListarMovimientos()
     {
-        return Enumerable.Reverse(_movimientos.ObtenerTodos())
-            .OrderByDescending(movimiento => movimiento.FechaHora)
+        FiltroPorCatalogoYFechas desdeSiempre = new FiltroPorCatalogoYFechas { Desde = DateTime.MinValue };
+
+        return _movimientos.ObtenerMovimientos(desdeSiempre)
             .Select(CrearMovimientoDto)
             .ToList();
     }
