@@ -12,16 +12,25 @@ public partial class SolicitarPrestamo
     // Estado de un tipo de equipamiento: solo se pueden solicitar los activos.
     private const string EstadoTipoActivo = "Activo";
 
+    private List<CatalogoDto> _catalogos = new List<CatalogoDto>();
+    private int? _idCatalogo;
     private List<TipoEquipamientoDto> _tipos = new List<TipoEquipamientoDto>();
     private string _tipo = string.Empty;
     private int? _cantidad = CantidadPorDefecto;
     private string? _error;
     private PrestamoDto? _resultado;
 
+    private bool HayCatalogos => _catalogos.Count > 0;
+
+    private bool HayCatalogoElegido => _idCatalogo is not null;
+
+    // Si ListarCatalogos fallo, la lista tambien queda vacia, pero el aviso seria falso: se muestra solo el error.
+    private bool MostrarSinCatalogos => !HayCatalogos && _error is null;
+
     private TipoEquipamientoDto? TipoSeleccionado => _tipos.FirstOrDefault(tipo => tipo.Nombre == _tipo);
 
     // Con la cantidad vacia el campo queda en null y el boton se deshabilita.
-    private bool FormularioCompleto => TipoSeleccionado is not null && _cantidad >= 1;
+    private bool FormularioCompleto => HayCatalogoElegido && TipoSeleccionado is not null && _cantidad >= 1;
 
     private string TextoDisponibilidad
     {
@@ -73,6 +82,36 @@ public partial class SolicitarPrestamo
             return;
         }
 
+        CargarCatalogos();
+        ElegirElCatalogoSiEsElUnico();
+    }
+
+    private void CargarCatalogos()
+    {
+        try
+        {
+            _catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
+        }
+        catch (ServicioException ex)
+        {
+            _error = ex.Message;
+        }
+    }
+
+    private void ElegirElCatalogoSiEsElUnico()
+    {
+        if (_catalogos.Count == 1)
+        {
+            _idCatalogo = _catalogos[0].Id;
+            CargarTipos();
+        }
+    }
+
+    // El resultado de la solicitud anterior se mantiene: tiene las unidades que hay que retirar.
+    private void CambiarCatalogo()
+    {
+        _error = null;
+        _tipo = string.Empty;
         CargarTipos();
     }
 
@@ -86,7 +125,9 @@ public partial class SolicitarPrestamo
 
         SolicitudPrestamoDto datos = new SolicitudPrestamoDto
         {
-            TipoEquipamiento = _tipo, CantidadSolicitada = _cantidad.GetValueOrDefault()
+            IdCatalogo = _idCatalogo.GetValueOrDefault(),
+            TipoEquipamiento = _tipo,
+            CantidadSolicitada = _cantidad.GetValueOrDefault()
         };
 
         _error = null;
@@ -111,24 +152,18 @@ public partial class SolicitarPrestamo
         _cantidad = CantidadPorDefecto;
     }
 
-    // Provisorio hasta que exista el selector de catalogo (T4): el primer catalogo activo.
-    private int ObtenerIdCatalogoProvisorio()
-    {
-        List<CatalogoDto> catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
-        if (catalogos.Count == 0)
-        {
-            throw new ServicioException("No hay catalogos disponibles");
-        }
-
-        return catalogos[0].Id;
-    }
-
     // Se recarga despues de solicitar para que la disponibilidad de cada tipo quede al dia.
     private void CargarTipos()
     {
+        _tipos = new List<TipoEquipamientoDto>();
+        if (_idCatalogo is null)
+        {
+            return;
+        }
+
         try
         {
-            _tipos = ServicioCatalogo.ConsultarTipos(ObtenerIdCatalogoProvisorio(),
+            _tipos = ServicioCatalogo.ConsultarTipos(_idCatalogo.Value,
                 new FiltroCatalogoDto { Estado = EstadoTipoActivo }, DniUsuario);
         }
         catch (ServicioException ex)

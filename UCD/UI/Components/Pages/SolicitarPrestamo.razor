@@ -9,14 +9,31 @@
 
 <div class="page-header">
     <h1>Solicitar préstamo</h1>
-    <p>Elegí el tipo de equipamiento y la cantidad de unidades que necesitás.</p>
+    <p>Elegí el catálogo, el tipo de equipamiento y la cantidad de unidades que necesitás.</p>
 </div>
 
 <div class="card formulario">
     <form class="form-grid" @onsubmit="Solicitar" novalidate>
+        @if (MostrarSinCatalogos)
+        {
+            <div class="alert alert-info" role="status">No hay catálogos disponibles.</div>
+        }
+
+        <div>
+            <label class="lbl" for="catalogo">Catálogo</label>
+            <select id="catalogo" class="field" @bind="_idCatalogo" @bind:after="CambiarCatalogo"
+                    disabled="@(!HayCatalogos)">
+                <option value="">Elegí un catálogo</option>
+                @foreach (CatalogoDto catalogo in _catalogos)
+                {
+                    <option value="@catalogo.Id">@catalogo.Nombre</option>
+                }
+            </select>
+        </div>
+
         <div>
             <label class="lbl" for="tipo">Tipo de equipamiento</label>
-            <select id="tipo" class="field" @bind="_tipo">
+            <select id="tipo" class="field" @bind="_tipo" disabled="@(!HayCatalogoElegido)">
                 <option value="">Elegí un tipo</option>
                 @foreach (TipoEquipamientoDto tipo in _tipos)
                 {
@@ -31,7 +48,8 @@
 
         <div>
             <label class="lbl" for="cantidad">Cantidad</label>
-            <input id="cantidad" type="number" min="1" class="field" @bind="_cantidad" @bind:event="oninput" />
+            <input id="cantidad" type="number" min="1" class="field" @bind="_cantidad" @bind:event="oninput"
+                   disabled="@(!HayCatalogos)" />
         </div>
 
         @if (_error is not null)
