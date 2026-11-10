@@ -862,7 +862,7 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void ListarPrestamosPorEntregar_VariosEstados_DevuelveLosActivos()
+    public void ListarPrestamosActivos_VariosEstados_DevuelveLosActivos()
     {
         ServicioPrestamo servicio = CrearServicio();
         servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion), DniAdministrador);
@@ -872,7 +872,7 @@ public sealed class ServicioPrestamoTests
         Guid idSegundoActivo =
             servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniAdministrador).Id;
 
-        List<PrestamoDto> resultado = servicio.ListarPrestamosPorEntregar();
+        List<PrestamoDto> resultado = servicio.ListarPrestamosActivos();
 
         CollectionAssert.AreEquivalent(
             new List<Guid> { idPrimerActivo, idSegundoActivo },

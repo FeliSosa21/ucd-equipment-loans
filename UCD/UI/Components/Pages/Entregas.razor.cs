@@ -15,6 +15,6 @@ public partial class Entregas
             return;
         }
 
-        _prestamos = ServicioPrestamo.ListarPrestamosPorEntregar();
+        _prestamos = ServicioPrestamo.ListarPrestamosActivos();
     }
 }
