@@ -117,6 +117,21 @@ public sealed class ServicioNotificacionTests
         Assert.IsInstanceOfType(logger.Registros[0].Excepcion!.InnerException, typeof(DbUpdateException));
     }
 
+    [TestMethod]
+    public void GenerarNotificacionesDeVencidos_LaBaseRechazaConDosVencidos_CortaEnLaPrimeraYRegistraUnaSolaVez()
+    {
+        GuardarPrestamoActivo(PedidoQueVencioAyer);
+        GuardarPrestamoActivo(PedidoQueVencioAyer);
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<Notificacion>(_opciones);
+        LoggerDePrueba<ServicioNotificacion> logger = new LoggerDePrueba<ServicioNotificacion>();
+        ServicioNotificacion servicio = CrearServicioSobre(contextoQueFalla, logger);
+
+        servicio.GenerarNotificacionesDeVencidos(DniDocente);
+
+        Assert.AreEqual(1, logger.Registros.Count);
+        Assert.AreEqual(0, LeerNoLeidasDe(DniDocente).Count);
+    }
+
     private ServicioNotificacion CrearServicio()
     {
         return CrearServicioSobre(_contexto, NullLogger<ServicioNotificacion>.Instance);
