@@ -36,7 +36,7 @@ public class RepositorioMovimientoSql
 
     public IReadOnlyList<Movimiento> ObtenerMovimientos(FiltroPorCatalogoYFechas filtro)
     {
-        if (filtro.Desde is null && filtro.Hasta is null)
+        if (filtro.IdCatalogo is null && filtro.Desde is null && filtro.Hasta is null)
         {
             return new List<Movimiento>();
         }
