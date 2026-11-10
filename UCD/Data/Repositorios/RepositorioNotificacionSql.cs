@@ -13,5 +13,7 @@ public class RepositorioNotificacionSql
 
     public void AgregarNotificacion(Notificacion notificacion)
     {
+        _contexto.Notificaciones.Add(notificacion);
+        _contexto.SaveChanges();
     }
 }
