@@ -195,6 +195,15 @@ public sealed class ServicioHistoricoTests
             movimientos.Select(movimiento => movimiento.FechaHora).ToList());
     }
 
+    [TestMethod]
+    public void ListarMovimientos_FiltroNulo_LanzaArgumentNullExceptionAntesDeBuscarAlUsuario()
+    {
+        ServicioHistorico servicio = CrearServicio();
+
+        Assert.ThrowsException<ArgumentNullException>(() =>
+            servicio.ListarMovimientos(_idCatalogo, null!, DniSupervisor));
+    }
+
     private List<MovimientoDto> ListarTodoElCatalogo(ServicioHistorico servicio)
     {
         return servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniSupervisor);
