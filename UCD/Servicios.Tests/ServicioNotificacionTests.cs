@@ -187,6 +187,19 @@ public sealed class ServicioNotificacionTests
         Assert.AreEqual("La notificacion no es del usuario", excepcion.Message);
     }
 
+    [TestMethod]
+    public void MarcarComoLeida_NotificacionDelUsuario_QuedaLeidaYDejaDeListarse()
+    {
+        Guid idPrestamo = GuardarPrestamoActivo(PedidoQueVencioAyer);
+        int idNotificacion = GuardarNotificacion(idPrestamo, TipoNotificacion.PrestamoVencido);
+        ServicioNotificacion servicio = CrearServicio();
+
+        servicio.MarcarComoLeida(idNotificacion, DniDocente);
+
+        Assert.IsTrue(LeerNotificacion(idNotificacion).EstaLeida);
+        Assert.AreEqual(0, LeerNoLeidasDe(DniDocente).Count);
+    }
+
     private ServicioNotificacion CrearServicio()
     {
         return CrearServicioSobre(_contexto, NullLogger<ServicioNotificacion>.Instance);
@@ -206,6 +219,13 @@ public sealed class ServicioNotificacionTests
         using SqlContext contextoQueLee = new SqlContext(_opciones);
 
         return new RepositorioNotificacionSql(contextoQueLee).ObtenerNoLeidasDeUsuario(dni);
+    }
+
+    private Notificacion LeerNotificacion(int idNotificacion)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+
+        return new RepositorioNotificacionSql(contextoQueLee).ObtenerNotificacionPorId(idNotificacion)!;
     }
 
     private int GuardarNotificacion(Guid idPrestamo, TipoNotificacion tipo)
