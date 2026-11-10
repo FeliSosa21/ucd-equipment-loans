@@ -14,7 +14,7 @@
 
 <div class="card formulario">
     <form class="form-grid" @onsubmit="Solicitar" novalidate>
-        @if (MostrarSinCatalogos)
+        @if (DebeAvisarSinCatalogos)
         {
             <div class="alert alert-info" role="status">No hay catálogos disponibles.</div>
         }

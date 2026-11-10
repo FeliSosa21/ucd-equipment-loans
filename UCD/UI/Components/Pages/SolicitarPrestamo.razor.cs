@@ -22,7 +22,7 @@ public partial class SolicitarPrestamo
     private bool HayCatalogoElegido => _idCatalogo is not null;
 
     // Si ListarCatalogos fallo, la lista tambien queda vacia, pero el aviso seria falso: se muestra solo el error.
-    private bool MostrarSinCatalogos => !HayCatalogos && _error is null;
+    private bool DebeAvisarSinCatalogos => !HayCatalogos && _error is null;
 
     private TipoEquipamientoDto? TipoSeleccionado => _tipos.FirstOrDefault(tipo => tipo.Nombre == _tipo);
 
@@ -134,6 +134,7 @@ public partial class SolicitarPrestamo
         {
             _resultado = ServicioPrestamo.Solicitar(datos, DniUsuario);
             VaciarFormulario();
+            // Se recarga para que la disponibilidad de cada tipo quede al dia.
             CargarTipos();
         }
         catch (ServicioException ex)
@@ -149,7 +150,6 @@ public partial class SolicitarPrestamo
         _cantidad = CantidadPorDefecto;
     }
 
-    // Se recarga despues de solicitar para que la disponibilidad de cada tipo quede al dia.
     private void CargarTipos()
     {
         _tipos = new List<TipoEquipamientoDto>();
