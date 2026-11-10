@@ -96,7 +96,7 @@ public class ServicioPrestamo
     {
         ObtenerUsuarioHabilitado(dniConsultante, Permiso.ConsultarPrestamos, MensajeSinPermisoParaConsultarPrestamos);
 
-        return _prestamos.ObtenerPrestamos(new FiltroPorCatalogoYFechas()).Select(CrearPrestamoDto).ToList();
+        return _prestamos.ObtenerPrestamos(CrearFiltroDeDiasCompletos(filtro)).Select(CrearPrestamoDto).ToList();
     }
 
     public FiltroDePrestamosDto RangoPorDefecto()
@@ -285,6 +285,15 @@ public class ServicioPrestamo
         {
             _movimientos.AgregarMovimiento(Movimiento.DePrestamo(prestamo, crearRegistro(), unidad));
         }
+    }
+
+    private static FiltroPorCatalogoYFechas CrearFiltroDeDiasCompletos(FiltroDePrestamosDto filtro)
+    {
+        return new FiltroPorCatalogoYFechas
+        {
+            Desde = filtro.Desde.Date,
+            Hasta = filtro.Hasta.Date.AddDays(1)
+        };
     }
 
     private static PrestamoDto CrearPrestamoDto(Prestamo prestamo)
