@@ -13,6 +13,7 @@ public class ServicioNotificacion
         "No se pudo guardar la notificacion de vencido del prestamo {IdPrestamo}";
     private const string FormatoFecha = "dd/MM/yyyy";
     private const string MensajeNotificacionAjena = "La notificacion no es del usuario";
+    private const string MensajeSinResultado = "El prestamo no quedo aprobado ni rechazado";
 
     private readonly RepositorioNotificacionSql _notificaciones;
     private readonly RepositorioPrestamoSql _prestamos;
@@ -75,9 +76,12 @@ public class ServicioNotificacion
 
     public void RegistrarResultadoDeEvaluacion(Prestamo prestamo, DateTime fechaHoraEvaluacion)
     {
-        TipoNotificacion tipo = prestamo.Estado == EstadoPrestamo.Rechazado
-            ? TipoNotificacion.SolicitudRechazada
-            : TipoNotificacion.SolicitudAprobada;
+        TipoNotificacion tipo = prestamo.Estado switch
+        {
+            EstadoPrestamo.Activo => TipoNotificacion.SolicitudAprobada,
+            EstadoPrestamo.Rechazado => TipoNotificacion.SolicitudRechazada,
+            _ => throw new ArgumentException(MensajeSinResultado, nameof(prestamo))
+        };
 
         _notificaciones.AgregarNotificacion(new Notificacion(prestamo, tipo, fechaHoraEvaluacion));
     }
