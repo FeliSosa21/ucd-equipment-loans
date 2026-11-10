@@ -7,6 +7,7 @@ namespace Servicios;
 public class ServicioPrestamo
 {
     private const string MensajeSinPermisoParaEvaluar = "El usuario no tiene permiso para evaluar solicitudes";
+    private const string MensajeSinPermisoParaMisSolicitudes = "El usuario no tiene permiso para consultar sus solicitudes";
 
     private readonly RepositorioPrestamoSql _prestamos;
     private readonly RepositorioUsuarioSql _usuarios;
@@ -71,6 +72,8 @@ public class ServicioPrestamo
 
     public List<PrestamoDto> ListarMisSolicitudes(string dniConsultante)
     {
+        ObtenerUsuarioHabilitado(dniConsultante, Permiso.ConsultarMisSolicitudes, MensajeSinPermisoParaMisSolicitudes);
+
         return _prestamos.ObtenerPrestamosDeSolicitante(dniConsultante).Select(CrearPrestamoDto).ToList();
     }
 
