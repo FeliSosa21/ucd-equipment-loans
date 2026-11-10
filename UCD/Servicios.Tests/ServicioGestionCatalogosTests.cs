@@ -232,6 +232,18 @@ public class ServicioGestionCatalogosTests
         Assert.AreEqual("Aulas", LeerCatalogosActivos()[0].Nombre);
     }
 
+    [TestMethod]
+    public void Modificar_UsuarioSinPermiso_LanzaServicioException()
+    {
+        int id = _entorno.GuardarCatalogo(new Catalogo("Aulas"));
+        ServicioGestionCatalogos servicio = CrearServicio();
+        _entorno.GuardarUsuario(DniDocente, TipoUsuario.Docente());
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Modificar(id, NombreValido, DniDocente));
+
+        Assert.AreEqual("Aulas", LeerCatalogosActivos()[0].Nombre);
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
