@@ -32,6 +32,21 @@ public sealed class NotificacionTests
             new Notificacion(CrearPrestamo(), (TipoNotificacion)99, FechaFija));
     }
 
+    [TestMethod]
+    public void MarcarComoLeida_SinLeer_QuedaLeida()
+    {
+        Notificacion notificacion = CrearNotificacion();
+
+        notificacion.MarcarComoLeida();
+
+        Assert.IsTrue(notificacion.EstaLeida);
+    }
+
+    private static Notificacion CrearNotificacion()
+    {
+        return new Notificacion(CrearPrestamo(), TipoNotificacion.PrestamoVencido, FechaFija);
+    }
+
     private static Prestamo CrearPrestamo()
     {
         TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",

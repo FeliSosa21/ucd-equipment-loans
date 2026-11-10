@@ -23,6 +23,10 @@ public class Notificacion
         FechaHora = fechaHora;
     }
 
+    public void MarcarComoLeida()
+    {
+    }
+
     private static void ValidarPrestamo(Prestamo prestamo)
     {
         if (prestamo is null)
