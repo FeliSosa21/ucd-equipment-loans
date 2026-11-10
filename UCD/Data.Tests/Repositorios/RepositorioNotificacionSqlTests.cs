@@ -190,6 +190,18 @@ public sealed class RepositorioNotificacionSqlTests
         Assert.IsInstanceOfType(excepcion.InnerException, typeof(DbUpdateException));
     }
 
+    [TestMethod]
+    public void AgregarNotificacion_LaBaseRechazaElGuardado_DejaElSeguimientoVacio()
+    {
+        using SqlContext contextoQueFalla = new ContextoQueFallaAlGuardar(_opciones);
+        RepositorioNotificacionSql repositorio = new RepositorioNotificacionSql(contextoQueFalla);
+        Notificacion notificacion = CrearNotificacionDeVencido(CrearPrestamoActivo(DniSolicitante));
+
+        Assert.ThrowsException<InvalidOperationException>(() => repositorio.AgregarNotificacion(notificacion));
+
+        Assert.IsFalse(contextoQueFalla.ChangeTracker.Entries().Any());
+    }
+
     private Notificacion? LeerNotificacionPorId(int id)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
