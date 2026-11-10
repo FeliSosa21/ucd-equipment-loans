@@ -38,6 +38,9 @@ public class SesionActual
     // Aviso para la pantalla de ingreso cuando la sesion se cerro sin que el usuario saliera.
     public string? AvisoDeCierre { get; private set; }
 
+    // Catalogo que eligio el usuario en el selector: solo en memoria, para que siga elegido al cambiar de pagina.
+    public int? IdCatalogoElegido { get; set; }
+
     public event Action? Cambio;
 
     // Recupera la sesion guardada al abrir o recargar la pagina. Si el DNI guardado no es valido
@@ -100,6 +103,7 @@ public class SesionActual
     {
         Usuario = usuario;
         AvisoDeCierre = null;
+        IdCatalogoElegido = null;
         await _almacenamiento.SetAsync(ClaveDni, usuario.Dni);
         Cambio?.Invoke();
     }
@@ -137,6 +141,7 @@ public class SesionActual
     public async Task CerrarAsync()
     {
         Usuario = null;
+        IdCatalogoElegido = null;
         await _almacenamiento.DeleteAsync(ClaveDni);
         Cambio?.Invoke();
     }
