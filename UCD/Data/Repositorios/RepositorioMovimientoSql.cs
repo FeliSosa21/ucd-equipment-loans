@@ -27,23 +27,29 @@ public class RepositorioMovimientoSql
             return new List<Movimiento>();
         }
 
-        return FiltrarPor(filtro)
+        return FiltrarPor(MovimientosConSusDatos(), filtro)
+            .OrderByDescending(movimiento => EF.Property<RegistroDeAccion>(movimiento, CampoRegistro).FechaHora)
+            .ThenByDescending(movimiento => movimiento.Id)
+            .ToList();
+    }
+
+    // Los Include van antes del filtro: filtrar primero por la fecha del registro owned hace que EF no cargue
+    // su responsable.
+    private IQueryable<Movimiento> MovimientosConSusDatos()
+    {
+        return _contexto.Movimientos
             .Include(movimiento => movimiento.Prestamo)
             .ThenInclude(prestamo => prestamo.Solicitante)
             .Include(movimiento => movimiento.Prestamo)
             .ThenInclude(prestamo => prestamo.TipoEquipamiento)
             .Include(movimiento => movimiento.Evaluador)
             .Include(movimiento => movimiento.Unidad)
-            .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}")
-            .OrderByDescending(movimiento => EF.Property<RegistroDeAccion>(movimiento, CampoRegistro).FechaHora)
-            .ThenByDescending(movimiento => movimiento.Id)
-            .ToList();
+            .Include($"{CampoRegistro}.{nameof(RegistroDeAccion.Responsable)}");
     }
 
-    private IQueryable<Movimiento> FiltrarPor(FiltroPorCatalogoYFechas filtro)
+    private static IQueryable<Movimiento> FiltrarPor(IQueryable<Movimiento> movimientos,
+        FiltroPorCatalogoYFechas filtro)
     {
-        IQueryable<Movimiento> movimientos = _contexto.Movimientos;
-
         if (filtro.IdCatalogo is not null)
         {
             movimientos = movimientos.Where(movimiento =>
