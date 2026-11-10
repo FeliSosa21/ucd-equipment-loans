@@ -123,6 +123,25 @@ public sealed class RepositorioMovimientoTests
     }
 
     [TestMethod]
+    public void ObtenerMovimientos_FiltroPorCatalogo_DevuelveSoloLosDeTiposDeEseCatalogo()
+    {
+        Memoria memoria = new Memoria();
+        TipoEquipamiento proyector = CrearTipo("Proyector Epson");
+        Catalogo catalogo = new Catalogo("Catalogo de la facultad");
+        catalogo.AgregarTipo(proyector);
+        new RepositorioCatalogo(memoria).Guardar(catalogo);
+        RepositorioMovimiento repositorio = new RepositorioMovimiento(memoria);
+        Movimiento delCatalogo = CrearMovimiento(idInstitucional: "EQP-0001", FechaFija, proyector);
+        repositorio.AgregarMovimiento(delCatalogo);
+        repositorio.AgregarMovimiento(CrearMovimiento(idInstitucional: "EQP-0002", FechaFija, CrearTipo("Camara Sony")));
+
+        IReadOnlyList<Movimiento> resultado =
+            repositorio.ObtenerMovimientos(new FiltroPorCatalogoYFechas { IdCatalogo = catalogo.Id });
+
+        CollectionAssert.AreEqual(new List<Movimiento> { delCatalogo }, resultado.ToList());
+    }
+
+    [TestMethod]
     public void AgregarMovimiento_MovimientoNulo_LanzaArgumentNullException()
     {
         Memoria memoria = new Memoria();
@@ -169,6 +188,12 @@ public sealed class RepositorioMovimientoTests
         return unidad;
     }
 
+    private static TipoEquipamiento CrearTipo(string nombre)
+    {
+        return new TipoEquipamiento(nombre: nombre, descripcion: "Equipo para aulas", duracionMaxPrestamo: 5,
+            requiereAprobacion: true, categoria: Categoria.Audiovisual);
+    }
+
     private static Movimiento CrearMovimiento(string idInstitucional)
     {
         return CrearMovimiento(idInstitucional, FechaFija);
@@ -176,10 +201,13 @@ public sealed class RepositorioMovimientoTests
 
     private static Movimiento CrearMovimiento(string idInstitucional, DateTime fechaHora)
     {
+        return CrearMovimiento(idInstitucional, fechaHora, CrearTipo("Proyector Epson"));
+    }
+
+    private static Movimiento CrearMovimiento(string idInstitucional, DateTime fechaHora, TipoEquipamiento tipo)
+    {
         Usuario evaluador = CrearEvaluador();
         UnidadFisica unidad = CrearUnidad(idInstitucional: idInstitucional);
-        TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",
-            duracionMaxPrestamo: 5, requiereAprobacion: true, categoria: Categoria.Audiovisual);
         tipo.AgregarUnidad(unidad);
         Prestamo prestamo = new Prestamo(CrearSolicitante(), tipo, cantidadSolicitada: 1, fechaHoraPrestamo: FechaFija);
         prestamo.Aprobar(evaluador, new List<UnidadFisica> { unidad });
