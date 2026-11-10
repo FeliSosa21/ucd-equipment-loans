@@ -177,6 +177,19 @@ public sealed class RepositorioNotificacionSqlTests
         Assert.IsTrue(LeerNotificacionPorId(notificacion.Id)!.EstaLeida);
     }
 
+    [TestMethod]
+    public void AgregarNotificacion_LaBaseRechazaElGuardado_LanzaInvalidOperationExceptionConLaOriginalComoInterna()
+    {
+        using SqlContext contextoQueFalla = new ContextoQueFallaAlGuardar(_opciones);
+        RepositorioNotificacionSql repositorio = new RepositorioNotificacionSql(contextoQueFalla);
+        Notificacion notificacion = CrearNotificacionDeVencido(CrearPrestamoActivo(DniSolicitante));
+
+        InvalidOperationException excepcion =
+            Assert.ThrowsException<InvalidOperationException>(() => repositorio.AgregarNotificacion(notificacion));
+
+        Assert.IsInstanceOfType(excepcion.InnerException, typeof(DbUpdateException));
+    }
+
     private Notificacion? LeerNotificacionPorId(int id)
     {
         using SqlContext contextoQueLee = new SqlContext(_opciones);
