@@ -160,6 +160,19 @@ public class ServicioGestionCatalogosTests
         Assert.AreEqual(NombreValido, guardados[0].Nombre);
     }
 
+    [TestMethod]
+    public void Modificar_NombreDeOtroCatalogo_LanzaServicioException()
+    {
+        _entorno.GuardarCatalogo(new Catalogo(NombreValido));
+        int id = _entorno.GuardarCatalogo(new Catalogo("Aulas"));
+        ServicioGestionCatalogos servicio = CrearServicio();
+
+        ServicioException error = Assert.ThrowsException<ServicioException>(() =>
+            servicio.Modificar(id, "  laboratorio de informatica ", DniSupervisor));
+
+        Assert.AreEqual(CampoNombre, error.Campo);
+    }
+
     private ServicioGestionCatalogos CrearServicio()
     {
         return new ServicioGestionCatalogos(_entorno.Catalogos, _entorno.Usuarios, _entorno.Prestamos);
