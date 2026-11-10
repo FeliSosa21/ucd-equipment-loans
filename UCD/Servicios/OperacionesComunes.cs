@@ -1,6 +1,5 @@
 using Data.Repositorios;
 using Dominio;
-using Microsoft.EntityFrameworkCore;
 
 namespace Servicios;
 

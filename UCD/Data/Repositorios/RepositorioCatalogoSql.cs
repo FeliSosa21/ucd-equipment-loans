@@ -33,15 +33,7 @@ public class RepositorioCatalogoSql
 
         _contexto.Catalogos.Add(catalogo);
 
-        try
-        {
-            _contexto.SaveChanges();
-        }
-        catch (DbUpdateException ex)
-        {
-            _contexto.ChangeTracker.Clear();
-            throw new InvalidOperationException("La base rechazo los cambios del catalogo", ex);
-        }
+        GuardarCambios();
     }
 
     public Catalogo? ObtenerCatalogoActivoPorId(int id)
@@ -75,15 +67,7 @@ public class RepositorioCatalogoSql
     {
         ArgumentNullException.ThrowIfNull(catalogo);
 
-        try
-        {
-            _contexto.SaveChanges();
-        }
-        catch (DbUpdateException ex)
-        {
-            _contexto.ChangeTracker.Clear();
-            throw new InvalidOperationException("La base rechazo los cambios del catalogo", ex);
-        }
+        GuardarCambios();
     }
 
     public TipoEquipamiento? ObtenerTipoPorNombre(int idCatalogo, string nombre)
@@ -116,5 +100,18 @@ public class RepositorioCatalogoSql
             .Any(unidad => unidad.NumSerie != null
                            && unidad.NumSerie.Trim().ToLower() == numeroDeSerieBuscado
                            && unidad.Id != idUnidadExcluida);
+    }
+
+    private void GuardarCambios()
+    {
+        try
+        {
+            _contexto.SaveChanges();
+        }
+        catch (DbUpdateException ex)
+        {
+            _contexto.ChangeTracker.Clear();
+            throw new InvalidOperationException("La base rechazo los cambios del catalogo", ex);
+        }
     }
 }

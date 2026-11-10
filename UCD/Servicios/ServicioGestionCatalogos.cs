@@ -1,7 +1,6 @@
 using Data.Repositorios;
 using Dominio;
 using DTOs;
-using Microsoft.EntityFrameworkCore;
 
 namespace Servicios;
 
@@ -94,7 +93,7 @@ public class ServicioGestionCatalogos
         }
         catch (InvalidOperationException ex)
         {
-            throw new ServicioException(CampoNombre, "No se pudo crear el catalogo: ya existe uno con ese nombre", ex);
+            throw new ServicioException(CampoNombre, "No se pudo crear el catalogo. Puede que otro usuario haya creado uno con ese nombre: recarga la lista y proba de nuevo", ex);
         }
     }
 
