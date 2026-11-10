@@ -789,6 +789,23 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_LaBaseRechazaLosMovimientos_LanzaDbUpdateExceptionYElPrestamoQuedaActivo()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<Movimiento>(_opciones);
+        ServicioPrestamo servicioQueFalla = CrearServicioSobre(contextoQueFalla, new RelojFijo(FechaDeEvaluacion));
+
+        Assert.ThrowsException<DbUpdateException>(() => servicioQueFalla.Aprobar(idPrestamo, DniSupervisor));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
+
+        Assert.AreEqual(EstadoPrestamo.Activo, guardado.Estado,
+            "El prestamo deberia guardarse antes que sus movimientos");
+    }
+
+    [TestMethod]
     public void Rechazar_SolicitudPendiente_QuedaRechazadoConMotivoYEvaluador()
     {
         ServicioPrestamo servicio = CrearServicio();
@@ -1201,11 +1218,17 @@ public sealed class ServicioPrestamoTests
 
     private ServicioPrestamo CrearServicioConReloj(TimeProvider reloj)
     {
+        return CrearServicioSobre(_contexto, reloj);
+    }
+
+    // Todos los repositorios sobre el mismo contexto: si se mezclan, EF intenta insertar lo que ya existe.
+    private static ServicioPrestamo CrearServicioSobre(SqlContext contexto, TimeProvider reloj)
+    {
         return new ServicioPrestamo(
-            prestamos: new RepositorioPrestamoSql(_contexto),
-            usuarios: new RepositorioUsuarioSql(_contexto),
-            catalogo: new RepositorioCatalogoSql(_contexto),
-            movimientos: new RepositorioMovimientoSql(_contexto),
+            prestamos: new RepositorioPrestamoSql(contexto),
+            usuarios: new RepositorioUsuarioSql(contexto),
+            catalogo: new RepositorioCatalogoSql(contexto),
+            movimientos: new RepositorioMovimientoSql(contexto),
             reloj: reloj);
     }
 
