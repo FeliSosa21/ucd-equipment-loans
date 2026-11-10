@@ -53,24 +53,51 @@ public partial class SelectorCatalogo
         }
     }
 
-    // Con un solo catalogo se elige solo; si el elegido ya no esta entre los activos, se avisa que no hay ninguno.
+    // Con un solo catalogo se elige solo; con varios, vuelve el que el usuario eligio antes si sigue activo.
+    // Si el elegido ya no esta entre los activos, se avisa que no hay ninguno.
     private async Task AjustarSeleccionAsync()
     {
         if (_catalogos.Count == 1 && IdCatalogo != _catalogos[0].Id)
         {
-            await IdCatalogoChanged.InvokeAsync(_catalogos[0].Id);
+            await ElegirAsync(_catalogos[0].Id);
             return;
         }
 
-        if (IdCatalogo != SinCatalogo && !_catalogos.Any(catalogo => catalogo.Id == IdCatalogo))
+        if (IdCatalogo != SinCatalogo && !EstaActivo(IdCatalogo))
         {
-            await IdCatalogoChanged.InvokeAsync(SinCatalogo);
+            await ElegirAsync(SinCatalogo);
+            return;
+        }
+
+        int? recordado = SesionActual.IdCatalogoElegido;
+        if (IdCatalogo == SinCatalogo && recordado is int id && EstaActivo(id))
+        {
+            await ElegirAsync(id);
         }
     }
 
     private async Task AlElegir(ChangeEventArgs evento)
     {
-        await IdCatalogoChanged.InvokeAsync(int.Parse(evento.Value!.ToString()!));
+        await ElegirAsync(int.Parse(evento.Value!.ToString()!));
+    }
+
+    private async Task ElegirAsync(int idCatalogo)
+    {
+        if (idCatalogo == SinCatalogo)
+        {
+            SesionActual.IdCatalogoElegido = null;
+        }
+        else
+        {
+            SesionActual.IdCatalogoElegido = idCatalogo;
+        }
+
+        await IdCatalogoChanged.InvokeAsync(idCatalogo);
+    }
+
+    private bool EstaActivo(int idCatalogo)
+    {
+        return _catalogos.Any(catalogo => catalogo.Id == idCatalogo);
     }
 
     private string? NombreElegido()
