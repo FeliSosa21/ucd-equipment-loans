@@ -13,19 +13,6 @@ public class ServicioDevolucionTests
     private static readonly DateTime InicioPrestamo = new DateTime(2026, 9, 22, 10, 0, 0);
     private static readonly DateTime MomentoDevolucion = InicioPrestamo.AddDays(2);
 
-    private readonly List<SqlContext> _contextosAuditoria = new();
-
-    [TestCleanup]
-    public void Limpiar()
-    {
-        foreach (SqlContext contexto in _contextosAuditoria)
-        {
-            contexto.Dispose();
-        }
-
-        _contextosAuditoria.Clear();
-    }
-
     [TestMethod]
     public void CondicionesPosibles_DevuelveLasTresCondiciones()
     {
@@ -67,52 +54,6 @@ public class ServicioDevolucionTests
 
         Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
         Assert.AreEqual(0, servicio.ListarPrestamosActivos(DniFuncionario).Count);
-    }
-
-    [TestMethod]
-    public void RegistrarDevolucion_DatosValidos_RegistraLaDevolucionConSuResponsableYSuHora()
-    {
-        Memoria memoria = new Memoria();
-        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
-
-        servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
-
-        RegistroAuditoria registro = LeerAccionesDelFuncionario(memoria).Single();
-        Assert.AreEqual(AccionAuditada.DevolucionDePrestamo, registro.Accion);
-        Assert.AreEqual(MomentoDevolucion, registro.FechaHora);
-    }
-
-    [TestMethod]
-    public void RegistrarDevolucion_DatosValidos_ElDetalleTieneElSolicitanteYLaCantidadDeUnidades()
-    {
-        Memoria memoria = new Memoria();
-        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
-
-        servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
-
-        Assert.AreEqual("Devolución del préstamo de Ana Perez (DNI 45678905): 2 unidades",
-            LeerAccionesDelFuncionario(memoria).Single().Detalle);
-    }
-
-    [TestMethod]
-    public void RegistrarDevolucion_UnaUnidad_ElDetalleDiceUnaUnidad()
-    {
-        Memoria memoria = new Memoria();
-        ServicioDevolucion servicio = CrearServicio(memoria, out _);
-        Prestamo deUnaUnidad = AgregarPrestamoDeUnaUnidad(memoria);
-        DevolucionDto datos = new DevolucionDto
-        {
-            IdPrestamo = deUnaUnidad.Id,
-            Unidades = new List<UnidadDevueltaDto>
-            {
-                new UnidadDevueltaDto { IdInstitucional = "EQP-0003", Condicion = "Sin observaciones" }
-            }
-        };
-
-        servicio.RegistrarDevolucion(datos, DniFuncionario);
-
-        Assert.AreEqual("Devolución del préstamo de Ana Perez (DNI 45678905): 1 unidad",
-            LeerAccionesDelFuncionario(memoria).Single().Detalle);
     }
 
     [TestMethod]
@@ -348,38 +289,6 @@ public class ServicioDevolucionTests
         Assert.AreEqual(1, new RepositorioDevolucion(memoria).ObtenerTodas().Count);
     }
 
-    [TestMethod]
-    public void RegistrarDevolucion_PrestamoYaDevuelto_NoAgregaNadaAlLog()
-    {
-        Memoria memoria = new Memoria();
-        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
-        servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
-
-        Assert.ThrowsException<ServicioException>(() =>
-            servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario));
-
-        Assert.AreEqual(1, LeerAccionesDelFuncionario(memoria).Count);
-    }
-
-    private static Prestamo AgregarPrestamoDeUnaUnidad(Memoria memoria)
-    {
-        Usuario solicitante = new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniSolicitante)!;
-        TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Notebook Lenovo", descripcion: "Notebook para clases",
-            duracionMaxPrestamo: 5, requiereAprobacion: false, categoria: Categoria.Computacion);
-        UnidadFisica unidad = new UnidadFisica(idInstitucional: "EQP-0003", ubiFisica: "Deposito A", numSerie: null);
-        tipo.AgregarUnidad(unidad);
-        Prestamo prestamo = new Prestamo(solicitante, tipo, cantidadSolicitada: 1, fechaHoraPrestamo: InicioPrestamo);
-        prestamo.Activar(new List<UnidadFisica> { unidad });
-        new RepositorioPrestamo(memoria).AgregarPrestamo(prestamo);
-        return prestamo;
-    }
-
-    private static IReadOnlyList<RegistroAuditoria> LeerAccionesDelFuncionario(Memoria memoria)
-    {
-        return AuditoriaDePrueba.LeerRegistros(memoria,
-            new FiltroAuditoria { DniUsuario = DniFuncionario });
-    }
-
     private static DevolucionDto CrearDatos(Guid idPrestamo, string condicionSegunda = "Sin observaciones")
     {
         return new DevolucionDto
@@ -393,17 +302,17 @@ public class ServicioDevolucionTests
         };
     }
 
-    private ServicioDevolucion CrearServicio(out Prestamo prestamo)
+    private static ServicioDevolucion CrearServicio(out Prestamo prestamo)
     {
         return CrearServicio(new Memoria(), out prestamo);
     }
 
-    private ServicioDevolucion CrearServicio(Memoria memoria, out Prestamo prestamo)
+    private static ServicioDevolucion CrearServicio(Memoria memoria, out Prestamo prestamo)
     {
         return CrearServicio(memoria, out prestamo, MomentoDevolucion);
     }
 
-    private ServicioDevolucion CrearServicio(Memoria memoria, out Prestamo prestamo, DateTime ahora)
+    private static ServicioDevolucion CrearServicio(Memoria memoria, out Prestamo prestamo, DateTime ahora)
     {
         RepositorioUsuario usuarios = new RepositorioUsuario(memoria);
         RepositorioPrestamo prestamos = new RepositorioPrestamo(memoria);
@@ -432,9 +341,7 @@ public class ServicioDevolucionTests
         prestamo.Activar(unidades);
         prestamos.AgregarPrestamo(prestamo);
 
-        SqlContext contextoAuditoria = AuditoriaDePrueba.CrearContexto(memoria);
-        _contextosAuditoria.Add(contextoAuditoria);
         return new ServicioDevolucion(prestamos, usuarios, new RepositorioDevolucion(memoria),
-            new RepositorioMovimiento(memoria), new RelojFijo(ahora), AuditoriaDePrueba.Registrador(contextoAuditoria));
+            new RepositorioMovimiento(memoria), new RelojFijo(ahora));
     }
 }

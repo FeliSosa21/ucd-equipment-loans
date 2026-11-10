@@ -2,7 +2,7 @@ namespace Dominio;
 
 public class RegistroAuditoria
 {
-    public const int LargoMaximoDetalle = 200;
+    private const int LargoMaximoDetalle = 200;
 
     private RegistroDeAccion _registro;
 

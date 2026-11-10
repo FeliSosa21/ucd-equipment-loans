@@ -38,29 +38,4 @@ public static class TextosVisibles
 
         return valor;
     }
-
-    public static readonly IReadOnlyDictionary<string, string> AccionesAuditadas = new Dictionary<string, string>
-    {
-        { "RegistroDeUsuario", "Registro de usuario" },
-        { "AltaDeUsuario", "Alta de usuario" },
-        { "CambioDeTipoDeUsuario", "Cambio de tipo de usuario" },
-        { "DesactivacionDeUsuario", "Desactivación de usuario" },
-        { "ReactivacionDeUsuario", "Reactivación de usuario" },
-        { "SolicitudDePrestamo", "Solicitud de préstamo" },
-        { "AprobacionDePrestamo", "Aprobación de préstamo" },
-        { "IntentoDeAprobacion", "Intento de aprobación" },
-        { "RechazoDePrestamo", "Rechazo de préstamo" },
-        { "ActivacionDePrestamo", "Activación de préstamo" },
-        { "DevolucionDePrestamo", "Devolución de préstamo" }
-    };
-
-    public static string AccionAuditada(string valor)
-    {
-        if (AccionesAuditadas.ContainsKey(valor))
-        {
-            return AccionesAuditadas[valor];
-        }
-
-        return valor;
-    }
 }

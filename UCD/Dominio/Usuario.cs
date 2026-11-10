@@ -21,7 +21,6 @@ public class Usuario
     public bool DebeCambiarContrasena { get; private set; }
     public TipoUsuario Tipo { get; private set; }
     public string NombreCompleto => $"{Nombre} {Apellido}";
-    public string NombreCompletoConDni => $"{NombreCompleto} (DNI {Dni})";
 
     public Usuario(string dni, string nombre, string apellido, string correo, string contrasena)
     {
@@ -53,21 +52,6 @@ public class Usuario
     public bool TienePermiso(Permiso permiso)
     {
         return Tipo.TienePermiso(permiso);
-    }
-
-    public bool TieneTipo(TipoUsuario tipo)
-    {
-        return Tipo.Nombre == tipo.Nombre;
-    }
-
-    public bool EstaActivo()
-    {
-        return Estado == EstadoUsuario.Activo;
-    }
-
-    public bool PuedeGestionarUsuarios()
-    {
-        return EstaActivo() && TienePermiso(Permiso.GestionarUsuarios);
     }
 
     public bool EstaPendienteDeActivacion()

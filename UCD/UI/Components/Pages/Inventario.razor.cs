@@ -34,9 +34,8 @@ public partial class Inventario
 
         try
         {
-            int idCatalogo = ObtenerIdCatalogoProvisorio();
-            _porCategoria = ServicioInventario.ContarPorCategoria(idCatalogo, DniUsuario);
-            _porTipo = ServicioInventario.ContarPorTipo(idCatalogo, filtro, DniUsuario);
+            _porCategoria = ServicioInventario.ContarPorCategoria();
+            _porTipo = ServicioInventario.ContarPorTipo(filtro);
         }
         catch (ServicioException ex)
         {
@@ -44,18 +43,6 @@ public partial class Inventario
             _porCategoria = new List<CantidadesPorEstadoDto>();
             _porTipo = new List<CantidadesPorEstadoDto>();
         }
-    }
-
-    // Provisorio hasta que exista el selector de catalogo (T4): el primer catalogo activo.
-    private int ObtenerIdCatalogoProvisorio()
-    {
-        List<CatalogoDto> catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
-        if (catalogos.Count == 0)
-        {
-            throw new ServicioException("No hay catalogos disponibles");
-        }
-
-        return catalogos[0].Id;
     }
 
     private void LimpiarFiltros()

@@ -6,42 +6,23 @@ namespace Servicios;
 
 public class ServicioCatalogo
 {
-    private const string MensajeSinPermiso = "El usuario no tiene permiso para consultar el catalogo";
+    private readonly RepositorioCatalogo _repositorioCatalogo;
 
-    private readonly RepositorioCatalogoSql _repositorioCatalogo;
-    private readonly RepositorioUsuarioSql _repositorioUsuario;
-
-    public ServicioCatalogo(RepositorioCatalogoSql repositorioCatalogo, RepositorioUsuarioSql repositorioUsuario)
+    public ServicioCatalogo(RepositorioCatalogo repositorioCatalogo)
     {
         _repositorioCatalogo = repositorioCatalogo;
-        _repositorioUsuario = repositorioUsuario;
     }
 
-    public List<CatalogoDto> ListarCatalogos(string dniUsuario)
-    {
-        ValidarResponsable(dniUsuario);
-        var resultado = new List<CatalogoDto>();
-
-        foreach (var catalogo in _repositorioCatalogo.ObtenerCatalogosActivos())
-        {
-            resultado.Add(new CatalogoDto { Id = catalogo.Id, Nombre = catalogo.Nombre });
-        }
-
-        return resultado;
-    }
-
-    public List<TipoEquipamientoDto> ConsultarTipos(int idCatalogo, FiltroCatalogoDto filtro, string dniUsuario)
+    public List<TipoEquipamientoDto> ConsultarTipos(FiltroCatalogoDto filtro)
     {
         ArgumentNullException.ThrowIfNull(filtro);
-        Usuario usuario = ValidarResponsable(dniUsuario);
-        bool veDiscontinuados = usuario.TienePermiso(Permiso.GestionarCatalogo);
         ValidarFiltro(filtro);
-        var catalogo = OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
+        var catalogo = ObtenerCatalogo();
         var resultado = new List<TipoEquipamientoDto>();
 
         foreach (var tipo in catalogo.Tipos)
         {
-            if (CumpleFiltro(tipo, filtro) && (veDiscontinuados || tipo.EstaActivo))
+            if (CumpleFiltro(tipo, filtro))
             {
                 resultado.Add(CrearTipoDto(tipo));
             }
@@ -50,10 +31,14 @@ public class ServicioCatalogo
         return resultado;
     }
 
-    public List<UnidadFisicaDto> ObtenerUnidadesDisponibles(int idCatalogo, string nombreTipo, string dniUsuario)
+    public List<UnidadFisicaDto> ObtenerUnidadesDisponibles(string nombreTipo)
     {
-        ValidarResponsable(dniUsuario);
-        var tipo = OperacionesComunes.ObtenerTipo(_repositorioCatalogo, idCatalogo, nombreTipo);
+        var tipo = _repositorioCatalogo.ObtenerTipoPorNombre(nombreTipo);
+
+        if (tipo is null)
+        {
+            throw new ServicioException("No existe un tipo de equipamiento con ese nombre");
+        }
 
         var resultado = new List<UnidadFisicaDto>();
 
@@ -65,18 +50,24 @@ public class ServicioCatalogo
         return resultado;
     }
 
-    private Usuario ValidarResponsable(string dniUsuario)
-    {
-        return OperacionesComunes.ValidarResponsable(_repositorioUsuario.ObtenerUsuarioPorDni(dniUsuario),
-            Permiso.ConsultarCatalogo, MensajeSinPermiso);
-    }
-
     private void ValidarFiltro (FiltroCatalogoDto filtro)
     {
         if (filtro.MinimoDisponibles != null && filtro.MinimoDisponibles < 0)
         {
             throw new ServicioException("La cantidad minima de unidades disponibles no puede ser negativa");
         }
+    }
+
+    private Catalogo ObtenerCatalogo()
+    {
+        var catalogo = _repositorioCatalogo.Obtener();
+
+        if (catalogo is null)
+        {
+            throw new ServicioException("Todavia no hay un catalogo cargado");
+        }
+
+        return catalogo;
     }
 
     private static bool CumpleFiltro(TipoEquipamiento tipo, FiltroCatalogoDto filtro)

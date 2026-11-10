@@ -23,9 +23,9 @@ El resto (por ejemplo `MovimientoConfiguracion`, `TipoUsuarioConfiguracion`, `Re
 - Datos privados agrupados (por ejemplo `_registro`, `presentacion`, `topes`) se mapean con `OwnsOne` sobre el campo.
 - Sin lazy loading: las consultas que devuelven entidades con relaciones usan `Include`.
 - Comparaciones de texto sin distinguir mayúsculas con `ToLower()`; `string.Equals(..., StringComparison)` no se traduce a SQL.
-- `OrderBy` con desempate (por `Id` u otro campo único).
+- `OrderBy` antes de `Skip`/`Take`, con desempate (por `Id` u otro campo único).
 - Los filtros por fechas usan `FiltroPorCatalogoYFechas`: `Desde` incluido y `Hasta` excluido.
-- Las consultas para la exportación (req. 2.7), `ObtenerDevoluciones(filtro)` y `ObtenerPrestamos(filtro)`, devuelven todo el rango filtrado aunque el filtro no tenga criterios. Tienen la misma firma en memoria y en EF, acordada con el equipo: no la cambies aunque una revisión lo sugiera.
+- Las consultas para la exportación (req. 2.7) **no paginan**: `ObtenerDevoluciones(filtro)` y `ObtenerPrestamos(filtro)` devuelven todo el rango filtrado, con la misma firma en memoria y en EF (acordada con el equipo). No las cambies por `ObtenerPagina...` aunque una revisión lo sugiera.
 - Los datos que la app necesita para arrancar (los 6 tipos de usuario) van con `HasData` en la configuración; los datos de prueba no van en el código.
 
 ## Tests de persistencia

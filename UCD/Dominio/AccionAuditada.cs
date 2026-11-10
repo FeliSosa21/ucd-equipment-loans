@@ -7,10 +7,5 @@ public enum AccionAuditada
     ActivacionDePrestamo,
     RechazoDePrestamo,
     DevolucionDePrestamo,
-    IntentoDeAprobacion,
-    AprobacionDePrestamo,
-    AltaDeUsuario,
-    CambioDeTipoDeUsuario,
-    DesactivacionDeUsuario,
-    ReactivacionDeUsuario
+    IntentoDeAprobacion
 }

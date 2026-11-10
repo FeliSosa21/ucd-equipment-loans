@@ -8,9 +8,9 @@ public class ServicioSesion
 {
     public const string CampoContrasenaActual = "ContrasenaActual";
 
-    private readonly RepositorioUsuarioSql _repositorio;
+    private readonly RepositorioUsuario _repositorio;
 
-    public ServicioSesion(RepositorioUsuarioSql repositorio)
+    public ServicioSesion(RepositorioUsuario repositorio)
     {
         _repositorio = repositorio;
     }
@@ -60,7 +60,6 @@ public class ServicioSesion
         }
 
         TraduccionDeErrores.Ejecutar(() => usuario.CambiarContrasena(nueva));
-        _repositorio.ActualizarUsuario(usuario);
     }
 
     private static UsuarioSesionDto CrearSesion(Usuario usuario)
