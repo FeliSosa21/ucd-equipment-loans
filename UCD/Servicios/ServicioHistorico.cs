@@ -6,11 +6,18 @@ namespace Servicios;
 
 public class ServicioHistorico
 {
+    private readonly RepositorioUsuarioSql _usuarios;
     private readonly RepositorioMovimientoSql _movimientos;
 
-    public ServicioHistorico(RepositorioMovimientoSql movimientos)
+    public ServicioHistorico(RepositorioUsuarioSql usuarios, RepositorioMovimientoSql movimientos)
     {
+        _usuarios = usuarios;
         _movimientos = movimientos;
+    }
+
+    public List<MovimientoDto> ListarMovimientos(int idCatalogo, FiltroMovimientosDto filtro, string dniUsuario)
+    {
+        throw new NotImplementedException();
     }
 
     // Temporal, hasta que la pagina filtre por catalogo: no recibe quien consulta (el permiso lo controla la pagina).

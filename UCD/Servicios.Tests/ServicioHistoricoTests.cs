@@ -9,6 +9,7 @@ public sealed class ServicioHistoricoTests
 {
     private const string TipoConAprobacion = "Proyector Epson";
     private const string TipoSinAprobacion = "Notebook Lenovo ThinkPad";
+    private const string DniFuncionario = "45678905";
     private static readonly DateTime FechaFija = new DateTime(2026, 9, 22, 10, 30, 0);
 
     private MovimientosSqlDePrueba _datos = null!;
@@ -98,9 +99,20 @@ public sealed class ServicioHistoricoTests
         Assert.AreEqual("Sistema", movimiento.Responsable);
     }
 
+    [TestMethod]
+    public void ListarMovimientos_UsuarioSinPermisoConsultarHistorico_LanzaServicioException()
+    {
+        _datos.GuardarUsuario(DniFuncionario, TipoUsuario.FuncionarioCE());
+        ServicioHistorico servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniFuncionario));
+    }
+
     private ServicioHistorico CrearServicio()
     {
-        return new ServicioHistorico(new RepositorioMovimientoSql(_datos.Contexto));
+        return new ServicioHistorico(new RepositorioUsuarioSql(_datos.Contexto),
+            new RepositorioMovimientoSql(_datos.Contexto));
     }
 
     private void GuardarSolicitud(DateTime fechaHora)
