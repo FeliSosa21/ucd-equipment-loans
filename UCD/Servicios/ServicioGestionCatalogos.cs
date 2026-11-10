@@ -33,7 +33,8 @@ public class ServicioGestionCatalogos
             throw new ServicioException(CampoNombre, "Ya existe un catalogo con ese nombre");
         }
 
-        _repositorioCatalogo.AgregarCatalogo(new Catalogo(nombreNormalizado));
+        Catalogo catalogo = TraduccionDeErrores.Ejecutar(() => new Catalogo(nombreNormalizado), CampoNombre);
+        _repositorioCatalogo.AgregarCatalogo(catalogo);
     }
 
     public void Modificar(int idCatalogo, string nombre, string dniResponsable)
