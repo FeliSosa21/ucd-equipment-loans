@@ -1,6 +1,7 @@
 using Data.Repositorios;
 using Dominio;
 using DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace Servicios;
 
@@ -36,7 +37,7 @@ public class ServicioGestionCatalogos
         }
 
         Catalogo catalogo = TraduccionDeErrores.Ejecutar(() => new Catalogo(nombreNormalizado), CampoNombre);
-        _repositorioCatalogo.AgregarCatalogo(catalogo);
+        AgregarCatalogo(catalogo);
     }
 
     public void Modificar(int idCatalogo, string nombre, string dniResponsable)
@@ -45,6 +46,19 @@ public class ServicioGestionCatalogos
 
     public void Eliminar(int idCatalogo, string dniResponsable)
     {
+    }
+
+    // Dos usuarios pueden crear el mismo nombre a la vez: el indice unico de la base rechaza al segundo.
+    private void AgregarCatalogo(Catalogo catalogo)
+    {
+        try
+        {
+            _repositorioCatalogo.AgregarCatalogo(catalogo);
+        }
+        catch (DbUpdateException ex)
+        {
+            throw new ServicioException(CampoNombre, "No se pudo crear el catalogo: ya existe uno con ese nombre", ex);
+        }
     }
 
     private void ValidarResponsable(string dniResponsable)
