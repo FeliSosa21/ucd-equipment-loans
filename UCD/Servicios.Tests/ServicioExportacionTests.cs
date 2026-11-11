@@ -554,9 +554,11 @@ public sealed class ServicioExportacionTests
         using XLWorkbook libro = new XLWorkbook(new MemoryStream(contenido));
         IXLWorksheet hoja = libro.Worksheet(1);
         List<string> filas = new List<string>();
+        // Los archivos de la prueba siempre tienen encabezado, asi que la hoja nunca esta vacia.
+        int ultimaColumna = hoja.LastColumnUsed()!.ColumnNumber();
         foreach (IXLRow fila in hoja.RowsUsed())
         {
-            filas.Add(string.Join("|", fila.Cells(1, hoja.LastColumnUsed().ColumnNumber()).Select(c => c.GetString())));
+            filas.Add(string.Join("|", fila.Cells(1, ultimaColumna).Select(c => c.GetString())));
         }
 
         return filas;
