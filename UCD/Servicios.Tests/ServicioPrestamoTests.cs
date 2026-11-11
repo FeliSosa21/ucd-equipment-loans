@@ -734,6 +734,23 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_TipoSinAprobacionConTresUnidades_RegistraUnaEntradaPorAccionYNoPorUnidad()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 3);
+
+        servicio.Solicitar(datos, DniDocente);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(3, LeerMovimientos(contextoQueLee)
+            .Count(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo));
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada> { AccionAuditada.SolicitudDePrestamo, AccionAuditada.ActivacionDePrestamo },
+            LeerLog(contextoQueLee).Select(entrada => entrada.Accion).ToList(),
+            "El log lleva una entrada por prestamo y accion, no una por unidad");
+    }
+
+    [TestMethod]
     public void Aprobar_SolicitudPendienteConUnidades_QuedaActivo()
     {
         ServicioPrestamo servicio = CrearServicio();
