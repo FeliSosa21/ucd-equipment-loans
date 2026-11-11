@@ -725,6 +725,19 @@ public sealed class PrestamoTests
         Assert.IsTrue(unidades[0].EstaDisponible(), "La unidad deberia seguir disponible");
     }
 
+    [TestMethod]
+    public void ActivarORechazarPorFaltaDeUnidades_PrestamoNoSolicitado_LanzaYNoCambiaNada()
+    {
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
+
+        Assert.ThrowsException<DominioException>(() => prestamo.ActivarORechazarPorFaltaDeUnidades());
+
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        CollectionAssert.AreEqual(unidades, prestamo.UnidadesAsignadas.ToList());
+        Assert.IsNull(prestamo.MotivoRechazo);
+        Assert.IsNull(prestamo.Evaluador);
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
