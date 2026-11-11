@@ -765,6 +765,26 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_LaBaseRechazaElLog_LanzaDbUpdateExceptionYQuedanElPrestamoYSusMovimientos()
+    {
+        CrearServicio();
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<RegistroAuditoria>(_opciones);
+        ServicioPrestamo servicioQueFalla = CrearServicioSobre(contextoQueFalla, new RelojFijo(FechaFija));
+
+        Assert.ThrowsException<DbUpdateException>(() => servicioQueFalla.Solicitar(CrearSolicitud(), DniDocente));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado =
+            new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(DniDocente).Single();
+        Assert.AreEqual(EstadoPrestamo.Activo, guardado.Estado);
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Prestamo, TipoMovimiento.Prestamo },
+            LeerMovimientos(contextoQueLee).Select(movimiento => movimiento.Tipo).ToList(),
+            "Los movimientos deberian guardarse antes que el log");
+        Assert.AreEqual(0, LeerLog(contextoQueLee).Count);
+    }
+
+    [TestMethod]
     public void Aprobar_SolicitudPendienteConUnidades_QuedaActivo()
     {
         ServicioPrestamo servicio = CrearServicio();
