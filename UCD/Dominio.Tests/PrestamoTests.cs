@@ -7,6 +7,8 @@ public sealed class PrestamoTests
     private const int CantidadSolicitadaPorDefecto = 2;
     private const string MotivoDeRechazo = "El equipo esta reservado para un examen";
     private const string MotivoFaltaDeUnidades = "No hay unidades suficientes para el tipo de equipamiento";
+    private const string MotivoTopeDeUnidades =
+        "Supera el maximo de unidades por catalogo al momento de la aprobacion";
 
     [TestMethod]
     public void Constructor_DatosValidos_NaceSolicitado()
@@ -803,6 +805,18 @@ public sealed class PrestamoTests
         Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
         Assert.AreEqual(MotivoFaltaDeUnidades, prestamo.MotivoRechazo);
         Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+        Assert.IsNull(prestamo.Evaluador);
+    }
+
+    [TestMethod]
+    public void RechazarPorTopeDeUnidades_PrestamoSolicitado_QuedaRechazadoConSuMotivoYSinEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        prestamo.RechazarPorTopeDeUnidades();
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(MotivoTopeDeUnidades, prestamo.MotivoRechazo);
         Assert.IsNull(prestamo.Evaluador);
     }
 
