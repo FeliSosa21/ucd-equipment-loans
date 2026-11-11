@@ -321,6 +321,21 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_TipoSinAprobacion_NoNotifica()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoSinAprobacion);
+
+        PrestamoDto resultado = servicio.Solicitar(datos, DniDocente);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+        Assert.AreEqual(0, LeerNoLeidas(contextoQueLee, DniDocente).Count,
+            "Solo los prestamos que requerian aprobacion llevan notificacion");
+    }
+
+    [TestMethod]
     public void Solicitar_TipoInexistente_LanzaExcepcion()
     {
         ServicioPrestamo servicio = CrearServicio();
