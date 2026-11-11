@@ -751,6 +751,20 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_LaBaseRechazaElPrestamo_LanzaDbUpdateExceptionYNoQuedaNadaNiEnElLog()
+    {
+        CrearServicio();
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<Prestamo>(_opciones);
+        ServicioPrestamo servicioQueFalla = CrearServicioSobre(contextoQueFalla, new RelojFijo(FechaFija));
+
+        Assert.ThrowsException<DbUpdateException>(() => servicioQueFalla.Solicitar(CrearSolicitud(), DniDocente));
+
+        VerificarQueNoSeGuardoNiSePrestoNada(DniDocente);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(0, LeerLog(contextoQueLee).Count, "El log no deberia guardarse antes que el prestamo");
+    }
+
+    [TestMethod]
     public void Aprobar_SolicitudPendienteConUnidades_QuedaActivo()
     {
         ServicioPrestamo servicio = CrearServicio();
