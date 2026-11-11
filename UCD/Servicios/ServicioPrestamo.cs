@@ -289,19 +289,7 @@ public class ServicioPrestamo
         _prestamos.ActualizarPrestamo(prestamo);
         RegistrarMovimientosDeEvaluacion(prestamo, evaluador, fechaHoraEvaluacion);
         _servicioNotificacion.RegistrarResultadoDeEvaluacion(prestamo, fechaHoraEvaluacion);
-
-        if (prestamo.Estado == EstadoPrestamo.Activo)
-        {
-            RegistrarEnAuditoria(RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion),
-                AccionAuditada.AprobacionDePrestamo, prestamo);
-        }
-        else
-        {
-            RegistrarEnAuditoria(RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion),
-                AccionAuditada.IntentoDeAprobacion, prestamo);
-            RegistrarEnAuditoria(RegistroDeAccion.DelSistema(fechaHoraEvaluacion),
-                AccionAuditada.RechazoDePrestamo, prestamo);
-        }
+        RegistrarEvaluacionEnAuditoria(prestamo, evaluador, fechaHoraEvaluacion);
     }
 
     private void DecidirEvaluacion(Prestamo prestamo, Usuario solicitante, Usuario evaluador)
@@ -339,6 +327,24 @@ public class ServicioPrestamo
             }
 
             RegistrarMovimientosDePrestamo(prestamo, crearRegistroDelEvaluador);
+        }
+    }
+
+    // Si el sistema rechaza al aprobar, el evaluador figura en el intento y el rechazo es del sistema
+    // (foro 2.4, h. 4: el supervisor no rechazo, intento aprobar).
+    private void RegistrarEvaluacionEnAuditoria(Prestamo prestamo, Usuario evaluador, DateTime fechaHoraEvaluacion)
+    {
+        if (prestamo.Estado == EstadoPrestamo.Rechazado)
+        {
+            RegistrarEnAuditoria(RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion),
+                AccionAuditada.IntentoDeAprobacion, prestamo);
+            RegistrarEnAuditoria(RegistroDeAccion.DelSistema(fechaHoraEvaluacion),
+                AccionAuditada.RechazoDePrestamo, prestamo);
+        }
+        else
+        {
+            RegistrarEnAuditoria(RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion),
+                AccionAuditada.AprobacionDePrestamo, prestamo);
         }
     }
 
