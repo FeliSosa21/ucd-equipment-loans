@@ -87,7 +87,7 @@ public class Usuario
 
     public bool PuedeAgregarPrestamo(int prestamosVigentes)
     {
-        return false;
+        return Tipo.PuedeAgregarPrestamo(prestamosVigentes);
     }
 
     public void ModificarDatos(string nombre, string apellido, string correo)
