@@ -5,6 +5,8 @@ public class Prestamo
     private const string MotivoFaltaDeUnidades = "No hay unidades suficientes para el tipo de equipamiento";
     private const string MotivoTopeDeUnidades =
         "Supera el maximo de unidades por catalogo al momento de la aprobacion";
+    private const string MotivoTopeDePrestamosConcurrentes =
+        "Supera el maximo de prestamos concurrentes al momento de la aprobacion";
     public const int LargoMaximoMotivoRechazo = 300;
     private readonly List<UnidadFisica> _unidadesAsignadas = new List<UnidadFisica>();
 
@@ -86,6 +88,10 @@ public class Prestamo
 
     public void RechazarPorTopeDePrestamosConcurrentes()
     {
+        ValidarQueEsteSolicitado();
+
+        Estado = EstadoPrestamo.Rechazado;
+        MotivoRechazo = MotivoTopeDePrestamosConcurrentes;
     }
 
     public void ActivarORechazarPorFaltaDeUnidades()
