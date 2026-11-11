@@ -13,9 +13,12 @@ public class ServicioExportacion
     private const string MensajeRangoInvertido = "La fecha desde no puede ser posterior a la fecha hasta";
     private const string MensajeFormatoDesconocido = "El formato elegido no esta disponible";
     private const string FormatoDeFechaEnElNombre = "yyyy-MM-dd";
+    private const string FormatoDeFechaHora = "yyyy-MM-ddTHH:mm:ss";
+    private const string SeparadorDeLista = "; ";
 
     private readonly RepositorioPrestamoSql _prestamos;
     private readonly RepositorioDevolucionSql _devoluciones;
+    private readonly RepositorioCatalogoSql _catalogos;
     private readonly RepositorioUsuarioSql _usuarios;
     private readonly List<IExportadorDeTabla> _exportadores;
 
@@ -24,6 +27,7 @@ public class ServicioExportacion
     {
         _prestamos = prestamos;
         _devoluciones = devoluciones;
+        _catalogos = catalogos;
         _usuarios = usuarios;
         _exportadores = exportadores.ToList();
     }
@@ -35,11 +39,64 @@ public class ServicioExportacion
         ValidarRango(pedido.Rango);
         IExportadorDeTabla exportador = ObtenerExportador(pedido.Formato);
         string sufijoDelNombre = CrearSufijoDelNombre(pedido.Rango);
+        FiltroPorCatalogoYFechas filtro = CrearFiltro(pedido.Rango);
+        Dictionary<int, string> catalogoDelTipo = CrearCatalogoPorTipo();
 
         return new List<ArchivoExportadoDto>
         {
-            CrearArchivo("prestamos" + sufijoDelNombre, new TablaExportableDto(), exportador),
+            CrearArchivo("prestamos" + sufijoDelNombre, CrearTablaDePrestamos(filtro, catalogoDelTipo), exportador),
             CrearArchivo("devoluciones" + sufijoDelNombre, new TablaExportableDto(), exportador)
+        };
+    }
+
+    // Id del tipo -> nombre de su catalogo, de todos los catalogos (los eliminados tambien: sus prestamos se exportan).
+    private Dictionary<int, string> CrearCatalogoPorTipo()
+    {
+        Dictionary<int, string> catalogoPorTipo = new Dictionary<int, string>();
+        foreach (Catalogo catalogo in _catalogos.ObtenerCatalogosParaExportar())
+        {
+            foreach (TipoEquipamiento tipo in catalogo.Tipos)
+            {
+                catalogoPorTipo[tipo.Id] = catalogo.Nombre;
+            }
+        }
+
+        return catalogoPorTipo;
+    }
+
+    private TablaExportableDto CrearTablaDePrestamos(FiltroPorCatalogoYFechas filtro,
+        Dictionary<int, string> catalogoDelTipo)
+    {
+        TablaExportableDto tabla = new TablaExportableDto
+        {
+            Encabezados = new List<string>
+            {
+                "Catalogo", "Fecha de solicitud", "Solicitante", "Tipo de equipamiento", "Cantidad",
+                "Unidades asignadas", "Estado", "Evaluador", "Fecha esperada de devolucion"
+            }
+        };
+
+        foreach (Prestamo prestamo in _prestamos.ObtenerPrestamos(filtro))
+        {
+            tabla.Filas.Add(CrearFilaDePrestamo(prestamo, catalogoDelTipo[prestamo.TipoEquipamiento.Id]));
+        }
+
+        return tabla;
+    }
+
+    private static List<string> CrearFilaDePrestamo(Prestamo prestamo, string catalogo)
+    {
+        return new List<string>
+        {
+            catalogo,
+            prestamo.FechaHoraPrestamo.ToString(FormatoDeFechaHora, CultureInfo.InvariantCulture),
+            prestamo.Solicitante.NombreCompletoConDni,
+            prestamo.TipoEquipamiento.Nombre,
+            prestamo.CantidadSolicitada.ToString(CultureInfo.InvariantCulture),
+            string.Join(SeparadorDeLista, prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional)),
+            prestamo.Estado.ToString(),
+            prestamo.Evaluador?.NombreCompletoConDni ?? string.Empty,
+            prestamo.FechaEsperadaDevolucion.ToString(FormatoDeFechaEnElNombre, CultureInfo.InvariantCulture)
         };
     }
 
