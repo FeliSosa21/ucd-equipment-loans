@@ -89,7 +89,7 @@ public partial class Exportacion
                 await Entregar(archivo);
             }
 
-            _exito = $"Se descargaron {archivos.Count} archivos: {string.Join(" y ", archivos.Select(a => a.Nombre))}.";
+            _exito = $"Se descargaron {archivos.Count} archivos: {string.Join(" y ", archivos.Select(archivo => archivo.Nombre))}.";
         }
         catch (ServicioException ex)
         {

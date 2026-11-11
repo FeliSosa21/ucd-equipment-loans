@@ -65,27 +65,14 @@ public sealed class ServicioExportacionTests
     }
 
     [TestMethod]
-    public void ContarRegistros_Docente_LanzaServicioException()
+    [DataRow(DniDocente)]
+    [DataRow(DniEstudiante)]
+    [DataRow(DniFuncionario)]
+    public void ContarRegistros_TipoSinPermisoDeConsultarPrestamos_LanzaServicioException(string dniSinPermiso)
     {
         ServicioExportacion servicio = CrearServicio();
 
-        Assert.ThrowsException<ServicioException>(() => servicio.ContarRegistros(CrearRango(1, 5), DniDocente));
-    }
-
-    [TestMethod]
-    public void ContarRegistros_Estudiante_LanzaServicioException()
-    {
-        ServicioExportacion servicio = CrearServicio();
-
-        Assert.ThrowsException<ServicioException>(() => servicio.ContarRegistros(CrearRango(1, 5), DniEstudiante));
-    }
-
-    [TestMethod]
-    public void ContarRegistros_Funcionario_LanzaServicioException()
-    {
-        ServicioExportacion servicio = CrearServicio();
-
-        Assert.ThrowsException<ServicioException>(() => servicio.ContarRegistros(CrearRango(1, 5), DniFuncionario));
+        Assert.ThrowsException<ServicioException>(() => servicio.ContarRegistros(CrearRango(1, 5), dniSinPermiso));
     }
 
     [TestMethod]
@@ -243,23 +230,14 @@ public sealed class ServicioExportacionTests
     }
 
     [TestMethod]
-    public void Exportar_FormatoDesconocido_LanzaServicioExceptionEnElCampoFormato()
+    [DataRow("PDF")]
+    [DataRow("")]
+    public void Exportar_FormatoDesconocidoOVacio_LanzaServicioExceptionEnElCampoFormato(string formato)
     {
         ServicioExportacion servicio = CrearServicio(new ExportadorDePrueba());
 
         ServicioException ex = Assert.ThrowsException<ServicioException>(
-            () => servicio.Exportar(CrearPedido("PDF"), DniAdministrador));
-
-        Assert.AreEqual(nameof(PedidoExportacionDto.Formato), ex.Campo);
-    }
-
-    [TestMethod]
-    public void Exportar_SinFormato_LanzaServicioExceptionEnElCampoFormato()
-    {
-        ServicioExportacion servicio = CrearServicio(new ExportadorDePrueba());
-
-        ServicioException ex = Assert.ThrowsException<ServicioException>(
-            () => servicio.Exportar(CrearPedido(string.Empty), DniAdministrador));
+            () => servicio.Exportar(CrearPedido(formato), DniAdministrador));
 
         Assert.AreEqual(nameof(PedidoExportacionDto.Formato), ex.Campo);
     }
