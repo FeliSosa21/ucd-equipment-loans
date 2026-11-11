@@ -981,6 +981,18 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_TopeDeUnidadesQueSigueCumpliendose_QuedaActivo()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        BajarTopesDelDocente(maxUnidadesPorCatalogo: CantidadSolicitadaPorDefecto, maxPrestamosConcurrentes: 3);
+
+        PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+    }
+
+    [TestMethod]
     public void Aprobar_LaBaseRechazaLaNotificacion_LanzaInvalidOperationExceptionYQuedanElPrestamoActivoYSusMovimientos()
     {
         ServicioPrestamo servicio = CrearServicio();
