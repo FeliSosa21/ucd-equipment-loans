@@ -357,6 +357,8 @@ public class ServicioPrestamo
         _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo,
             RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion)));
         _servicioNotificacion.RegistrarResultadoDeEvaluacion(prestamo, fechaHoraEvaluacion);
+        RegistrarEnAuditoria(RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion),
+            AccionAuditada.RechazoDePrestamo, prestamo);
     }
 
     // Un registro nuevo por movimiento: con EF, RegistroDeAccion es owned de Movimiento y una misma
