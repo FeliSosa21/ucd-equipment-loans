@@ -252,6 +252,13 @@ public class ServicioPrestamo
     {
         DateTime fechaHoraEvaluacion = _reloj.GetLocalNow().DateTime;
 
+        DecidirEvaluacion(prestamo, evaluador);
+        _prestamos.ActualizarPrestamo(prestamo);
+        RegistrarMovimientosDeEvaluacion(prestamo, evaluador, fechaHoraEvaluacion);
+    }
+
+    private static void DecidirEvaluacion(Prestamo prestamo, Usuario evaluador)
+    {
         if (prestamo.TipoEquipamiento.CantidadDisponibles() < prestamo.CantidadSolicitada)
         {
             prestamo.RechazarPorFaltaDeUnidades();
@@ -262,9 +269,10 @@ public class ServicioPrestamo
                 .Take(prestamo.CantidadSolicitada).ToList();
             prestamo.Aprobar(evaluador, unidades);
         }
+    }
 
-        _prestamos.ActualizarPrestamo(prestamo);
-
+    private void RegistrarMovimientosDeEvaluacion(Prestamo prestamo, Usuario evaluador, DateTime fechaHoraEvaluacion)
+    {
         if (prestamo.Estado == EstadoPrestamo.Rechazado)
         {
             _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo,
