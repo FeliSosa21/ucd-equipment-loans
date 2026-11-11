@@ -23,10 +23,11 @@ public class ServicioPrestamo
     private readonly RepositorioMovimientoSql _movimientos;
     private readonly ServicioNotificacion _servicioNotificacion;
     private readonly TimeProvider _reloj;
+    private readonly RegistradorDeAuditoria _auditoria;
 
     public ServicioPrestamo(RepositorioPrestamoSql prestamos, RepositorioUsuarioSql usuarios,
         RepositorioCatalogoSql catalogo, RepositorioMovimientoSql movimientos,
-        ServicioNotificacion servicioNotificacion, TimeProvider reloj)
+        ServicioNotificacion servicioNotificacion, TimeProvider reloj, RegistradorDeAuditoria auditoria)
     {
         _prestamos = prestamos;
         _usuarios = usuarios;
@@ -34,6 +35,7 @@ public class ServicioPrestamo
         _movimientos = movimientos;
         _servicioNotificacion = servicioNotificacion;
         _reloj = reloj;
+        _auditoria = auditoria;
     }
 
     public PrestamoDto Solicitar(SolicitudPrestamoDto datos, string dniSolicitante)

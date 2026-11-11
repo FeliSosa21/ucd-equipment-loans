@@ -660,6 +660,26 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_TipoConAprobacion_RegistraSoloLaSolicitudDelSolicitanteEnElLog()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion);
+
+        servicio.Solicitar(datos, DniDocente);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada> { AccionAuditada.SolicitudDePrestamo },
+            entradas.Select(entrada => entrada.Accion).ToList(),
+            "Deberia registrarse solo la solicitud");
+        Assert.AreEqual(DniDocente, entradas[0].Responsable?.Dni, "La solicitud la registra el solicitante");
+        Assert.AreEqual(FechaFija, entradas[0].FechaHora);
+        Assert.AreEqual("Solicitud de préstamo de Renato Alves (DNI 12345672). Unidades: 2", entradas[0].Detalle);
+    }
+
+    [TestMethod]
     public void Aprobar_SolicitudPendienteConUnidades_QuedaActivo()
     {
         ServicioPrestamo servicio = CrearServicio();
@@ -1592,7 +1612,8 @@ public sealed class ServicioPrestamoTests
             catalogo: new RepositorioCatalogoSql(contexto),
             movimientos: new RepositorioMovimientoSql(contexto),
             servicioNotificacion: servicioNotificacion,
-            reloj: reloj);
+            reloj: reloj,
+            auditoria: new RegistradorDeAuditoria(new RepositorioAuditoriaSql(contexto), reloj));
     }
 
     private SolicitudPrestamoDto CrearSolicitud(
@@ -1686,6 +1707,17 @@ public sealed class ServicioPrestamoTests
             .Include(movimiento => movimiento.Unidad)
             .Include("_registro.Responsable")
             .OrderBy(movimiento => movimiento.Id)
+            .ToList();
+    }
+
+    // ObtenerRegistros los devuelve del mas nuevo al mas viejo: se ordenan por Id para leerlos en el orden
+    // en que se registraron, porque las entradas de una misma operacion comparten la fecha.
+    private static IReadOnlyList<RegistroAuditoria> LeerLog(SqlContext contextoQueLee)
+    {
+        FiltroAuditoria todos = new FiltroAuditoria { Desde = DateTime.MinValue };
+
+        return new RepositorioAuditoriaSql(contextoQueLee).ObtenerRegistros(todos)
+            .OrderBy(registro => registro.Id)
             .ToList();
     }
 
