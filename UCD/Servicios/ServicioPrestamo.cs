@@ -255,16 +255,7 @@ public class ServicioPrestamo
 
     private static void DecidirEvaluacion(Prestamo prestamo, Usuario evaluador)
     {
-        if (prestamo.TipoEquipamiento.CantidadDisponibles() < prestamo.CantidadSolicitada)
-        {
-            prestamo.RechazarPorFaltaDeUnidades();
-        }
-        else
-        {
-            List<UnidadFisica> unidades = prestamo.TipoEquipamiento.UnidadesDisponibles()
-                .Take(prestamo.CantidadSolicitada).ToList();
-            prestamo.Aprobar(evaluador, unidades);
-        }
+        prestamo.AprobarORechazarPorFaltaDeUnidades(evaluador);
     }
 
     private void RegistrarMovimientosDeEvaluacion(Prestamo prestamo, Usuario evaluador, DateTime fechaHoraEvaluacion)
