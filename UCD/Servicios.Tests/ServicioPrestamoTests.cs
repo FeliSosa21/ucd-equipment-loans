@@ -1257,6 +1257,31 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_TopeDeUnidadesBajado_RegistraEnElLogElIntentoDelEvaluadorYElRechazoDelSistema()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        BajarTopesDelDocente(maxUnidadesPorCatalogo: 1, maxPrestamosConcurrentes: 3);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada>
+            {
+                AccionAuditada.SolicitudDePrestamo, AccionAuditada.IntentoDeAprobacion, AccionAuditada.RechazoDePrestamo
+            },
+            entradas.Select(entrada => entrada.Accion).ToList(),
+            "Deberia registrarse el intento del evaluador y despues el rechazo del sistema por el tope");
+        Assert.AreEqual(DniSupervisor, entradas[1].Responsable?.Dni, "El intento lo registra el evaluador");
+        Assert.IsTrue(entradas[2].EsDelSistema(), "El rechazo por el tope lo registra el sistema");
+        Assert.AreEqual(FechaDeEvaluacion, entradas[2].FechaHora);
+    }
+
+    [TestMethod]
     public void Aprobar_LaBaseRechazaLaNotificacion_LanzaInvalidOperationExceptionYQuedanElPrestamoActivoYSusMovimientos()
     {
         ServicioPrestamo servicio = CrearServicio();
