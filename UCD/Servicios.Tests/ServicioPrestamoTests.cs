@@ -722,6 +722,18 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_SuperaElMaximoDeUnidades_NoRegistraNadaEnElLog()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 3);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(datos, DniEstudiante));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(0, LeerLog(contextoQueLee).Count, "Si falla una validacion no se registra nada");
+    }
+
+    [TestMethod]
     public void Aprobar_SolicitudPendienteConUnidades_QuedaActivo()
     {
         ServicioPrestamo servicio = CrearServicio();
