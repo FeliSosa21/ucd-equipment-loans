@@ -42,7 +42,7 @@ public class ServicioPrestamo
 
         Usuario solicitante = ObtenerSolicitante(dniSolicitante);
         TipoEquipamiento tipo = ObtenerTipoEquipamiento(datos.IdCatalogo, datos.TipoEquipamiento);
-        ValidarLimites(solicitante, datos.CantidadSolicitada);
+        ValidarLimites(solicitante, tipo, datos.CantidadSolicitada);
 
         Prestamo prestamo = TraduccionDeErrores.Ejecutar(
             () => RegistrarSolicitud(solicitante, tipo, datos.CantidadSolicitada));
@@ -192,19 +192,17 @@ public class ServicioPrestamo
         return tipo;
     }
 
-    private void ValidarLimites(Usuario solicitante, int cantidadSolicitada)
+    private void ValidarLimites(Usuario solicitante, TipoEquipamiento tipo, int cantidadSolicitada)
     {
-        IReadOnlyList<Prestamo> prestamosDelSolicitante = _prestamos.ObtenerPrestamosDeSolicitante(solicitante.Dni);
+        int unidadesActivasEnElCatalogo =
+            _prestamos.ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(solicitante.Dni, tipo.Id);
 
-        int unidadesActivas = prestamosDelSolicitante
-            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Activo)
-            .Sum(prestamo => prestamo.UnidadesAsignadas.Count);
-
-        if (!solicitante.Tipo.PermiteUnidades(unidadesActivas + cantidadSolicitada))
+        if (!solicitante.Tipo.PermiteUnidades(unidadesActivasEnElCatalogo + cantidadSolicitada))
         {
             throw new ServicioException("La cantidad solicitada supera el maximo de unidades del solicitante");
         }
 
+        IReadOnlyList<Prestamo> prestamosDelSolicitante = _prestamos.ObtenerPrestamosDeSolicitante(solicitante.Dni);
         int prestamosVigentes = prestamosDelSolicitante.Count(prestamo => prestamo.EstaVigente());
 
         if (!solicitante.Tipo.PuedeAgregarPrestamo(prestamosVigentes))
