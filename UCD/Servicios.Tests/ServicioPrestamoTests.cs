@@ -37,6 +37,8 @@ public sealed class ServicioPrestamoTests
     private const int CantidadSolicitadaPorDefecto = 2;
 
     private const string MotivoDeRechazo = "El equipo esta reservado para un examen";
+    private const string MotivoTopeDeUnidades =
+        "Supera el maximo de unidades por catalogo al momento de la aprobacion";
 
     private DbContextOptions<SqlContext> _opciones = null!;
     private SqlContext _contexto = null!;
@@ -959,6 +961,26 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_TopeDeUnidadesBajadoDespuesDeSolicitar_QuedaRechazadoPorElTopeSinEvaluador()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        BajarTopesDelDocente(maxUnidadesPorCatalogo: 1, maxPrestamosConcurrentes: 3);
+
+        PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        Assert.AreEqual("Rechazado", resultado.Estado);
+        Assert.AreEqual(MotivoTopeDeUnidades, resultado.MotivoRechazo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
+        Assert.AreEqual(EstadoPrestamo.Rechazado, guardado.Estado);
+        Assert.AreEqual(MotivoTopeDeUnidades, guardado.MotivoRechazo);
+        Assert.IsNull(guardado.Evaluador);
+        Assert.AreEqual(0, guardado.UnidadesAsignadas.Count);
+    }
+
+    [TestMethod]
     public void Aprobar_LaBaseRechazaLaNotificacion_LanzaInvalidOperationExceptionYQuedanElPrestamoActivoYSusMovimientos()
     {
         ServicioPrestamo servicio = CrearServicio();
@@ -1670,6 +1692,16 @@ public sealed class ServicioPrestamoTests
 
         tipo.Modificar(tipo.Nombre, tipo.Descripcion, diasHabiles, tipo.RequiereAprobacion, tipo.Categoria);
         catalogos.ActualizarCatalogo(catalogo);
+    }
+
+    // Con el contexto del servicio: con otro, el servicio seguiria viendo los topes del tipo que ya tiene cargado.
+    private void BajarTopesDelDocente(int maxUnidadesPorCatalogo, int maxPrestamosConcurrentes)
+    {
+        RepositorioTipoUsuarioSql tipos = new RepositorioTipoUsuarioSql(_contexto);
+        TipoUsuario docente = tipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!;
+
+        docente.ModificarTopes(maxUnidadesPorCatalogo, maxPrestamosConcurrentes);
+        tipos.ActualizarTipo(docente);
     }
 
     private static TipoEquipamiento CrearTipoEquipamiento(string nombre, bool requiereAprobacion, int cantidadUnidades,
