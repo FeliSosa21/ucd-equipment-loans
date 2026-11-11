@@ -179,6 +179,11 @@ public class ServicioExportacion
         };
     }
 
+    public List<string> FormatosDisponibles()
+    {
+        throw new NotImplementedException();
+    }
+
     public CantidadesAExportarDto ContarRegistros(RangoDeExportacionDto rango, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);

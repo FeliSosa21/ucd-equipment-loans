@@ -538,6 +538,16 @@ public sealed class ServicioExportacionTests
         Assert.AreEqual("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", xlsx[0].TipoContenido);
     }
 
+    [TestMethod]
+    public void FormatosDisponibles_ConCsvYXlsx_DevuelveLosFormatosDeLosExportadores()
+    {
+        ServicioExportacion servicio = CrearServicio(new ExportadorCsv(), new ExportadorXlsx());
+
+        List<string> formatos = servicio.FormatosDisponibles();
+
+        CollectionAssert.AreEqual(new List<string> { "CSV", "XLSX" }, formatos);
+    }
+
     private ServicioExportacion CrearServicio(params IExportadorDeTabla[] exportadores)
     {
         return new ServicioExportacion(_datos.Prestamos, _datos.Devoluciones, _datos.Catalogos, _datos.Usuarios,
