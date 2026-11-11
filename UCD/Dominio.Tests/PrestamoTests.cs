@@ -9,6 +9,8 @@ public sealed class PrestamoTests
     private const string MotivoFaltaDeUnidades = "No hay unidades suficientes para el tipo de equipamiento";
     private const string MotivoTopeDeUnidades =
         "Supera el maximo de unidades por catalogo al momento de la aprobacion";
+    private const string MotivoTopeDePrestamosConcurrentes =
+        "Supera el maximo de prestamos concurrentes al momento de la aprobacion";
 
     [TestMethod]
     public void Constructor_DatosValidos_NaceSolicitado()
@@ -830,6 +832,18 @@ public sealed class PrestamoTests
         Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
         CollectionAssert.AreEqual(unidades, prestamo.UnidadesAsignadas.ToList());
         Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
+    public void RechazarPorTopeDePrestamosConcurrentes_PrestamoSolicitado_QuedaRechazadoConSuMotivoYSinEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        prestamo.RechazarPorTopeDePrestamosConcurrentes();
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(MotivoTopeDePrestamosConcurrentes, prestamo.MotivoRechazo);
+        Assert.IsNull(prestamo.Evaluador);
     }
 
     private static Usuario CrearSolicitante()

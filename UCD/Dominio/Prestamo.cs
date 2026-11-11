@@ -84,6 +84,10 @@ public class Prestamo
         MotivoRechazo = MotivoTopeDeUnidades;
     }
 
+    public void RechazarPorTopeDePrestamosConcurrentes()
+    {
+    }
+
     public void ActivarORechazarPorFaltaDeUnidades()
     {
         ValidarQueEsteSolicitado();
