@@ -258,6 +258,7 @@ public class ServicioPrestamo
         DecidirEvaluacion(prestamo, evaluador);
         _prestamos.ActualizarPrestamo(prestamo);
         RegistrarMovimientosDeEvaluacion(prestamo, evaluador, fechaHoraEvaluacion);
+        _notificaciones.RegistrarResultadoDeEvaluacion(prestamo, fechaHoraEvaluacion);
     }
 
     private static void DecidirEvaluacion(Prestamo prestamo, Usuario evaluador)
