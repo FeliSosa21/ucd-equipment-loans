@@ -23,6 +23,7 @@ builder.Services.AddScoped<RepositorioDevolucionSql>();
 builder.Services.AddScoped<RepositorioMovimientoSql>();
 builder.Services.AddScoped<RepositorioCatalogoSql>();
 builder.Services.AddScoped<RepositorioAuditoriaSql>();
+builder.Services.AddScoped<RepositorioNotificacionSql>();
 builder.Services.AddScoped<RegistradorDeAuditoria>();
 builder.Services.AddScoped<ServicioUsuario>();
 builder.Services.AddScoped<ServicioSesion>();
@@ -38,6 +39,7 @@ builder.Services.AddScoped<ServicioInventario>();
 builder.Services.AddScoped<ServicioTiposEquipamiento>();
 builder.Services.AddScoped<ServicioUnidades>();
 builder.Services.AddScoped<ServicioAuditoria>();
+builder.Services.AddScoped<ServicioNotificacion>();
 
 // Reloj del sistema: los servicios piden la hora a TimeProvider (en los tests se usa uno fijo).
 builder.Services.AddSingleton(TimeProvider.System);
