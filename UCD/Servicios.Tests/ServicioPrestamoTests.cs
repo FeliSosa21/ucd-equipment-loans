@@ -39,6 +39,8 @@ public sealed class ServicioPrestamoTests
     private const string MotivoDeRechazo = "El equipo esta reservado para un examen";
     private const string MotivoTopeDeUnidades =
         "Supera el maximo de unidades por catalogo al momento de la aprobacion";
+    private const string MotivoTopeDePrestamosConcurrentes =
+        "Supera el maximo de prestamos concurrentes al momento de la aprobacion";
 
     private DbContextOptions<SqlContext> _opciones = null!;
     private SqlContext _contexto = null!;
@@ -1042,6 +1044,26 @@ public sealed class ServicioPrestamoTests
 
         Assert.AreEqual("Rechazado", resultado.Estado);
         Assert.AreEqual(MotivoTopeDeUnidades, resultado.MotivoRechazo);
+    }
+
+    [TestMethod]
+    public void Aprobar_TopeDeConcurrentesBajadoDespuesDeSolicitar_QuedaRechazadoPorElTope()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        CrearSolicitudPendiente(servicio);
+        BajarTopesDelDocente(maxUnidadesPorCatalogo: 40, maxPrestamosConcurrentes: 1);
+
+        PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        Assert.AreEqual("Rechazado", resultado.Estado);
+        Assert.AreEqual(MotivoTopeDePrestamosConcurrentes, resultado.MotivoRechazo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
+        Assert.AreEqual(EstadoPrestamo.Rechazado, guardado.Estado);
+        Assert.IsNull(guardado.Evaluador);
+        Assert.AreEqual(0, guardado.UnidadesAsignadas.Count);
     }
 
     [TestMethod]
