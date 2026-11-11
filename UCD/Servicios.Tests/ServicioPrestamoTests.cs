@@ -1343,7 +1343,7 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void Rechazar_SolicitudPendiente_ElMovimientoYLaNotificacionLlevanLaMismaFecha()
+    public void Rechazar_SolicitudPendiente_ElMovimientoLaNotificacionYElLogLlevanLaMismaFecha()
     {
         ServicioPrestamo servicio = CrearServicio();
         Guid idPrestamo = CrearSolicitudPendiente(servicio);
@@ -1355,9 +1355,13 @@ public sealed class ServicioPrestamoTests
         Movimiento rechazo = LeerMovimientos(contextoQueLee)
             .Single(movimiento => movimiento.Tipo == TipoMovimiento.Rechazo);
         Notificacion notificacion = LeerNoLeidas(contextoQueLee, DniDocente).Single();
+        RegistroAuditoria entradaDelRechazo = LeerLog(contextoQueLee)
+            .Single(entrada => entrada.Accion == AccionAuditada.RechazoDePrestamo);
 
         Assert.AreEqual(rechazo.FechaHora, notificacion.FechaHora,
             "La fecha del rechazo deberia tomarse una sola vez");
+        Assert.AreEqual(rechazo.FechaHora, entradaDelRechazo.FechaHora,
+            "El log deberia usar la misma fecha del rechazo");
     }
 
     [TestMethod]
