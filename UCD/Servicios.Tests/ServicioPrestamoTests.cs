@@ -1430,6 +1430,27 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Rechazar_SolicitudPendiente_RegistraEnElLogElRechazoDelEvaluador()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada> { AccionAuditada.SolicitudDePrestamo, AccionAuditada.RechazoDePrestamo },
+            entradas.Select(entrada => entrada.Accion).ToList(),
+            "Deberia registrarse el rechazo despues de la solicitud");
+        Assert.AreEqual(DniSupervisor, entradas[1].Responsable?.Dni, "El rechazo lo registra el evaluador");
+        Assert.AreEqual(FechaDeEvaluacion, entradas[1].FechaHora);
+        Assert.AreEqual("Rechazo del préstamo de Renato Alves (DNI 12345672). Unidades: 2", entradas[1].Detalle);
+    }
+
+    [TestMethod]
     public void Rechazar_MotivoVacio_LanzaExcepcionConCausaDeDominio()
     {
         ServicioPrestamo servicio = CrearServicio();
