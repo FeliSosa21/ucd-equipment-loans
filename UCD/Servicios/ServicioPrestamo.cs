@@ -303,6 +303,7 @@ public class ServicioPrestamo
         _prestamos.ActualizarPrestamo(prestamo);
         _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo,
             RegistroDeAccion.DeUsuario(evaluador, _reloj.GetLocalNow().DateTime)));
+        _notificaciones.RegistrarResultadoDeEvaluacion(prestamo, _reloj.GetLocalNow().DateTime);
     }
 
     // Un registro nuevo por movimiento: con EF, RegistroDeAccion es owned de Movimiento y una misma
