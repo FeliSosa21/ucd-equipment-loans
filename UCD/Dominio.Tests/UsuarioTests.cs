@@ -814,6 +814,15 @@ public sealed class UsuarioTests
         Assert.IsFalse(usuario.EstaHabilitadoPara(Permiso.EvaluarSolicitud));
     }
 
+    [TestMethod]
+    public void PermiteUnidades_EstudianteHastaSuMaximo_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante());
+
+        Assert.IsTrue(usuario.PermiteUnidades(2));
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
