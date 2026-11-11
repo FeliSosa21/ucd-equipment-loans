@@ -23,6 +23,7 @@ public class ServicioPrestamo
             { AccionAuditada.SolicitudDePrestamo, "Solicitud de préstamo de" },
             { AccionAuditada.ActivacionDePrestamo, "Activación del préstamo de" },
             { AccionAuditada.RechazoDePrestamo, "Rechazo del préstamo de" },
+            { AccionAuditada.IntentoDeAprobacion, "Intento de aprobación del préstamo de" },
             { AccionAuditada.AprobacionDePrestamo, "Aprobación del préstamo de" }
         };
 
@@ -293,6 +294,13 @@ public class ServicioPrestamo
         {
             RegistrarEnAuditoria(RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion),
                 AccionAuditada.AprobacionDePrestamo, prestamo);
+        }
+        else
+        {
+            RegistrarEnAuditoria(RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion),
+                AccionAuditada.IntentoDeAprobacion, prestamo);
+            RegistrarEnAuditoria(RegistroDeAccion.DelSistema(fechaHoraEvaluacion),
+                AccionAuditada.RechazoDePrestamo, prestamo);
         }
     }
 
