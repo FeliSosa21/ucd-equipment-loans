@@ -99,6 +99,34 @@ namespace Data.Migrations
                     b.ToTable("Movimientos", (string)null);
                 });
 
+            modelBuilder.Entity("Dominio.Notificacion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("EstaLeida")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("FechaHora")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("PrestamoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PrestamoId");
+
+                    b.ToTable("Notificaciones", (string)null);
+                });
+
             modelBuilder.Entity("Dominio.Prestamo", b =>
                 {
                     b.Property<Guid>("Id")
@@ -488,6 +516,17 @@ namespace Data.Migrations
 
                     b.Navigation("_registro")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Dominio.Notificacion", b =>
+                {
+                    b.HasOne("Dominio.Prestamo", "Prestamo")
+                        .WithMany()
+                        .HasForeignKey("PrestamoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Prestamo");
                 });
 
             modelBuilder.Entity("Dominio.Prestamo", b =>
