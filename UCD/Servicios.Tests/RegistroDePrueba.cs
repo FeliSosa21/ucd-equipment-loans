@@ -9,6 +9,7 @@ internal sealed class RegistroDePrueba
     public string NombreTipo { get; init; } = string.Empty;
     public string DniSolicitante { get; init; } = string.Empty;
     public DateTime FechaPrestamo { get; init; }
+    public string DniEvaluador { get; init; } = string.Empty;
     public string DniQuienRegistra { get; init; } = string.Empty;
     public DateTime FechaDevolucion { get; init; }
     public CondicionDevolucion Condicion { get; init; } = CondicionDevolucion.SinObservaciones;

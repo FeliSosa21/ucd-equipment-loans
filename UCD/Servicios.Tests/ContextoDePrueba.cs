@@ -136,7 +136,17 @@ internal sealed class ContextoDePrueba : IDisposable
             .ObtenerTipoPorNombre(registro.IdCatalogo, registro.NombreTipo)!;
         Usuario solicitante = new RepositorioUsuarioSql(preparacion).ObtenerUsuarioPorDni(registro.DniSolicitante)!;
         Prestamo prestamo = new Prestamo(solicitante, tipo, 1, registro.FechaPrestamo);
-        prestamo.Activar(tipo.Unidades.Where(unidad => unidad.EstaDisponible()).Take(1).ToList());
+        List<UnidadFisica> unidades = tipo.Unidades.Where(unidad => unidad.EstaDisponible()).Take(1).ToList();
+        if (registro.DniEvaluador.Length == 0)
+        {
+            prestamo.Activar(unidades);
+        }
+        else
+        {
+            prestamo.Aprobar(new RepositorioUsuarioSql(preparacion).ObtenerUsuarioPorDni(registro.DniEvaluador)!,
+                unidades);
+        }
+
         new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
         return prestamo;
     }
