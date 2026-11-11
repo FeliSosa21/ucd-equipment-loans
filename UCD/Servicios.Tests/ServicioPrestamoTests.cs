@@ -850,12 +850,7 @@ public sealed class ServicioPrestamoTests
         servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
-        IReadOnlyList<Notificacion> notificaciones = LeerNoLeidas(contextoQueLee, DniDocente);
-
-        Assert.AreEqual(1, notificaciones.Count);
-        Assert.AreEqual(TipoNotificacion.SolicitudAprobada, notificaciones[0].Tipo);
-        Assert.AreEqual(idPrestamo, notificaciones[0].Prestamo.Id);
-        Assert.AreEqual(FechaDeEvaluacion, notificaciones[0].FechaHora);
+        VerificarUnaNotificacion(contextoQueLee, idPrestamo, TipoNotificacion.SolicitudAprobada);
     }
 
     [TestMethod]
@@ -868,12 +863,7 @@ public sealed class ServicioPrestamoTests
         servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
-        IReadOnlyList<Notificacion> notificaciones = LeerNoLeidas(contextoQueLee, DniDocente);
-
-        Assert.AreEqual(1, notificaciones.Count);
-        Assert.AreEqual(TipoNotificacion.SolicitudRechazada, notificaciones[0].Tipo);
-        Assert.AreEqual(idPrestamo, notificaciones[0].Prestamo.Id);
-        Assert.AreEqual(FechaDeEvaluacion, notificaciones[0].FechaHora);
+        VerificarUnaNotificacion(contextoQueLee, idPrestamo, TipoNotificacion.SolicitudRechazada);
     }
 
     [TestMethod]
@@ -911,12 +901,7 @@ public sealed class ServicioPrestamoTests
         servicioDeLaEvaluacion.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor);
 
         using SqlContext contextoQueLee = new SqlContext(_opciones);
-        IReadOnlyList<Notificacion> notificaciones = LeerNoLeidas(contextoQueLee, DniDocente);
-
-        Assert.AreEqual(1, notificaciones.Count);
-        Assert.AreEqual(TipoNotificacion.SolicitudRechazada, notificaciones[0].Tipo);
-        Assert.AreEqual(idPrestamo, notificaciones[0].Prestamo.Id);
-        Assert.AreEqual(FechaDeEvaluacion, notificaciones[0].FechaHora);
+        VerificarUnaNotificacion(contextoQueLee, idPrestamo, TipoNotificacion.SolicitudRechazada);
     }
 
     [TestMethod]
@@ -1461,6 +1446,17 @@ public sealed class ServicioPrestamoTests
     private static IReadOnlyList<Notificacion> LeerNoLeidas(SqlContext contextoQueLee, string dni)
     {
         return new RepositorioNotificacionSql(contextoQueLee).ObtenerNoLeidasDeUsuario(dni);
+    }
+
+    // Las solicitudes de estos tests son del docente y se evaluan en FechaDeEvaluacion.
+    private static void VerificarUnaNotificacion(SqlContext contextoQueLee, Guid idPrestamo, TipoNotificacion tipo)
+    {
+        IReadOnlyList<Notificacion> notificaciones = LeerNoLeidas(contextoQueLee, DniDocente);
+
+        Assert.AreEqual(1, notificaciones.Count);
+        Assert.AreEqual(tipo, notificaciones[0].Tipo);
+        Assert.AreEqual(idPrestamo, notificaciones[0].Prestamo.Id);
+        Assert.AreEqual(FechaDeEvaluacion, notificaciones[0].FechaHora);
     }
 
     // RepositorioMovimientoSql no tiene una consulta de todos los movimientos: se leen de la base,
