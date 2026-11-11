@@ -254,6 +254,12 @@ public class ServicioPrestamo
             AccionAuditada.SolicitudDePrestamo,
             $"Solicitud de préstamo de {solicitante.NombreCompletoConDni}. Unidades: {prestamo.CantidadSolicitada}");
 
+        if (prestamo.Estado == EstadoPrestamo.Activo)
+        {
+            _auditoria.Registrar(crearRegistroDelSistema(), AccionAuditada.ActivacionDePrestamo,
+                $"Activación del préstamo de {solicitante.NombreCompletoConDni}. Unidades: {prestamo.CantidadSolicitada}");
+        }
+
         return prestamo;
     }
 
