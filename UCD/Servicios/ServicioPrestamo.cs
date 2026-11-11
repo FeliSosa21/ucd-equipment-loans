@@ -56,9 +56,9 @@ public class ServicioPrestamo
                     dniEvaluador, Permiso.EvaluarSolicitud, MensajeSinPermisoParaEvaluar);
         Prestamo prestamo = ObtenerPrestamo(idPrestamo);
 
-        ObtenerSolicitante(prestamo.Solicitante.Dni);
+        Usuario solicitante = ObtenerSolicitante(prestamo.Solicitante.Dni);
 
-        TraduccionDeErrores.Ejecutar(() => ResolverAprobacion(prestamo, evaluador));
+        TraduccionDeErrores.Ejecutar(() => ResolverAprobacion(prestamo, solicitante, evaluador));
 
         return CrearPrestamoDto(prestamo);
     }
@@ -240,19 +240,29 @@ public class ServicioPrestamo
         return prestamo;
     }
 
-    private void ResolverAprobacion(Prestamo prestamo, Usuario evaluador)
+    private void ResolverAprobacion(Prestamo prestamo, Usuario solicitante, Usuario evaluador)
     {
         DateTime fechaHoraEvaluacion = _reloj.GetLocalNow().DateTime;
 
-        DecidirEvaluacion(prestamo, evaluador);
+        DecidirEvaluacion(prestamo, solicitante, evaluador);
         _prestamos.ActualizarPrestamo(prestamo);
         RegistrarMovimientosDeEvaluacion(prestamo, evaluador, fechaHoraEvaluacion);
         _servicioNotificacion.RegistrarResultadoDeEvaluacion(prestamo, fechaHoraEvaluacion);
     }
 
-    private static void DecidirEvaluacion(Prestamo prestamo, Usuario evaluador)
+    private void DecidirEvaluacion(Prestamo prestamo, Usuario solicitante, Usuario evaluador)
     {
-        prestamo.AprobarORechazarPorFaltaDeUnidades(evaluador);
+        int unidadesActivasEnElCatalogo = _prestamos.ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(
+            solicitante.Dni, prestamo.TipoEquipamiento.Id);
+
+        if (!solicitante.PermiteUnidades(unidadesActivasEnElCatalogo + prestamo.CantidadSolicitada))
+        {
+            prestamo.RechazarPorTopeDeUnidades();
+        }
+        else
+        {
+            prestamo.AprobarORechazarPorFaltaDeUnidades(evaluador);
+        }
     }
 
     private void RegistrarMovimientosDeEvaluacion(Prestamo prestamo, Usuario evaluador, DateTime fechaHoraEvaluacion)
