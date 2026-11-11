@@ -40,6 +40,9 @@ builder.Services.AddScoped<ServicioTiposEquipamiento>();
 builder.Services.AddScoped<ServicioUnidades>();
 builder.Services.AddScoped<ServicioAuditoria>();
 builder.Services.AddScoped<ServicioNotificacion>();
+builder.Services.AddScoped<IExportadorDeTabla, ExportadorCsv>();
+builder.Services.AddScoped<IExportadorDeTabla, ExportadorXlsx>();
+builder.Services.AddScoped<ServicioExportacion>();
 
 // Reloj del sistema: los servicios piden la hora a TimeProvider (en los tests se usa uno fijo).
 builder.Services.AddSingleton(TimeProvider.System);

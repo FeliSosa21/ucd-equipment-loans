@@ -19,6 +19,7 @@ internal sealed class ContextoDePrueba : IDisposable
     public RepositorioUsuarioSql Usuarios { get; }
     public RepositorioCatalogoSql Catalogos { get; }
     public RepositorioPrestamoSql Prestamos { get; }
+    public RepositorioDevolucionSql Devoluciones { get; }
 
     public ContextoDePrueba()
     {
@@ -30,6 +31,7 @@ internal sealed class ContextoDePrueba : IDisposable
         Usuarios = new RepositorioUsuarioSql(Contexto);
         Catalogos = new RepositorioCatalogoSql(Contexto);
         Prestamos = new RepositorioPrestamoSql(Contexto);
+        Devoluciones = new RepositorioDevolucionSql(Contexto);
     }
 
     public SqlContext NuevoContexto()
@@ -86,6 +88,25 @@ internal sealed class ContextoDePrueba : IDisposable
         new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
     }
 
+    // Activa el prestamo con la primera unidad disponible del tipo, asi se pueden guardar varios del mismo tipo.
+    public void GuardarPrestamoActivoEn(RegistroDePrueba registro)
+    {
+        using SqlContext preparacion = NuevoContexto();
+        PrestamoActivoDePrueba(preparacion, registro);
+    }
+
+    public void GuardarDevolucion(RegistroDePrueba registro)
+    {
+        using SqlContext preparacion = NuevoContexto();
+        Prestamo prestamo = PrestamoActivoDePrueba(preparacion, registro);
+        Usuario quienRegistra = new RepositorioUsuarioSql(preparacion).ObtenerUsuarioPorDni(registro.DniQuienRegistra)!;
+        UnidadDevuelta unidad = new UnidadDevuelta(prestamo.UnidadesAsignadas[0], registro.Condicion, null);
+        Devolucion devolucion = new Devolucion(prestamo,
+            RegistroDeAccion.DeUsuario(quienRegistra, registro.FechaDevolucion), new List<UnidadDevuelta> { unidad });
+        devolucion.Aplicar();
+        new RepositorioDevolucionSql(preparacion).AgregarDevolucion(devolucion);
+    }
+
     public void GuardarUsuario(string dni, TipoUsuario tipoPredefinido)
     {
         using SqlContext preparacion = NuevoContexto();
@@ -107,6 +128,27 @@ internal sealed class ContextoDePrueba : IDisposable
         {
             contexto.Dispose();
         }
+    }
+
+    private static Prestamo PrestamoActivoDePrueba(SqlContext preparacion, RegistroDePrueba registro)
+    {
+        TipoEquipamiento tipo = new RepositorioCatalogoSql(preparacion)
+            .ObtenerTipoPorNombre(registro.IdCatalogo, registro.NombreTipo)!;
+        Usuario solicitante = new RepositorioUsuarioSql(preparacion).ObtenerUsuarioPorDni(registro.DniSolicitante)!;
+        Prestamo prestamo = new Prestamo(solicitante, tipo, 1, registro.FechaPrestamo);
+        List<UnidadFisica> unidades = tipo.Unidades.Where(unidad => unidad.EstaDisponible()).Take(1).ToList();
+        if (registro.DniEvaluador.Length == 0)
+        {
+            prestamo.Activar(unidades);
+        }
+        else
+        {
+            prestamo.Aprobar(new RepositorioUsuarioSql(preparacion).ObtenerUsuarioPorDni(registro.DniEvaluador)!,
+                unidades);
+        }
+
+        new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
+        return prestamo;
     }
 
     private static Prestamo CrearPrestamo(SqlContext preparacion, int idCatalogo, string nombreTipo,
