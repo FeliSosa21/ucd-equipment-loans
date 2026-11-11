@@ -16,6 +16,14 @@ public class ServicioExportacion
     private const string FormatoDeFechaHora = "yyyy-MM-ddTHH:mm:ss";
     private const string SeparadorDeLista = "; ";
 
+    private static readonly Dictionary<CondicionDevolucion, string> TextoDeLaCondicion =
+        new Dictionary<CondicionDevolucion, string>
+        {
+            { CondicionDevolucion.SinObservaciones, "Sin observaciones" },
+            { CondicionDevolucion.ConFallas, "Con fallas" },
+            { CondicionDevolucion.Daniada, "Dañada" }
+        };
+
     private readonly RepositorioPrestamoSql _prestamos;
     private readonly RepositorioDevolucionSql _devoluciones;
     private readonly RepositorioCatalogoSql _catalogos;
@@ -45,7 +53,7 @@ public class ServicioExportacion
         return new List<ArchivoExportadoDto>
         {
             CrearArchivo("prestamos" + sufijoDelNombre, CrearTablaDePrestamos(filtro, catalogoDelTipo), exportador),
-            CrearArchivo("devoluciones" + sufijoDelNombre, new TablaExportableDto(), exportador)
+            CrearArchivo("devoluciones" + sufijoDelNombre, CrearTablaDeDevoluciones(filtro, catalogoDelTipo), exportador)
         };
     }
 
@@ -98,6 +106,45 @@ public class ServicioExportacion
             prestamo.Evaluador?.NombreCompletoConDni ?? string.Empty,
             prestamo.FechaEsperadaDevolucion.ToString(FormatoDeFechaEnElNombre, CultureInfo.InvariantCulture)
         };
+    }
+
+    private TablaExportableDto CrearTablaDeDevoluciones(FiltroPorCatalogoYFechas filtro,
+        Dictionary<int, string> catalogoDelTipo)
+    {
+        TablaExportableDto tabla = new TablaExportableDto
+        {
+            Encabezados = new List<string>
+            {
+                "Catalogo", "Fecha de registro", "Solicitante", "Tipo de equipamiento", "Unidades devueltas",
+                "Registrada por"
+            }
+        };
+
+        foreach (Devolucion devolucion in _devoluciones.ObtenerDevoluciones(filtro))
+        {
+            tabla.Filas.Add(CrearFilaDeDevolucion(devolucion,
+                catalogoDelTipo[devolucion.Prestamo.TipoEquipamiento.Id]));
+        }
+
+        return tabla;
+    }
+
+    private static List<string> CrearFilaDeDevolucion(Devolucion devolucion, string catalogo)
+    {
+        return new List<string>
+        {
+            catalogo,
+            devolucion.FechaHoraDevolucion.ToString(FormatoDeFechaHora, CultureInfo.InvariantCulture),
+            devolucion.Prestamo.Solicitante.NombreCompletoConDni,
+            devolucion.Prestamo.TipoEquipamiento.Nombre,
+            string.Join(SeparadorDeLista, devolucion.Unidades.Select(DescribirUnidadDevuelta)),
+            devolucion.RegistradaPor.NombreCompletoConDni
+        };
+    }
+
+    private static string DescribirUnidadDevuelta(UnidadDevuelta unidadDevuelta)
+    {
+        return $"{unidadDevuelta.Unidad.IdInstitucional} ({TextoDeLaCondicion[unidadDevuelta.Condicion]})";
     }
 
     // Cada exportador declara su formato: agregar uno nuevo no obliga a tocar este servicio.
