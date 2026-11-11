@@ -21,18 +21,18 @@ public class ServicioPrestamo
     private readonly RepositorioUsuarioSql _usuarios;
     private readonly RepositorioCatalogoSql _catalogo;
     private readonly RepositorioMovimientoSql _movimientos;
-    private readonly ServicioNotificacion _notificaciones;
+    private readonly ServicioNotificacion _servicioNotificacion;
     private readonly TimeProvider _reloj;
 
     public ServicioPrestamo(RepositorioPrestamoSql prestamos, RepositorioUsuarioSql usuarios,
-        RepositorioCatalogoSql catalogo, RepositorioMovimientoSql movimientos, ServicioNotificacion notificaciones,
-        TimeProvider reloj)
+        RepositorioCatalogoSql catalogo, RepositorioMovimientoSql movimientos,
+        ServicioNotificacion servicioNotificacion, TimeProvider reloj)
     {
         _prestamos = prestamos;
         _usuarios = usuarios;
         _catalogo = catalogo;
         _movimientos = movimientos;
-        _notificaciones = notificaciones;
+        _servicioNotificacion = servicioNotificacion;
         _reloj = reloj;
     }
 
@@ -258,7 +258,7 @@ public class ServicioPrestamo
         DecidirEvaluacion(prestamo, evaluador);
         _prestamos.ActualizarPrestamo(prestamo);
         RegistrarMovimientosDeEvaluacion(prestamo, evaluador, fechaHoraEvaluacion);
-        _notificaciones.RegistrarResultadoDeEvaluacion(prestamo, fechaHoraEvaluacion);
+        _servicioNotificacion.RegistrarResultadoDeEvaluacion(prestamo, fechaHoraEvaluacion);
     }
 
     private static void DecidirEvaluacion(Prestamo prestamo, Usuario evaluador)
@@ -305,7 +305,7 @@ public class ServicioPrestamo
         _prestamos.ActualizarPrestamo(prestamo);
         _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo,
             RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion)));
-        _notificaciones.RegistrarResultadoDeEvaluacion(prestamo, fechaHoraEvaluacion);
+        _servicioNotificacion.RegistrarResultadoDeEvaluacion(prestamo, fechaHoraEvaluacion);
     }
 
     // Un registro nuevo por movimiento: con EF, RegistroDeAccion es owned de Movimiento y una misma

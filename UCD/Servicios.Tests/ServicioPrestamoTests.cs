@@ -1364,7 +1364,7 @@ public sealed class ServicioPrestamoTests
     // Todos los repositorios sobre el mismo contexto: si se mezclan, EF intenta insertar lo que ya existe.
     private static ServicioPrestamo CrearServicioSobre(SqlContext contexto, TimeProvider reloj)
     {
-        ServicioNotificacion notificaciones = new ServicioNotificacion(
+        ServicioNotificacion servicioNotificacion = new ServicioNotificacion(
             notificaciones: new RepositorioNotificacionSql(contexto),
             prestamos: new RepositorioPrestamoSql(contexto),
             reloj: reloj,
@@ -1375,7 +1375,7 @@ public sealed class ServicioPrestamoTests
             usuarios: new RepositorioUsuarioSql(contexto),
             catalogo: new RepositorioCatalogoSql(contexto),
             movimientos: new RepositorioMovimientoSql(contexto),
-            notificaciones: notificaciones,
+            servicioNotificacion: servicioNotificacion,
             reloj: reloj);
     }
 
