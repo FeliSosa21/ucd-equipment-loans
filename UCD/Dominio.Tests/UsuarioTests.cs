@@ -850,6 +850,15 @@ public sealed class UsuarioTests
         Assert.IsTrue(usuario.PuedeAgregarPrestamo(1));
     }
 
+    [TestMethod]
+    public void PuedeAgregarPrestamo_EstudianteEnSuMaximo_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante());
+
+        Assert.IsFalse(usuario.PuedeAgregarPrestamo(2));
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
