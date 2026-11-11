@@ -6,6 +6,7 @@ public sealed class PrestamoTests
     private static readonly DateTime FechaFija = new(2026, 10, 5, 10, 0, 0);
     private const int CantidadSolicitadaPorDefecto = 2;
     private const string MotivoDeRechazo = "El equipo esta reservado para un examen";
+    private const string MotivoFaltaDeUnidades = "No hay unidades suficientes para el tipo de equipamiento";
 
     [TestMethod]
     public void Constructor_DatosValidos_NaceSolicitado()
@@ -707,6 +708,21 @@ public sealed class PrestamoTests
             prestamo.UnidadesAsignadas.ToList());
         Assert.IsNull(prestamo.Evaluador);
         Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
+    public void ActivarORechazarPorFaltaDeUnidades_SinUnidadesSuficientes_QuedaRechazadoSinUnidadesNiEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: 1);
+
+        prestamo.ActivarORechazarPorFaltaDeUnidades();
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(MotivoFaltaDeUnidades, prestamo.MotivoRechazo);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+        Assert.IsNull(prestamo.Evaluador);
+        Assert.IsTrue(unidades[0].EstaDisponible(), "La unidad deberia seguir disponible");
     }
 
     private static Usuario CrearSolicitante()
