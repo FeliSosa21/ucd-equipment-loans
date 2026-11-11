@@ -74,6 +74,10 @@ public class Prestamo
         MotivoRechazo = MotivoFaltaDeUnidades;
     }
 
+    public void ActivarORechazarPorFaltaDeUnidades()
+    {
+    }
+
     public void MarcarDevuelto()
     {
         ValidarQueEsteActivo();
