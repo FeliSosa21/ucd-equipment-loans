@@ -76,6 +76,7 @@ else
                                 <option value="@categoria.Key">@categoria.Value</option>
                             }
                         </select>
+                        <div class="hint">Obligatoria: elegí una categoría.</div>
                     </div>
                 </div>
                 <div>
@@ -89,6 +90,7 @@ else
                         <label class="lbl" for="tipo-duracion">Duración máxima del préstamo (días hábiles)</label>
                         <input id="tipo-duracion" class="field" type="number" min="1"
                                @bind="_datos.DuracionMaxPrestamo" @bind:event="oninput" />
+                        <div class="hint">Mínimo 1 día hábil.</div>
                     </div>
                     <label class="check">
                         <input type="checkbox" @bind="_datos.RequiereAprobacion" />
@@ -142,7 +144,7 @@ else
                         }
                     </td>
                     <td>@TextosVisibles.Categoria(tipo.Categoria)</td>
-                    <td class="numero">@tipo.DuracionMaxPrestamo días</td>
+                    <td class="numero">@tipo.DuracionMaxPrestamo días hábiles</td>
                     <td>@TextoAprobacion(tipo)</td>
                     <td><span class="@ClaseDeEstado(tipo)">@tipo.Estado</span></td>
                     <td class="celda-acciones">
