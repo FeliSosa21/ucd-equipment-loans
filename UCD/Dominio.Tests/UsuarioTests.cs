@@ -715,6 +715,77 @@ public sealed class UsuarioTests
         Assert.IsTrue(usuario.TienePermiso(Permiso.GestionarUsuarios));
     }
 
+    [TestMethod]
+    public void TieneTipo_OtraInstanciaConElMismoNombre_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Docente());
+
+        Assert.IsTrue(usuario.TieneTipo(TipoUsuario.Docente()));
+    }
+
+    [TestMethod]
+    public void TieneTipo_OtroTipo_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Docente());
+
+        Assert.IsFalse(usuario.TieneTipo(TipoUsuario.Estudiante()));
+    }
+
+    [TestMethod]
+    public void EstaActivo_UsuarioNuevo_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.IsTrue(usuario.EstaActivo());
+    }
+
+    [TestMethod]
+    public void EstaActivo_UsuarioDesactivado_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.Desactivar();
+
+        Assert.IsFalse(usuario.EstaActivo());
+    }
+
+    [TestMethod]
+    public void PuedeGestionarUsuarios_ActivoConPermiso_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Administrador());
+
+        Assert.IsTrue(usuario.PuedeGestionarUsuarios());
+    }
+
+    [TestMethod]
+    public void PuedeGestionarUsuarios_DesactivadoConPermiso_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Administrador());
+        usuario.Desactivar();
+
+        Assert.IsFalse(usuario.PuedeGestionarUsuarios());
+    }
+
+    [TestMethod]
+    public void PuedeGestionarUsuarios_ActivoSinPermiso_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Docente());
+
+        Assert.IsFalse(usuario.PuedeGestionarUsuarios());
+    }
+
+    [TestMethod]
+    public void NombreCompletoConDni_UsuarioValido_DevuelveNombreApellidoYDni()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.AreEqual("Felipe Sosa (DNI 12345672)", usuario.NombreCompletoConDni);
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {

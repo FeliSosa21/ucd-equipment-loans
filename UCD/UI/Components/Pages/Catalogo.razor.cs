@@ -23,7 +23,7 @@ public partial class Catalogo
             return;
         }
 
-        // Foro: Docente y Estudiante solo ven los tipos activos; filtrar por estado es de quien gestiona el catalogo.
+        // Solo quien gestiona el catalogo ve el filtro por estado; los discontinuados los oculta el servicio.
         _puedeFiltrarPorEstado = SesionActual.Usuario!.Permisos.Contains(Permisos.GestionarCatalogo);
         Consultar();
     }
@@ -35,13 +35,13 @@ public partial class Catalogo
         FiltroCatalogoDto filtro = new FiltroCatalogoDto
         {
             Categoria = ValoresDeFiltro.ValorONulo(_categoria),
-            Estado = EstadoAFiltrar(),
+            Estado = ValoresDeFiltro.ValorONulo(_estado),
             MinimoDisponibles = _minimoDisponibles
         };
 
         try
         {
-            _tipos = ServicioCatalogo.ConsultarTipos(filtro);
+            _tipos = ServicioCatalogo.ConsultarTipos(ObtenerIdCatalogoProvisorio(), filtro, DniUsuario);
             CerrarUnidadesSiElTipoNoEstaEnLaLista();
         }
         catch (ServicioException ex)
@@ -52,14 +52,16 @@ public partial class Catalogo
         }
     }
 
-    private string? EstadoAFiltrar()
+    // Provisorio hasta que exista el selector de catalogo (T4): el primer catalogo activo.
+    private int ObtenerIdCatalogoProvisorio()
     {
-        if (_puedeFiltrarPorEstado)
+        List<CatalogoDto> catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
+        if (catalogos.Count == 0)
         {
-            return ValoresDeFiltro.ValorONulo(_estado);
+            throw new ServicioException("No hay catalogos disponibles");
         }
 
-        return EstadosCatalogo.TipoActivo;
+        return catalogos[0].Id;
     }
 
     private void LimpiarFiltros()
@@ -85,7 +87,8 @@ public partial class Catalogo
         _error = null;
         try
         {
-            _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(nombreTipo);
+            _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(ObtenerIdCatalogoProvisorio(), nombreTipo,
+                DniUsuario);
             _tipoSeleccionado = nombreTipo;
         }
         catch (ServicioException ex)
