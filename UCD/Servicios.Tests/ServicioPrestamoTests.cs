@@ -3,6 +3,7 @@ using Data.Repositorios;
 using Dominio;
 using DTOs;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Servicios.Tests;
 
@@ -317,6 +318,21 @@ public sealed class ServicioPrestamoTests
 
         Assert.AreEqual(0, LeerMovimientos(contextoQueLee)
             .Count(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo));
+    }
+
+    [TestMethod]
+    public void Solicitar_TipoSinAprobacion_NoNotifica()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoSinAprobacion);
+
+        PrestamoDto resultado = servicio.Solicitar(datos, DniDocente);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+        Assert.AreEqual(0, LeerNoLeidas(contextoQueLee, DniDocente).Count,
+            "Solo los prestamos que requerian aprobacion llevan notificacion");
     }
 
     [TestMethod]
@@ -789,6 +805,147 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_LaBaseRechazaLosMovimientos_LanzaDbUpdateExceptionYElPrestamoQuedaActivo()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<Movimiento>(_opciones);
+        ServicioPrestamo servicioQueFalla = CrearServicioSobre(contextoQueFalla, new RelojFijo(FechaDeEvaluacion));
+
+        Assert.ThrowsException<DbUpdateException>(() => servicioQueFalla.Aprobar(idPrestamo, DniSupervisor));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
+
+        Assert.AreEqual(EstadoPrestamo.Activo, guardado.Estado,
+            "El prestamo deberia guardarse antes que sus movimientos");
+    }
+
+    [TestMethod]
+    public void Aprobar_SinUnidadesSuficientes_LaBaseRechazaLosMovimientos_LanzaDbUpdateExceptionYElPrestamoQuedaRechazado()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio, tipoEquipamiento: NombreTipoConAprobacionSinUnidades);
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<Movimiento>(_opciones);
+        ServicioPrestamo servicioQueFalla = CrearServicioSobre(contextoQueFalla, new RelojFijo(FechaDeEvaluacion));
+
+        Assert.ThrowsException<DbUpdateException>(() => servicioQueFalla.Aprobar(idPrestamo, DniSupervisor));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, guardado.Estado,
+            "El rechazo del sistema deberia guardarse antes que su movimiento");
+        Assert.IsFalse(string.IsNullOrWhiteSpace(guardado.MotivoRechazo),
+            "El rechazo del sistema deberia guardarse con su motivo");
+    }
+
+    [TestMethod]
+    public void Aprobar_SolicitudPendienteConUnidades_NotificaLaAprobacionAlSolicitanteConLaFechaDeEvaluacion()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        VerificarUnaNotificacion(contextoQueLee, idPrestamo, TipoNotificacion.SolicitudAprobada);
+    }
+
+    [TestMethod]
+    public void Aprobar_SinUnidadesSuficientes_NotificaElRechazoAlSolicitanteConLaFechaDeEvaluacion()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio, tipoEquipamiento: NombreTipoConAprobacionSinUnidades);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        VerificarUnaNotificacion(contextoQueLee, idPrestamo, TipoNotificacion.SolicitudRechazada);
+    }
+
+    [TestMethod]
+    public void Aprobar_LaBaseRechazaLaNotificacion_LanzaInvalidOperationExceptionYQuedanElPrestamoActivoYSusMovimientos()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<Notificacion>(_opciones);
+        ServicioPrestamo servicioQueFalla = CrearServicioSobre(contextoQueFalla, new RelojFijo(FechaDeEvaluacion));
+
+        Assert.ThrowsException<InvalidOperationException>(() => servicioQueFalla.Aprobar(idPrestamo, DniSupervisor));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
+
+        Assert.AreEqual(EstadoPrestamo.Activo, guardado.Estado);
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento>
+            {
+                TipoMovimiento.Solicitud, TipoMovimiento.Aprobacion, TipoMovimiento.Aprobacion,
+                TipoMovimiento.Prestamo, TipoMovimiento.Prestamo
+            },
+            LeerMovimientos(contextoQueLee).Select(movimiento => movimiento.Tipo).ToList(),
+            "Los movimientos deberian guardarse antes que la notificacion");
+        Assert.AreEqual(0, LeerNoLeidas(contextoQueLee, DniDocente).Count);
+    }
+
+    [TestMethod]
+    public void Rechazar_SolicitudPendiente_NotificaElRechazoAlSolicitanteConLaFechaDeEvaluacion()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        VerificarUnaNotificacion(contextoQueLee, idPrestamo, TipoNotificacion.SolicitudRechazada);
+    }
+
+    [TestMethod]
+    public void Rechazar_SolicitudPendiente_ElMovimientoYLaNotificacionLlevanLaMismaFecha()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojQueAvanza(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Movimiento rechazo = LeerMovimientos(contextoQueLee)
+            .Single(movimiento => movimiento.Tipo == TipoMovimiento.Rechazo);
+        Notificacion notificacion = LeerNoLeidas(contextoQueLee, DniDocente).Single();
+
+        Assert.AreEqual(rechazo.FechaHora, notificacion.FechaHora,
+            "La fecha del rechazo deberia tomarse una sola vez");
+    }
+
+    [TestMethod]
+    public void Rechazar_LaBaseRechazaLaNotificacion_LanzaInvalidOperationExceptionYQuedanElRechazoYSuMovimiento()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<Notificacion>(_opciones);
+        ServicioPrestamo servicioQueFalla = CrearServicioSobre(contextoQueFalla, new RelojFijo(FechaDeEvaluacion));
+
+        Assert.ThrowsException<InvalidOperationException>(
+            () => servicioQueFalla.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, guardado.Estado);
+        Assert.AreEqual(MotivoDeRechazo, guardado.MotivoRechazo);
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
+            LeerMovimientos(contextoQueLee).Select(movimiento => movimiento.Tipo).ToList(),
+            "El movimiento deberia guardarse antes que la notificacion");
+        Assert.AreEqual(0, LeerNoLeidas(contextoQueLee, DniDocente).Count);
+    }
+
+    [TestMethod]
     public void Rechazar_SolicitudPendiente_QuedaRechazadoConMotivoYEvaluador()
     {
         ServicioPrestamo servicio = CrearServicio();
@@ -1201,11 +1358,24 @@ public sealed class ServicioPrestamoTests
 
     private ServicioPrestamo CrearServicioConReloj(TimeProvider reloj)
     {
+        return CrearServicioSobre(_contexto, reloj);
+    }
+
+    // Todos los repositorios sobre el mismo contexto: si se mezclan, EF intenta insertar lo que ya existe.
+    private static ServicioPrestamo CrearServicioSobre(SqlContext contexto, TimeProvider reloj)
+    {
+        ServicioNotificacion servicioNotificacion = new ServicioNotificacion(
+            notificaciones: new RepositorioNotificacionSql(contexto),
+            prestamos: new RepositorioPrestamoSql(contexto),
+            reloj: reloj,
+            logger: NullLogger<ServicioNotificacion>.Instance);
+
         return new ServicioPrestamo(
-            prestamos: new RepositorioPrestamoSql(_contexto),
-            usuarios: new RepositorioUsuarioSql(_contexto),
-            catalogo: new RepositorioCatalogoSql(_contexto),
-            movimientos: new RepositorioMovimientoSql(_contexto),
+            prestamos: new RepositorioPrestamoSql(contexto),
+            usuarios: new RepositorioUsuarioSql(contexto),
+            catalogo: new RepositorioCatalogoSql(contexto),
+            movimientos: new RepositorioMovimientoSql(contexto),
+            servicioNotificacion: servicioNotificacion,
             reloj: reloj);
     }
 
@@ -1271,6 +1441,22 @@ public sealed class ServicioPrestamoTests
     private TipoEquipamiento ObtenerTipoGuardado(SqlContext contextoQueLee, string nombreTipo)
     {
         return new RepositorioCatalogoSql(contextoQueLee).ObtenerTipoPorNombre(_idCatalogo, nombreTipo)!;
+    }
+
+    private static IReadOnlyList<Notificacion> LeerNoLeidas(SqlContext contextoQueLee, string dni)
+    {
+        return new RepositorioNotificacionSql(contextoQueLee).ObtenerNoLeidasDeUsuario(dni);
+    }
+
+    // Las solicitudes de estos tests son del docente y se evaluan en FechaDeEvaluacion.
+    private static void VerificarUnaNotificacion(SqlContext contextoQueLee, Guid idPrestamo, TipoNotificacion tipo)
+    {
+        IReadOnlyList<Notificacion> notificaciones = LeerNoLeidas(contextoQueLee, DniDocente);
+
+        Assert.AreEqual(1, notificaciones.Count);
+        Assert.AreEqual(tipo, notificaciones[0].Tipo);
+        Assert.AreEqual(idPrestamo, notificaciones[0].Prestamo.Id);
+        Assert.AreEqual(FechaDeEvaluacion, notificaciones[0].FechaHora);
     }
 
     // RepositorioMovimientoSql no tiene una consulta de todos los movimientos: se leen de la base,

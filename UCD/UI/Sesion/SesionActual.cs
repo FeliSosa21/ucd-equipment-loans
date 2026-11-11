@@ -21,11 +21,14 @@ public class SesionActual
 
     private readonly ProtectedLocalStorage _almacenamiento;
     private readonly ServicioSesion _servicioSesion;
+    private readonly ServicioNotificacion _servicioNotificacion;
 
-    public SesionActual(ProtectedLocalStorage almacenamiento, ServicioSesion servicioSesion)
+    public SesionActual(ProtectedLocalStorage almacenamiento, ServicioSesion servicioSesion,
+        ServicioNotificacion servicioNotificacion)
     {
         _almacenamiento = almacenamiento;
         _servicioSesion = servicioSesion;
+        _servicioNotificacion = servicioNotificacion;
     }
 
     public UsuarioSesionDto? Usuario { get; private set; }
@@ -67,6 +70,11 @@ public class SesionActual
             }
         }
 
+        if (Usuario is not null)
+        {
+            _servicioNotificacion.GenerarNotificacionesDeVencidos(Usuario.Dni);
+        }
+
         Cargada = true;
         Cambio?.Invoke();
     }
@@ -105,6 +113,7 @@ public class SesionActual
         AvisoDeCierre = null;
         IdCatalogoElegido = null;
         await _almacenamiento.SetAsync(ClaveDni, usuario.Dni);
+        _servicioNotificacion.GenerarNotificacionesDeVencidos(usuario.Dni);
         Cambio?.Invoke();
     }
 

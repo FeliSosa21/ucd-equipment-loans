@@ -21,15 +21,18 @@ public class ServicioPrestamo
     private readonly RepositorioUsuarioSql _usuarios;
     private readonly RepositorioCatalogoSql _catalogo;
     private readonly RepositorioMovimientoSql _movimientos;
+    private readonly ServicioNotificacion _servicioNotificacion;
     private readonly TimeProvider _reloj;
 
     public ServicioPrestamo(RepositorioPrestamoSql prestamos, RepositorioUsuarioSql usuarios,
-        RepositorioCatalogoSql catalogo, RepositorioMovimientoSql movimientos, TimeProvider reloj)
+        RepositorioCatalogoSql catalogo, RepositorioMovimientoSql movimientos,
+        ServicioNotificacion servicioNotificacion, TimeProvider reloj)
     {
         _prestamos = prestamos;
         _usuarios = usuarios;
         _catalogo = catalogo;
         _movimientos = movimientos;
+        _servicioNotificacion = servicioNotificacion;
         _reloj = reloj;
     }
 
@@ -243,7 +246,7 @@ public class ServicioPrestamo
             _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo, crearRegistroDelSistema()));
         }
 
-        RegistrarMovimientos(prestamo, crearRegistroDelSistema);
+        RegistrarMovimientosDePrestamo(prestamo, crearRegistroDelSistema);
 
         return prestamo;
     }
@@ -252,18 +255,35 @@ public class ServicioPrestamo
     {
         DateTime fechaHoraEvaluacion = _reloj.GetLocalNow().DateTime;
 
+        DecidirEvaluacion(prestamo, evaluador);
+        _prestamos.ActualizarPrestamo(prestamo);
+        RegistrarMovimientosDeEvaluacion(prestamo, evaluador, fechaHoraEvaluacion);
+        _servicioNotificacion.RegistrarResultadoDeEvaluacion(prestamo, fechaHoraEvaluacion);
+    }
+
+    private static void DecidirEvaluacion(Prestamo prestamo, Usuario evaluador)
+    {
         if (prestamo.TipoEquipamiento.CantidadDisponibles() < prestamo.CantidadSolicitada)
         {
             prestamo.RechazarPorFaltaDeUnidades();
-
-            _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo,
-                RegistroDeAccion.DelSistema(fechaHoraEvaluacion)));
         }
         else
         {
             List<UnidadFisica> unidades = prestamo.TipoEquipamiento.UnidadesDisponibles()
                 .Take(prestamo.CantidadSolicitada).ToList();
             prestamo.Aprobar(evaluador, unidades);
+        }
+    }
+
+    private void RegistrarMovimientosDeEvaluacion(Prestamo prestamo, Usuario evaluador, DateTime fechaHoraEvaluacion)
+    {
+        if (prestamo.Estado == EstadoPrestamo.Rechazado)
+        {
+            _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo,
+                RegistroDeAccion.DelSistema(fechaHoraEvaluacion)));
+        }
+        else
+        {
             Func<RegistroDeAccion> crearRegistroDelEvaluador =
                 () => RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion);
 
@@ -273,23 +293,24 @@ public class ServicioPrestamo
                     Movimiento.DeAprobacion(prestamo, crearRegistroDelEvaluador(), unidad));
             }
 
-            RegistrarMovimientos(prestamo, crearRegistroDelEvaluador);
+            RegistrarMovimientosDePrestamo(prestamo, crearRegistroDelEvaluador);
         }
-
-        _prestamos.ActualizarPrestamo(prestamo);
     }
 
     private void RegistrarRechazo(Prestamo prestamo, Usuario evaluador, string motivo)
     {
+        DateTime fechaHoraEvaluacion = _reloj.GetLocalNow().DateTime;
+
         prestamo.Rechazar(evaluador, motivo);
         _prestamos.ActualizarPrestamo(prestamo);
         _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo,
-            RegistroDeAccion.DeUsuario(evaluador, _reloj.GetLocalNow().DateTime)));
+            RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion)));
+        _servicioNotificacion.RegistrarResultadoDeEvaluacion(prestamo, fechaHoraEvaluacion);
     }
 
     // Un registro nuevo por movimiento: con EF, RegistroDeAccion es owned de Movimiento y una misma
     // instancia no puede pertenecer a dos movimientos.
-    private void RegistrarMovimientos(Prestamo prestamo, Func<RegistroDeAccion> crearRegistro)
+    private void RegistrarMovimientosDePrestamo(Prestamo prestamo, Func<RegistroDeAccion> crearRegistro)
     {
         foreach (UnidadFisica unidad in prestamo.UnidadesAsignadas)
         {
