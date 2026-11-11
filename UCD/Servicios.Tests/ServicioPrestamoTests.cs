@@ -1208,6 +1208,27 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_SolicitudPendienteConUnidades_RegistraEnElLogLaAprobacionDelEvaluador()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada> { AccionAuditada.SolicitudDePrestamo, AccionAuditada.AprobacionDePrestamo },
+            entradas.Select(entrada => entrada.Accion).ToList(),
+            "Deberia registrarse una sola aprobacion despues de la solicitud");
+        Assert.AreEqual(DniSupervisor, entradas[1].Responsable?.Dni, "La aprobacion la registra el evaluador");
+        Assert.AreEqual(FechaDeEvaluacion, entradas[1].FechaHora);
+        Assert.AreEqual("Aprobación del préstamo de Renato Alves (DNI 12345672). Unidades: 2", entradas[1].Detalle);
+    }
+
+    [TestMethod]
     public void Aprobar_LaBaseRechazaLaNotificacion_LanzaInvalidOperationExceptionYQuedanElPrestamoActivoYSusMovimientos()
     {
         ServicioPrestamo servicio = CrearServicio();
