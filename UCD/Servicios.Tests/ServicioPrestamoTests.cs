@@ -792,6 +792,7 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(FechaDeEvaluacion, rechazo.FechaHora);
         Assert.AreSame(docente, rechazo.Solicitante);
         Assert.IsNull(rechazo.Evaluador, "El rechazo por falta de unidades lo decide el sistema, sin evaluador");
+        Assert.IsNull(rechazo.Responsable, "El rechazo por falta de unidades lo registra el sistema");
         Assert.IsNull(rechazo.Unidad);
     }
 
