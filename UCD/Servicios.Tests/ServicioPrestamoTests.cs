@@ -505,6 +505,27 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_UnidadesActivasDelMismoCatalogoMasSolicitadasSuperanElMaximo_LanzaExcepcionSinGuardarNada()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        int idElectronica = CargarCatalogoElectronica();
+        servicio.Solicitar(CrearSolicitudEnCatalogo(idElectronica, NombreTipoNotebook, 2), DniEstudiante);
+        SolicitudPrestamoDto proyector =
+            CrearSolicitudEnCatalogo(idElectronica, NombreTipoProyectorDeElectronica, 1);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Solicitar(proyector, DniEstudiante));
+        Assert.AreEqual("La cantidad solicitada supera el maximo de unidades del solicitante", excepcion.Message);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(1,
+            new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(DniEstudiante).Count);
+        TipoEquipamiento tipoProyector = new RepositorioCatalogoSql(contextoQueLee)
+            .ObtenerTipoPorNombre(idElectronica, NombreTipoProyectorDeElectronica)!;
+        Assert.AreEqual(3, tipoProyector.CantidadDisponibles());
+    }
+
+    [TestMethod]
     public void Solicitar_CantidadCero_LanzaExcepcionConCausaDeDominio()
     {
         ServicioPrestamo servicio = CrearServicio();
