@@ -923,6 +923,29 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Rechazar_LaBaseRechazaLaNotificacion_LanzaInvalidOperationExceptionYQuedanElRechazoYSuMovimiento()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<Notificacion>(_opciones);
+        ServicioPrestamo servicioQueFalla = CrearServicioSobre(contextoQueFalla, new RelojFijo(FechaDeEvaluacion));
+
+        Assert.ThrowsException<InvalidOperationException>(
+            () => servicioQueFalla.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, guardado.Estado);
+        Assert.AreEqual(MotivoDeRechazo, guardado.MotivoRechazo);
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
+            LeerMovimientos(contextoQueLee).Select(movimiento => movimiento.Tipo).ToList(),
+            "El movimiento deberia guardarse antes que la notificacion");
+        Assert.AreEqual(0, LeerNoLeidas(contextoQueLee, DniDocente).Count);
+    }
+
+    [TestMethod]
     public void Rechazar_SolicitudPendiente_QuedaRechazadoConMotivoYEvaluador()
     {
         ServicioPrestamo servicio = CrearServicio();
