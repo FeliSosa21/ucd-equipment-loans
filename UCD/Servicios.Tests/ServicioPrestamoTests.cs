@@ -680,6 +680,27 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_TipoSinAprobacionConUnidades_RegistraEnElLogLaSolicitudYLaActivacionDelSistema()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto datos = CrearSolicitud();
+
+        servicio.Solicitar(datos, DniDocente);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada> { AccionAuditada.SolicitudDePrestamo, AccionAuditada.ActivacionDePrestamo },
+            entradas.Select(entrada => entrada.Accion).ToList(),
+            "Deberia registrarse la solicitud y despues la activacion");
+        Assert.AreEqual(DniDocente, entradas[0].Responsable?.Dni, "La solicitud la registra el solicitante");
+        Assert.IsTrue(entradas[1].EsDelSistema(), "La activacion la registra el sistema");
+        Assert.AreEqual(FechaFija, entradas[1].FechaHora);
+        Assert.AreEqual("Activación del préstamo de Renato Alves (DNI 12345672). Unidades: 2", entradas[1].Detalle);
+    }
+
+    [TestMethod]
     public void Aprobar_SolicitudPendienteConUnidades_QuedaActivo()
     {
         ServicioPrestamo servicio = CrearServicio();
