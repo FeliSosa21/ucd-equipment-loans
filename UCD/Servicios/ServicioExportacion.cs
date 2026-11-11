@@ -181,7 +181,7 @@ public class ServicioExportacion
 
     public List<string> FormatosDisponibles()
     {
-        throw new NotImplementedException();
+        return _exportadores.Select(exportador => exportador.Formato).ToList();
     }
 
     public CantidadesAExportarDto ContarRegistros(RangoDeExportacionDto rango, string dniResponsable)
