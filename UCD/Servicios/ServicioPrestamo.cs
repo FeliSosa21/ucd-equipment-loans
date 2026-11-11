@@ -299,11 +299,13 @@ public class ServicioPrestamo
 
     private void RegistrarRechazo(Prestamo prestamo, Usuario evaluador, string motivo)
     {
+        DateTime fechaHoraEvaluacion = _reloj.GetLocalNow().DateTime;
+
         prestamo.Rechazar(evaluador, motivo);
         _prestamos.ActualizarPrestamo(prestamo);
         _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo,
-            RegistroDeAccion.DeUsuario(evaluador, _reloj.GetLocalNow().DateTime)));
-        _notificaciones.RegistrarResultadoDeEvaluacion(prestamo, _reloj.GetLocalNow().DateTime);
+            RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion)));
+        _notificaciones.RegistrarResultadoDeEvaluacion(prestamo, fechaHoraEvaluacion);
     }
 
     // Un registro nuevo por movimiento: con EF, RegistroDeAccion es owned de Movimiento y una misma
