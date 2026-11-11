@@ -806,6 +806,25 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_SinUnidadesSuficientes_LaBaseRechazaLosMovimientos_LanzaDbUpdateExceptionYElPrestamoQuedaRechazado()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio, tipoEquipamiento: NombreTipoConAprobacionSinUnidades);
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<Movimiento>(_opciones);
+        ServicioPrestamo servicioQueFalla = CrearServicioSobre(contextoQueFalla, new RelojFijo(FechaDeEvaluacion));
+
+        Assert.ThrowsException<DbUpdateException>(() => servicioQueFalla.Aprobar(idPrestamo, DniSupervisor));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, guardado.Estado,
+            "El rechazo del sistema deberia guardarse antes que su movimiento");
+        Assert.IsFalse(string.IsNullOrWhiteSpace(guardado.MotivoRechazo),
+            "El rechazo del sistema deberia guardarse con su motivo");
+    }
+
+    [TestMethod]
     public void Rechazar_SolicitudPendiente_QuedaRechazadoConMotivoYEvaluador()
     {
         ServicioPrestamo servicio = CrearServicio();
