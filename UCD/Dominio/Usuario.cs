@@ -80,6 +80,16 @@ public class Usuario
         return Tipo.NoTienePermisos();
     }
 
+    public bool PermiteUnidades(int cantidadSolicitada)
+    {
+        return Tipo.PermiteUnidades(cantidadSolicitada);
+    }
+
+    public bool PuedeAgregarPrestamo(int prestamosVigentes)
+    {
+        return Tipo.PuedeAgregarPrestamo(prestamosVigentes);
+    }
+
     public void ModificarDatos(string nombre, string apellido, string correo)
     {
         nombre = Recortar(nombre);

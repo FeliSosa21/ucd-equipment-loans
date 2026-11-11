@@ -814,6 +814,60 @@ public sealed class UsuarioTests
         Assert.IsFalse(usuario.EstaHabilitadoPara(Permiso.EvaluarSolicitud));
     }
 
+    [TestMethod]
+    public void PermiteUnidades_EstudianteHastaSuMaximo_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante());
+
+        Assert.IsTrue(usuario.PermiteUnidades(2));
+    }
+
+    [TestMethod]
+    public void PermiteUnidades_EstudianteSobreSuMaximo_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante());
+
+        Assert.IsFalse(usuario.PermiteUnidades(3));
+    }
+
+    [TestMethod]
+    public void PermiteUnidades_AdministradorSinTopes_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Administrador());
+
+        Assert.IsTrue(usuario.PermiteUnidades(1000));
+    }
+
+    [TestMethod]
+    public void PuedeAgregarPrestamo_EstudianteDebajoDeSuMaximo_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante());
+
+        Assert.IsTrue(usuario.PuedeAgregarPrestamo(1));
+    }
+
+    [TestMethod]
+    public void PuedeAgregarPrestamo_EstudianteEnSuMaximo_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante());
+
+        Assert.IsFalse(usuario.PuedeAgregarPrestamo(2));
+    }
+
+    [TestMethod]
+    public void PuedeAgregarPrestamo_AdministradorSinTopes_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Administrador());
+
+        Assert.IsTrue(usuario.PuedeAgregarPrestamo(1000));
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {

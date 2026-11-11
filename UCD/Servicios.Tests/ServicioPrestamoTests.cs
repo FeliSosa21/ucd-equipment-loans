@@ -22,6 +22,8 @@ public sealed class ServicioPrestamoTests
     private const string DniSupervisorDesactivado = "78901238";
     private const string DniAdministrador = "89012349";
     private const string DniFuncionarioDesactivado = "90123450";
+    private const string DniAdministradorConNombreYApellidoMaximos = "98765438";
+    private const string DocenteConDni = $"Renato Alves (DNI {DniDocente})";
 
     private const string NombreTipoSinAprobacion = "Proyector Epson PowerLite";
     private const string NombreTipoSinUnidades = "Parlante JBL Flip";
@@ -30,10 +32,17 @@ public sealed class ServicioPrestamoTests
     private const string NombreTipoDiscontinuado = "Retroproyector 3M";
     private const string NombreTipoInexistente = "Microscopio Zeiss Primo";
     private const string NombreTipoDeOtroCatalogo = "Osciloscopio Rigol DS1054Z";
+    private const string NombreTipoNotebook = "Notebook Lenovo ThinkPad E14";
+    private const string NombreTipoProyectorDeElectronica = "Proyector BenQ MW560";
+    private const string NombreTipoMicroscopio = "Microscopio Olympus CX23";
 
     private const int CantidadSolicitadaPorDefecto = 2;
 
     private const string MotivoDeRechazo = "El equipo esta reservado para un examen";
+    private const string MotivoTopeDeUnidades =
+        "Supera el maximo de unidades por catalogo al momento de la aprobacion";
+    private const string MotivoTopeDePrestamosConcurrentes =
+        "Supera el maximo de prestamos concurrentes al momento de la aprobacion";
 
     private DbContextOptions<SqlContext> _opciones = null!;
     private SqlContext _contexto = null!;
@@ -488,6 +497,95 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_UnidadesActivasDeOtroCatalogo_NoCuentanParaElMaximo()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        int idElectronica = CargarCatalogoElectronica();
+        int idBiotecnologia = CargarCatalogoBiotecnologia();
+        servicio.Solicitar(CrearSolicitudEnCatalogo(idElectronica, NombreTipoNotebook, 2), DniEstudiante);
+        SolicitudPrestamoDto microscopio = CrearSolicitudEnCatalogo(idBiotecnologia, NombreTipoMicroscopio, 1);
+
+        PrestamoDto resultado = servicio.Solicitar(microscopio, DniEstudiante);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+    }
+
+    [TestMethod]
+    public void Solicitar_UnidadesActivasDelMismoCatalogoMasSolicitadasSuperanElMaximo_LanzaExcepcionSinGuardarNada()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        int idElectronica = CargarCatalogoElectronica();
+        servicio.Solicitar(CrearSolicitudEnCatalogo(idElectronica, NombreTipoNotebook, 2), DniEstudiante);
+        SolicitudPrestamoDto proyector =
+            CrearSolicitudEnCatalogo(idElectronica, NombreTipoProyectorDeElectronica, 1);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Solicitar(proyector, DniEstudiante));
+        Assert.AreEqual("La cantidad solicitada supera el maximo de unidades del solicitante", excepcion.Message);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(1,
+            new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(DniEstudiante).Count);
+        TipoEquipamiento tipoProyector = new RepositorioCatalogoSql(contextoQueLee)
+            .ObtenerTipoPorNombre(idElectronica, NombreTipoProyectorDeElectronica)!;
+        Assert.AreEqual(3, tipoProyector.CantidadDisponibles());
+    }
+
+    [TestMethod]
+    public void Solicitar_UnidadesActivasDelCatalogoMasSolicitadasIgualanElMaximo_QuedaActivo()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        int idElectronica = CargarCatalogoElectronica();
+        servicio.Solicitar(CrearSolicitudEnCatalogo(idElectronica, NombreTipoNotebook, 1), DniEstudiante);
+        SolicitudPrestamoDto proyector =
+            CrearSolicitudEnCatalogo(idElectronica, NombreTipoProyectorDeElectronica, 1);
+
+        PrestamoDto resultado = servicio.Solicitar(proyector, DniEstudiante);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+    }
+
+    [TestMethod]
+    public void Solicitar_PrestamoRechazadoEnOtroContexto_NoCuentaComoVigente()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto camara = CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1);
+        Guid idPrimera = servicio.Solicitar(camara, DniEstudiante).Id;
+        servicio.Solicitar(camara, DniEstudiante);
+
+        // Otra pestaña rechaza la primera: el contexto del servicio la sigue teniendo cargada como Solicitado.
+        using (SqlContext otroContexto = new SqlContext(_opciones))
+        {
+            CrearServicioSobre(otroContexto, new RelojFijo(FechaDeEvaluacion))
+                .Rechazar(idPrimera, MotivoDeRechazo, DniSupervisor);
+        }
+
+        PrestamoDto resultado = servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniEstudiante);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+    }
+
+    [TestMethod]
+    public void Solicitar_VigentesDeDistintosCatalogos_SumanContraUnSoloMaximo()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        int idElectronica = CargarCatalogoElectronica();
+        int idBiotecnologia = CargarCatalogoBiotecnologia();
+        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1),
+            DniEstudiante);
+        servicio.Solicitar(CrearSolicitudEnCatalogo(idElectronica, NombreTipoNotebook, 1), DniEstudiante);
+        SolicitudPrestamoDto microscopio = CrearSolicitudEnCatalogo(idBiotecnologia, NombreTipoMicroscopio, 1);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Solicitar(microscopio, DniEstudiante));
+        Assert.AreEqual("El solicitante alcanzo el maximo de prestamos vigentes", excepcion.Message);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(2,
+            new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(DniEstudiante).Count);
+    }
+
+    [TestMethod]
     public void Solicitar_CantidadCero_LanzaExcepcionConCausaDeDominio()
     {
         ServicioPrestamo servicio = CrearServicio();
@@ -561,6 +659,131 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual("Debe indicar un catalogo", excepcion.Message);
 
         VerificarQueNoSeGuardoNiSePrestoNada(DniDocente);
+    }
+
+    [TestMethod]
+    public void Solicitar_TipoConAprobacion_RegistraSoloLaSolicitudDelSolicitanteEnElLog()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion);
+
+        servicio.Solicitar(datos, DniDocente);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada> { AccionAuditada.SolicitudDePrestamo },
+            entradas.Select(entrada => entrada.Accion).ToList(),
+            "Deberia registrarse solo la solicitud");
+        Assert.AreEqual(DniDocente, entradas[0].Responsable?.Dni, "La solicitud la registra el solicitante");
+        Assert.AreEqual(FechaFija, entradas[0].FechaHora);
+        Assert.AreEqual($"Solicitud de préstamo de {DocenteConDni}. Unidades: 2", entradas[0].Detalle);
+    }
+
+    [TestMethod]
+    public void Solicitar_TipoSinAprobacionConUnidades_RegistraEnElLogLaSolicitudYLaActivacionDelSistema()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto datos = CrearSolicitud();
+
+        servicio.Solicitar(datos, DniDocente);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada> { AccionAuditada.SolicitudDePrestamo, AccionAuditada.ActivacionDePrestamo },
+            entradas.Select(entrada => entrada.Accion).ToList(),
+            "Deberia registrarse la solicitud y despues la activacion");
+        Assert.AreEqual(DniDocente, entradas[0].Responsable?.Dni, "La solicitud la registra el solicitante");
+        Assert.IsTrue(entradas[1].EsDelSistema(), "La activacion la registra el sistema");
+        Assert.AreEqual(FechaFija, entradas[1].FechaHora);
+        Assert.AreEqual($"Activación del préstamo de {DocenteConDni}. Unidades: 2", entradas[1].Detalle);
+    }
+
+    [TestMethod]
+    public void Solicitar_TipoSinAprobacionSinUnidadesSuficientes_RegistraEnElLogLaSolicitudYElRechazoDelSistema()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades);
+
+        servicio.Solicitar(datos, DniDocente);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada> { AccionAuditada.SolicitudDePrestamo, AccionAuditada.RechazoDePrestamo },
+            entradas.Select(entrada => entrada.Accion).ToList(),
+            "Deberia registrarse la solicitud y despues el rechazo");
+        Assert.AreEqual(DniDocente, entradas[0].Responsable?.Dni, "La solicitud la registra el solicitante");
+        Assert.IsTrue(entradas[1].EsDelSistema(), "El rechazo por falta de unidades lo registra el sistema");
+        Assert.AreEqual(FechaFija, entradas[1].FechaHora);
+        Assert.AreEqual($"Rechazo del préstamo de {DocenteConDni}. Unidades: 2", entradas[1].Detalle);
+    }
+
+    [TestMethod]
+    public void Solicitar_SuperaElMaximoDeUnidades_NoRegistraNadaEnElLog()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 3);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Solicitar(datos, DniEstudiante));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(0, LeerLog(contextoQueLee).Count, "Si falla una validacion no se registra nada");
+    }
+
+    [TestMethod]
+    public void Solicitar_TipoSinAprobacionConTresUnidades_RegistraUnaEntradaPorAccionYNoPorUnidad()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto datos = CrearSolicitud(cantidadSolicitada: 3);
+
+        servicio.Solicitar(datos, DniDocente);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(3, LeerMovimientos(contextoQueLee)
+            .Count(movimiento => movimiento.Tipo == TipoMovimiento.Prestamo));
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada> { AccionAuditada.SolicitudDePrestamo, AccionAuditada.ActivacionDePrestamo },
+            LeerLog(contextoQueLee).Select(entrada => entrada.Accion).ToList(),
+            "El log lleva una entrada por prestamo y accion, no una por unidad");
+    }
+
+    [TestMethod]
+    public void Solicitar_LaBaseRechazaElPrestamo_LanzaDbUpdateExceptionYNoQuedaNadaNiEnElLog()
+    {
+        CrearServicio();
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<Prestamo>(_opciones);
+        ServicioPrestamo servicioQueFalla = CrearServicioSobre(contextoQueFalla, new RelojFijo(FechaFija));
+
+        Assert.ThrowsException<DbUpdateException>(() => servicioQueFalla.Solicitar(CrearSolicitud(), DniDocente));
+
+        VerificarQueNoSeGuardoNiSePrestoNada(DniDocente);
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(0, LeerLog(contextoQueLee).Count, "El log no deberia guardarse antes que el prestamo");
+    }
+
+    [TestMethod]
+    public void Solicitar_LaBaseRechazaElLog_LanzaDbUpdateExceptionYQuedanElPrestamoYSusMovimientos()
+    {
+        CrearServicio();
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<RegistroAuditoria>(_opciones);
+        ServicioPrestamo servicioQueFalla = CrearServicioSobre(contextoQueFalla, new RelojFijo(FechaFija));
+
+        Assert.ThrowsException<DbUpdateException>(() => servicioQueFalla.Solicitar(CrearSolicitud(), DniDocente));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado =
+            new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(DniDocente).Single();
+        Assert.AreEqual(EstadoPrestamo.Activo, guardado.Estado);
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Prestamo, TipoMovimiento.Prestamo },
+            LeerMovimientos(contextoQueLee).Select(movimiento => movimiento.Tipo).ToList(),
+            "Los movimientos deberian guardarse antes que el log");
+        Assert.AreEqual(0, LeerLog(contextoQueLee).Count);
     }
 
     [TestMethod]
@@ -696,6 +919,7 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(FechaDeEvaluacion, rechazo.FechaHora);
         Assert.AreSame(docente, rechazo.Solicitante);
         Assert.IsNull(rechazo.Evaluador, "El rechazo por falta de unidades lo decide el sistema, sin evaluador");
+        Assert.IsNull(rechazo.Responsable, "El rechazo por falta de unidades lo registra el sistema");
         Assert.IsNull(rechazo.Unidad);
     }
 
@@ -867,6 +1091,249 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_TopeDeUnidadesBajadoDespuesDeSolicitar_QuedaRechazadoPorElTopeSinEvaluador()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        BajarTopesDelDocente(maxUnidadesPorCatalogo: 1, maxPrestamosConcurrentes: 3);
+
+        PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        Assert.AreEqual("Rechazado", resultado.Estado);
+        Assert.AreEqual(MotivoTopeDeUnidades, resultado.MotivoRechazo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
+        Assert.AreEqual(EstadoPrestamo.Rechazado, guardado.Estado);
+        Assert.AreEqual(MotivoTopeDeUnidades, guardado.MotivoRechazo);
+        Assert.IsNull(guardado.Evaluador);
+        Assert.AreEqual(0, guardado.UnidadesAsignadas.Count);
+    }
+
+    [TestMethod]
+    public void Aprobar_TopeDeUnidadesQueSigueCumpliendose_QuedaActivo()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        BajarTopesDelDocente(maxUnidadesPorCatalogo: CantidadSolicitadaPorDefecto, maxPrestamosConcurrentes: 3);
+
+        PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+    }
+
+    [TestMethod]
+    public void Aprobar_TopeDeUnidadesBajado_RegistraElRechazoDelSistemaSinEvaluador()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        BajarTopesDelDocente(maxUnidadesPorCatalogo: 1, maxPrestamosConcurrentes: 3);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<Movimiento> movimientos = LeerMovimientos(contextoQueLee);
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
+            movimientos.Select(movimiento => movimiento.Tipo).ToList(),
+            "Deberia registrarse la solicitud y despues el rechazo del sistema");
+        Movimiento rechazo = movimientos.Single(movimiento => movimiento.Tipo == TipoMovimiento.Rechazo);
+        Assert.AreEqual(FechaDeEvaluacion, rechazo.FechaHora);
+        Assert.IsNull(rechazo.Evaluador, "El rechazo por el tope lo decide el sistema, sin evaluador");
+        Assert.IsNull(rechazo.Responsable, "El rechazo por el tope lo registra el sistema");
+        Assert.IsNull(rechazo.Unidad);
+    }
+
+    [TestMethod]
+    public void Aprobar_TopeDeUnidadesBajado_NotificaElRechazoConElMotivoDelTope()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        BajarTopesDelDocente(maxUnidadesPorCatalogo: 1, maxPrestamosConcurrentes: 3);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        VerificarUnaNotificacion(contextoQueLee, idPrestamo, TipoNotificacion.SolicitudRechazada);
+        Assert.AreEqual(MotivoTopeDeUnidades, LeerNoLeidas(contextoQueLee, DniDocente)[0].Prestamo.MotivoRechazo);
+    }
+
+    // Los topes se revisan antes que la disponibilidad, como al solicitar: si fallan los dos, queda el motivo del tope.
+    [TestMethod]
+    public void Aprobar_SinUnidadesYSinCumplirElTope_QuedaRechazadoConElMotivoDelTope()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio, tipoEquipamiento: NombreTipoConAprobacionSinUnidades);
+        BajarTopesDelDocente(maxUnidadesPorCatalogo: 1, maxPrestamosConcurrentes: 3);
+
+        PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        Assert.AreEqual("Rechazado", resultado.Estado);
+        Assert.AreEqual(MotivoTopeDeUnidades, resultado.MotivoRechazo);
+    }
+
+    [TestMethod]
+    public void Aprobar_TopeDeConcurrentesBajadoDespuesDeSolicitar_QuedaRechazadoPorElTope()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        CrearSolicitudPendiente(servicio);
+        BajarTopesDelDocente(maxUnidadesPorCatalogo: 40, maxPrestamosConcurrentes: 1);
+
+        PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        Assert.AreEqual("Rechazado", resultado.Estado);
+        Assert.AreEqual(MotivoTopeDePrestamosConcurrentes, resultado.MotivoRechazo);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Prestamo guardado = ObtenerPrestamoGuardado(contextoQueLee, idPrestamo);
+        Assert.AreEqual(EstadoPrestamo.Rechazado, guardado.Estado);
+        Assert.IsNull(guardado.Evaluador);
+        Assert.AreEqual(0, guardado.UnidadesAsignadas.Count);
+    }
+
+    // El docente tiene un maximo de 3 concurrentes: con 3 pendientes, el que se aprueba ya es uno de ellos.
+    [TestMethod]
+    public void Aprobar_JustoEnElMaximoDeConcurrentes_NoCuentaDosVecesElQueSeAprueba()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto camara = CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1);
+        Guid idPrestamo = servicio.Solicitar(camara, DniDocente).Id;
+        servicio.Solicitar(camara, DniDocente);
+        servicio.Solicitar(camara, DniDocente);
+
+        PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+    }
+
+    [TestMethod]
+    public void Aprobar_SolicitudPendienteConUnidades_RegistraEnElLogLaAprobacionDelEvaluador()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada> { AccionAuditada.SolicitudDePrestamo, AccionAuditada.AprobacionDePrestamo },
+            entradas.Select(entrada => entrada.Accion).ToList(),
+            "Deberia registrarse una sola aprobacion despues de la solicitud");
+        Assert.AreEqual(DniSupervisor, entradas[1].Responsable?.Dni, "La aprobacion la registra el evaluador");
+        Assert.AreEqual(FechaDeEvaluacion, entradas[1].FechaHora);
+        Assert.AreEqual($"Aprobación del préstamo de {DocenteConDni}. Unidades: 2", entradas[1].Detalle);
+    }
+
+    [TestMethod]
+    public void Aprobar_SinUnidadesSuficientes_RegistraEnElLogElIntentoDelEvaluadorYElRechazoDelSistema()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio, tipoEquipamiento: NombreTipoConAprobacionSinUnidades);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada>
+            {
+                AccionAuditada.SolicitudDePrestamo, AccionAuditada.IntentoDeAprobacion, AccionAuditada.RechazoDePrestamo
+            },
+            entradas.Select(entrada => entrada.Accion).ToList(),
+            "Deberia registrarse el intento del evaluador y despues el rechazo del sistema");
+        Assert.AreEqual(DniSupervisor, entradas[1].Responsable?.Dni, "El intento lo registra el evaluador");
+        Assert.IsTrue(entradas[2].EsDelSistema(), "El rechazo por falta de unidades lo registra el sistema");
+        Assert.AreEqual(FechaDeEvaluacion, entradas[1].FechaHora);
+        Assert.AreEqual(FechaDeEvaluacion, entradas[2].FechaHora);
+        Assert.AreEqual($"Intento de aprobación del préstamo de {DocenteConDni}. Unidades: 2",
+            entradas[1].Detalle);
+        Assert.AreEqual($"Rechazo del préstamo de {DocenteConDni}. Unidades: 2", entradas[2].Detalle);
+    }
+
+    [TestMethod]
+    public void Aprobar_TopeDeUnidadesBajado_RegistraEnElLogElIntentoDelEvaluadorYElRechazoDelSistema()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        BajarTopesDelDocente(maxUnidadesPorCatalogo: 1, maxPrestamosConcurrentes: 3);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada>
+            {
+                AccionAuditada.SolicitudDePrestamo, AccionAuditada.IntentoDeAprobacion, AccionAuditada.RechazoDePrestamo
+            },
+            entradas.Select(entrada => entrada.Accion).ToList(),
+            "Deberia registrarse el intento del evaluador y despues el rechazo del sistema por el tope");
+        Assert.AreEqual(DniSupervisor, entradas[1].Responsable?.Dni, "El intento lo registra el evaluador");
+        Assert.IsTrue(entradas[2].EsDelSistema(), "El rechazo por el tope lo registra el sistema");
+        Assert.AreEqual(FechaDeEvaluacion, entradas[2].FechaHora);
+    }
+
+    // El intento lleva el texto fijo mas largo; con la persona y la cantidad al maximo no pasa los 200 caracteres.
+    [TestMethod]
+    public void Aprobar_SolicitanteYCantidadAlMaximo_RegistraLosDetallesSinPasarseDelLargo()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        CargarAdministradorConNombreYApellidoMaximos();
+        SolicitudPrestamoDto datos =
+            CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: int.MaxValue);
+        Guid idPrestamo = servicio.Solicitar(datos, DniAdministradorConNombreYApellidoMaximos).Id;
+
+        servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+        string persona = $"{NombreOApellidoMaximo('N')} {NombreOApellidoMaximo('A')} " +
+            $"(DNI {DniAdministradorConNombreYApellidoMaximos})";
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada>
+            {
+                AccionAuditada.SolicitudDePrestamo, AccionAuditada.IntentoDeAprobacion, AccionAuditada.RechazoDePrestamo
+            },
+            entradas.Select(entrada => entrada.Accion).ToList());
+        Assert.AreEqual($"Intento de aprobación del préstamo de {persona}. Unidades: {int.MaxValue}",
+            entradas[1].Detalle);
+    }
+
+    [TestMethod]
+    public void Aprobar_SinUnidadesSuficientes_LaBaseRechazaElLog_LanzaDbUpdateExceptionYQuedanElRechazoSuMovimientoYLaNotificacion()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio, tipoEquipamiento: NombreTipoConAprobacionSinUnidades);
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<RegistroAuditoria>(_opciones);
+        ServicioPrestamo servicioQueFalla = CrearServicioSobre(contextoQueFalla, new RelojFijo(FechaDeEvaluacion));
+
+        Assert.ThrowsException<DbUpdateException>(() => servicioQueFalla.Aprobar(idPrestamo, DniSupervisor));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(EstadoPrestamo.Rechazado, ObtenerPrestamoGuardado(contextoQueLee, idPrestamo).Estado);
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
+            LeerMovimientos(contextoQueLee).Select(movimiento => movimiento.Tipo).ToList(),
+            "El movimiento deberia guardarse antes que el log");
+        VerificarUnaNotificacion(contextoQueLee, idPrestamo, TipoNotificacion.SolicitudRechazada);
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada> { AccionAuditada.SolicitudDePrestamo },
+            LeerLog(contextoQueLee).Select(entrada => entrada.Accion).ToList(),
+            "Solo deberia quedar la entrada de la solicitud");
+    }
+
+    [TestMethod]
     public void Aprobar_LaBaseRechazaLaNotificacion_LanzaInvalidOperationExceptionYQuedanElPrestamoActivoYSusMovimientos()
     {
         ServicioPrestamo servicio = CrearServicio();
@@ -905,7 +1372,7 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
-    public void Rechazar_SolicitudPendiente_ElMovimientoYLaNotificacionLlevanLaMismaFecha()
+    public void Rechazar_SolicitudPendiente_ElMovimientoLaNotificacionYElLogLlevanLaMismaFecha()
     {
         ServicioPrestamo servicio = CrearServicio();
         Guid idPrestamo = CrearSolicitudPendiente(servicio);
@@ -917,9 +1384,13 @@ public sealed class ServicioPrestamoTests
         Movimiento rechazo = LeerMovimientos(contextoQueLee)
             .Single(movimiento => movimiento.Tipo == TipoMovimiento.Rechazo);
         Notificacion notificacion = LeerNoLeidas(contextoQueLee, DniDocente).Single();
+        RegistroAuditoria entradaDelRechazo = LeerLog(contextoQueLee)
+            .Single(entrada => entrada.Accion == AccionAuditada.RechazoDePrestamo);
 
         Assert.AreEqual(rechazo.FechaHora, notificacion.FechaHora,
             "La fecha del rechazo deberia tomarse una sola vez");
+        Assert.AreEqual(rechazo.FechaHora, entradaDelRechazo.FechaHora,
+            "El log deberia usar la misma fecha del rechazo");
     }
 
     [TestMethod]
@@ -989,6 +1460,27 @@ public sealed class ServicioPrestamoTests
         Assert.AreSame(docente, rechazo.Solicitante);
         Assert.AreSame(supervisor, rechazo.Evaluador, "El rechazo del supervisor deberia registrarlo como evaluador");
         Assert.IsNull(rechazo.Unidad);
+    }
+
+    [TestMethod]
+    public void Rechazar_SolicitudPendiente_RegistraEnElLogElRechazoDelEvaluador()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada> { AccionAuditada.SolicitudDePrestamo, AccionAuditada.RechazoDePrestamo },
+            entradas.Select(entrada => entrada.Accion).ToList(),
+            "Deberia registrarse el rechazo despues de la solicitud");
+        Assert.AreEqual(DniSupervisor, entradas[1].Responsable?.Dni, "El rechazo lo registra el evaluador");
+        Assert.AreEqual(FechaDeEvaluacion, entradas[1].FechaHora);
+        Assert.AreEqual($"Rechazo del préstamo de {DocenteConDni}. Unidades: 2", entradas[1].Detalle);
     }
 
     [TestMethod]
@@ -1376,7 +1868,8 @@ public sealed class ServicioPrestamoTests
             catalogo: new RepositorioCatalogoSql(contexto),
             movimientos: new RepositorioMovimientoSql(contexto),
             servicioNotificacion: servicioNotificacion,
-            reloj: reloj);
+            reloj: reloj,
+            auditoria: new RegistradorDeAuditoria(new RepositorioAuditoriaSql(contexto), reloj));
     }
 
     private SolicitudPrestamoDto CrearSolicitud(
@@ -1468,7 +1961,19 @@ public sealed class ServicioPrestamoTests
             .ThenInclude(prestamo => prestamo.Solicitante)
             .Include(movimiento => movimiento.Evaluador)
             .Include(movimiento => movimiento.Unidad)
+            .Include("_registro.Responsable")
             .OrderBy(movimiento => movimiento.Id)
+            .ToList();
+    }
+
+    // ObtenerRegistros los devuelve del mas nuevo al mas viejo: se ordenan por Id para leerlos en el orden
+    // en que se registraron, porque las entradas de una misma operacion comparten la fecha.
+    private static IReadOnlyList<RegistroAuditoria> LeerLog(SqlContext contextoQueLee)
+    {
+        FiltroAuditoria todos = new FiltroAuditoria { Desde = DateTime.MinValue };
+
+        return new RepositorioAuditoriaSql(contextoQueLee).ObtenerRegistros(todos)
+            .OrderBy(registro => registro.Id)
             .ToList();
     }
 
@@ -1522,6 +2027,53 @@ public sealed class ServicioPrestamoTests
         return otroCatalogo.Id;
     }
 
+    // Los catalogos de los ejemplos del foro sobre el tope de unidades por catalogo (2.1, h. 3).
+    private int CargarCatalogoElectronica()
+    {
+        Catalogo electronica = new Catalogo("Electronica");
+
+        electronica.AgregarTipo(CrearTipoEquipamiento(
+            nombre: NombreTipoNotebook,
+            requiereAprobacion: false,
+            cantidadUnidades: 3,
+            primerNumero: 401));
+        electronica.AgregarTipo(CrearTipoEquipamiento(
+            nombre: NombreTipoProyectorDeElectronica,
+            requiereAprobacion: false,
+            cantidadUnidades: 3,
+            primerNumero: 501));
+
+        new RepositorioCatalogoSql(_contexto).AgregarCatalogo(electronica);
+
+        return electronica.Id;
+    }
+
+    private int CargarCatalogoBiotecnologia()
+    {
+        Catalogo biotecnologia = new Catalogo("Biotecnologia");
+
+        biotecnologia.AgregarTipo(CrearTipoEquipamiento(
+            nombre: NombreTipoMicroscopio,
+            requiereAprobacion: false,
+            cantidadUnidades: 3,
+            primerNumero: 601));
+
+        new RepositorioCatalogoSql(_contexto).AgregarCatalogo(biotecnologia);
+
+        return biotecnologia.Id;
+    }
+
+    private static SolicitudPrestamoDto CrearSolicitudEnCatalogo(int idCatalogo, string tipoEquipamiento,
+        int cantidadSolicitada)
+    {
+        return new SolicitudPrestamoDto
+        {
+            IdCatalogo = idCatalogo,
+            TipoEquipamiento = tipoEquipamiento,
+            CantidadSolicitada = cantidadSolicitada
+        };
+    }
+
     // Con el contexto del servicio: la proxima solicitud usa el tipo que ese contexto ya tiene cargado.
     private void CambiarDuracionDelTipo(string nombreTipo, int diasHabiles)
     {
@@ -1531,6 +2083,16 @@ public sealed class ServicioPrestamoTests
 
         tipo.Modificar(tipo.Nombre, tipo.Descripcion, diasHabiles, tipo.RequiereAprobacion, tipo.Categoria);
         catalogos.ActualizarCatalogo(catalogo);
+    }
+
+    // Con el contexto del servicio: con otro, el servicio seguiria viendo los topes del tipo que ya tiene cargado.
+    private void BajarTopesDelDocente(int maxUnidadesPorCatalogo, int maxPrestamosConcurrentes)
+    {
+        RepositorioTipoUsuarioSql tipos = new RepositorioTipoUsuarioSql(_contexto);
+        TipoUsuario docente = tipos.ObtenerTipoPorNombre(TipoUsuario.Docente().Nombre)!;
+
+        docente.ModificarTopes(maxUnidadesPorCatalogo, maxPrestamosConcurrentes);
+        tipos.ActualizarTipo(docente);
     }
 
     private static TipoEquipamiento CrearTipoEquipamiento(string nombre, bool requiereAprobacion, int cantidadUnidades,
@@ -1584,6 +2146,21 @@ public sealed class ServicioPrestamoTests
         Usuario funcionarioDesactivado = CrearUsuario(dni: DniFuncionarioDesactivado, tipoUsuario: funcionario);
         funcionarioDesactivado.Desactivar();
         usuarios.AgregarUsuario(funcionarioDesactivado);
+    }
+
+    // Con el tipo del Administrador ya cargado (un objeto por tipo): no tiene topes y puede pedir int.MaxValue.
+    private void CargarAdministradorConNombreYApellidoMaximos()
+    {
+        RepositorioUsuarioSql usuarios = new RepositorioUsuarioSql(_contexto);
+        TipoUsuario administrador = usuarios.ObtenerUsuarioPorDni(DniAdministrador)!.Tipo;
+
+        usuarios.AgregarUsuario(CrearUsuario(dni: DniAdministradorConNombreYApellidoMaximos,
+            tipoUsuario: administrador, nombre: NombreOApellidoMaximo('N'), apellido: NombreOApellidoMaximo('A')));
+    }
+
+    private static string NombreOApellidoMaximo(char letra)
+    {
+        return new string(letra, Usuario.LargoMaximoNombreOApellido);
     }
 
     private static Usuario CrearUsuario(

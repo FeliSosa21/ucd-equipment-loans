@@ -6,6 +6,11 @@ public sealed class PrestamoTests
     private static readonly DateTime FechaFija = new(2026, 10, 5, 10, 0, 0);
     private const int CantidadSolicitadaPorDefecto = 2;
     private const string MotivoDeRechazo = "El equipo esta reservado para un examen";
+    private const string MotivoFaltaDeUnidades = "No hay unidades suficientes para el tipo de equipamiento";
+    private const string MotivoTopeDeUnidades =
+        "Supera el maximo de unidades por catalogo al momento de la aprobacion";
+    private const string MotivoTopeDePrestamosConcurrentes =
+        "Supera el maximo de prestamos concurrentes al momento de la aprobacion";
 
     [TestMethod]
     public void Constructor_DatosValidos_NaceSolicitado()
@@ -692,6 +697,165 @@ public sealed class PrestamoTests
         bool vencido = prestamo.EstaVencido(diaSiguienteALaFechaEsperada);
 
         Assert.IsFalse(vencido);
+    }
+
+    [TestMethod]
+    public void ActivarORechazarPorFaltaDeUnidades_ConUnidadesSuficientes_QuedaActivoConLasPrimerasUnidades()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: 3);
+
+        prestamo.ActivarORechazarPorFaltaDeUnidades();
+
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        CollectionAssert.AreEqual(unidades.Take(CantidadSolicitadaPorDefecto).ToList(),
+            prestamo.UnidadesAsignadas.ToList());
+        Assert.IsNull(prestamo.Evaluador);
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
+    public void ActivarORechazarPorFaltaDeUnidades_SinUnidadesSuficientes_QuedaRechazadoSinUnidadesNiEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo();
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: 1);
+
+        prestamo.ActivarORechazarPorFaltaDeUnidades();
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(MotivoFaltaDeUnidades, prestamo.MotivoRechazo);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+        Assert.IsNull(prestamo.Evaluador);
+        Assert.IsTrue(unidades[0].EstaDisponible(), "La unidad deberia seguir disponible");
+    }
+
+    [TestMethod]
+    public void ActivarORechazarPorFaltaDeUnidades_PrestamoNoSolicitado_LanzaYNoCambiaNada()
+    {
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
+
+        Assert.ThrowsException<DominioException>(() => prestamo.ActivarORechazarPorFaltaDeUnidades());
+
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        CollectionAssert.AreEqual(unidades, prestamo.UnidadesAsignadas.ToList());
+        Assert.IsNull(prestamo.MotivoRechazo);
+        Assert.IsNull(prestamo.Evaluador);
+    }
+
+    [TestMethod]
+    public void ActivarORechazarPorFaltaDeUnidades_TipoQueRequiereAprobacion_LanzaYNoCambiaNada()
+    {
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: CrearTipoEquipamiento(requiereAprobacion: true));
+
+        Assert.ThrowsException<DominioException>(() => prestamo.ActivarORechazarPorFaltaDeUnidades());
+
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
+    public void AprobarORechazarPorFaltaDeUnidades_ConUnidadesSuficientes_QuedaActivoConElEvaluadorYLasPrimerasUnidades()
+    {
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: CrearTipoEquipamiento(requiereAprobacion: true));
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: 3);
+        Usuario evaluador = CrearEvaluador();
+
+        prestamo.AprobarORechazarPorFaltaDeUnidades(evaluador);
+
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        CollectionAssert.AreEqual(unidades.Take(CantidadSolicitadaPorDefecto).ToList(),
+            prestamo.UnidadesAsignadas.ToList());
+        Assert.AreSame(evaluador, prestamo.Evaluador);
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
+    public void AprobarORechazarPorFaltaDeUnidades_SinUnidadesSuficientes_QuedaRechazadoSinUnidadesNiEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: CrearTipoEquipamiento(requiereAprobacion: true));
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: 1);
+
+        prestamo.AprobarORechazarPorFaltaDeUnidades(CrearEvaluador());
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(MotivoFaltaDeUnidades, prestamo.MotivoRechazo);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+        Assert.IsNull(prestamo.Evaluador);
+        Assert.IsTrue(unidades[0].EstaDisponible(), "La unidad deberia seguir disponible");
+    }
+
+    [TestMethod]
+    public void AprobarORechazarPorFaltaDeUnidades_EvaluadorNulo_LanzaYNoCambiaNada()
+    {
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: CrearTipoEquipamiento(requiereAprobacion: true));
+
+        Assert.ThrowsException<DominioException>(() => prestamo.AprobarORechazarPorFaltaDeUnidades(null!));
+
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
+    public void AprobarORechazarPorFaltaDeUnidades_PrestamoNoSolicitado_LanzaYNoCambiaNada()
+    {
+        Prestamo prestamo = CrearPrestamoRechazado();
+        CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: 3);
+
+        Assert.ThrowsException<DominioException>(
+            () => prestamo.AprobarORechazarPorFaltaDeUnidades(CrearEvaluador()));
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(MotivoFaltaDeUnidades, prestamo.MotivoRechazo);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+        Assert.IsNull(prestamo.Evaluador);
+    }
+
+    [TestMethod]
+    public void RechazarPorTopeDeUnidades_PrestamoSolicitado_QuedaRechazadoConSuMotivoYSinEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        prestamo.RechazarPorTopeDeUnidades();
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(MotivoTopeDeUnidades, prestamo.MotivoRechazo);
+        Assert.IsNull(prestamo.Evaluador);
+    }
+
+    [TestMethod]
+    public void RechazarPorTopeDeUnidades_PrestamoNoSolicitado_LanzaYNoCambiaNada()
+    {
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
+
+        Assert.ThrowsException<DominioException>(() => prestamo.RechazarPorTopeDeUnidades());
+
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        CollectionAssert.AreEqual(unidades, prestamo.UnidadesAsignadas.ToList());
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
+    public void RechazarPorTopeDePrestamosConcurrentes_PrestamoSolicitado_QuedaRechazadoConSuMotivoYSinEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        prestamo.RechazarPorTopeDePrestamosConcurrentes();
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(MotivoTopeDePrestamosConcurrentes, prestamo.MotivoRechazo);
+        Assert.IsNull(prestamo.Evaluador);
+    }
+
+    [TestMethod]
+    public void RechazarPorTopeDePrestamosConcurrentes_PrestamoNoSolicitado_LanzaYNoCambiaNada()
+    {
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
+
+        Assert.ThrowsException<DominioException>(() => prestamo.RechazarPorTopeDePrestamosConcurrentes());
+
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        CollectionAssert.AreEqual(unidades, prestamo.UnidadesAsignadas.ToList());
+        Assert.IsNull(prestamo.MotivoRechazo);
     }
 
     private static Usuario CrearSolicitante()

@@ -17,16 +17,27 @@ public class ServicioPrestamo
     private const string MensajeEstadoNoValido = "El estado del prestamo no es valido";
     private const int DiasPorDefecto = 30;
 
+    private static readonly Dictionary<AccionAuditada, string> TextosDelLog =
+        new Dictionary<AccionAuditada, string>
+        {
+            { AccionAuditada.SolicitudDePrestamo, "Solicitud de préstamo de" },
+            { AccionAuditada.ActivacionDePrestamo, "Activación del préstamo de" },
+            { AccionAuditada.RechazoDePrestamo, "Rechazo del préstamo de" },
+            { AccionAuditada.IntentoDeAprobacion, "Intento de aprobación del préstamo de" },
+            { AccionAuditada.AprobacionDePrestamo, "Aprobación del préstamo de" }
+        };
+
     private readonly RepositorioPrestamoSql _prestamos;
     private readonly RepositorioUsuarioSql _usuarios;
     private readonly RepositorioCatalogoSql _catalogo;
     private readonly RepositorioMovimientoSql _movimientos;
     private readonly ServicioNotificacion _servicioNotificacion;
     private readonly TimeProvider _reloj;
+    private readonly RegistradorDeAuditoria _auditoria;
 
     public ServicioPrestamo(RepositorioPrestamoSql prestamos, RepositorioUsuarioSql usuarios,
         RepositorioCatalogoSql catalogo, RepositorioMovimientoSql movimientos,
-        ServicioNotificacion servicioNotificacion, TimeProvider reloj)
+        ServicioNotificacion servicioNotificacion, TimeProvider reloj, RegistradorDeAuditoria auditoria)
     {
         _prestamos = prestamos;
         _usuarios = usuarios;
@@ -34,6 +45,7 @@ public class ServicioPrestamo
         _movimientos = movimientos;
         _servicioNotificacion = servicioNotificacion;
         _reloj = reloj;
+        _auditoria = auditoria;
     }
 
     public PrestamoDto Solicitar(SolicitudPrestamoDto datos, string dniSolicitante)
@@ -42,7 +54,7 @@ public class ServicioPrestamo
 
         Usuario solicitante = ObtenerSolicitante(dniSolicitante);
         TipoEquipamiento tipo = ObtenerTipoEquipamiento(datos.IdCatalogo, datos.TipoEquipamiento);
-        ValidarLimites(solicitante, datos.CantidadSolicitada);
+        ValidarLimites(solicitante, tipo, datos.CantidadSolicitada);
 
         Prestamo prestamo = TraduccionDeErrores.Ejecutar(
             () => RegistrarSolicitud(solicitante, tipo, datos.CantidadSolicitada));
@@ -56,9 +68,9 @@ public class ServicioPrestamo
                     dniEvaluador, Permiso.EvaluarSolicitud, MensajeSinPermisoParaEvaluar);
         Prestamo prestamo = ObtenerPrestamo(idPrestamo);
 
-        ObtenerSolicitante(prestamo.Solicitante.Dni);
+        Usuario solicitante = ObtenerSolicitante(prestamo.Solicitante.Dni);
 
-        TraduccionDeErrores.Ejecutar(() => ResolverAprobacion(prestamo, evaluador));
+        TraduccionDeErrores.Ejecutar(() => ResolverAprobacion(prestamo, solicitante, evaluador));
 
         return CrearPrestamoDto(prestamo);
     }
@@ -192,25 +204,33 @@ public class ServicioPrestamo
         return tipo;
     }
 
-    private void ValidarLimites(Usuario solicitante, int cantidadSolicitada)
+    private void ValidarLimites(Usuario solicitante, TipoEquipamiento tipo, int cantidadSolicitada)
     {
-        IReadOnlyList<Prestamo> prestamosDelSolicitante = _prestamos.ObtenerPrestamosDeSolicitante(solicitante.Dni);
-
-        int unidadesActivas = prestamosDelSolicitante
-            .Where(prestamo => prestamo.Estado == EstadoPrestamo.Activo)
-            .Sum(prestamo => prestamo.UnidadesAsignadas.Count);
-
-        if (!solicitante.Tipo.PermiteUnidades(unidadesActivas + cantidadSolicitada))
+        if (!PermiteUnidadesEnElCatalogo(solicitante, tipo.Id, cantidadSolicitada))
         {
             throw new ServicioException("La cantidad solicitada supera el maximo de unidades del solicitante");
         }
 
-        int prestamosVigentes = prestamosDelSolicitante.Count(prestamo => prestamo.EstaVigente());
-
-        if (!solicitante.Tipo.PuedeAgregarPrestamo(prestamosVigentes))
+        if (!PuedeTenerOtroPrestamoVigente(solicitante, idExcluido: null))
         {
             throw new ServicioException("El solicitante alcanzo el maximo de prestamos vigentes");
         }
+    }
+
+    private bool PermiteUnidadesEnElCatalogo(Usuario solicitante, int idTipoEquipamiento, int cantidadSolicitada)
+    {
+        int unidadesActivasEnElCatalogo =
+            _prestamos.ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(solicitante.Dni, idTipoEquipamiento);
+
+        return solicitante.PermiteUnidades(unidadesActivasEnElCatalogo + cantidadSolicitada);
+    }
+
+    // idExcluido es el prestamo que se aprueba: ya esta Solicitado y no tiene que contarse dos veces.
+    private bool PuedeTenerOtroPrestamoVigente(Usuario solicitante, Guid? idExcluido)
+    {
+        int prestamosVigentes = _prestamos.ContarPrestamosVigentesDeSolicitante(solicitante.Dni, idExcluido);
+
+        return solicitante.PuedeAgregarPrestamo(prestamosVigentes);
     }
 
     private Prestamo RegistrarSolicitud(Usuario solicitante, TipoEquipamiento tipo, int cantidadSolicitada)
@@ -223,15 +243,7 @@ public class ServicioPrestamo
 
         if (!tipo.RequiereAprobacion)
         {
-            if (tipo.CantidadDisponibles() < cantidadSolicitada)
-            {
-                prestamo.RechazarPorFaltaDeUnidades();
-            }
-            else
-            {
-                List<UnidadFisica> unidades = tipo.UnidadesDisponibles().Take(cantidadSolicitada).ToList();
-                prestamo.Activar(unidades);
-            }
+            prestamo.ActivarORechazarPorFaltaDeUnidades();
         }
 
         _prestamos.AgregarPrestamo(prestamo);
@@ -247,31 +259,52 @@ public class ServicioPrestamo
         }
 
         RegistrarMovimientosDePrestamo(prestamo, crearRegistroDelSistema);
+        RegistrarSolicitudEnAuditoria(prestamo);
 
         return prestamo;
     }
 
-    private void ResolverAprobacion(Prestamo prestamo, Usuario evaluador)
+    private void RegistrarSolicitudEnAuditoria(Prestamo prestamo)
+    {
+        RegistrarEnAuditoria(RegistroDeAccion.DeUsuario(prestamo.Solicitante, prestamo.FechaHoraPrestamo),
+            AccionAuditada.SolicitudDePrestamo, prestamo);
+
+        if (prestamo.Estado == EstadoPrestamo.Activo)
+        {
+            RegistrarEnAuditoria(RegistroDeAccion.DelSistema(prestamo.FechaHoraPrestamo),
+                AccionAuditada.ActivacionDePrestamo, prestamo);
+        }
+        else if (prestamo.Estado == EstadoPrestamo.Rechazado)
+        {
+            RegistrarEnAuditoria(RegistroDeAccion.DelSistema(prestamo.FechaHoraPrestamo),
+                AccionAuditada.RechazoDePrestamo, prestamo);
+        }
+    }
+
+    private void ResolverAprobacion(Prestamo prestamo, Usuario solicitante, Usuario evaluador)
     {
         DateTime fechaHoraEvaluacion = _reloj.GetLocalNow().DateTime;
 
-        DecidirEvaluacion(prestamo, evaluador);
+        DecidirEvaluacion(prestamo, solicitante, evaluador);
         _prestamos.ActualizarPrestamo(prestamo);
         RegistrarMovimientosDeEvaluacion(prestamo, evaluador, fechaHoraEvaluacion);
         _servicioNotificacion.RegistrarResultadoDeEvaluacion(prestamo, fechaHoraEvaluacion);
+        RegistrarEvaluacionEnAuditoria(prestamo, evaluador, fechaHoraEvaluacion);
     }
 
-    private static void DecidirEvaluacion(Prestamo prestamo, Usuario evaluador)
+    private void DecidirEvaluacion(Prestamo prestamo, Usuario solicitante, Usuario evaluador)
     {
-        if (prestamo.TipoEquipamiento.CantidadDisponibles() < prestamo.CantidadSolicitada)
+        if (!PermiteUnidadesEnElCatalogo(solicitante, prestamo.TipoEquipamiento.Id, prestamo.CantidadSolicitada))
         {
-            prestamo.RechazarPorFaltaDeUnidades();
+            prestamo.RechazarPorTopeDeUnidades();
+        }
+        else if (!PuedeTenerOtroPrestamoVigente(solicitante, prestamo.Id))
+        {
+            prestamo.RechazarPorTopeDePrestamosConcurrentes();
         }
         else
         {
-            List<UnidadFisica> unidades = prestamo.TipoEquipamiento.UnidadesDisponibles()
-                .Take(prestamo.CantidadSolicitada).ToList();
-            prestamo.Aprobar(evaluador, unidades);
+            prestamo.AprobarORechazarPorFaltaDeUnidades(evaluador);
         }
     }
 
@@ -297,6 +330,24 @@ public class ServicioPrestamo
         }
     }
 
+    // Si el sistema rechaza al aprobar, el evaluador figura en el intento y el rechazo es del sistema
+    // (foro 2.4, h. 4: el supervisor no rechazo, intento aprobar).
+    private void RegistrarEvaluacionEnAuditoria(Prestamo prestamo, Usuario evaluador, DateTime fechaHoraEvaluacion)
+    {
+        if (prestamo.Estado == EstadoPrestamo.Rechazado)
+        {
+            RegistrarEnAuditoria(RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion),
+                AccionAuditada.IntentoDeAprobacion, prestamo);
+            RegistrarEnAuditoria(RegistroDeAccion.DelSistema(fechaHoraEvaluacion),
+                AccionAuditada.RechazoDePrestamo, prestamo);
+        }
+        else
+        {
+            RegistrarEnAuditoria(RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion),
+                AccionAuditada.AprobacionDePrestamo, prestamo);
+        }
+    }
+
     private void RegistrarRechazo(Prestamo prestamo, Usuario evaluador, string motivo)
     {
         DateTime fechaHoraEvaluacion = _reloj.GetLocalNow().DateTime;
@@ -306,6 +357,8 @@ public class ServicioPrestamo
         _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo,
             RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion)));
         _servicioNotificacion.RegistrarResultadoDeEvaluacion(prestamo, fechaHoraEvaluacion);
+        RegistrarEnAuditoria(RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion),
+            AccionAuditada.RechazoDePrestamo, prestamo);
     }
 
     // Un registro nuevo por movimiento: con EF, RegistroDeAccion es owned de Movimiento y una misma
@@ -316,6 +369,14 @@ public class ServicioPrestamo
         {
             _movimientos.AgregarMovimiento(Movimiento.DePrestamo(prestamo, crearRegistro(), unidad));
         }
+    }
+
+    // El detalle lleva solo textos fijos, el solicitante y la cantidad, para no pasar del largo maximo del log
+    // (D18, regla 3). Cada entrada recibe un registro nuevo (D18, regla 4).
+    private void RegistrarEnAuditoria(RegistroDeAccion registro, AccionAuditada accion, Prestamo prestamo)
+    {
+        _auditoria.Registrar(registro, accion,
+            $"{TextosDelLog[accion]} {prestamo.Solicitante.NombreCompletoConDni}. Unidades: {prestamo.CantidadSolicitada}");
     }
 
     private static void ValidarRango(FiltroDePrestamosDto filtro)
