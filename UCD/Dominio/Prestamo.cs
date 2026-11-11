@@ -72,26 +72,17 @@ public class Prestamo
 
     public void RechazarPorFaltaDeUnidades()
     {
-        ValidarQueEsteSolicitado();
-
-        Estado = EstadoPrestamo.Rechazado;
-        MotivoRechazo = MotivoFaltaDeUnidades;
+        RechazarDelSistema(MotivoFaltaDeUnidades);
     }
 
     public void RechazarPorTopeDeUnidades()
     {
-        ValidarQueEsteSolicitado();
-
-        Estado = EstadoPrestamo.Rechazado;
-        MotivoRechazo = MotivoTopeDeUnidades;
+        RechazarDelSistema(MotivoTopeDeUnidades);
     }
 
     public void RechazarPorTopeDePrestamosConcurrentes()
     {
-        ValidarQueEsteSolicitado();
-
-        Estado = EstadoPrestamo.Rechazado;
-        MotivoRechazo = MotivoTopeDePrestamosConcurrentes;
+        RechazarDelSistema(MotivoTopeDePrestamosConcurrentes);
     }
 
     public void ActivarORechazarPorFaltaDeUnidades()
@@ -250,6 +241,14 @@ public class Prestamo
                 throw new DominioException($"La unidad {unidadFisica.IdInstitucional} no esta disponible");
             }
         }
+    }
+
+    private void RechazarDelSistema(string motivo)
+    {
+        ValidarQueEsteSolicitado();
+
+        Estado = EstadoPrestamo.Rechazado;
+        MotivoRechazo = motivo;
     }
 
     private List<UnidadFisica> PrimerasUnidadesDisponibles()
