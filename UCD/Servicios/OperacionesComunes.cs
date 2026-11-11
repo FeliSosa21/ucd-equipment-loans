@@ -75,4 +75,15 @@ internal static class OperacionesComunes
 
         return texto.Trim();
     }
+
+    // Los campos opcionales en blanco se guardan como null: "sin numero de serie" no es lo mismo que "   ".
+    public static string? NormalizarOpcional(string? texto)
+    {
+        if (string.IsNullOrWhiteSpace(texto))
+        {
+            return null;
+        }
+
+        return texto.Trim();
+    }
 }
