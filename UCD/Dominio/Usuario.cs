@@ -85,6 +85,11 @@ public class Usuario
         return Tipo.PermiteUnidades(cantidadSolicitada);
     }
 
+    public bool PuedeAgregarPrestamo(int prestamosVigentes)
+    {
+        return false;
+    }
+
     public void ModificarDatos(string nombre, string apellido, string correo)
     {
         nombre = Recortar(nombre);
