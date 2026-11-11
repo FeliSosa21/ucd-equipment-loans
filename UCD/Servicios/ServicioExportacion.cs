@@ -1,3 +1,4 @@
+using System.Globalization;
 using Data.Repositorios;
 using Dominio;
 using DTOs;
@@ -10,10 +11,13 @@ public class ServicioExportacion
     private const string MensajeFaltaDesde = "Elija la fecha desde";
     private const string MensajeFaltaHasta = "Elija la fecha hasta";
     private const string MensajeRangoInvertido = "La fecha desde no puede ser posterior a la fecha hasta";
+    private const string MensajeFormatoDesconocido = "El formato elegido no esta disponible";
+    private const string FormatoDeFechaEnElNombre = "yyyy-MM-dd";
 
     private readonly RepositorioPrestamoSql _prestamos;
     private readonly RepositorioDevolucionSql _devoluciones;
     private readonly RepositorioUsuarioSql _usuarios;
+    private readonly List<IExportadorDeTabla> _exportadores;
 
     public ServicioExportacion(RepositorioPrestamoSql prestamos, RepositorioDevolucionSql devoluciones,
         RepositorioCatalogoSql catalogos, RepositorioUsuarioSql usuarios, IEnumerable<IExportadorDeTabla> exportadores)
@@ -21,11 +25,54 @@ public class ServicioExportacion
         _prestamos = prestamos;
         _devoluciones = devoluciones;
         _usuarios = usuarios;
+        _exportadores = exportadores.ToList();
     }
 
     public List<ArchivoExportadoDto> Exportar(PedidoExportacionDto pedido, string dniResponsable)
     {
-        throw new NotImplementedException();
+        ArgumentNullException.ThrowIfNull(pedido);
+        ValidarResponsable(dniResponsable);
+        ValidarRango(pedido.Rango);
+        IExportadorDeTabla exportador = ObtenerExportador(pedido.Formato);
+        string sufijoDelNombre = CrearSufijoDelNombre(pedido.Rango);
+
+        return new List<ArchivoExportadoDto>
+        {
+            CrearArchivo("prestamos" + sufijoDelNombre, new TablaExportableDto(), exportador),
+            CrearArchivo("devoluciones" + sufijoDelNombre, new TablaExportableDto(), exportador)
+        };
+    }
+
+    // Cada exportador declara su formato: agregar uno nuevo no obliga a tocar este servicio.
+    private IExportadorDeTabla ObtenerExportador(string? formato)
+    {
+        IExportadorDeTabla? exportador = _exportadores.FirstOrDefault(candidato =>
+            string.Equals(candidato.Formato, formato, StringComparison.OrdinalIgnoreCase));
+
+        if (exportador is null)
+        {
+            throw new ServicioException(nameof(PedidoExportacionDto.Formato), MensajeFormatoDesconocido);
+        }
+
+        return exportador;
+    }
+
+    private static string CrearSufijoDelNombre(RangoDeExportacionDto rango)
+    {
+        string desde = rango.Desde!.Value.ToString(FormatoDeFechaEnElNombre, CultureInfo.InvariantCulture);
+        string hasta = rango.Hasta!.Value.ToString(FormatoDeFechaEnElNombre, CultureInfo.InvariantCulture);
+        return $"_{desde}_{hasta}";
+    }
+
+    private static ArchivoExportadoDto CrearArchivo(string nombreBase, TablaExportableDto tabla,
+        IExportadorDeTabla exportador)
+    {
+        return new ArchivoExportadoDto
+        {
+            Nombre = nombreBase + exportador.Extension,
+            Contenido = exportador.Exportar(tabla),
+            TipoContenido = exportador.TipoContenido
+        };
     }
 
     public CantidadesAExportarDto ContarRegistros(RangoDeExportacionDto rango, string dniResponsable)
