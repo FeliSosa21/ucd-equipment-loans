@@ -70,9 +70,24 @@ public class Usuario
         return EstaActivo() && TienePermiso(Permiso.GestionarUsuarios);
     }
 
+    public bool EstaHabilitadoPara(Permiso permiso)
+    {
+        return EstaActivo() && TienePermiso(permiso);
+    }
+
     public bool EstaPendienteDeActivacion()
     {
         return Tipo.NoTienePermisos();
+    }
+
+    public bool PermiteUnidades(int cantidadSolicitada)
+    {
+        return Tipo.PermiteUnidades(cantidadSolicitada);
+    }
+
+    public bool PuedeAgregarPrestamo(int prestamosVigentes)
+    {
+        return Tipo.PuedeAgregarPrestamo(prestamosVigentes);
     }
 
     public void ModificarDatos(string nombre, string apellido, string correo)

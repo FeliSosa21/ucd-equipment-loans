@@ -99,6 +99,34 @@ namespace Data.Migrations
                     b.ToTable("Movimientos", (string)null);
                 });
 
+            modelBuilder.Entity("Dominio.Notificacion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("EstaLeida")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("FechaHora")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("PrestamoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PrestamoId");
+
+                    b.ToTable("Notificaciones", (string)null);
+                });
+
             modelBuilder.Entity("Dominio.Prestamo", b =>
                 {
                     b.Property<Guid>("Id")
@@ -222,38 +250,6 @@ namespace Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TiposDeUsuario", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            permisos = ""
-                        },
-                        new
-                        {
-                            Id = 2,
-                            permisos = "ConsultarCatalogo,ConsultarDisponibilidad,SolicitarPrestamo,ConsultarMisSolicitudes"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            permisos = "ConsultarCatalogo,ConsultarHistorico,ConsultarDisponibilidad,SolicitarPrestamo,ConsultarMisSolicitudes"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            permisos = "ConsultarCatalogo,GestionarUnidades,RealizarPrestamo,RegistrarDevolucion"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            permisos = "ConsultarCatalogo,ConsultarHistorico,GestionarUnidades,RegistrarDevolucion,GestionarCatalogo,EvaluarSolicitud,ConsultarPrestamos"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            permisos = "ConsultarCatalogo,ConsultarHistorico,ConsultarDisponibilidad,SolicitarPrestamo,ConsultarMisSolicitudes,GestionarUnidades,RealizarPrestamo,RegistrarDevolucion,GestionarCatalogo,EvaluarSolicitud,ConsultarPrestamos,GestionarUsuarios"
-                        });
                 });
 
             modelBuilder.Entity("Dominio.UnidadFisica", b =>
@@ -522,6 +518,17 @@ namespace Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Dominio.Notificacion", b =>
+                {
+                    b.HasOne("Dominio.Prestamo", "Prestamo")
+                        .WithMany()
+                        .HasForeignKey("PrestamoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Prestamo");
+                });
+
             modelBuilder.Entity("Dominio.Prestamo", b =>
                 {
                     b.HasOne("Dominio.Usuario", "Evaluador")
@@ -627,50 +634,6 @@ namespace Data.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("TipoUsuarioId");
-
-                            b1.HasData(
-                                new
-                                {
-                                    TipoUsuarioId = 1,
-                                    Descripcion = "Cuenta registrada que espera que un administrador le asigne un tipo de usuario.",
-                                    Imagen = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABi0lEQVR42u2b0U0EMQxEk9H2BkVABVAOVABFcNXBFxI60LGb2OPxxv48ndZ+Y2eVeJ3WysrKVrbOdPby9vG597/Pj/c9vQBHgKME6erg3kL0LOBeQvRs4NZCIDO8hX9khreIo2cGt1gSOBP8SHw4E/xInFtUkE8Pd79+e32/6G6FrbL/F7iXEHveB1CDP/I/i7ihBs8WAVHrnSnCsABZ3vozVQDV7LOqAGfP/n88aIsbVsj+La6qAG8Hs7s67+1xVQBj/Y9m0SP713y0CjgKwzoZUpfAXijmsZjeD/iGU+kHhDVEImAlBGA2RGQEmOkFeIuxKZ8Efz7DSwgowzOOxcgA7/lcZIH3ej4sv7Yyenizfq75kCXzXv6QEd7SL7LCW/lH5IRWE/h0jszZt4gD0XN60YMT1RIb/bysUv574rnFURWgMrMbNTQFpcHliIkxqE1vs8fltuw9PepWOEsVHIkTKnP7UZOi/QyzwjOJgeItDmYcUL3KwvJfN0Za3RlqdWusLXxvsKxscfsCzJLHh9CjvCgAAAAASUVORK5CYII=",
-                                    Nombre = "Sin permisos"
-                                },
-                                new
-                                {
-                                    TipoUsuarioId = 2,
-                                    Descripcion = "Estudiantes de la facultad: consultan el catálogo y solicitan préstamos de equipamiento.",
-                                    Imagen = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABiklEQVR42u2bQU7EMAxFk69u4EpwNVjA1eBKzBJWSGhAQ5vY39+NvRyNar9vp0pcp7WysrKVrTOdPbx8fO797/vzfU8vwBHgKEG6Ori3ED0LuJcQPRu4tRDIDG/hH5nhLeLomcEtlgTOBD8SH84EPxLnFhXk29Pdr98eXy+6W2Gr7P8F7iXEnvcB1OCP/M8ibqjBs0VA1HpnijAsQJa3/kwVQDX7rCrA2bP/Hw/a4oYVsn+LqyrA28Hsrs57e1wVwFj/o1n0yP41H60CjsKwTobUJbAXinkspvcDvuFU+gFhDZEIWAkBmA0RGQFmegHeYmzKJ8Gfz/ASAsrwjGMxMsB7PhdZ4L2eD8uvrYwe3qyfaz5kybyXP2SEt/SLrPBW/hE5odUEPp0jc/Yt4kD0nF704ES1xEY/L6uU/554bnFUBajM7EYNTUFpcDliYgxq09vscbkte0+PuhXOUgVH4oTK3H7UpGg/w6zwTGKgeIuDGQdUr7Kw/NeNkVZ3hlrdGmsL3xssK1vcvgDTb8v7Luk3MwAAAABJRU5ErkJggg==",
-                                    Nombre = "Estudiante"
-                                },
-                                new
-                                {
-                                    TipoUsuarioId = 3,
-                                    Descripcion = "Docentes de la facultad: solicitan préstamos con topes más altos y consultan el histórico.",
-                                    Imagen = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABiklEQVR42u2bUU7EMAxEk1EPAJeCW4HgVnAp9gbwhYQWtLSJPR439udqVfuNnSpxndbKyspWts50dvf28rn3v5fH555egCPAUYJ0dXBvIXoWcC8hejZwayGQGd7CPzLDW8TRM4NbLAmcCX4kPpwJfiTOLSrIj4enX7/dv7/qboWtsv8XuJcQe94HUIM/8j+LuKEGzxYBUeudKcKwAFne+jNVANXss6oAZ8/+fzxoixtWyP4trqoAbwezuzrv7XFVAGP9j2bRI/vXfLQKOArDOhlSl8BeKOaxmN4P+IZT6QeENUQiYCUEYDZEZASY6QV4i7EpnwR/PsNLCCjDM47FyADv+Vxkgfd6Piy/tjJ6eLN+rvmQJfNe/pAR3tIvssJb+UfkhFYT+HSOzNm3iAPRc3rRgxPVEhv9vKxS/nviucVRFaAysxs1NAWlweWIiTGoTW+zx+W27D096lY4SxUciRMqc/tRk6L9DLPCM4mB4i0OZhxQvcrC8l83RlrdGWp1a6wtfG+wrGxx+wLGV9PGmW25PwAAAABJRU5ErkJggg==",
-                                    Nombre = "Docente"
-                                },
-                                new
-                                {
-                                    TipoUsuarioId = 4,
-                                    Descripcion = "Personal del centro: gestiona unidades, entrega préstamos y registra devoluciones.",
-                                    Imagen = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABh0lEQVR42u2bwU7EMAxEk1FPLD8JHwY/yXJlT0hoQUub2ONxYx9Xq9pv7FSJ67RWVla2snWms+vb5Wvvfy+v155egCPAUYJ0dXBvIXoWcC8hejZwayGQGd7CPzLDW8TRM4NbLAmcCX4kPpwJfiTOLSrIp5ePX799vj/rboWtsv8XuJcQe94HUIM/8j+LuKEGzxYBUeudKcKwAFne+jNVANXss6oAZ8/+fzxoixtWyP4jrqoAbwezuzrv7XFVAGP9j2bRI/v3fLQKOArDOhlSl8BeKOaxmN4P+IZT6QeENUQiYCUEYDZEZASY6QV4i7EpnwR/PsNLCCjDM47FyADv+Vxkgfd6Piy/tjJ6eLN+7vmQJfNe/pAR3tIvssJb+UfkhFYT+HSOzNm3iAPRc3rRgxPVEhv9vKxS/nviecRRFaAysxs1NAWlweWIiTGoTW+zx+W27D096lY4SxUciRMqc/tRk6L9DLPCM4mB4i0OZhxQvcrC8l83RlrdGWp1a6wtfG+wrGxxuwHl282KHT/3UQAAAABJRU5ErkJggg==",
-                                    Nombre = "Funcionario del centro de equipamiento"
-                                },
-                                new
-                                {
-                                    TipoUsuarioId = 5,
-                                    Descripcion = "Gestiona el catálogo y las unidades, evalúa solicitudes y consulta préstamos e histórico.",
-                                    Imagen = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABiklEQVR42u2bQU7EMAxFk69u4IxwCzgF3ALOyCxhhYQGNLSJ/f3d2MvRqPb7dqrEdVorKytb2TrT2cvDx+fe/z6/3/f0AhwBjhKkq4N7C9GzgHsJ0bOBWwuBzPAW/pEZ3iKOnhncYkngTPAj8eFM8CNxblFBPr3d/frt9fGiuxW2yv5f4F5C7HkfQA3+yP8s4oYaPFsERK13pgjDAmR5689UAVSzz6oCnD37//GgLW5YIfu3uKoCvB3M7uq8t8dVAYz1P5pFj+xf89Eq4CgM62RIXQJ7oZjHYno/4BtOpR8Q1hCJgJUQgNkQkRFgphfgLcamfBL8+QwvIaAMzzgWIwO853ORBd7r+bD82sro4c36ueZDlsx7+UNGeEu/yApv5R+RE1pN4NM5MmffIg5Ez+lFD05US2z087JK+e+J5xZHVYDKzG7U0BSUBpcjJsagNr3NHpfbsvf0qFvhLFVwJE6ozO1HTYr2M8wKzyQGirc4mHFA9SoLy3/dGGl1Z6jVrbG28L3BsrLF7QtqKcjdsAOVfgAAAABJRU5ErkJggg==",
-                                    Nombre = "Supervisor"
-                                },
-                                new
-                                {
-                                    TipoUsuarioId = 6,
-                                    Descripcion = "Gestiona usuarios y tipos de usuario; tiene todos los permisos y no tiene límites.",
-                                    Imagen = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABh0lEQVR42u2b0W3DMAxEpYMHaHdKpk52ajdovwoEaZHaEnk8WuRnEJh8R8qQaKq1srKyla0znX1cLl97//t+v/f0AhwBjhKkq4N7C9GzgHsJ0bOBWwuBzPAW/pEZ3iKOnhncYkngTPAj8eFM8CNxblFBvt1uv377vF51t8JW2f8L3EuIPe8DqMEf+Z9F3FCDZ4uAqPXOFGFYgCxv/ZkqgGr2WVWAs2f/Px60xQ0rZP8VV1WAt4PZXZ339rgqgLH+R7Pokf1nPloFHIVhnQypS2AvFPNYTO8H/MCp9APCGiIRsBICMBsiMgLM9AK8xdiUT4KPz/ASAsrwjGMxMsB7PhdZ4L2eD8uvrYwe3qyfZz5kybyXP2SEt/SLrPBW/hE5odUEPp0jc/Yt4kD0nF704ES1xEY/L6uU/554XnFUBajM7EYNTUFpcDliYgxq09vscbkte0+PuhXOUgVH4oTK3H7UpGg/w6zwTGKgeIuDGQdUr7Kw/NeNkVZ3hlrdGmsL3xssK1vcvgG0hdBvKvPwGAAAAABJRU5ErkJggg==",
-                                    Nombre = "Administrador"
-                                });
                         });
 
                     b.OwnsOne("Dominio.TopesDePrestamo", "topes", b1 =>
@@ -692,38 +655,6 @@ namespace Data.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("TipoUsuarioId");
-
-                            b1.HasData(
-                                new
-                                {
-                                    TipoUsuarioId = 1,
-                                    MaxPrestamosConcurrentes = 0,
-                                    MaxUnidadesPorCatalogo = 0
-                                },
-                                new
-                                {
-                                    TipoUsuarioId = 2,
-                                    MaxPrestamosConcurrentes = 2,
-                                    MaxUnidadesPorCatalogo = 2
-                                },
-                                new
-                                {
-                                    TipoUsuarioId = 3,
-                                    MaxPrestamosConcurrentes = 3,
-                                    MaxUnidadesPorCatalogo = 40
-                                },
-                                new
-                                {
-                                    TipoUsuarioId = 4,
-                                    MaxPrestamosConcurrentes = 0,
-                                    MaxUnidadesPorCatalogo = 0
-                                },
-                                new
-                                {
-                                    TipoUsuarioId = 5,
-                                    MaxPrestamosConcurrentes = 0,
-                                    MaxUnidadesPorCatalogo = 0
-                                });
                         });
 
                     b.Navigation("presentacion")

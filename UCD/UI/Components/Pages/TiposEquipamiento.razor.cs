@@ -18,42 +18,29 @@ public partial class TiposEquipamiento
     private string? _nombreOriginal;
     private DatosTipoEquipamientoDto _datos = new DatosTipoEquipamientoDto();
     private TipoEquipamientoDetalleDto? _aDiscontinuar;
-    private int _idCatalogo;
     private string? _error;
     private string? _exito;
 
     protected override void OnInitialized()
     {
-        if (RedirigirSiNoTienePermiso(Permisos.GestionarCatalogo))
+        RedirigirSiNoTienePermiso(Permisos.GestionarCatalogo);
+    }
+
+    private async Task AlCambiarCatalogoAsync()
+    {
+        CerrarTodo();
+        if (!HayCatalogoElegido())
         {
+            _tipos = new List<TipoEquipamientoDetalleDto>();
             return;
         }
 
-        ResolverCatalogoProvisorio();
-        Recargar();
+        await RecargarAsync();
     }
-
-    // Provisorio hasta que exista el selector de catalogo (T4): el primer catalogo activo.
-    private void ResolverCatalogoProvisorio()
-    {
-        try
-        {
-            List<CatalogoDto> catalogos = ServicioCatalogo.ListarCatalogos(DniUsuario);
-            if (catalogos.Count > 0)
-            {
-                _idCatalogo = catalogos[0].Id;
-            }
-        }
-        catch (ServicioException ex)
-        {
-            _error = ex.Message;
-        }
-    }
-
 
     // ---------- Listado y filtros ----------
 
-    private void Recargar()
+    private async Task RecargarAsync()
     {
         try
         {
@@ -62,27 +49,28 @@ public partial class TiposEquipamiento
                 Nombre = ValoresDeFiltro.ValorONulo(_busqueda),
                 Categoria = ValoresDeFiltro.ValorONulo(_categoria)
             };
-            _tipos = ServicioTipos.Listar(_idCatalogo, filtro, DniUsuario);
+            _tipos = ServicioTipos.Listar(IdCatalogo, filtro, DniUsuario);
         }
         catch (ServicioException ex)
         {
             _tipos = new List<TipoEquipamientoDetalleDto>();
+            await RecargarSelectorAsync();
             _error = ex.Message;
         }
     }
 
     // Al cambiar un filtro no queda en pantalla el mensaje de la accion anterior.
-    private void Filtrar()
+    private async Task FiltrarAsync()
     {
         LimpiarMensajes();
-        Recargar();
+        await RecargarAsync();
     }
 
-    private void LimpiarFiltros()
+    private async Task LimpiarFiltrosAsync()
     {
         _busqueda = string.Empty;
         _categoria = string.Empty;
-        Filtrar();
+        await FiltrarAsync();
     }
 
     private bool HayFiltrosAplicados()
@@ -132,7 +120,7 @@ public partial class TiposEquipamiento
                _datos.DuracionMaxPrestamo > 0;
     }
 
-    private void Guardar()
+    private async Task GuardarAsync()
     {
         // Un doble clic manda dos envios: el segundo llega con el formulario ya cerrado.
         if (!_mostrarFormulario)
@@ -146,7 +134,7 @@ public partial class TiposEquipamiento
         {
             if (_nombreOriginal is null)
             {
-                ServicioTipos.Registrar(_idCatalogo, _datos, DniUsuario);
+                ServicioTipos.Registrar(IdCatalogo, _datos, DniUsuario);
                 _exito = $"Se registró el tipo «{nombre}».";
             }
             else
@@ -156,7 +144,7 @@ public partial class TiposEquipamiento
                     NombreActual = _nombreOriginal,
                     Datos = _datos
                 };
-                ServicioTipos.Modificar(_idCatalogo, modificacion, DniUsuario);
+                ServicioTipos.Modificar(IdCatalogo, modificacion, DniUsuario);
                 _exito = $"Se guardaron los cambios de «{nombre}».";
             }
 
@@ -167,7 +155,7 @@ public partial class TiposEquipamiento
             _error = ex.Message;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
     private void CancelarFormulario()
@@ -184,7 +172,7 @@ public partial class TiposEquipamiento
         _aDiscontinuar = tipo;
     }
 
-    private void ConfirmarDiscontinuar()
+    private async Task ConfirmarDiscontinuarAsync()
     {
         // Un doble clic manda dos envios: el segundo llega con la confirmacion ya cerrada.
         if (_aDiscontinuar is null)
@@ -196,7 +184,7 @@ public partial class TiposEquipamiento
         _aDiscontinuar = null;
         try
         {
-            ServicioTipos.Discontinuar(_idCatalogo, nombre, DniUsuario);
+            ServicioTipos.Discontinuar(IdCatalogo, nombre, DniUsuario);
             _exito = $"Se discontinuó el tipo «{nombre}».";
         }
         catch (ServicioException ex)
@@ -204,7 +192,7 @@ public partial class TiposEquipamiento
             _error = ex.Message;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
     private void CancelarDiscontinuar()
@@ -214,7 +202,7 @@ public partial class TiposEquipamiento
 
     // ---------- Reactivar (foro: un tipo discontinuado puede volver a activarse) ----------
 
-    private void Reactivar(TipoEquipamientoDetalleDto tipo)
+    private async Task ReactivarAsync(TipoEquipamientoDetalleDto tipo)
     {
         // Un doble clic manda dos envios: el segundo llega con el tipo ya activo.
         if (!SigueDiscontinuado(tipo))
@@ -225,7 +213,7 @@ public partial class TiposEquipamiento
         CerrarTodo();
         try
         {
-            ServicioTipos.Reactivar(_idCatalogo, tipo.Nombre, DniUsuario);
+            ServicioTipos.Reactivar(IdCatalogo, tipo.Nombre, DniUsuario);
             _exito = $"Se reactivó el tipo «{tipo.Nombre}».";
         }
         catch (ServicioException ex)
@@ -233,7 +221,7 @@ public partial class TiposEquipamiento
             _error = ex.Message;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
     // La fila del clic puede ser de un listado viejo: se compara con el estado del listado actual.

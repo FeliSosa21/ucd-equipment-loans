@@ -1,5 +1,5 @@
 @page "/catalogo"
-@inherits PaginaConSesion
+@inherits PaginaConCatalogo
 @using DTOs
 @using Servicios
 @using UI.Presentacion
@@ -12,123 +12,138 @@
     <p>Elegí un tipo de equipamiento para ver cuántas unidades tiene disponibles y dónde están.</p>
 </div>
 
-<div class="toolbar">
-    <label class="filtro">
-        <span class="lbl">Categoría</span>
-        <select class="field" @bind="_categoria" @bind:after="Consultar">
-            <option value="">Todas las categorías</option>
-            @foreach (KeyValuePair<string, string> categoria in TextosVisibles.Categorias)
-            {
-                <option value="@categoria.Key">@categoria.Value</option>
-            }
-        </select>
-    </label>
-    <label class="filtro">
-        <span class="lbl">Al menos N disponibles</span>
-        <input class="field" type="number" min="0" placeholder="Cualquier cantidad…"
-               @bind="_minimoDisponibles" @bind:event="oninput" @bind:after="Consultar" />
-    </label>
-    @if (_puedeFiltrarPorEstado)
-    {
-        <label class="filtro">
-            <span class="lbl">Estado</span>
-            <select class="field" @bind="_estado" @bind:after="Consultar">
-                <option value="">Activos y discontinuados</option>
-                <option value="@EstadosCatalogo.TipoActivo">Solo activos</option>
-                <option value="@EstadosCatalogo.TipoDiscontinuado">Solo discontinuados</option>
-            </select>
-        </label>
-    }
-    <span class="espacio"></span>
-    <button type="button" class="btn btn-ghost btn-sm"
-            @onclick="LimpiarFiltros" disabled="@(!HayFiltrosAplicados())">
-        Limpiar filtros
-    </button>
-</div>
+<SelectorCatalogo @ref="Selector" @bind-IdCatalogo="IdCatalogo" @bind-IdCatalogo:after="AlCambiarCatalogoAsync" />
 
 @if (_error is not null)
 {
     <div class="alert alert-error mensaje" role="alert">@_error</div>
 }
 
-<p class="hint resultados" role="status">@TextoResultados()</p>
-
-@if (_tipos.Count == 0)
+@if (!HayCatalogoElegido())
 {
-    <div class="card">
-        <EstadoVacio Titulo="No hay equipamiento que coincida con los filtros"
-                     Mensaje="Probá con otra categoría, otro estado o un mínimo de disponibles más bajo." />
-    </div>
+    @if (HayCatalogosParaElegir())
+    {
+        <div class="card">
+            <EstadoVacio Titulo="Elegí un catálogo para ver su equipamiento"
+                         Mensaje="Cada catálogo tiene sus propios tipos de equipamiento y unidades." />
+        </div>
+    }
 }
 else
 {
-    <div class="card table-card">
-        <table>
-            <thead>
-            <tr>
-                <th>Tipo de equipamiento</th>
-                <th>Categoría</th>
-                <th>Estado</th>
-                <th class="numero">Disponibles</th>
-                <th><span class="sr-only">Acciones</span></th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach (TipoEquipamientoDto tipo in _tipos)
-            {
-                <tr class="@ClaseDeFila(tipo.Nombre)">
-                    <td><strong>@tipo.Nombre</strong></td>
-                    <td>@TextosVisibles.Categoria(tipo.Categoria)</td>
-                    <td><span class="badge @ClaseDeEstado(tipo.Estado)">@tipo.Estado</span></td>
-                    <td class="@ClaseDeDisponibles(tipo.CantidadDisponibles)">@tipo.CantidadDisponibles</td>
-                    <td class="accion-fila">
-                        <button type="button" class="btn btn-ghost btn-sm" @onclick="() => VerUnidades(tipo.Nombre)">
-                            Ver unidades
-                        </button>
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
-    </div>
-}
-
-@if (_tipoSeleccionado is not null)
-{
-    <section class="card table-card panel-unidades" aria-label="Unidades disponibles">
-        <div class="panel-cabecera">
-            <h2>Unidades disponibles de @_tipoSeleccionado</h2>
-            <button type="button" class="btn btn-ghost btn-sm" @onclick="CerrarUnidades">
-                Cerrar
-            </button>
-        </div>
-
-        @if (_unidades.Count == 0)
+    <div class="toolbar">
+        <label class="filtro">
+            <span class="lbl">Categoría</span>
+            <select class="field" @bind="_categoria" @bind:after="ConsultarAsync">
+                <option value="">Todas las categorías</option>
+                @foreach (KeyValuePair<string, string> categoria in TextosVisibles.Categorias)
+                {
+                    <option value="@categoria.Key">@categoria.Value</option>
+                }
+            </select>
+        </label>
+        <label class="filtro">
+            <span class="lbl">Al menos N disponibles</span>
+            <input class="field" type="number" min="0" placeholder="Cualquier cantidad…"
+                   @bind="_minimoDisponibles" @bind:event="oninput" @bind:after="ConsultarAsync" />
+        </label>
+        @if (_puedeFiltrarPorEstado)
         {
-            <EstadoVacio Titulo="Este tipo no tiene unidades disponibles"
-                         Mensaje="Todas sus unidades están prestadas, en mantenimiento o dadas de baja." />
+            <label class="filtro">
+                <span class="lbl">Estado</span>
+                <select class="field" @bind="_estado" @bind:after="ConsultarAsync">
+                    <option value="">Activos y discontinuados</option>
+                    <option value="@EstadosCatalogo.TipoActivo">Solo activos</option>
+                    <option value="@EstadosCatalogo.TipoDiscontinuado">Solo discontinuados</option>
+                </select>
+            </label>
         }
-        else
-        {
+        <span class="espacio"></span>
+        <button type="button" class="btn btn-ghost btn-sm"
+                @onclick="LimpiarFiltrosAsync" disabled="@(!HayFiltrosAplicados())">
+            Limpiar filtros
+        </button>
+    </div>
+
+    <p class="hint resultados" role="status">@TextoResultados()</p>
+
+    @if (_tipos.Count == 0)
+    {
+        <div class="card">
+            <EstadoVacio Titulo="No hay equipamiento que coincida con los filtros"
+                         Mensaje="Probá con otra categoría, otro estado o un mínimo de disponibles más bajo." />
+        </div>
+    }
+    else
+    {
+        <div class="card table-card">
             <table>
                 <thead>
                 <tr>
-                    <th>ID institucional</th>
-                    <th>N.º de serie</th>
-                    <th>Ubicación</th>
+                    <th>Tipo de equipamiento</th>
+                    <th>Categoría</th>
+                    <th>Estado</th>
+                    <th class="numero">Disponibles</th>
+                    <th><span class="sr-only">Acciones</span></th>
                 </tr>
                 </thead>
                 <tbody>
-                @foreach (UnidadFisicaDto unidad in _unidades)
+                @foreach (TipoEquipamientoDto tipo in _tipos)
                 {
-                    <tr>
-                        <td class="mono">@unidad.IdInstitucional</td>
-                        <td class="mono">@TextoDeSerie(unidad.NumSerie)</td>
-                        <td>@unidad.UbiFisica</td>
+                    <tr class="@ClaseDeFila(tipo.Nombre)">
+                        <td><strong>@tipo.Nombre</strong></td>
+                        <td>@TextosVisibles.Categoria(tipo.Categoria)</td>
+                        <td><span class="badge @ClaseDeEstado(tipo.Estado)">@tipo.Estado</span></td>
+                        <td class="@ClaseDeDisponibles(tipo.CantidadDisponibles)">@tipo.CantidadDisponibles</td>
+                        <td class="accion-fila">
+                            <button type="button" class="btn btn-ghost btn-sm" @onclick="() => VerUnidadesAsync(tipo.Nombre)">
+                                Ver unidades
+                            </button>
+                        </td>
                     </tr>
                 }
                 </tbody>
             </table>
-        }
-    </section>
+        </div>
+    }
+
+    @if (_tipoSeleccionado is not null)
+    {
+        <section class="card table-card panel-unidades" aria-label="Unidades disponibles">
+            <div class="panel-cabecera">
+                <h2>Unidades disponibles de @_tipoSeleccionado</h2>
+                <button type="button" class="btn btn-ghost btn-sm" @onclick="CerrarUnidades">
+                    Cerrar
+                </button>
+            </div>
+
+            @if (_unidades.Count == 0)
+            {
+                <EstadoVacio Titulo="Este tipo no tiene unidades disponibles"
+                             Mensaje="Todas sus unidades están prestadas, en mantenimiento o dadas de baja." />
+            }
+            else
+            {
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID institucional</th>
+                        <th>N.º de serie</th>
+                        <th>Ubicación</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (UnidadFisicaDto unidad in _unidades)
+                    {
+                        <tr>
+                            <td class="mono">@unidad.IdInstitucional</td>
+                            <td class="mono">@TextoDeSerie(unidad.NumSerie)</td>
+                            <td>@unidad.UbiFisica</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </section>
+    }
 }

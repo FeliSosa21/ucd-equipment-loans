@@ -1,6 +1,5 @@
 using Data.Repositorios;
 using Dominio;
-using Microsoft.EntityFrameworkCore;
 
 namespace Servicios;
 
@@ -39,7 +38,7 @@ internal static class OperacionesComunes
         {
             repositorioCatalogo.ActualizarCatalogo(catalogo);
         }
-        catch (DbUpdateException ex)
+        catch (InvalidOperationException ex)
         {
             throw new ServicioException(mensajeSiFalla, ex);
         }
@@ -72,6 +71,17 @@ internal static class OperacionesComunes
         if (texto is null)
         {
             return string.Empty;
+        }
+
+        return texto.Trim();
+    }
+
+    // Los campos opcionales en blanco se guardan como null: "sin numero de serie" no es lo mismo que "   ".
+    public static string? NormalizarOpcional(string? texto)
+    {
+        if (string.IsNullOrWhiteSpace(texto))
+        {
+            return null;
         }
 
         return texto.Trim();

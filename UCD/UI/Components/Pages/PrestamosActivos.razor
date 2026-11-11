@@ -1,0 +1,50 @@
+@page "/prestamos-activos"
+@using DTOs
+@using Servicios
+@inherits PaginaConSesion
+@inject ServicioPrestamo ServicioPrestamo
+
+<PageTitle>UCD · Préstamos activos</PageTitle>
+
+<div class="page-header">
+    <h1>Préstamos activos</h1>
+    <p>Los préstamos entregados y sus unidades, ordenados por devolución esperada: los vencidos van primero.</p>
+</div>
+
+<div class="card table-card">
+    <table>
+        <thead>
+            <tr>
+                <th>Solicitante</th>
+                <th>Equipo</th>
+                <th>Cantidad</th>
+                <th>Unidades</th>
+                <th>Fecha del préstamo</th>
+                <th>Devolución esperada</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (PrestamoDto prestamo in _prestamos)
+            {
+                <tr>
+                    <td>@prestamo.Solicitante</td>
+                    <td>@prestamo.TipoEquipamiento</td>
+                    <td>@prestamo.CantidadSolicitada</td>
+                    <td class="mono">@string.Join(", ", prestamo.Unidades)</td>
+                    <td>@prestamo.FechaHoraPrestamo.ToString(Formatos.FechaHora)</td>
+                    <td>
+                        @prestamo.FechaEsperadaDevolucion.ToString(Formatos.Fecha)
+                        @if (prestamo.EstaVencido)
+                        {
+                            <span class="badge badge-error">Vencido</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @if (!_prestamos.Any())
+    {
+        <EstadoVacio Titulo="No hay préstamos activos" />
+    }
+</div>

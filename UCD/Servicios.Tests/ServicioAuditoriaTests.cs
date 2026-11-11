@@ -22,7 +22,7 @@ public class ServicioAuditoriaTests
         DbContextOptions<SqlContext> opciones = new DbContextOptionsBuilder<SqlContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
         _preparacion = new SqlContext(opciones);
-        _preparacion.Database.EnsureCreated();
+        TiposDePrueba.GuardarEn(_preparacion);
         _contexto = new SqlContext(opciones);
     }
 

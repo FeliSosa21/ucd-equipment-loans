@@ -46,7 +46,7 @@ public class ServicioUnidades
         Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
         TipoEquipamiento tipo = OperacionesComunes.ObtenerTipo(_repositorioCatalogo, idCatalogo, datos.NombreTipo);
         string idInstitucional = OperacionesComunes.Normalizar(datos.IdInstitucional);
-        string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
+        string? numeroSerie = OperacionesComunes.NormalizarOpcional(datos.NumeroSerie);
         ValidarIdDisponible(idInstitucional);
         ValidarSerieDisponibleEnElSistema(numeroSerie, null);
         string ubicacionFisica = OperacionesComunes.Normalizar(datos.UbicacionFisica);
@@ -62,12 +62,12 @@ public class ServicioUnidades
         ValidarResponsable(dniResponsable);
         Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
         UnidadFisica unidad = ObtenerUnidad(catalogo, datos.IdInstitucional);
-        string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
+        string? numeroSerie = OperacionesComunes.NormalizarOpcional(datos.NumeroSerie);
         ValidarSerieDisponibleEnElSistema(numeroSerie, unidad.Id);
 
         TraduccionDeErrores.Ejecutar(() =>
             unidad.ModificarInfo(OperacionesComunes.Normalizar(datos.UbicacionFisica), numeroSerie,
-                NormalizarOpcional(datos.Observaciones)));
+                OperacionesComunes.NormalizarOpcional(datos.Observaciones)));
         OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
@@ -110,17 +110,6 @@ public class ServicioUnidades
 
         TraduccionDeErrores.Ejecutar(unidad.DarDeBaja);
         OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
-    }
-
-    // Los campos opcionales en blanco se guardan como null: "sin numero de serie" no es lo mismo que "   ".
-    private static string? NormalizarOpcional(string? texto)
-    {
-        if (string.IsNullOrWhiteSpace(texto))
-        {
-            return null;
-        }
-
-        return texto.Trim();
     }
 
     private Catalogo ObtenerCatalogoActivo(int idCatalogo)

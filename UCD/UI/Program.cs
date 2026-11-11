@@ -15,32 +15,34 @@ builder.Services.AddRazorComponents()
 builder.Services.AddDbContext<SqlContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Una sola Memoria para toda la aplicacion: guarda los datos mientras corre el sistema.
-builder.Services.AddSingleton<Memoria>();
-
-// Repositorios y servicios: uno por conexion; no guardan estado propio.
-builder.Services.AddScoped<RepositorioUsuario>();
-builder.Services.AddScoped<RepositorioTipoUsuario>();
-builder.Services.AddScoped<RepositorioPrestamo>();
-builder.Services.AddScoped<RepositorioDevolucion>();
-builder.Services.AddScoped<RepositorioMovimiento>();
-builder.Services.AddScoped<RepositorioCatalogo>();
-builder.Services.AddScoped<RepositorioAuditoria>();
+// Repositorios y servicios: uno por conexion del navegador, todos sobre el mismo SqlContext.
+builder.Services.AddScoped<RepositorioUsuarioSql>();
+builder.Services.AddScoped<RepositorioTipoUsuarioSql>();
+builder.Services.AddScoped<RepositorioPrestamoSql>();
+builder.Services.AddScoped<RepositorioDevolucionSql>();
+builder.Services.AddScoped<RepositorioMovimientoSql>();
+builder.Services.AddScoped<RepositorioCatalogoSql>();
+builder.Services.AddScoped<RepositorioAuditoriaSql>();
+builder.Services.AddScoped<RepositorioNotificacionSql>();
 builder.Services.AddScoped<RegistradorDeAuditoria>();
 builder.Services.AddScoped<ServicioUsuario>();
 builder.Services.AddScoped<ServicioSesion>();
-builder.Services.AddScoped<CargaInicial>();
-builder.Services.AddScoped<DatosDeEjemplo>();
+builder.Services.AddScoped<CargaInicialSql>();
 builder.Services.AddScoped<ServicioAdministracionUsuarios>();
 builder.Services.AddScoped<ServicioTiposUsuario>();
 builder.Services.AddScoped<ServicioDevolucion>();
 builder.Services.AddScoped<ServicioPrestamo>();
 builder.Services.AddScoped<ServicioCatalogo>();
+builder.Services.AddScoped<ServicioGestionCatalogos>();
 builder.Services.AddScoped<ServicioHistorico>();
 builder.Services.AddScoped<ServicioInventario>();
 builder.Services.AddScoped<ServicioTiposEquipamiento>();
 builder.Services.AddScoped<ServicioUnidades>();
 builder.Services.AddScoped<ServicioAuditoria>();
+builder.Services.AddScoped<ServicioNotificacion>();
+builder.Services.AddScoped<IExportadorDeTabla, ExportadorCsv>();
+builder.Services.AddScoped<IExportadorDeTabla, ExportadorXlsx>();
+builder.Services.AddScoped<ServicioExportacion>();
 
 // Reloj del sistema: los servicios piden la hora a TimeProvider (en los tests se usa uno fijo).
 builder.Services.AddSingleton(TimeProvider.System);
@@ -50,18 +52,13 @@ builder.Services.AddScoped<SesionActual>();
 
 WebApplication app = builder.Build();
 
-// Precarga el usuario root, el catalogo unico y los datos de ejemplo al arrancar (la Memoria empieza vacia).
-// El catalogo va antes que los datos de ejemplo: ahi se agregan los tipos de equipamiento.
-//Tambien aplica las migraciones
+// Al arrancar se aplican las migraciones y se crea el root si no existe.
+// Los tipos de usuario los carga el script de instalacion (D19): sin el tipo Administrador el arranque se corta.
 using (IServiceScope scope = app.Services.CreateScope())
 {
     SqlContext contexto = scope.ServiceProvider.GetRequiredService<SqlContext>();
     contexto.Database.Migrate();
-    CargaInicial cargaInicial = scope.ServiceProvider.GetRequiredService<CargaInicial>();
-    cargaInicial.CargarTiposDeUsuario();
-    cargaInicial.CargarRoot();
-    cargaInicial.CargarCatalogo();
-    scope.ServiceProvider.GetRequiredService<DatosDeEjemplo>().Cargar();
+    scope.ServiceProvider.GetRequiredService<CargaInicialSql>().CargarRoot();
 }
 
 if (!app.Environment.IsDevelopment())
