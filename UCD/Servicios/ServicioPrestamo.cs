@@ -250,6 +250,10 @@ public class ServicioPrestamo
 
         RegistrarMovimientosDePrestamo(prestamo, crearRegistroDelSistema);
 
+        _auditoria.Registrar(RegistroDeAccion.DeUsuario(solicitante, prestamo.FechaHoraPrestamo),
+            AccionAuditada.SolicitudDePrestamo,
+            $"Solicitud de préstamo de {solicitante.NombreCompletoConDni}. Unidades: {prestamo.CantidadSolicitada}");
+
         return prestamo;
     }
 
