@@ -15,7 +15,14 @@
     <button class="btn btn-primary btn-sm" @onclick="AbrirAlta" disabled="@_mostrarAlta">Nuevo usuario</button>
     <input class="field busqueda" type="search" placeholder="Buscar por nombre, CI o correo…"
            aria-label="Buscar usuario"
-           @bind="_busqueda" @bind:event="oninput" @bind:after="Buscar" />
+           @bind="_busqueda" @bind:event="oninput" @bind:after="Recargar" />
+    <select class="field" aria-label="Filtrar por tipo de usuario" @bind="_tipoFiltro" @bind:after="Recargar">
+        <option value="">Todos los tipos</option>
+        @foreach (string tipo in _tipos)
+        {
+            <option value="@tipo">@tipo</option>
+        }
+    </select>
 </div>
 
 @if (_mostrarAlta)
@@ -105,7 +112,7 @@
             </tr>
         </thead>
         <tbody @key="_recargas">
-            @foreach (UsuarioResumenDto usuario in UsuariosDeLaPagina)
+            @foreach (UsuarioResumenDto usuario in _usuarios)
             {
                 <tr>
                     <td>@usuario.Nombre @usuario.Apellido</td>
@@ -134,18 +141,8 @@
             }
         </tbody>
     </table>
-    @if (!UsuariosDeLaPagina.Any())
+    @if (!_usuarios.Any())
     {
-        <EstadoVacio Titulo="No hay usuarios que coincidan" />
-    }
-    @if (_pagina.HayPaginaAnterior || _pagina.HayPaginaSiguiente)
-    {
-        <nav class="paginacion" aria-label="Páginas de usuarios">
-            <button type="button" class="btn btn-ghost btn-sm" disabled="@(!_pagina.HayPaginaAnterior)"
-                    @onclick="() => IrAPagina(_numeroPagina - 1)">Anterior</button>
-            <span class="hint">Página @_numeroPagina</span>
-            <button type="button" class="btn btn-ghost btn-sm" disabled="@(!_pagina.HayPaginaSiguiente)"
-                    @onclick="() => IrAPagina(_numeroPagina + 1)">Siguiente</button>
-        </nav>
+        <EstadoVacio Titulo="@(_filtroConCriterios ? "No hay usuarios que coincidan" : "Ingresá un texto o elegí un tipo")" />
     }
 </div>

@@ -6,21 +6,26 @@ namespace Servicios;
 
 // Consulta de inventario (req. 9): cantidad de unidades en cada estado, por tipo y por categoria.
 // La disponibilidad sale del estado de las unidades fisicas (letra).
-// Como el historico, no recibe quien consulta: el permiso lo controla la pagina.
+// Quien consulta necesita el permiso GestionarUnidades (Funcionario, Supervisor y Administrador).
 public class ServicioInventario
 {
-    private readonly RepositorioCatalogo _repositorioCatalogo;
+    private const string MensajeSinPermiso = "El usuario no tiene permiso para consultar el inventario";
 
-    public ServicioInventario(RepositorioCatalogo repositorioCatalogo)
+    private readonly RepositorioCatalogoSql _repositorioCatalogo;
+    private readonly RepositorioUsuarioSql _repositorioUsuario;
+
+    public ServicioInventario(RepositorioCatalogoSql repositorioCatalogo, RepositorioUsuarioSql repositorioUsuario)
     {
         _repositorioCatalogo = repositorioCatalogo;
+        _repositorioUsuario = repositorioUsuario;
     }
 
-    public List<CantidadesPorEstadoDto> ContarPorTipo(FiltroInventarioDto filtro)
+    public List<CantidadesPorEstadoDto> ContarPorTipo(int idCatalogo, FiltroInventarioDto filtro, string dniUsuario)
     {
         ArgumentNullException.ThrowIfNull(filtro);
+        ValidarResponsable(dniUsuario);
         List<CantidadesPorEstadoDto> filas = new List<CantidadesPorEstadoDto>();
-        foreach (TipoEquipamiento tipo in ObtenerTipos())
+        foreach (TipoEquipamiento tipo in ObtenerTipos(idCatalogo))
         {
             if (CumpleFiltro(tipo, filtro))
             {
@@ -31,9 +36,10 @@ public class ServicioInventario
         return filas;
     }
 
-    public List<CantidadesPorEstadoDto> ContarPorCategoria()
+    public List<CantidadesPorEstadoDto> ContarPorCategoria(int idCatalogo, string dniUsuario)
     {
-        IReadOnlyCollection<TipoEquipamiento> tipos = ObtenerTipos();
+        ValidarResponsable(dniUsuario);
+        IReadOnlyCollection<TipoEquipamiento> tipos = ObtenerTipos(idCatalogo);
         List<CantidadesPorEstadoDto> filas = new List<CantidadesPorEstadoDto>();
         foreach (Categoria categoria in Enum.GetValues<Categoria>())
         {
@@ -43,9 +49,15 @@ public class ServicioInventario
         return filas;
     }
 
-    private IReadOnlyCollection<TipoEquipamiento> ObtenerTipos()
+    private void ValidarResponsable(string dniUsuario)
     {
-        return OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo).Tipos;
+        OperacionesComunes.ValidarResponsable(_repositorioUsuario.ObtenerUsuarioPorDni(dniUsuario),
+            Permiso.GestionarUnidades, MensajeSinPermiso);
+    }
+
+    private IReadOnlyCollection<TipoEquipamiento> ObtenerTipos(int idCatalogo)
+    {
+        return OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo).Tipos;
     }
 
     private static bool CumpleFiltro(TipoEquipamiento tipo, FiltroInventarioDto filtro)

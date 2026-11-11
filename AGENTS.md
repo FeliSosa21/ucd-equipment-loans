@@ -30,7 +30,7 @@ Todos desde `UCD/`:
 ## Forma de trabajo
 
 1. **TDD siempre**, también en lo hecho por agentes (letra, pág. 8): un commit por paso, `test: ... (RED)`, `feat: ... (GREEN)`, `refactor: ... (REFACTOR)`. El RED compila y falla solo por el test nuevo; el GREEN es el código mínimo.
-2. **Mostrar el código antes de cada commit** y explicar qué hace. Lo commitea el integrante, después de correr `dotnet test`; nunca se commitea con tests en rojo.
+2. **Mostrar el código antes de cada commit** y explicar qué hace. Lo commitea el integrante, después de correr `dotnet test`. El commit RED es el único con un test en rojo, y falla solo el test nuevo; un GREEN o un REFACTOR nunca se commitea con algún test fallando.
 3. **Modo plan** para cambios grandes: proponer, ajustar con el integrante, recién ahí implementar.
 4. **Ramas:** una por funcionalidad desde `develop` (`feature/...`, `fix/...`). Nada se mergea a `develop` sin PR revisado por otro integrante. No usar `amend`, `rebase` ni `push --force`.
 5. **Migraciones:** una por vez y desde `develop` actualizado (el snapshot es un solo archivo). Revisar la migración antes de aplicarla: no puede crear ni borrar nada que no corresponda al cambio.
@@ -49,7 +49,7 @@ La letra (pág. 6) pide que cada integrante haga **a mano, sin agentes y con TDD
 - Estáticos solo si no tienen estado, no tienen dependencias y no pertenecen al dominio.
 - Errores: el dominio lanza `DominioException(campo, mensaje)`; los servicios la traducen con `TraduccionDeErrores` a `ServicioException`; la UI muestra el error junto al campo (`ErrorDeCampo`).
 - Sin interfaces para los repositorios: los tests usan el repositorio real sobre `Memoria` o sobre el proveedor InMemory de EF (una base con nombre único por test).
-- Repositorios: nada de "traer todo"; paginar y contar (`ObtenerPagina...`, `Contar...`), salvo las consultas de la exportación (ver `UCD/Data/AGENTS.md`).
+- Repositorios: reciben un filtro y devuelven lo que lo cumple; sin criterios, lista vacía (no traer todo). Excepción: las consultas de la exportación (ver `UCD/Data/AGENTS.md`).
 - La UI no tiene reglas de negocio: llama a un servicio y muestra el resultado.
 
 ## Tests
