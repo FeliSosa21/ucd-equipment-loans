@@ -92,7 +92,7 @@ public class Prestamo
 
         List<UnidadFisica> unidades = PrimerasUnidadesDisponibles();
 
-        if (unidades.Count < CantidadSolicitada)
+        if (!AlcanzanLasUnidades(unidades))
         {
             RechazarPorFaltaDeUnidades();
         }
@@ -109,7 +109,7 @@ public class Prestamo
 
         List<UnidadFisica> unidades = PrimerasUnidadesDisponibles();
 
-        if (unidades.Count < CantidadSolicitada)
+        if (!AlcanzanLasUnidades(unidades))
         {
             RechazarPorFaltaDeUnidades();
         }
@@ -254,6 +254,11 @@ public class Prestamo
     private List<UnidadFisica> PrimerasUnidadesDisponibles()
     {
         return TipoEquipamiento.UnidadesDisponibles().Take(CantidadSolicitada).ToList();
+    }
+
+    private bool AlcanzanLasUnidades(IReadOnlyList<UnidadFisica> unidades)
+    {
+        return unidades.Count >= CantidadSolicitada;
     }
 
     private void AsignarYActivar(IReadOnlyList<UnidadFisica> unidadesFisicas)
