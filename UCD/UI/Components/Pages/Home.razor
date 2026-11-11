@@ -3,6 +3,40 @@
 @using Servicios
 @inject SesionActual SesionActual
 @inject ServicioPrestamo ServicioPrestamo
+@inject ServicioNotificacion ServicioNotificacion
+
+@if (_avisoNotificaciones is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_avisoNotificaciones</div>
+}
+
+@if (_notificaciones.Any())
+{
+    <div class="card table-card mensaje">
+        <table>
+            <thead>
+                <tr>
+                    <th>Notificaciones sin leer</th>
+                    <th>Fecha</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (NotificacionDto notificacion in _notificaciones)
+                {
+                    <tr>
+                        <td>@notificacion.Texto</td>
+                        <td>@notificacion.FechaHora.ToString(Formatos.FechaHora)</td>
+                        <td class="celda-acciones">
+                            <button type="button" class="btn btn-ghost btn-sm"
+                                    @onclick="() => MarcarComoLeida(notificacion)">Marcar como leída</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
 
 @if (!SesionActual.EstaIniciada)
 {
@@ -82,18 +116,58 @@ else
     private const string SinDato = "—";
 
     private List<PrestamoDto> _prestamos = new List<PrestamoDto>();
+    private List<NotificacionDto> _notificaciones = new List<NotificacionDto>();
+    private string? _avisoNotificaciones;
 
     private bool PuedeConsultarSusSolicitudes =>
         SesionActual.Usuario!.Permisos.Contains(Permisos.ConsultarMisSolicitudes);
 
-    // Requerimiento 7: las solicitudes y préstamos del usuario logueado, los más recientes primero.
+    // Requerimiento 2.5: las notificaciones sin leer, para cualquier usuario con sesion.
     protected override void OnInitialized()
     {
-        if (!SesionActual.EstaIniciada || !PuedeConsultarSusSolicitudes)
+        if (!SesionActual.EstaIniciada)
         {
             return;
         }
 
+        CargarNotificaciones();
+
+        if (PuedeConsultarSusSolicitudes)
+        {
+            CargarMisSolicitudes();
+        }
+    }
+
+    private void MarcarComoLeida(NotificacionDto notificacion)
+    {
+        // Un doble clic manda dos envios: el segundo llega con la notificacion ya fuera de la lista.
+        if (!_notificaciones.Any(sinLeer => sinLeer.Id == notificacion.Id))
+        {
+            return;
+        }
+
+        _avisoNotificaciones = null;
+
+        try
+        {
+            ServicioNotificacion.MarcarComoLeida(notificacion.Id, SesionActual.Usuario!.Dni);
+        }
+        catch (ServicioException ex)
+        {
+            _avisoNotificaciones = ex.Message;
+        }
+
+        CargarNotificaciones();
+    }
+
+    private void CargarNotificaciones()
+    {
+        _notificaciones = ServicioNotificacion.ListarNoLeidas(SesionActual.Usuario!.Dni);
+    }
+
+    // Requerimiento 7: las solicitudes y préstamos del usuario logueado, los más recientes primero.
+    private void CargarMisSolicitudes()
+    {
         _prestamos = ServicioPrestamo.ListarMisSolicitudes(SesionActual.Usuario!.Dni)
             .OrderByDescending(prestamo => prestamo.FechaHoraPrestamo)
             .ToList();
