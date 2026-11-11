@@ -749,6 +749,22 @@ public sealed class PrestamoTests
         Assert.IsNull(prestamo.MotivoRechazo);
     }
 
+    [TestMethod]
+    public void AprobarORechazarPorFaltaDeUnidades_ConUnidadesSuficientes_QuedaActivoConElEvaluadorYLasPrimerasUnidades()
+    {
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: CrearTipoEquipamiento(requiereAprobacion: true));
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: 3);
+        Usuario evaluador = CrearEvaluador();
+
+        prestamo.AprobarORechazarPorFaltaDeUnidades(evaluador);
+
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        CollectionAssert.AreEqual(unidades.Take(CantidadSolicitadaPorDefecto).ToList(),
+            prestamo.UnidadesAsignadas.ToList());
+        Assert.AreSame(evaluador, prestamo.Evaluador);
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(

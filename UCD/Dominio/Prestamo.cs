@@ -91,6 +91,10 @@ public class Prestamo
         }
     }
 
+    public void AprobarORechazarPorFaltaDeUnidades(Usuario evaluador)
+    {
+    }
+
     public void MarcarDevuelto()
     {
         ValidarQueEsteActivo();
