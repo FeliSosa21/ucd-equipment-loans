@@ -30,6 +30,9 @@ public sealed class ServicioPrestamoTests
     private const string NombreTipoDiscontinuado = "Retroproyector 3M";
     private const string NombreTipoInexistente = "Microscopio Zeiss Primo";
     private const string NombreTipoDeOtroCatalogo = "Osciloscopio Rigol DS1054Z";
+    private const string NombreTipoNotebook = "Notebook Lenovo ThinkPad E14";
+    private const string NombreTipoProyectorDeElectronica = "Proyector BenQ MW560";
+    private const string NombreTipoMicroscopio = "Microscopio Olympus CX23";
 
     private const int CantidadSolicitadaPorDefecto = 2;
 
@@ -483,6 +486,20 @@ public sealed class ServicioPrestamoTests
         servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades), DniEstudiante);
 
         PrestamoDto resultado = servicio.Solicitar(CrearSolicitud(), DniEstudiante);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+    }
+
+    [TestMethod]
+    public void Solicitar_UnidadesActivasDeOtroCatalogo_NoCuentanParaElMaximo()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        int idElectronica = CargarCatalogoElectronica();
+        int idBiotecnologia = CargarCatalogoBiotecnologia();
+        servicio.Solicitar(CrearSolicitudEnCatalogo(idElectronica, NombreTipoNotebook, 2), DniEstudiante);
+        SolicitudPrestamoDto microscopio = CrearSolicitudEnCatalogo(idBiotecnologia, NombreTipoMicroscopio, 1);
+
+        PrestamoDto resultado = servicio.Solicitar(microscopio, DniEstudiante);
 
         Assert.AreEqual("Activo", resultado.Estado);
     }
@@ -1520,6 +1537,53 @@ public sealed class ServicioPrestamoTests
         new RepositorioCatalogoSql(_contexto).AgregarCatalogo(otroCatalogo);
 
         return otroCatalogo.Id;
+    }
+
+    // Los catalogos de los ejemplos del foro sobre el tope de unidades por catalogo (2.1, h. 3).
+    private int CargarCatalogoElectronica()
+    {
+        Catalogo electronica = new Catalogo("Electronica");
+
+        electronica.AgregarTipo(CrearTipoEquipamiento(
+            nombre: NombreTipoNotebook,
+            requiereAprobacion: false,
+            cantidadUnidades: 3,
+            primerNumero: 401));
+        electronica.AgregarTipo(CrearTipoEquipamiento(
+            nombre: NombreTipoProyectorDeElectronica,
+            requiereAprobacion: false,
+            cantidadUnidades: 3,
+            primerNumero: 501));
+
+        new RepositorioCatalogoSql(_contexto).AgregarCatalogo(electronica);
+
+        return electronica.Id;
+    }
+
+    private int CargarCatalogoBiotecnologia()
+    {
+        Catalogo biotecnologia = new Catalogo("Biotecnologia");
+
+        biotecnologia.AgregarTipo(CrearTipoEquipamiento(
+            nombre: NombreTipoMicroscopio,
+            requiereAprobacion: false,
+            cantidadUnidades: 3,
+            primerNumero: 601));
+
+        new RepositorioCatalogoSql(_contexto).AgregarCatalogo(biotecnologia);
+
+        return biotecnologia.Id;
+    }
+
+    private static SolicitudPrestamoDto CrearSolicitudEnCatalogo(int idCatalogo, string tipoEquipamiento,
+        int cantidadSolicitada)
+    {
+        return new SolicitudPrestamoDto
+        {
+            IdCatalogo = idCatalogo,
+            TipoEquipamiento = tipoEquipamiento,
+            CantidadSolicitada = cantidadSolicitada
+        };
     }
 
     // Con el contexto del servicio: la proxima solicitud usa el tipo que ese contexto ya tiene cargado.
