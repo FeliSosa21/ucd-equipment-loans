@@ -223,15 +223,7 @@ public class ServicioPrestamo
 
         if (!tipo.RequiereAprobacion)
         {
-            if (tipo.CantidadDisponibles() < cantidadSolicitada)
-            {
-                prestamo.RechazarPorFaltaDeUnidades();
-            }
-            else
-            {
-                List<UnidadFisica> unidades = tipo.UnidadesDisponibles().Take(cantidadSolicitada).ToList();
-                prestamo.Activar(unidades);
-            }
+            prestamo.ActivarORechazarPorFaltaDeUnidades();
         }
 
         _prestamos.AgregarPrestamo(prestamo);
