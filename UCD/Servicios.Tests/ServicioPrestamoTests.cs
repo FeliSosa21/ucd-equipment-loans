@@ -1282,6 +1282,29 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_SinUnidadesSuficientes_LaBaseRechazaElLog_LanzaDbUpdateExceptionYQuedanElRechazoSuMovimientoYLaNotificacion()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio, tipoEquipamiento: NombreTipoConAprobacionSinUnidades);
+        using SqlContext contextoQueFalla = new ContextoQueFallaSiHayPendiente<RegistroAuditoria>(_opciones);
+        ServicioPrestamo servicioQueFalla = CrearServicioSobre(contextoQueFalla, new RelojFijo(FechaDeEvaluacion));
+
+        Assert.ThrowsException<DbUpdateException>(() => servicioQueFalla.Aprobar(idPrestamo, DniSupervisor));
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(EstadoPrestamo.Rechazado, ObtenerPrestamoGuardado(contextoQueLee, idPrestamo).Estado);
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
+            LeerMovimientos(contextoQueLee).Select(movimiento => movimiento.Tipo).ToList(),
+            "El movimiento deberia guardarse antes que el log");
+        VerificarUnaNotificacion(contextoQueLee, idPrestamo, TipoNotificacion.SolicitudRechazada);
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada> { AccionAuditada.SolicitudDePrestamo },
+            LeerLog(contextoQueLee).Select(entrada => entrada.Accion).ToList(),
+            "Solo deberia quedar la entrada de la solicitud");
+    }
+
+    [TestMethod]
     public void Aprobar_LaBaseRechazaLaNotificacion_LanzaInvalidOperationExceptionYQuedanElPrestamoActivoYSusMovimientos()
     {
         ServicioPrestamo servicio = CrearServicio();
