@@ -10,7 +10,7 @@
     <div class="alert alert-error mensaje" role="alert">@_avisoNotificaciones</div>
 }
 
-@if (_notificaciones.Any())
+@if (SesionActual.EstaIniciada && _notificaciones.Any())
 {
     <div class="card table-card mensaje">
         <table>
