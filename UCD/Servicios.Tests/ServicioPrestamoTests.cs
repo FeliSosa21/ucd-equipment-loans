@@ -23,6 +23,7 @@ public sealed class ServicioPrestamoTests
     private const string DniAdministrador = "89012349";
     private const string DniFuncionarioDesactivado = "90123450";
     private const string DniAdministradorConNombreYApellidoMaximos = "98765438";
+    private const string DocenteConDni = $"Renato Alves (DNI {DniDocente})";
 
     private const string NombreTipoSinAprobacion = "Proyector Epson PowerLite";
     private const string NombreTipoSinUnidades = "Parlante JBL Flip";
@@ -677,7 +678,7 @@ public sealed class ServicioPrestamoTests
             "Deberia registrarse solo la solicitud");
         Assert.AreEqual(DniDocente, entradas[0].Responsable?.Dni, "La solicitud la registra el solicitante");
         Assert.AreEqual(FechaFija, entradas[0].FechaHora);
-        Assert.AreEqual("Solicitud de préstamo de Renato Alves (DNI 12345672). Unidades: 2", entradas[0].Detalle);
+        Assert.AreEqual($"Solicitud de préstamo de {DocenteConDni}. Unidades: 2", entradas[0].Detalle);
     }
 
     [TestMethod]
@@ -698,7 +699,7 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(DniDocente, entradas[0].Responsable?.Dni, "La solicitud la registra el solicitante");
         Assert.IsTrue(entradas[1].EsDelSistema(), "La activacion la registra el sistema");
         Assert.AreEqual(FechaFija, entradas[1].FechaHora);
-        Assert.AreEqual("Activación del préstamo de Renato Alves (DNI 12345672). Unidades: 2", entradas[1].Detalle);
+        Assert.AreEqual($"Activación del préstamo de {DocenteConDni}. Unidades: 2", entradas[1].Detalle);
     }
 
     [TestMethod]
@@ -719,7 +720,7 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(DniDocente, entradas[0].Responsable?.Dni, "La solicitud la registra el solicitante");
         Assert.IsTrue(entradas[1].EsDelSistema(), "El rechazo por falta de unidades lo registra el sistema");
         Assert.AreEqual(FechaFija, entradas[1].FechaHora);
-        Assert.AreEqual("Rechazo del préstamo de Renato Alves (DNI 12345672). Unidades: 2", entradas[1].Detalle);
+        Assert.AreEqual($"Rechazo del préstamo de {DocenteConDni}. Unidades: 2", entradas[1].Detalle);
     }
 
     [TestMethod]
@@ -1226,7 +1227,7 @@ public sealed class ServicioPrestamoTests
             "Deberia registrarse una sola aprobacion despues de la solicitud");
         Assert.AreEqual(DniSupervisor, entradas[1].Responsable?.Dni, "La aprobacion la registra el evaluador");
         Assert.AreEqual(FechaDeEvaluacion, entradas[1].FechaHora);
-        Assert.AreEqual("Aprobación del préstamo de Renato Alves (DNI 12345672). Unidades: 2", entradas[1].Detalle);
+        Assert.AreEqual($"Aprobación del préstamo de {DocenteConDni}. Unidades: 2", entradas[1].Detalle);
     }
 
     [TestMethod]
@@ -1252,9 +1253,9 @@ public sealed class ServicioPrestamoTests
         Assert.IsTrue(entradas[2].EsDelSistema(), "El rechazo por falta de unidades lo registra el sistema");
         Assert.AreEqual(FechaDeEvaluacion, entradas[1].FechaHora);
         Assert.AreEqual(FechaDeEvaluacion, entradas[2].FechaHora);
-        Assert.AreEqual("Intento de aprobación del préstamo de Renato Alves (DNI 12345672). Unidades: 2",
+        Assert.AreEqual($"Intento de aprobación del préstamo de {DocenteConDni}. Unidades: 2",
             entradas[1].Detalle);
-        Assert.AreEqual("Rechazo del préstamo de Renato Alves (DNI 12345672). Unidades: 2", entradas[2].Detalle);
+        Assert.AreEqual($"Rechazo del préstamo de {DocenteConDni}. Unidades: 2", entradas[2].Detalle);
     }
 
     [TestMethod]
@@ -1479,7 +1480,7 @@ public sealed class ServicioPrestamoTests
             "Deberia registrarse el rechazo despues de la solicitud");
         Assert.AreEqual(DniSupervisor, entradas[1].Responsable?.Dni, "El rechazo lo registra el evaluador");
         Assert.AreEqual(FechaDeEvaluacion, entradas[1].FechaHora);
-        Assert.AreEqual("Rechazo del préstamo de Renato Alves (DNI 12345672). Unidades: 2", entradas[1].Detalle);
+        Assert.AreEqual($"Rechazo del préstamo de {DocenteConDni}. Unidades: 2", entradas[1].Detalle);
     }
 
     [TestMethod]
