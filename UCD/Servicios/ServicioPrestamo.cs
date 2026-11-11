@@ -259,6 +259,11 @@ public class ServicioPrestamo
             _auditoria.Registrar(crearRegistroDelSistema(), AccionAuditada.ActivacionDePrestamo,
                 $"Activación del préstamo de {solicitante.NombreCompletoConDni}. Unidades: {prestamo.CantidadSolicitada}");
         }
+        else if (prestamo.Estado == EstadoPrestamo.Rechazado)
+        {
+            _auditoria.Registrar(crearRegistroDelSistema(), AccionAuditada.RechazoDePrestamo,
+                $"Rechazo del préstamo de {solicitante.NombreCompletoConDni}. Unidades: {prestamo.CantidadSolicitada}");
+        }
 
         return prestamo;
     }
