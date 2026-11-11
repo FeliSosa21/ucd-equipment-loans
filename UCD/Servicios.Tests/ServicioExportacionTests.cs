@@ -417,6 +417,92 @@ public sealed class ServicioExportacionTests
         CollectionAssert.AreEqual(new List<string> { "2026-11-01T00:00:00", "2026-11-05T23:59:00" }, fechas);
     }
 
+    [TestMethod]
+    public void Exportar_Devoluciones_LosEncabezadosSonLosAcordados()
+    {
+        ExportadorDePrueba exportador = new ExportadorDePrueba();
+        ServicioExportacion servicio = CrearServicio(exportador);
+
+        servicio.Exportar(CrearPedido("TXT"), DniAdministrador);
+
+        CollectionAssert.AreEqual(new List<string>
+        {
+            "Catalogo", "Fecha de registro", "Solicitante", "Tipo de equipamiento", "Unidades devueltas",
+            "Registrada por"
+        }, TablaDeDevoluciones(exportador).Encabezados);
+    }
+
+    [TestMethod]
+    public void Exportar_UnaDevolucion_ArmaLaFilaConSusDatos()
+    {
+        GuardarDevolucion(_idCatalogoActivo, TipoActivo, new DateTime(2026, 11, 3, 16, 45, 30));
+        ExportadorDePrueba exportador = new ExportadorDePrueba();
+        ServicioExportacion servicio = CrearServicio(exportador);
+
+        servicio.Exportar(CrearPedido("TXT"), DniAdministrador);
+
+        CollectionAssert.AreEqual(new List<string>
+        {
+            "Audiovisual", "2026-11-03T16:45:30", "Nombre Apellido (DNI 12345672)", TipoActivo,
+            "EQP-0001 (Sin observaciones)", "Nombre Apellido (DNI 78901238)"
+        }, TablaDeDevoluciones(exportador).Filas.Single());
+    }
+
+    [TestMethod]
+    public void Exportar_DevolucionConFallas_MuestraLaCondicionDeLaUnidad()
+    {
+        _datos.GuardarDevolucion(new RegistroDePrueba
+        {
+            IdCatalogo = _idCatalogoActivo,
+            NombreTipo = TipoActivo,
+            DniSolicitante = DniDocente,
+            FechaPrestamo = new DateTime(2026, 11, 1, 9, 0, 0),
+            DniQuienRegistra = DniFuncionario,
+            FechaDevolucion = new DateTime(2026, 11, 2, 9, 0, 0),
+            Condicion = CondicionDevolucion.Daniada
+        });
+        ExportadorDePrueba exportador = new ExportadorDePrueba();
+        ServicioExportacion servicio = CrearServicio(exportador);
+
+        servicio.Exportar(CrearPedido("TXT"), DniAdministrador);
+
+        Assert.AreEqual("EQP-0001 (Dañada)", TablaDeDevoluciones(exportador).Filas.Single()[4]);
+    }
+
+    [TestMethod]
+    public void Exportar_DevolucionesDeDosCatalogosUnoEliminado_CadaFilaTraeSuCatalogo()
+    {
+        GuardarDevolucion(_idCatalogoActivo, TipoActivo, new DateTime(2026, 11, 2, 10, 0, 0));
+        GuardarDevolucion(_idCatalogoEliminado, TipoDelCatalogoEliminado, new DateTime(2026, 11, 3, 10, 0, 0));
+        _datos.DarDeBajaCatalogo(_idCatalogoEliminado);
+        ExportadorDePrueba exportador = new ExportadorDePrueba();
+        ServicioExportacion servicio = CrearServicio(exportador);
+
+        servicio.Exportar(CrearPedido("TXT"), DniAdministrador);
+
+        List<List<string>> filas = TablaDeDevoluciones(exportador).Filas;
+        Assert.AreEqual(2, filas.Count);
+        Assert.AreEqual("Audiovisual", filas[0][0]);
+        Assert.AreEqual("Computacion vieja", filas[1][0]);
+        Assert.AreEqual(TipoDelCatalogoEliminado, filas[1][3]);
+    }
+
+    [TestMethod]
+    public void Exportar_DevolucionesEnLosExtremosDelRango_SoloEntranLasRegistradasDentroDelDiaCompleto()
+    {
+        GuardarDevolucion(_idCatalogoActivo, TipoActivo, new DateTime(2026, 10, 31, 23, 59, 0));
+        GuardarDevolucion(_idCatalogoActivo, TipoActivo, new DateTime(2026, 11, 1, 0, 0, 0));
+        GuardarDevolucion(_idCatalogoActivo, TipoActivo, new DateTime(2026, 11, 5, 23, 59, 0));
+        GuardarDevolucion(_idCatalogoActivo, TipoActivo, new DateTime(2026, 11, 6, 0, 0, 0));
+        ExportadorDePrueba exportador = new ExportadorDePrueba();
+        ServicioExportacion servicio = CrearServicio(exportador);
+
+        servicio.Exportar(CrearPedido("TXT"), DniAdministrador);
+
+        List<string> fechas = TablaDeDevoluciones(exportador).Filas.Select(fila => fila[1]).ToList();
+        CollectionAssert.AreEqual(new List<string> { "2026-11-01T00:00:00", "2026-11-05T23:59:00" }, fechas);
+    }
+
     private ServicioExportacion CrearServicio(params IExportadorDeTabla[] exportadores)
     {
         return new ServicioExportacion(_datos.Prestamos, _datos.Devoluciones, _datos.Catalogos, _datos.Usuarios,
