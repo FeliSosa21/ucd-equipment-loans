@@ -82,7 +82,7 @@ public class Usuario
 
     public bool PermiteUnidades(int cantidadSolicitada)
     {
-        return false;
+        return Tipo.PermiteUnidades(cantidadSolicitada);
     }
 
     public void ModificarDatos(string nombre, string apellido, string correo)
