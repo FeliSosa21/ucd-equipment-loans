@@ -993,6 +993,29 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_TopeDeUnidadesBajado_RegistraElRechazoDelSistemaSinEvaluador()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        BajarTopesDelDocente(maxUnidadesPorCatalogo: 1, maxPrestamosConcurrentes: 3);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<Movimiento> movimientos = LeerMovimientos(contextoQueLee);
+        CollectionAssert.AreEqual(
+            new List<TipoMovimiento> { TipoMovimiento.Solicitud, TipoMovimiento.Rechazo },
+            movimientos.Select(movimiento => movimiento.Tipo).ToList(),
+            "Deberia registrarse la solicitud y despues el rechazo del sistema");
+        Movimiento rechazo = movimientos.Single(movimiento => movimiento.Tipo == TipoMovimiento.Rechazo);
+        Assert.AreEqual(FechaDeEvaluacion, rechazo.FechaHora);
+        Assert.IsNull(rechazo.Evaluador, "El rechazo por el tope lo decide el sistema, sin evaluador");
+        Assert.IsNull(rechazo.Responsable, "El rechazo por el tope lo registra el sistema");
+        Assert.IsNull(rechazo.Unidad);
+    }
+
+    [TestMethod]
     public void Aprobar_LaBaseRechazaLaNotificacion_LanzaInvalidOperationExceptionYQuedanElPrestamoActivoYSusMovimientos()
     {
         ServicioPrestamo servicio = CrearServicio();
@@ -1594,6 +1617,7 @@ public sealed class ServicioPrestamoTests
             .ThenInclude(prestamo => prestamo.Solicitante)
             .Include(movimiento => movimiento.Evaluador)
             .Include(movimiento => movimiento.Unidad)
+            .Include("_registro.Responsable")
             .OrderBy(movimiento => movimiento.Id)
             .ToList();
     }
