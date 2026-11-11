@@ -255,15 +255,23 @@ public class ServicioPrestamo
         if (prestamo.TipoEquipamiento.CantidadDisponibles() < prestamo.CantidadSolicitada)
         {
             prestamo.RechazarPorFaltaDeUnidades();
-
-            _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo,
-                RegistroDeAccion.DelSistema(fechaHoraEvaluacion)));
         }
         else
         {
             List<UnidadFisica> unidades = prestamo.TipoEquipamiento.UnidadesDisponibles()
                 .Take(prestamo.CantidadSolicitada).ToList();
             prestamo.Aprobar(evaluador, unidades);
+        }
+
+        _prestamos.ActualizarPrestamo(prestamo);
+
+        if (prestamo.Estado == EstadoPrestamo.Rechazado)
+        {
+            _movimientos.AgregarMovimiento(Movimiento.DeRechazo(prestamo,
+                RegistroDeAccion.DelSistema(fechaHoraEvaluacion)));
+        }
+        else
+        {
             Func<RegistroDeAccion> crearRegistroDelEvaluador =
                 () => RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion);
 
@@ -275,8 +283,6 @@ public class ServicioPrestamo
 
             RegistrarMovimientos(prestamo, crearRegistroDelEvaluador);
         }
-
-        _prestamos.ActualizarPrestamo(prestamo);
     }
 
     private void RegistrarRechazo(Prestamo prestamo, Usuario evaluador, string motivo)
