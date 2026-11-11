@@ -820,6 +820,18 @@ public sealed class PrestamoTests
         Assert.IsNull(prestamo.Evaluador);
     }
 
+    [TestMethod]
+    public void RechazarPorTopeDeUnidades_PrestamoNoSolicitado_LanzaYNoCambiaNada()
+    {
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
+
+        Assert.ThrowsException<DominioException>(() => prestamo.RechazarPorTopeDeUnidades());
+
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        CollectionAssert.AreEqual(unidades, prestamo.UnidadesAsignadas.ToList());
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
     private static Usuario CrearSolicitante()
     {
         Usuario usuario = new Usuario(
