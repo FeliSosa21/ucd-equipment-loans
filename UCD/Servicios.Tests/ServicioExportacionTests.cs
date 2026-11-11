@@ -1,3 +1,5 @@
+using System.Text;
+using ClosedXML.Excel;
 using Data.Repositorios;
 using Dominio;
 using DTOs;
@@ -503,6 +505,39 @@ public sealed class ServicioExportacionTests
         CollectionAssert.AreEqual(new List<string> { "2026-11-01T00:00:00", "2026-11-05T23:59:00" }, fechas);
     }
 
+    [TestMethod]
+    public void Exportar_CsvYXlsx_TienenLasMismasFilasDePrestamosYDevoluciones()
+    {
+        GuardarPrestamo(_idCatalogoActivo, TipoActivo, new DateTime(2026, 11, 2, 10, 0, 0));
+        GuardarDevolucion(_idCatalogoEliminado, TipoDelCatalogoEliminado, new DateTime(2026, 11, 3, 10, 0, 0));
+        _datos.DarDeBajaCatalogo(_idCatalogoEliminado);
+        ServicioExportacion servicio = CrearServicio(new ExportadorCsv(), new ExportadorXlsx());
+
+        List<ArchivoExportadoDto> csv = servicio.Exportar(CrearPedido("CSV"), DniAdministrador);
+        List<ArchivoExportadoDto> xlsx = servicio.Exportar(CrearPedido("XLSX"), DniAdministrador);
+
+        CollectionAssert.AreEqual(LeerFilasDelCsv(csv[0].Contenido), LeerFilasDelXlsx(xlsx[0].Contenido));
+        CollectionAssert.AreEqual(LeerFilasDelCsv(csv[1].Contenido), LeerFilasDelXlsx(xlsx[1].Contenido));
+        Assert.AreEqual(2, LeerFilasDelCsv(csv[0].Contenido).Count);
+        Assert.AreEqual(2, LeerFilasDelCsv(csv[1].Contenido).Count);
+    }
+
+    [TestMethod]
+    public void Exportar_CsvYXlsx_NombreExtensionYTipoDeContenidoDeCadaArchivo()
+    {
+        ServicioExportacion servicio = CrearServicio(new ExportadorCsv(), new ExportadorXlsx());
+
+        List<ArchivoExportadoDto> csv = servicio.Exportar(CrearPedido("CSV"), DniAdministrador);
+        List<ArchivoExportadoDto> xlsx = servicio.Exportar(CrearPedido("XLSX"), DniAdministrador);
+
+        Assert.AreEqual("prestamos_2026-11-01_2026-11-05.csv", csv[0].Nombre);
+        Assert.AreEqual("devoluciones_2026-11-01_2026-11-05.csv", csv[1].Nombre);
+        Assert.AreEqual("prestamos_2026-11-01_2026-11-05.xlsx", xlsx[0].Nombre);
+        Assert.AreEqual("devoluciones_2026-11-01_2026-11-05.xlsx", xlsx[1].Nombre);
+        Assert.AreEqual("text/csv", csv[0].TipoContenido);
+        Assert.AreEqual("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", xlsx[0].TipoContenido);
+    }
+
     private ServicioExportacion CrearServicio(params IExportadorDeTabla[] exportadores)
     {
         return new ServicioExportacion(_datos.Prestamos, _datos.Devoluciones, _datos.Catalogos, _datos.Usuarios,
@@ -517,6 +552,26 @@ public sealed class ServicioExportacionTests
     private static TablaExportableDto TablaDeDevoluciones(ExportadorDePrueba exportador)
     {
         return exportador.TablasRecibidas[1];
+    }
+
+    // Los datos de la prueba no llevan comas ni comillas, asi que alcanza con partir cada linea por coma.
+    private static List<string> LeerFilasDelCsv(byte[] contenido)
+    {
+        string texto = new UTF8Encoding(encoderShouldEmitUTF8Identifier: true).GetString(contenido).TrimStart('﻿');
+        return texto.Split("\r\n", StringSplitOptions.RemoveEmptyEntries).Select(linea => linea.Replace(",", "|")).ToList();
+    }
+
+    private static List<string> LeerFilasDelXlsx(byte[] contenido)
+    {
+        using XLWorkbook libro = new XLWorkbook(new MemoryStream(contenido));
+        IXLWorksheet hoja = libro.Worksheet(1);
+        List<string> filas = new List<string>();
+        foreach (IXLRow fila in hoja.RowsUsed())
+        {
+            filas.Add(string.Join("|", fila.Cells(1, hoja.LastColumnUsed().ColumnNumber()).Select(c => c.GetString())));
+        }
+
+        return filas;
     }
 
     private static PedidoExportacionDto CrearPedido(string formato)
