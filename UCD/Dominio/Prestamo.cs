@@ -93,6 +93,19 @@ public class Prestamo
 
     public void AprobarORechazarPorFaltaDeUnidades(Usuario evaluador)
     {
+        ValidarQueEsteSolicitado();
+        ValidarEvaluador(evaluador);
+
+        List<UnidadFisica> unidades = PrimerasUnidadesDisponibles();
+
+        if (unidades.Count < CantidadSolicitada)
+        {
+            RechazarPorFaltaDeUnidades();
+        }
+        else
+        {
+            Aprobar(evaluador, unidades);
+        }
     }
 
     public void MarcarDevuelto()
