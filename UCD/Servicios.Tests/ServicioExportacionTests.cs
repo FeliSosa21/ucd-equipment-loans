@@ -240,10 +240,105 @@ public sealed class ServicioExportacionTests
         Assert.AreEqual(1, cantidades.Devoluciones);
     }
 
+    [TestMethod]
+    public void Exportar_FormatoDesconocido_LanzaServicioExceptionEnElCampoFormato()
+    {
+        ServicioExportacion servicio = CrearServicio(new ExportadorDePrueba());
+
+        ServicioException ex = Assert.ThrowsException<ServicioException>(
+            () => servicio.Exportar(CrearPedido("PDF"), DniAdministrador));
+
+        Assert.AreEqual(nameof(PedidoExportacionDto.Formato), ex.Campo);
+    }
+
+    [TestMethod]
+    public void Exportar_SinFormato_LanzaServicioExceptionEnElCampoFormato()
+    {
+        ServicioExportacion servicio = CrearServicio(new ExportadorDePrueba());
+
+        ServicioException ex = Assert.ThrowsException<ServicioException>(
+            () => servicio.Exportar(CrearPedido(string.Empty), DniAdministrador));
+
+        Assert.AreEqual(nameof(PedidoExportacionDto.Formato), ex.Campo);
+    }
+
+    [TestMethod]
+    public void Exportar_ResponsableSinPermiso_LanzaServicioException()
+    {
+        ServicioExportacion servicio = CrearServicio(new ExportadorDePrueba());
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Exportar(CrearPedido("TXT"), DniDocente));
+    }
+
+    [TestMethod]
+    public void Exportar_ResponsableDesactivado_LanzaServicioException()
+    {
+        ServicioExportacion servicio = CrearServicio(new ExportadorDePrueba());
+
+        Assert.ThrowsException<ServicioException>(() => servicio.Exportar(CrearPedido("TXT"), DniDesactivado));
+    }
+
+    [TestMethod]
+    public void Exportar_RangoInvertido_LanzaServicioExceptionEnElCampoDesde()
+    {
+        ServicioExportacion servicio = CrearServicio(new ExportadorDePrueba());
+        PedidoExportacionDto pedido = CrearPedido("TXT");
+        pedido.Rango = CrearRango(5, 1);
+
+        ServicioException ex = Assert.ThrowsException<ServicioException>(
+            () => servicio.Exportar(pedido, DniAdministrador));
+
+        Assert.AreEqual(nameof(RangoDeExportacionDto.Desde), ex.Campo);
+    }
+
+    [TestMethod]
+    public void Exportar_FormatoConocido_DevuelveLosDosArchivosConNombreExtensionYTipoDeContenido()
+    {
+        ServicioExportacion servicio = CrearServicio(new ExportadorDePrueba());
+
+        List<ArchivoExportadoDto> archivos = servicio.Exportar(CrearPedido("TXT"), DniSupervisor);
+
+        Assert.AreEqual(2, archivos.Count);
+        Assert.AreEqual("prestamos_2026-11-01_2026-11-05.txt", archivos[0].Nombre);
+        Assert.AreEqual("devoluciones_2026-11-01_2026-11-05.txt", archivos[1].Nombre);
+        Assert.AreEqual("text/plain", archivos[0].TipoContenido);
+        Assert.AreEqual("text/plain", archivos[1].TipoContenido);
+    }
+
+    [TestMethod]
+    public void Exportar_FormatoConocido_ElContenidoEsLoQueDevuelveElExportador()
+    {
+        ExportadorDePrueba exportador = new ExportadorDePrueba();
+        ServicioExportacion servicio = CrearServicio(exportador);
+
+        List<ArchivoExportadoDto> archivos = servicio.Exportar(CrearPedido("TXT"), DniAdministrador);
+
+        Assert.AreEqual(2, exportador.TablasRecibidas.Count);
+        CollectionAssert.AreEqual(exportador.Exportar(exportador.TablasRecibidas[0]), archivos[0].Contenido);
+    }
+
+    [TestMethod]
+    public void Exportar_VariosExportadores_UsaElQueDeclaraElFormatoPedido()
+    {
+        ExportadorDePrueba otro = new ExportadorDePrueba();
+        ServicioExportacion servicio = CrearServicio(new ExportadorCsv(), otro, new ExportadorXlsx());
+
+        List<ArchivoExportadoDto> archivos = servicio.Exportar(CrearPedido("CSV"), DniAdministrador);
+
+        Assert.AreEqual(0, otro.TablasRecibidas.Count);
+        Assert.AreEqual("text/csv", archivos[0].TipoContenido);
+        Assert.IsTrue(archivos[1].Nombre.EndsWith(".csv"));
+    }
+
     private ServicioExportacion CrearServicio(params IExportadorDeTabla[] exportadores)
     {
         return new ServicioExportacion(_datos.Prestamos, _datos.Devoluciones, _datos.Catalogos, _datos.Usuarios,
             exportadores);
+    }
+
+    private static PedidoExportacionDto CrearPedido(string formato)
+    {
+        return new PedidoExportacionDto { Rango = CrearRango(1, 5), Formato = formato };
     }
 
     private void GuardarPrestamo(int idCatalogo, string nombreTipo, DateTime fechaPrestamo)

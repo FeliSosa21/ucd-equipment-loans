@@ -23,6 +23,11 @@ public class ServicioExportacion
         _usuarios = usuarios;
     }
 
+    public List<ArchivoExportadoDto> Exportar(PedidoExportacionDto pedido, string dniResponsable)
+    {
+        throw new NotImplementedException();
+    }
+
     public CantidadesAExportarDto ContarRegistros(RangoDeExportacionDto rango, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
