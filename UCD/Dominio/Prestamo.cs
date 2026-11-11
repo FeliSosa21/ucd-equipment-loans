@@ -76,6 +76,19 @@ public class Prestamo
 
     public void ActivarORechazarPorFaltaDeUnidades()
     {
+        ValidarQueEsteSolicitado();
+        ValidarQueNoRequieraAprobacion();
+
+        List<UnidadFisica> unidades = PrimerasUnidadesDisponibles();
+
+        if (unidades.Count < CantidadSolicitada)
+        {
+            RechazarPorFaltaDeUnidades();
+        }
+        else
+        {
+            Activar(unidades);
+        }
     }
 
     public void MarcarDevuelto()
@@ -200,6 +213,11 @@ public class Prestamo
                 throw new DominioException($"La unidad {unidadFisica.IdInstitucional} no esta disponible");
             }
         }
+    }
+
+    private List<UnidadFisica> PrimerasUnidadesDisponibles()
+    {
+        return TipoEquipamiento.UnidadesDisponibles().Take(CantidadSolicitada).ToList();
     }
 
     private void AsignarYActivar(IReadOnlyList<UnidadFisica> unidadesFisicas)
