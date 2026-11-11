@@ -197,14 +197,14 @@ public class ServicioPrestamo
         int unidadesActivasEnElCatalogo =
             _prestamos.ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(solicitante.Dni, tipo.Id);
 
-        if (!solicitante.Tipo.PermiteUnidades(unidadesActivasEnElCatalogo + cantidadSolicitada))
+        if (!solicitante.PermiteUnidades(unidadesActivasEnElCatalogo + cantidadSolicitada))
         {
             throw new ServicioException("La cantidad solicitada supera el maximo de unidades del solicitante");
         }
 
         int prestamosVigentes = _prestamos.ContarPrestamosVigentesDeSolicitante(solicitante.Dni);
 
-        if (!solicitante.Tipo.PuedeAgregarPrestamo(prestamosVigentes))
+        if (!solicitante.PuedeAgregarPrestamo(prestamosVigentes))
         {
             throw new ServicioException("El solicitante alcanzo el maximo de prestamos vigentes");
         }
