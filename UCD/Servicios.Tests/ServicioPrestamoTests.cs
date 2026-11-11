@@ -887,6 +887,24 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Rechazar_SolicitudPendiente_NotificaElRechazoAlSolicitanteConLaFechaDeEvaluacion()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<Notificacion> notificaciones = LeerNoLeidas(contextoQueLee, DniDocente);
+
+        Assert.AreEqual(1, notificaciones.Count);
+        Assert.AreEqual(TipoNotificacion.SolicitudRechazada, notificaciones[0].Tipo);
+        Assert.AreEqual(idPrestamo, notificaciones[0].Prestamo.Id);
+        Assert.AreEqual(FechaDeEvaluacion, notificaciones[0].FechaHora);
+    }
+
+    [TestMethod]
     public void Rechazar_SolicitudPendiente_QuedaRechazadoConMotivoYEvaluador()
     {
         ServicioPrestamo servicio = CrearServicio();
