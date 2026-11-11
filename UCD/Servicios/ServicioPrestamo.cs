@@ -255,9 +255,15 @@ public class ServicioPrestamo
         int unidadesActivasEnElCatalogo = _prestamos.ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(
             solicitante.Dni, prestamo.TipoEquipamiento.Id);
 
+        int otrosPrestamosVigentes = _prestamos.ContarPrestamosVigentesDeSolicitante(solicitante.Dni, prestamo.Id);
+
         if (!solicitante.PermiteUnidades(unidadesActivasEnElCatalogo + prestamo.CantidadSolicitada))
         {
             prestamo.RechazarPorTopeDeUnidades();
+        }
+        else if (!solicitante.PuedeAgregarPrestamo(otrosPrestamosVigentes))
+        {
+            prestamo.RechazarPorTopeDePrestamosConcurrentes();
         }
         else
         {
