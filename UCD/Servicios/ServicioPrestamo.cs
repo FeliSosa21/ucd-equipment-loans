@@ -17,6 +17,14 @@ public class ServicioPrestamo
     private const string MensajeEstadoNoValido = "El estado del prestamo no es valido";
     private const int DiasPorDefecto = 30;
 
+    private static readonly Dictionary<AccionAuditada, string> TextosDelLog =
+        new Dictionary<AccionAuditada, string>
+        {
+            { AccionAuditada.SolicitudDePrestamo, "Solicitud de préstamo de" },
+            { AccionAuditada.ActivacionDePrestamo, "Activación del préstamo de" },
+            { AccionAuditada.RechazoDePrestamo, "Rechazo del préstamo de" }
+        };
+
     private readonly RepositorioPrestamoSql _prestamos;
     private readonly RepositorioUsuarioSql _usuarios;
     private readonly RepositorioCatalogoSql _catalogo;
@@ -249,23 +257,26 @@ public class ServicioPrestamo
         }
 
         RegistrarMovimientosDePrestamo(prestamo, crearRegistroDelSistema);
+        RegistrarSolicitudEnAuditoria(prestamo);
 
-        _auditoria.Registrar(RegistroDeAccion.DeUsuario(solicitante, prestamo.FechaHoraPrestamo),
-            AccionAuditada.SolicitudDePrestamo,
-            $"Solicitud de préstamo de {solicitante.NombreCompletoConDni}. Unidades: {prestamo.CantidadSolicitada}");
+        return prestamo;
+    }
+
+    private void RegistrarSolicitudEnAuditoria(Prestamo prestamo)
+    {
+        RegistrarEnAuditoria(RegistroDeAccion.DeUsuario(prestamo.Solicitante, prestamo.FechaHoraPrestamo),
+            AccionAuditada.SolicitudDePrestamo, prestamo);
 
         if (prestamo.Estado == EstadoPrestamo.Activo)
         {
-            _auditoria.Registrar(crearRegistroDelSistema(), AccionAuditada.ActivacionDePrestamo,
-                $"Activación del préstamo de {solicitante.NombreCompletoConDni}. Unidades: {prestamo.CantidadSolicitada}");
+            RegistrarEnAuditoria(RegistroDeAccion.DelSistema(prestamo.FechaHoraPrestamo),
+                AccionAuditada.ActivacionDePrestamo, prestamo);
         }
         else if (prestamo.Estado == EstadoPrestamo.Rechazado)
         {
-            _auditoria.Registrar(crearRegistroDelSistema(), AccionAuditada.RechazoDePrestamo,
-                $"Rechazo del préstamo de {solicitante.NombreCompletoConDni}. Unidades: {prestamo.CantidadSolicitada}");
+            RegistrarEnAuditoria(RegistroDeAccion.DelSistema(prestamo.FechaHoraPrestamo),
+                AccionAuditada.RechazoDePrestamo, prestamo);
         }
-
-        return prestamo;
     }
 
     private void ResolverAprobacion(Prestamo prestamo, Usuario solicitante, Usuario evaluador)
@@ -335,6 +346,14 @@ public class ServicioPrestamo
         {
             _movimientos.AgregarMovimiento(Movimiento.DePrestamo(prestamo, crearRegistro(), unidad));
         }
+    }
+
+    // El detalle lleva solo textos fijos, el solicitante y la cantidad, para no pasar del largo maximo del log
+    // (D18, regla 3). Cada entrada recibe un registro nuevo (D18, regla 4).
+    private void RegistrarEnAuditoria(RegistroDeAccion registro, AccionAuditada accion, Prestamo prestamo)
+    {
+        _auditoria.Registrar(registro, accion,
+            $"{TextosDelLog[accion]} {prestamo.Solicitante.NombreCompletoConDni}. Unidades: {prestamo.CantidadSolicitada}");
     }
 
     private static void ValidarRango(FiltroDePrestamosDto filtro)
