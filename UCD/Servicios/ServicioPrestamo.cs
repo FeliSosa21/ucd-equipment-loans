@@ -194,20 +194,31 @@ public class ServicioPrestamo
 
     private void ValidarLimites(Usuario solicitante, TipoEquipamiento tipo, int cantidadSolicitada)
     {
-        int unidadesActivasEnElCatalogo =
-            _prestamos.ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(solicitante.Dni, tipo.Id);
-
-        if (!solicitante.PermiteUnidades(unidadesActivasEnElCatalogo + cantidadSolicitada))
+        if (!PermiteUnidadesEnElCatalogo(solicitante, tipo.Id, cantidadSolicitada))
         {
             throw new ServicioException("La cantidad solicitada supera el maximo de unidades del solicitante");
         }
 
-        int prestamosVigentes = _prestamos.ContarPrestamosVigentesDeSolicitante(solicitante.Dni);
-
-        if (!solicitante.PuedeAgregarPrestamo(prestamosVigentes))
+        if (!PuedeTenerOtroPrestamoVigente(solicitante, idExcluido: null))
         {
             throw new ServicioException("El solicitante alcanzo el maximo de prestamos vigentes");
         }
+    }
+
+    private bool PermiteUnidadesEnElCatalogo(Usuario solicitante, int idTipoEquipamiento, int cantidadSolicitada)
+    {
+        int unidadesActivasEnElCatalogo =
+            _prestamos.ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(solicitante.Dni, idTipoEquipamiento);
+
+        return solicitante.PermiteUnidades(unidadesActivasEnElCatalogo + cantidadSolicitada);
+    }
+
+    // idExcluido es el prestamo que se aprueba: ya esta Solicitado y no tiene que contarse dos veces.
+    private bool PuedeTenerOtroPrestamoVigente(Usuario solicitante, Guid? idExcluido)
+    {
+        int prestamosVigentes = _prestamos.ContarPrestamosVigentesDeSolicitante(solicitante.Dni, idExcluido);
+
+        return solicitante.PuedeAgregarPrestamo(prestamosVigentes);
     }
 
     private Prestamo RegistrarSolicitud(Usuario solicitante, TipoEquipamiento tipo, int cantidadSolicitada)
@@ -252,16 +263,11 @@ public class ServicioPrestamo
 
     private void DecidirEvaluacion(Prestamo prestamo, Usuario solicitante, Usuario evaluador)
     {
-        int unidadesActivasEnElCatalogo = _prestamos.ContarUnidadesActivasDeSolicitanteEnCatalogoDelTipo(
-            solicitante.Dni, prestamo.TipoEquipamiento.Id);
-
-        int otrosPrestamosVigentes = _prestamos.ContarPrestamosVigentesDeSolicitante(solicitante.Dni, prestamo.Id);
-
-        if (!solicitante.PermiteUnidades(unidadesActivasEnElCatalogo + prestamo.CantidadSolicitada))
+        if (!PermiteUnidadesEnElCatalogo(solicitante, prestamo.TipoEquipamiento.Id, prestamo.CantidadSolicitada))
         {
             prestamo.RechazarPorTopeDeUnidades();
         }
-        else if (!solicitante.PuedeAgregarPrestamo(otrosPrestamosVigentes))
+        else if (!PuedeTenerOtroPrestamoVigente(solicitante, prestamo.Id))
         {
             prestamo.RechazarPorTopeDePrestamosConcurrentes();
         }
