@@ -34,7 +34,6 @@ public sealed class ServicioExportacionTests
         _datos.GuardarUsuarioDesactivado(DniDesactivado, TipoUsuario.Administrador());
         _idCatalogoActivo = _datos.GuardarCatalogo("Audiovisual", CrearTipo(TipoActivo, "EQP-000"));
         _idCatalogoEliminado = _datos.GuardarCatalogo("Computacion vieja", CrearTipo(TipoDelCatalogoEliminado, "NTB-000"));
-        _datos.DarDeBajaCatalogo(_idCatalogoEliminado);
     }
 
     [TestCleanup]
@@ -232,11 +231,12 @@ public sealed class ServicioExportacionTests
         GuardarPrestamo(_idCatalogoActivo, TipoActivo, new DateTime(2026, 11, 2, 10, 0, 0));
         GuardarPrestamo(_idCatalogoEliminado, TipoDelCatalogoEliminado, new DateTime(2026, 11, 3, 10, 0, 0));
         GuardarDevolucion(_idCatalogoEliminado, TipoDelCatalogoEliminado, new DateTime(2026, 11, 4, 10, 0, 0));
+        _datos.DarDeBajaCatalogo(_idCatalogoEliminado);
         ServicioExportacion servicio = CrearServicio();
 
         CantidadesAExportarDto cantidades = servicio.ContarRegistros(CrearRango(1, 5), DniSupervisor);
 
-        Assert.AreEqual(3, cantidades.Prestamos);
+        Assert.AreEqual(2, cantidades.Prestamos);
         Assert.AreEqual(1, cantidades.Devoluciones);
     }
 
