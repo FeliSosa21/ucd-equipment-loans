@@ -905,6 +905,24 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Rechazar_SolicitudPendiente_ElMovimientoYLaNotificacionLlevanLaMismaFecha()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojQueAvanza(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Rechazar(idPrestamo, MotivoDeRechazo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Movimiento rechazo = LeerMovimientos(contextoQueLee)
+            .Single(movimiento => movimiento.Tipo == TipoMovimiento.Rechazo);
+        Notificacion notificacion = LeerNoLeidas(contextoQueLee, DniDocente).Single();
+
+        Assert.AreEqual(rechazo.FechaHora, notificacion.FechaHora,
+            "La fecha del rechazo deberia tomarse una sola vez");
+    }
+
+    [TestMethod]
     public void Rechazar_SolicitudPendiente_QuedaRechazadoConMotivoYEvaluador()
     {
         ServicioPrestamo servicio = CrearServicio();
