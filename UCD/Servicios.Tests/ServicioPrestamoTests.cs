@@ -701,6 +701,27 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_TipoSinAprobacionSinUnidadesSuficientes_RegistraEnElLogLaSolicitudYElRechazoDelSistema()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto datos = CrearSolicitud(tipoEquipamiento: NombreTipoSinUnidades);
+
+        servicio.Solicitar(datos, DniDocente);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada> { AccionAuditada.SolicitudDePrestamo, AccionAuditada.RechazoDePrestamo },
+            entradas.Select(entrada => entrada.Accion).ToList(),
+            "Deberia registrarse la solicitud y despues el rechazo");
+        Assert.AreEqual(DniDocente, entradas[0].Responsable?.Dni, "La solicitud la registra el solicitante");
+        Assert.IsTrue(entradas[1].EsDelSistema(), "El rechazo por falta de unidades lo registra el sistema");
+        Assert.AreEqual(FechaFija, entradas[1].FechaHora);
+        Assert.AreEqual("Rechazo del préstamo de Renato Alves (DNI 12345672). Unidades: 2", entradas[1].Detalle);
+    }
+
+    [TestMethod]
     public void Aprobar_SolicitudPendienteConUnidades_QuedaActivo()
     {
         ServicioPrestamo servicio = CrearServicio();
