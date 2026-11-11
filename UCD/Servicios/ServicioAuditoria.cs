@@ -58,7 +58,7 @@ public class ServicioAuditoria
         {
             Desde = filtro.Desde?.ToDateTime(TimeOnly.MinValue),
             Hasta = InicioDelDiaSiguiente(filtro.Hasta),
-            DniUsuario = string.IsNullOrWhiteSpace(filtro.DniUsuario) ? null : filtro.DniUsuario.Trim()
+            DniUsuario = OperacionesComunes.NormalizarOpcional(filtro.DniUsuario)
         };
     }
 
