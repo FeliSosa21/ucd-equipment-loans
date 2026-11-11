@@ -22,6 +22,7 @@ public sealed class ServicioPrestamoTests
     private const string DniSupervisorDesactivado = "78901238";
     private const string DniAdministrador = "89012349";
     private const string DniFuncionarioDesactivado = "90123450";
+    private const string DniAdministradorConNombreYApellidoMaximos = "98765438";
 
     private const string NombreTipoSinAprobacion = "Proyector Epson PowerLite";
     private const string NombreTipoSinUnidades = "Parlante JBL Flip";
@@ -1281,6 +1282,33 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(FechaDeEvaluacion, entradas[2].FechaHora);
     }
 
+    // El intento lleva el texto fijo mas largo; con la persona y la cantidad al maximo no pasa los 200 caracteres.
+    [TestMethod]
+    public void Aprobar_SolicitanteYCantidadAlMaximo_RegistraLosDetallesSinPasarseDelLargo()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        CargarAdministradorConNombreYApellidoMaximos();
+        SolicitudPrestamoDto datos =
+            CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: int.MaxValue);
+        Guid idPrestamo = servicio.Solicitar(datos, DniAdministradorConNombreYApellidoMaximos).Id;
+
+        servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+        string persona = $"{NombreOApellidoMaximo('N')} {NombreOApellidoMaximo('A')} " +
+            $"(DNI {DniAdministradorConNombreYApellidoMaximos})";
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada>
+            {
+                AccionAuditada.SolicitudDePrestamo, AccionAuditada.IntentoDeAprobacion, AccionAuditada.RechazoDePrestamo
+            },
+            entradas.Select(entrada => entrada.Accion).ToList());
+        Assert.AreEqual($"Intento de aprobación del préstamo de {persona}. Unidades: {int.MaxValue}",
+            entradas[1].Detalle);
+    }
+
     [TestMethod]
     public void Aprobar_SinUnidadesSuficientes_LaBaseRechazaElLog_LanzaDbUpdateExceptionYQuedanElRechazoSuMovimientoYLaNotificacion()
     {
@@ -2117,6 +2145,21 @@ public sealed class ServicioPrestamoTests
         Usuario funcionarioDesactivado = CrearUsuario(dni: DniFuncionarioDesactivado, tipoUsuario: funcionario);
         funcionarioDesactivado.Desactivar();
         usuarios.AgregarUsuario(funcionarioDesactivado);
+    }
+
+    // Con el tipo del Administrador ya cargado (un objeto por tipo): no tiene topes y puede pedir int.MaxValue.
+    private void CargarAdministradorConNombreYApellidoMaximos()
+    {
+        RepositorioUsuarioSql usuarios = new RepositorioUsuarioSql(_contexto);
+        TipoUsuario administrador = usuarios.ObtenerUsuarioPorDni(DniAdministrador)!.Tipo;
+
+        usuarios.AgregarUsuario(CrearUsuario(dni: DniAdministradorConNombreYApellidoMaximos,
+            tipoUsuario: administrador, nombre: NombreOApellidoMaximo('N'), apellido: NombreOApellidoMaximo('A')));
+    }
+
+    private static string NombreOApellidoMaximo(char letra)
+    {
+        return new string(letra, Usuario.LargoMaximoNombreOApellido);
     }
 
     private static Usuario CrearUsuario(
