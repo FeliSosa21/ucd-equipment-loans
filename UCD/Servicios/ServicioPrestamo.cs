@@ -21,15 +21,18 @@ public class ServicioPrestamo
     private readonly RepositorioUsuarioSql _usuarios;
     private readonly RepositorioCatalogoSql _catalogo;
     private readonly RepositorioMovimientoSql _movimientos;
+    private readonly ServicioNotificacion _notificaciones;
     private readonly TimeProvider _reloj;
 
     public ServicioPrestamo(RepositorioPrestamoSql prestamos, RepositorioUsuarioSql usuarios,
-        RepositorioCatalogoSql catalogo, RepositorioMovimientoSql movimientos, TimeProvider reloj)
+        RepositorioCatalogoSql catalogo, RepositorioMovimientoSql movimientos, ServicioNotificacion notificaciones,
+        TimeProvider reloj)
     {
         _prestamos = prestamos;
         _usuarios = usuarios;
         _catalogo = catalogo;
         _movimientos = movimientos;
+        _notificaciones = notificaciones;
         _reloj = reloj;
     }
 

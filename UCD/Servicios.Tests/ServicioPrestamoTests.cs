@@ -3,6 +3,7 @@ using Data.Repositorios;
 using Dominio;
 using DTOs;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Servicios.Tests;
 
@@ -825,6 +826,24 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_SolicitudPendienteConUnidades_NotificaLaAprobacionAlSolicitanteConLaFechaDeEvaluacion()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<Notificacion> notificaciones = LeerNoLeidas(contextoQueLee, DniDocente);
+
+        Assert.AreEqual(1, notificaciones.Count);
+        Assert.AreEqual(TipoNotificacion.SolicitudAprobada, notificaciones[0].Tipo);
+        Assert.AreEqual(idPrestamo, notificaciones[0].Prestamo.Id);
+        Assert.AreEqual(FechaDeEvaluacion, notificaciones[0].FechaHora);
+    }
+
+    [TestMethod]
     public void Rechazar_SolicitudPendiente_QuedaRechazadoConMotivoYEvaluador()
     {
         ServicioPrestamo servicio = CrearServicio();
@@ -1243,11 +1262,18 @@ public sealed class ServicioPrestamoTests
     // Todos los repositorios sobre el mismo contexto: si se mezclan, EF intenta insertar lo que ya existe.
     private static ServicioPrestamo CrearServicioSobre(SqlContext contexto, TimeProvider reloj)
     {
+        ServicioNotificacion notificaciones = new ServicioNotificacion(
+            notificaciones: new RepositorioNotificacionSql(contexto),
+            prestamos: new RepositorioPrestamoSql(contexto),
+            reloj: reloj,
+            logger: NullLogger<ServicioNotificacion>.Instance);
+
         return new ServicioPrestamo(
             prestamos: new RepositorioPrestamoSql(contexto),
             usuarios: new RepositorioUsuarioSql(contexto),
             catalogo: new RepositorioCatalogoSql(contexto),
             movimientos: new RepositorioMovimientoSql(contexto),
+            notificaciones: notificaciones,
             reloj: reloj);
     }
 
@@ -1313,6 +1339,11 @@ public sealed class ServicioPrestamoTests
     private TipoEquipamiento ObtenerTipoGuardado(SqlContext contextoQueLee, string nombreTipo)
     {
         return new RepositorioCatalogoSql(contextoQueLee).ObtenerTipoPorNombre(_idCatalogo, nombreTipo)!;
+    }
+
+    private static IReadOnlyList<Notificacion> LeerNoLeidas(SqlContext contextoQueLee, string dni)
+    {
+        return new RepositorioNotificacionSql(contextoQueLee).ObtenerNoLeidasDeUsuario(dni);
     }
 
     // RepositorioMovimientoSql no tiene una consulta de todos los movimientos: se leen de la base,
