@@ -560,6 +560,26 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_VigentesDeDistintosCatalogos_SumanContraUnSoloMaximo()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        int idElectronica = CargarCatalogoElectronica();
+        int idBiotecnologia = CargarCatalogoBiotecnologia();
+        servicio.Solicitar(CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1),
+            DniEstudiante);
+        servicio.Solicitar(CrearSolicitudEnCatalogo(idElectronica, NombreTipoNotebook, 1), DniEstudiante);
+        SolicitudPrestamoDto microscopio = CrearSolicitudEnCatalogo(idBiotecnologia, NombreTipoMicroscopio, 1);
+
+        ServicioException excepcion = Assert.ThrowsException<ServicioException>(
+            () => servicio.Solicitar(microscopio, DniEstudiante));
+        Assert.AreEqual("El solicitante alcanzo el maximo de prestamos vigentes", excepcion.Message);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        Assert.AreEqual(2,
+            new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamosDeSolicitante(DniEstudiante).Count);
+    }
+
+    [TestMethod]
     public void Solicitar_CantidadCero_LanzaExcepcionConCausaDeDominio()
     {
         ServicioPrestamo servicio = CrearServicio();
