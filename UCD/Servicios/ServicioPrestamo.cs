@@ -22,7 +22,8 @@ public class ServicioPrestamo
         {
             { AccionAuditada.SolicitudDePrestamo, "Solicitud de préstamo de" },
             { AccionAuditada.ActivacionDePrestamo, "Activación del préstamo de" },
-            { AccionAuditada.RechazoDePrestamo, "Rechazo del préstamo de" }
+            { AccionAuditada.RechazoDePrestamo, "Rechazo del préstamo de" },
+            { AccionAuditada.AprobacionDePrestamo, "Aprobación del préstamo de" }
         };
 
     private readonly RepositorioPrestamoSql _prestamos;
@@ -287,6 +288,12 @@ public class ServicioPrestamo
         _prestamos.ActualizarPrestamo(prestamo);
         RegistrarMovimientosDeEvaluacion(prestamo, evaluador, fechaHoraEvaluacion);
         _servicioNotificacion.RegistrarResultadoDeEvaluacion(prestamo, fechaHoraEvaluacion);
+
+        if (prestamo.Estado == EstadoPrestamo.Activo)
+        {
+            RegistrarEnAuditoria(RegistroDeAccion.DeUsuario(evaluador, fechaHoraEvaluacion),
+                AccionAuditada.AprobacionDePrestamo, prestamo);
+        }
     }
 
     private void DecidirEvaluacion(Prestamo prestamo, Usuario solicitante, Usuario evaluador)
