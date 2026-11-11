@@ -540,6 +540,26 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_PrestamoRechazadoEnOtroContexto_NoCuentaComoVigente()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto camara = CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1);
+        Guid idPrimera = servicio.Solicitar(camara, DniEstudiante).Id;
+        servicio.Solicitar(camara, DniEstudiante);
+
+        // Otra pestaña rechaza la primera: el contexto del servicio la sigue teniendo cargada como Solicitado.
+        using (SqlContext otroContexto = new SqlContext(_opciones))
+        {
+            CrearServicioSobre(otroContexto, new RelojFijo(FechaDeEvaluacion))
+                .Rechazar(idPrimera, MotivoDeRechazo, DniSupervisor);
+        }
+
+        PrestamoDto resultado = servicio.Solicitar(CrearSolicitud(cantidadSolicitada: 1), DniEstudiante);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+    }
+
+    [TestMethod]
     public void Solicitar_CantidadCero_LanzaExcepcionConCausaDeDominio()
     {
         ServicioPrestamo servicio = CrearServicio();
