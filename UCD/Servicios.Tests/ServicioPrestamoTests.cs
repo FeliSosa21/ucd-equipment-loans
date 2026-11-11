@@ -526,6 +526,20 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Solicitar_UnidadesActivasDelCatalogoMasSolicitadasIgualanElMaximo_QuedaActivo()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        int idElectronica = CargarCatalogoElectronica();
+        servicio.Solicitar(CrearSolicitudEnCatalogo(idElectronica, NombreTipoNotebook, 1), DniEstudiante);
+        SolicitudPrestamoDto proyector =
+            CrearSolicitudEnCatalogo(idElectronica, NombreTipoProyectorDeElectronica, 1);
+
+        PrestamoDto resultado = servicio.Solicitar(proyector, DniEstudiante);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+    }
+
+    [TestMethod]
     public void Solicitar_CantidadCero_LanzaExcepcionConCausaDeDominio()
     {
         ServicioPrestamo servicio = CrearServicio();
