@@ -1030,6 +1030,20 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(MotivoTopeDeUnidades, LeerNoLeidas(contextoQueLee, DniDocente)[0].Prestamo.MotivoRechazo);
     }
 
+    // Los topes se revisan antes que la disponibilidad, como al solicitar: si fallan los dos, queda el motivo del tope.
+    [TestMethod]
+    public void Aprobar_SinUnidadesYSinCumplirElTope_QuedaRechazadoConElMotivoDelTope()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio, tipoEquipamiento: NombreTipoConAprobacionSinUnidades);
+        BajarTopesDelDocente(maxUnidadesPorCatalogo: 1, maxPrestamosConcurrentes: 3);
+
+        PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        Assert.AreEqual("Rechazado", resultado.Estado);
+        Assert.AreEqual(MotivoTopeDeUnidades, resultado.MotivoRechazo);
+    }
+
     [TestMethod]
     public void Aprobar_LaBaseRechazaLaNotificacion_LanzaInvalidOperationExceptionYQuedanElPrestamoActivoYSusMovimientos()
     {
