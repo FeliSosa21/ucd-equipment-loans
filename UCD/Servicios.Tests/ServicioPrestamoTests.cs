@@ -1229,6 +1229,34 @@ public sealed class ServicioPrestamoTests
     }
 
     [TestMethod]
+    public void Aprobar_SinUnidadesSuficientes_RegistraEnElLogElIntentoDelEvaluadorYElRechazoDelSistema()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        Guid idPrestamo = CrearSolicitudPendiente(servicio, tipoEquipamiento: NombreTipoConAprobacionSinUnidades);
+        ServicioPrestamo servicioDeLaEvaluacion = CrearServicioConReloj(new RelojFijo(FechaDeEvaluacion));
+
+        servicioDeLaEvaluacion.Aprobar(idPrestamo, DniSupervisor);
+
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        IReadOnlyList<RegistroAuditoria> entradas = LeerLog(contextoQueLee);
+
+        CollectionAssert.AreEqual(
+            new List<AccionAuditada>
+            {
+                AccionAuditada.SolicitudDePrestamo, AccionAuditada.IntentoDeAprobacion, AccionAuditada.RechazoDePrestamo
+            },
+            entradas.Select(entrada => entrada.Accion).ToList(),
+            "Deberia registrarse el intento del evaluador y despues el rechazo del sistema");
+        Assert.AreEqual(DniSupervisor, entradas[1].Responsable?.Dni, "El intento lo registra el evaluador");
+        Assert.IsTrue(entradas[2].EsDelSistema(), "El rechazo por falta de unidades lo registra el sistema");
+        Assert.AreEqual(FechaDeEvaluacion, entradas[1].FechaHora);
+        Assert.AreEqual(FechaDeEvaluacion, entradas[2].FechaHora);
+        Assert.AreEqual("Intento de aprobación del préstamo de Renato Alves (DNI 12345672). Unidades: 2",
+            entradas[1].Detalle);
+        Assert.AreEqual("Rechazo del préstamo de Renato Alves (DNI 12345672). Unidades: 2", entradas[2].Detalle);
+    }
+
+    [TestMethod]
     public void Aprobar_LaBaseRechazaLaNotificacion_LanzaInvalidOperationExceptionYQuedanElPrestamoActivoYSusMovimientos()
     {
         ServicioPrestamo servicio = CrearServicio();
