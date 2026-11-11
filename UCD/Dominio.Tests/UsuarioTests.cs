@@ -832,6 +832,15 @@ public sealed class UsuarioTests
         Assert.IsFalse(usuario.PermiteUnidades(3));
     }
 
+    [TestMethod]
+    public void PermiteUnidades_AdministradorSinTopes_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Administrador());
+
+        Assert.IsTrue(usuario.PermiteUnidades(1000));
+    }
+
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,
         string? dni = DniValido, string? correo = CorreoValido, string? contrasena = ContrasenaValida)
     {
