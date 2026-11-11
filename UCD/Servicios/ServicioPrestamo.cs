@@ -202,8 +202,7 @@ public class ServicioPrestamo
             throw new ServicioException("La cantidad solicitada supera el maximo de unidades del solicitante");
         }
 
-        IReadOnlyList<Prestamo> prestamosDelSolicitante = _prestamos.ObtenerPrestamosDeSolicitante(solicitante.Dni);
-        int prestamosVigentes = prestamosDelSolicitante.Count(prestamo => prestamo.EstaVigente());
+        int prestamosVigentes = _prestamos.ContarPrestamosVigentesDeSolicitante(solicitante.Dni);
 
         if (!solicitante.Tipo.PuedeAgregarPrestamo(prestamosVigentes))
         {
