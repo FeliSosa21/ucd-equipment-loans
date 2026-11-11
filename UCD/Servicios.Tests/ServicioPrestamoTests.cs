@@ -1066,6 +1066,21 @@ public sealed class ServicioPrestamoTests
         Assert.AreEqual(0, guardado.UnidadesAsignadas.Count);
     }
 
+    // El docente tiene un maximo de 3 concurrentes: con 3 pendientes, el que se aprueba ya es uno de ellos.
+    [TestMethod]
+    public void Aprobar_JustoEnElMaximoDeConcurrentes_NoCuentaDosVecesElQueSeAprueba()
+    {
+        ServicioPrestamo servicio = CrearServicio();
+        SolicitudPrestamoDto camara = CrearSolicitud(tipoEquipamiento: NombreTipoConAprobacion, cantidadSolicitada: 1);
+        Guid idPrestamo = servicio.Solicitar(camara, DniDocente).Id;
+        servicio.Solicitar(camara, DniDocente);
+        servicio.Solicitar(camara, DniDocente);
+
+        PrestamoDto resultado = servicio.Aprobar(idPrestamo, DniSupervisor);
+
+        Assert.AreEqual("Activo", resultado.Estado);
+    }
+
     [TestMethod]
     public void Aprobar_LaBaseRechazaLaNotificacion_LanzaInvalidOperationExceptionYQuedanElPrestamoActivoYSusMovimientos()
     {
