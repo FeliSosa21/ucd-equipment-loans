@@ -2,6 +2,7 @@ using Data;
 using Data.Repositorios;
 using Dominio;
 using DTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace Servicios.Tests;
 
@@ -12,6 +13,29 @@ public class ServicioDevolucionTests
     private const string DniSolicitante = "45678905";
     private static readonly DateTime InicioPrestamo = new DateTime(2026, 9, 22, 10, 0, 0);
     private static readonly DateTime MomentoDevolucion = InicioPrestamo.AddDays(2);
+
+    private const string TipoQueSeDevuelve = "Proyector Epson";
+    private const string TipoDeUnaUnidad = "Notebook Lenovo";
+
+    private DbContextOptions<SqlContext> _opciones = null!;
+    private SqlContext _contexto = null!;
+    private int _idCatalogo;
+
+    // El servicio usa un solo contexto para todos sus repositorios, como en la app. Los datos se preparan
+    // con otro contexto y se verifican con uno nuevo, para no leer lo que quedo en memoria.
+    [TestInitialize]
+    public void Inicializar()
+    {
+        _opciones = new DbContextOptionsBuilder<SqlContext>()
+            .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
+        _contexto = new SqlContext(_opciones);
+    }
+
+    [TestCleanup]
+    public void Limpiar()
+    {
+        _contexto.Dispose();
+    }
 
     [TestMethod]
     public void CondicionesPosibles_DevuelveLasTresCondiciones()
@@ -52,8 +76,44 @@ public class ServicioDevolucionTests
 
         servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
 
-        Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
+        Assert.AreEqual(EstadoPrestamo.Devuelto, LeerPrestamo(prestamo.Id).Estado);
         Assert.AreEqual(0, servicio.ListarPrestamosActivos(DniFuncionario).Count);
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_DatosValidos_RegistraLaDevolucionConSuResponsableYSuHora()
+    {
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+
+        servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
+
+        RegistroAuditoria registro = LeerAccionesDelFuncionario().Single();
+        Assert.AreEqual(AccionAuditada.DevolucionDePrestamo, registro.Accion);
+        Assert.AreEqual(MomentoDevolucion, registro.FechaHora);
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_DatosValidos_ElDetalleTieneElSolicitanteYLaCantidadDeUnidades()
+    {
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+
+        servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
+
+        Assert.AreEqual("Devolución del préstamo de Ana Perez (DNI 45678905): 2 unidades",
+            LeerAccionesDelFuncionario().Single().Detalle);
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_UnaUnidad_ElDetalleDiceUnaUnidad()
+    {
+        ServicioDevolucion servicio = CrearServicio(out _);
+        Prestamo deUnaUnidad = GuardarPrestamoActivo(TipoDeUnaUnidad, cantidad: 1);
+        DevolucionDto datos = CrearDatosDeUnaUnidad(deUnaUnidad.Id);
+
+        servicio.RegistrarDevolucion(datos, DniFuncionario);
+
+        Assert.AreEqual("Devolución del préstamo de Ana Perez (DNI 45678905): 1 unidad",
+            LeerAccionesDelFuncionario().Single().Detalle);
     }
 
     [TestMethod]
@@ -64,76 +124,143 @@ public class ServicioDevolucionTests
 
         servicio.RegistrarDevolucion(datos, DniFuncionario);
 
-        Assert.AreEqual(EstadoUnidadFisica.Disponible, prestamo.UnidadesAsignadas[0].Estado);
-        Assert.AreEqual(EstadoUnidadFisica.EnMantenimiento, prestamo.UnidadesAsignadas[1].Estado);
+        Prestamo guardado = LeerPrestamo(prestamo.Id);
+        Assert.AreEqual(EstadoUnidadFisica.Disponible, UnidadAsignada(guardado, "EQP-0001").Estado);
+        Assert.AreEqual(EstadoUnidadFisica.EnMantenimiento, UnidadAsignada(guardado, "EQP-0002").Estado);
     }
 
     [TestMethod]
     public void RegistrarDevolucion_DatosValidos_LaGuarda()
     {
-        Memoria memoria = new Memoria();
-        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
 
         servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
 
-        Devolucion guardada = new RepositorioDevolucion(memoria).ObtenerTodas().Single();
-        Assert.AreSame(prestamo, guardada.Prestamo);
+        Devolucion guardada = LeerDevoluciones().Single();
+        Assert.AreEqual(prestamo.Id, guardada.Prestamo.Id);
         Assert.AreEqual(DniFuncionario, guardada.RegistradaPor.Dni);
         Assert.AreEqual(MomentoDevolucion, guardada.FechaHoraDevolucion);
     }
 
     [TestMethod]
-    public void RegistrarDevolucion_Supervisor_LaRegistra()
+    public void RegistrarDevolucion_DosUnidadesEnElMismoContexto_GuardaDevolucionMovimientosYLogDelMismoResponsable()
     {
-        Memoria memoria = new Memoria();
-        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
-        new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniFuncionario)!.AsignarTipo(TipoUsuario.Supervisor);
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
 
         servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
 
-        Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
+        Devolucion devolucion = LeerDevoluciones().Single();
+        IReadOnlyList<Movimiento> movimientos = LeerMovimientos();
+        RegistroAuditoria log = LeerAccionesDelFuncionario().Single();
+        Assert.AreEqual(2, movimientos.Count);
+        CollectionAssert.AreEqual(
+            new List<string> { DniFuncionario, DniFuncionario, DniFuncionario, DniFuncionario },
+            new List<string?>
+            {
+                devolucion.RegistradaPor.Dni, movimientos[0].Responsable?.Dni, movimientos[1].Responsable?.Dni,
+                log.Responsable?.Dni
+            });
+        CollectionAssert.AreEqual(
+            new List<DateTime> { MomentoDevolucion, MomentoDevolucion, MomentoDevolucion, MomentoDevolucion },
+            new List<DateTime>
+            {
+                devolucion.FechaHoraDevolucion, movimientos[0].FechaHora, movimientos[1].FechaHora, log.FechaHora
+            });
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_UnaUnidadEnElMismoContexto_GuardaDevolucionMovimientoYLogDelMismoResponsable()
+    {
+        ServicioDevolucion servicio = CrearServicio(out _);
+        Prestamo deUnaUnidad = GuardarPrestamoActivo(TipoDeUnaUnidad, cantidad: 1);
+        DevolucionDto datos = CrearDatosDeUnaUnidad(deUnaUnidad.Id);
+
+        servicio.RegistrarDevolucion(datos, DniFuncionario);
+
+        Devolucion devolucion = LeerDevoluciones().Single();
+        Movimiento movimiento = LeerMovimientos().Single();
+        RegistroAuditoria log = LeerAccionesDelFuncionario().Single();
+        CollectionAssert.AreEqual(
+            new List<string> { DniFuncionario, DniFuncionario, DniFuncionario },
+            new List<string?> { devolucion.RegistradaPor.Dni, movimiento.Responsable?.Dni, log.Responsable?.Dni });
+        CollectionAssert.AreEqual(
+            new List<DateTime> { MomentoDevolucion, MomentoDevolucion, MomentoDevolucion },
+            new List<DateTime> { devolucion.FechaHoraDevolucion, movimiento.FechaHora, log.FechaHora });
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_Supervisor_LaRegistra()
+    {
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+        AsignarAlFuncionarioElTipo(TipoUsuario.Supervisor().Nombre);
+
+        servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
+
+        Assert.AreEqual(EstadoPrestamo.Devuelto, LeerPrestamo(prestamo.Id).Estado);
     }
 
     [TestMethod]
     public void RegistrarDevolucion_DatosValidos_RegistraUnMovimientoPorUnidad()
     {
-        Memoria memoria = new Memoria();
-        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
         DevolucionDto datos = CrearDatos(prestamo.Id);
 
         servicio.RegistrarDevolucion(datos, DniFuncionario);
 
-        List<Movimiento> movimientos = new RepositorioMovimiento(memoria).ObtenerTodos().ToList();
+        IReadOnlyList<Movimiento> movimientos = LeerMovimientos();
         Assert.AreEqual(2, movimientos.Count);
-        CollectionAssert.AreEquivalent(prestamo.UnidadesAsignadas.ToList(),
-            movimientos.Select(movimiento => movimiento.Unidad).ToList());
+        CollectionAssert.AreEquivalent(prestamo.UnidadesAsignadas.Select(unidad => unidad.IdInstitucional).ToList(),
+            movimientos.Select(movimiento => movimiento.Unidad!.IdInstitucional).ToList());
     }
 
     [TestMethod]
     public void RegistrarDevolucion_DatosValidos_ElMovimientoTieneTipoFechaYSolicitante()
     {
-        Memoria memoria = new Memoria();
-        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
         DevolucionDto datos = CrearDatos(prestamo.Id);
 
         servicio.RegistrarDevolucion(datos, DniFuncionario);
 
-        Movimiento movimiento = new RepositorioMovimiento(memoria).ObtenerTodos()[0];
+        Movimiento movimiento = LeerMovimientos()[0];
         Assert.AreEqual(TipoMovimiento.Devolucion, movimiento.Tipo);
         Assert.AreEqual(MomentoDevolucion, movimiento.FechaHora);
-        Assert.AreSame(prestamo.Solicitante, movimiento.Solicitante);
+        Assert.AreEqual(prestamo.Solicitante.Dni, movimiento.Solicitante.Dni);
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_DatosValidos_DevuelveQuienLaRegistro()
+    {
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+
+        DevolucionRegistradaDto registrada = servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
+
+        Assert.AreEqual("Felipe Sosa", registrada.RegistradaPor);
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_DatosValidos_DevuelveLaCondicionDeCadaUnidad()
+    {
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+        DevolucionDto datos = CrearDatos(prestamo.Id, condicionSegunda: "Con fallas");
+        datos.Unidades[1].Observaciones = "No enciende";
+
+        DevolucionRegistradaDto registrada = servicio.RegistrarDevolucion(datos, DniFuncionario);
+
+        Assert.AreEqual(2, registrada.Unidades.Count);
+        UnidadDevueltaDto segunda = registrada.Unidades.Single(unidad => unidad.IdInstitucional == "EQP-0002");
+        Assert.AreEqual("Con fallas", segunda.Condicion);
+        Assert.AreEqual("No enciende", segunda.Observaciones);
     }
 
     [TestMethod]
     public void RegistrarDevolucion_DevolucionFallida_NoRegistraMovimientos()
     {
-        Memoria memoria = new Memoria();
-        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
         DevolucionDto datos = CrearDatos(prestamo.Id);
         datos.Unidades.RemoveAt(1);
 
         Assert.ThrowsException<ServicioException>(() => servicio.RegistrarDevolucion(datos, DniFuncionario));
-        Assert.AreEqual(0, new RepositorioMovimiento(memoria).ObtenerTodos().Count);
+        Assert.AreEqual(0, LeerMovimientos().Count);
     }
 
     [TestMethod]
@@ -170,7 +297,7 @@ public class ServicioDevolucionTests
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniSolicitante));
-        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        Assert.AreEqual(EstadoPrestamo.Activo, LeerPrestamo(prestamo.Id).Estado);
     }
 
     [TestMethod]
@@ -180,7 +307,7 @@ public class ServicioDevolucionTests
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), "30000004"));
-        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        Assert.AreEqual(EstadoPrestamo.Activo, LeerPrestamo(prestamo.Id).Estado);
     }
 
     [TestMethod]
@@ -191,7 +318,7 @@ public class ServicioDevolucionTests
         datos.Unidades[1].IdInstitucional = "EQP-0099";
 
         Assert.ThrowsException<ServicioException>(() => servicio.RegistrarDevolucion(datos, DniFuncionario));
-        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        Assert.AreEqual(EstadoPrestamo.Activo, LeerPrestamo(prestamo.Id).Estado);
     }
 
     [TestMethod]
@@ -213,30 +340,29 @@ public class ServicioDevolucionTests
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
             servicio.RegistrarDevolucion(datos, DniFuncionario));
         Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
-        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
-        Assert.AreEqual(EstadoUnidadFisica.Prestada, prestamo.UnidadesAsignadas[0].Estado);
+        Assert.AreEqual(EstadoPrestamo.Activo, LeerPrestamo(prestamo.Id).Estado);
+        Assert.AreEqual(EstadoUnidadFisica.Prestada, UnidadAsignada(LeerPrestamo(prestamo.Id), "EQP-0001").Estado);
     }
 
     [TestMethod]
     public void RegistrarDevolucion_FechaAnteriorAlPrestamo_LanzaExcepcion()
     {
-        ServicioDevolucion servicio = CrearServicio(new Memoria(), out Prestamo prestamo, InicioPrestamo.AddDays(-1));
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo, InicioPrestamo.AddDays(-1));
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario));
-        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        Assert.AreEqual(EstadoPrestamo.Activo, LeerPrestamo(prestamo.Id).Estado);
     }
 
     [TestMethod]
     public void RegistrarDevolucion_ResponsableDesactivado_LanzaExcepcion()
     {
-        Memoria memoria = new Memoria();
-        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
-        new RepositorioUsuario(memoria).ObtenerUsuarioPorDni(DniFuncionario)!.Desactivar();
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+        DesactivarAlFuncionario();
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario));
-        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        Assert.AreEqual(EstadoPrestamo.Activo, LeerPrestamo(prestamo.Id).Estado);
     }
 
     [TestMethod]
@@ -249,19 +375,30 @@ public class ServicioDevolucionTests
         ServicioException excepcion = Assert.ThrowsException<ServicioException>(() =>
             servicio.RegistrarDevolucion(datos, DniFuncionario));
         Assert.IsInstanceOfType(excepcion.InnerException, typeof(DominioException));
-        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        Assert.AreEqual(EstadoPrestamo.Activo, LeerPrestamo(prestamo.Id).Estado);
     }
 
     [TestMethod]
     public void RegistrarDevolucion_PrestamoYaDevuelto_LanzaExcepcionYNoLaGuardaDosVeces()
     {
-        Memoria memoria = new Memoria();
-        ServicioDevolucion servicio = CrearServicio(memoria, out Prestamo prestamo);
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
         servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
 
         Assert.ThrowsException<ServicioException>(() =>
             servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario));
-        Assert.AreEqual(1, new RepositorioDevolucion(memoria).ObtenerTodas().Count);
+        Assert.AreEqual(1, LeerDevoluciones().Count);
+    }
+
+    [TestMethod]
+    public void RegistrarDevolucion_PrestamoYaDevuelto_NoAgregaNadaAlLog()
+    {
+        ServicioDevolucion servicio = CrearServicio(out Prestamo prestamo);
+        servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.RegistrarDevolucion(CrearDatos(prestamo.Id), DniFuncionario));
+
+        Assert.AreEqual(1, LeerAccionesDelFuncionario().Count);
     }
 
     private static DevolucionDto CrearDatos(Guid idPrestamo, string condicionSegunda = "Sin observaciones")
@@ -277,46 +414,148 @@ public class ServicioDevolucionTests
         };
     }
 
-    private static ServicioDevolucion CrearServicio(out Prestamo prestamo)
+    private static DevolucionDto CrearDatosDeUnaUnidad(Guid idPrestamo)
     {
-        return CrearServicio(new Memoria(), out prestamo);
+        return new DevolucionDto
+        {
+            IdPrestamo = idPrestamo,
+            Unidades = new List<UnidadDevueltaDto>
+            {
+                new UnidadDevueltaDto { IdInstitucional = "EQP-0003", Condicion = "Sin observaciones" }
+            }
+        };
     }
 
-    private static ServicioDevolucion CrearServicio(Memoria memoria, out Prestamo prestamo)
+    private ServicioDevolucion CrearServicio(out Prestamo prestamo)
     {
-        return CrearServicio(memoria, out prestamo, MomentoDevolucion);
+        return CrearServicio(out prestamo, MomentoDevolucion);
     }
 
-    private static ServicioDevolucion CrearServicio(Memoria memoria, out Prestamo prestamo, DateTime ahora)
+    private ServicioDevolucion CrearServicio(out Prestamo prestamo, DateTime ahora)
     {
-        RepositorioUsuario usuarios = new RepositorioUsuario(memoria);
-        RepositorioPrestamo prestamos = new RepositorioPrestamo(memoria);
+        GuardarTiposYUsuarios();
+        _idCatalogo = GuardarCatalogo();
+        prestamo = GuardarPrestamoActivo(TipoQueSeDevuelve, cantidad: 2);
+        TimeProvider reloj = new RelojFijo(ahora);
 
+        return new ServicioDevolucion(new RepositorioPrestamoSql(_contexto), new RepositorioUsuarioSql(_contexto),
+            new RepositorioDevolucionSql(_contexto), new RepositorioMovimientoSql(_contexto), reloj,
+            new RegistradorDeAuditoria(new RepositorioAuditoriaSql(_contexto), reloj));
+    }
+
+    // Los tipos de usuario se guardan aca y no se toman de la base: la carga inicial puede no traerlos (D19).
+    private void GuardarTiposYUsuarios()
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
+        RepositorioTipoUsuarioSql tipos = new RepositorioTipoUsuarioSql(preparacion);
+        TipoUsuario funcionarioCE = TipoUsuario.FuncionarioCE();
+        TipoUsuario docente = TipoUsuario.Docente();
+        tipos.AgregarTipo(funcionarioCE);
+        tipos.AgregarTipo(docente);
+        tipos.AgregarTipo(TipoUsuario.Supervisor());
+
+        RepositorioUsuarioSql usuarios = new RepositorioUsuarioSql(preparacion);
         Usuario funcionario = new Usuario(dni: DniFuncionario, nombre: "Felipe", apellido: "Sosa",
             correo: "felipe@hotmail.com", contrasena: "VivaLaOrt2026");
-        funcionario.AsignarTipo(TipoUsuario.FuncionarioCE);
+        funcionario.AsignarTipo(funcionarioCE);
         Usuario solicitante = new Usuario(dni: DniSolicitante, nombre: "Ana", apellido: "Perez",
             correo: "ana@hotmail.com", contrasena: "VivaLaOrt2026");
-        solicitante.AsignarTipo(TipoUsuario.Docente);
+        solicitante.AsignarTipo(docente);
         usuarios.AgregarUsuario(funcionario);
         usuarios.AgregarUsuario(solicitante);
+    }
 
-        TipoEquipamiento tipo = new TipoEquipamiento(nombre: "Proyector Epson", descripcion: "Proyector para aulas",
-            duracionMaxPrestamo: 5, requiereAprobacion: false, categoria: Categoria.Audiovisual);
-        prestamo = new Prestamo(solicitante, tipo, cantidadSolicitada: 2, fechaHoraPrestamo: InicioPrestamo);
-        List<UnidadFisica> unidades = new List<UnidadFisica>
-        {
-            new UnidadFisica(idInstitucional: "EQP-0001", ubiFisica: "Deposito A", numSerie: null),
-            new UnidadFisica(idInstitucional: "EQP-0002", ubiFisica: "Deposito A", numSerie: null)
-        };
-        foreach (UnidadFisica unidad in unidades)
-        {
-            tipo.AgregarUnidad(unidad);
-        }
-        prestamo.Activar(unidades);
-        prestamos.AgregarPrestamo(prestamo);
+    private int GuardarCatalogo()
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
+        TipoEquipamiento proyector = new TipoEquipamiento(nombre: TipoQueSeDevuelve,
+            descripcion: "Proyector para aulas", duracionMaxPrestamo: 5, requiereAprobacion: false,
+            categoria: Categoria.Audiovisual);
+        proyector.AgregarUnidad(new UnidadFisica(idInstitucional: "EQP-0001", ubiFisica: "Deposito A", numSerie: null));
+        proyector.AgregarUnidad(new UnidadFisica(idInstitucional: "EQP-0002", ubiFisica: "Deposito A", numSerie: null));
+        TipoEquipamiento notebook = new TipoEquipamiento(nombre: TipoDeUnaUnidad,
+            descripcion: "Notebook para clases", duracionMaxPrestamo: 5, requiereAprobacion: false,
+            categoria: Categoria.Computacion);
+        notebook.AgregarUnidad(new UnidadFisica(idInstitucional: "EQP-0003", ubiFisica: "Deposito A", numSerie: null));
+        Catalogo catalogo = new Catalogo("Catalogo general");
+        catalogo.AgregarTipo(proyector);
+        catalogo.AgregarTipo(notebook);
+        new RepositorioCatalogoSql(preparacion).AgregarCatalogo(catalogo);
+        return catalogo.Id;
+    }
 
-        return new ServicioDevolucion(prestamos, usuarios, new RepositorioDevolucion(memoria),
-            new RepositorioMovimiento(memoria), new RelojFijo(ahora));
+    // El prestamo de Ana Perez queda activo con las primeras unidades del tipo, por id institucional.
+    private Prestamo GuardarPrestamoActivo(string nombreTipo, int cantidad)
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
+        Usuario solicitante = new RepositorioUsuarioSql(preparacion).ObtenerUsuarioPorDni(DniSolicitante)
+            ?? throw new InvalidOperationException($"No existe el usuario con DNI {DniSolicitante}");
+        TipoEquipamiento tipo = new RepositorioCatalogoSql(preparacion).ObtenerTipoPorNombre(_idCatalogo, nombreTipo)
+            ?? throw new InvalidOperationException($"No existe el tipo {nombreTipo}");
+        Prestamo prestamo = new Prestamo(solicitante, tipo, cantidadSolicitada: cantidad,
+            fechaHoraPrestamo: InicioPrestamo);
+        prestamo.Activar(tipo.Unidades.OrderBy(unidad => unidad.IdInstitucional).Take(cantidad).ToList());
+        new RepositorioPrestamoSql(preparacion).AgregarPrestamo(prestamo);
+        return prestamo;
+    }
+
+    private void AsignarAlFuncionarioElTipo(string nombreTipo)
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
+        RepositorioUsuarioSql usuarios = new RepositorioUsuarioSql(preparacion);
+        Usuario funcionario = ObtenerFuncionario(usuarios);
+        TipoUsuario tipo = new RepositorioTipoUsuarioSql(preparacion).ObtenerTipoPorNombre(nombreTipo)
+            ?? throw new InvalidOperationException($"No existe el tipo de usuario {nombreTipo}");
+        funcionario.AsignarTipo(tipo);
+        usuarios.ActualizarUsuario(funcionario);
+    }
+
+    private void DesactivarAlFuncionario()
+    {
+        using SqlContext preparacion = new SqlContext(_opciones);
+        RepositorioUsuarioSql usuarios = new RepositorioUsuarioSql(preparacion);
+        Usuario funcionario = ObtenerFuncionario(usuarios);
+        funcionario.Desactivar();
+        usuarios.ActualizarUsuario(funcionario);
+    }
+
+    private static Usuario ObtenerFuncionario(RepositorioUsuarioSql usuarios)
+    {
+        return usuarios.ObtenerUsuarioPorDni(DniFuncionario)
+            ?? throw new InvalidOperationException($"No existe el usuario con DNI {DniFuncionario}");
+    }
+
+    private Prestamo LeerPrestamo(Guid idPrestamo)
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        return new RepositorioPrestamoSql(contextoQueLee).ObtenerPrestamoPorId(idPrestamo)
+            ?? throw new InvalidOperationException($"No existe el prestamo {idPrestamo}");
+    }
+
+    private static UnidadFisica UnidadAsignada(Prestamo prestamo, string idInstitucional)
+    {
+        return prestamo.UnidadesAsignadas.Single(unidad => unidad.IdInstitucional == idInstitucional);
+    }
+
+    // Con un filtro sin criterios el repositorio no devuelve nada: Desde = MinValue abarca todo lo registrado.
+    private IReadOnlyList<Movimiento> LeerMovimientos()
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        return new RepositorioMovimientoSql(contextoQueLee)
+            .ObtenerMovimientos(new FiltroPorCatalogoYFechas { Desde = DateTime.MinValue });
+    }
+
+    // Es la consulta de la exportacion: sin criterios trae todas las devoluciones.
+    private IReadOnlyList<Devolucion> LeerDevoluciones()
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        return new RepositorioDevolucionSql(contextoQueLee).ObtenerDevoluciones(new FiltroPorCatalogoYFechas());
+    }
+
+    private IReadOnlyList<RegistroAuditoria> LeerAccionesDelFuncionario()
+    {
+        using SqlContext contextoQueLee = new SqlContext(_opciones);
+        return new RepositorioAuditoriaSql(contextoQueLee)
+            .ObtenerRegistros(new FiltroAuditoria { DniUsuario = DniFuncionario });
     }
 }

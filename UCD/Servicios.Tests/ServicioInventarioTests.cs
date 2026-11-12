@@ -8,6 +8,26 @@ namespace Servicios.Tests;
 [TestClass]
 public class ServicioInventarioTests
 {
+    private const string DniFuncionario = "12345672";
+    private const string DniDocente = "45678905";
+    private const string DniDesactivado = "23456783";
+    private const string DniInexistente = "34567894";
+
+    private ContextoDePrueba _entorno = null!;
+    private int _idCatalogo;
+
+    [TestInitialize]
+    public void Inicializar()
+    {
+        _entorno = new ContextoDePrueba();
+    }
+
+    [TestCleanup]
+    public void Limpiar()
+    {
+        _entorno.Dispose();
+    }
+
     [TestMethod]
     public void ContarPorTipo_UnidadesEnCadaEstado_CuentaCadaEstado()
     {
@@ -19,7 +39,7 @@ public class ServicioInventarioTests
         notebook.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0005", estado: EstadoUnidadFisica.DadaDeBaja));
         ServicioInventario servicio = CrearServicio(notebook);
 
-        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorTipo(new FiltroInventarioDto());
+        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorTipo(_idCatalogo, new FiltroInventarioDto(), DniFuncionario);
 
         Assert.AreEqual(1, resultado.Count);
         CantidadesPorEstadoDto fila = resultado[0];
@@ -33,19 +53,21 @@ public class ServicioInventarioTests
     }
 
     [TestMethod]
-    public void ContarPorTipo_SinCatalogo_LanzaServicioException()
+    public void ContarPorTipo_CatalogoInexistente_LanzaServicioException()
     {
-        ServicioInventario servicio = new ServicioInventario(new RepositorioCatalogo(new Memoria()));
+        ServicioInventario servicio = CrearServicio();
 
-        Assert.ThrowsException<ServicioException>(() => servicio.ContarPorTipo(new FiltroInventarioDto()));
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ContarPorTipo(_idCatalogo + 1, new FiltroInventarioDto(), DniFuncionario));
     }
 
     [TestMethod]
-    public void ContarPorCategoria_SinCatalogo_LanzaServicioException()
+    public void ContarPorCategoria_CatalogoInexistente_LanzaServicioException()
     {
-        ServicioInventario servicio = new ServicioInventario(new RepositorioCatalogo(new Memoria()));
+        ServicioInventario servicio = CrearServicio();
 
-        Assert.ThrowsException<ServicioException>(() => servicio.ContarPorCategoria());
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ContarPorCategoria(_idCatalogo + 1, DniFuncionario));
     }
 
     [TestMethod]
@@ -56,7 +78,7 @@ public class ServicioInventarioTests
         ServicioInventario servicio = CrearServicio(proyector, notebook);
         FiltroInventarioDto filtro = new FiltroInventarioDto { Categoria = "Computacion" };
 
-        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorTipo(filtro);
+        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorTipo(_idCatalogo, filtro, DniFuncionario);
 
         Assert.AreEqual(1, resultado.Count);
         Assert.AreEqual("Notebook", resultado[0].Agrupador);
@@ -73,7 +95,7 @@ public class ServicioInventarioTests
         ServicioInventario servicio = CrearServicio(proyector, kitArduino);
         FiltroInventarioDto filtro = new FiltroInventarioDto { Estado = "EnMantenimiento" };
 
-        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorTipo(filtro);
+        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorTipo(_idCatalogo, filtro, DniFuncionario);
 
         Assert.AreEqual(1, resultado.Count);
         Assert.AreEqual("Kit Arduino", resultado[0].Agrupador);
@@ -92,7 +114,7 @@ public class ServicioInventarioTests
         proyector.AgregarUnidad(CrearUnidad(idInstitucional: "PRY-0001"));
         ServicioInventario servicio = CrearServicio(notebook, proyector, tablet);
 
-        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorCategoria();
+        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorCategoria(_idCatalogo, DniFuncionario);
 
         Assert.AreEqual(5, resultado.Count);
         CantidadesPorEstadoDto computacion = BuscarFila(resultado, "Computacion");
@@ -108,7 +130,7 @@ public class ServicioInventarioTests
     {
         ServicioInventario servicio = CrearServicio(CrearTipo(nombre: "Notebook", categoria: Categoria.Computacion));
 
-        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorCategoria();
+        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorCategoria(_idCatalogo, DniFuncionario);
 
         CantidadesPorEstadoDto computacion = BuscarFila(resultado, "Computacion");
         Assert.AreEqual("Computacion", computacion.Agrupador);
@@ -119,21 +141,102 @@ public class ServicioInventarioTests
     {
         ServicioInventario servicio = CrearServicio(CrearTipo());
 
-        Assert.ThrowsException<ArgumentNullException>(() => servicio.ContarPorTipo(null!));
+        Assert.ThrowsException<ArgumentNullException>(() => servicio.ContarPorTipo(_idCatalogo, null!, DniFuncionario));
     }
 
-    private static ServicioInventario CrearServicio(params TipoEquipamiento[] tipos)
+    [TestMethod]
+    public void ContarPorTipo_CatalogoDadoDeBaja_LanzaServicioException()
     {
-        Memoria memoria = new Memoria();
-        RepositorioCatalogo repositorio = new RepositorioCatalogo(memoria);
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ContarPorTipo(_idCatalogo, new FiltroInventarioDto(), DniFuncionario));
+    }
+
+    [TestMethod]
+    public void ContarPorCategoria_CatalogoDadoDeBaja_LanzaServicioException()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+        _entorno.DarDeBajaCatalogo(_idCatalogo);
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ContarPorCategoria(_idCatalogo, DniFuncionario));
+    }
+
+    [TestMethod]
+    public void ContarPorCategoria_UnidadesDeOtroCatalogo_NoSeCuentan()
+    {
+        TipoEquipamiento notebook = CrearTipo(nombre: "Notebook", categoria: Categoria.Computacion);
+        notebook.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0001"));
+        ServicioInventario servicio = CrearServicio(notebook);
+        TipoEquipamiento notebookDelOtroCatalogo = CrearTipo(nombre: "Notebook", categoria: Categoria.Computacion);
+        notebookDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0002"));
+        notebookDelOtroCatalogo.AgregarUnidad(CrearUnidad(idInstitucional: "NTB-0003"));
+        _entorno.GuardarCatalogo("Catalogo Secundario", notebookDelOtroCatalogo);
+
+        List<CantidadesPorEstadoDto> resultado = servicio.ContarPorCategoria(_idCatalogo, DniFuncionario);
+
+        Assert.AreEqual(1, BuscarFila(resultado, "Computacion").Total);
+    }
+
+    [TestMethod]
+    public void ContarPorTipo_UsuarioSinPermiso_LanzaServicioException()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+        _entorno.GuardarUsuario(DniDocente, TipoUsuario.Docente());
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ContarPorTipo(_idCatalogo, new FiltroInventarioDto(), DniDocente));
+    }
+
+    [TestMethod]
+    public void ContarPorCategoria_UsuarioSinPermiso_LanzaServicioException()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+        _entorno.GuardarUsuario(DniDocente, TipoUsuario.Docente());
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ContarPorCategoria(_idCatalogo, DniDocente));
+    }
+
+    [TestMethod]
+    public void ContarPorTipo_UsuarioDesactivado_LanzaServicioException()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+        _entorno.GuardarUsuarioDesactivado(DniDesactivado, TipoUsuario.FuncionarioCE());
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ContarPorTipo(_idCatalogo, new FiltroInventarioDto(), DniDesactivado));
+    }
+
+    [TestMethod]
+    public void ContarPorCategoria_UsuarioDesactivado_LanzaServicioException()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+        _entorno.GuardarUsuarioDesactivado(DniDesactivado, TipoUsuario.FuncionarioCE());
+
+        Assert.ThrowsException<ServicioException>(() => servicio.ContarPorCategoria(_idCatalogo, DniDesactivado));
+    }
+
+    [TestMethod]
+    public void ContarPorTipo_DniInexistente_LanzaServicioException()
+    {
+        ServicioInventario servicio = CrearServicio(CrearTipo());
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ContarPorTipo(_idCatalogo, new FiltroInventarioDto(), DniInexistente));
+    }
+
+    private ServicioInventario CrearServicio(params TipoEquipamiento[] tipos)
+    {
         Catalogo catalogo = new Catalogo("Catalogo Central");
         foreach (TipoEquipamiento tipo in tipos)
         {
             catalogo.AgregarTipo(tipo);
         }
 
-        repositorio.Guardar(catalogo);
-        return new ServicioInventario(repositorio);
+        _idCatalogo = _entorno.GuardarCatalogo(catalogo);
+        _entorno.GuardarUsuario(DniFuncionario, TipoUsuario.FuncionarioCE());
+        return new ServicioInventario(_entorno.Catalogos, _entorno.Usuarios);
     }
 
     private static TipoEquipamiento CrearTipo(string nombre = "Proyector", Categoria categoria = Categoria.Audiovisual)

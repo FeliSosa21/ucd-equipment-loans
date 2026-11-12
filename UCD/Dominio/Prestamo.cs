@@ -3,20 +3,29 @@
 public class Prestamo
 {
     private const string MotivoFaltaDeUnidades = "No hay unidades suficientes para el tipo de equipamiento";
+    private const string MotivoTopeDeUnidades =
+        "Supera el maximo de unidades por catalogo al momento de la aprobacion";
+    private const string MotivoTopeDePrestamosConcurrentes =
+        "Supera el maximo de prestamos concurrentes al momento de la aprobacion";
+    public const int LargoMaximoMotivoRechazo = 300;
     private readonly List<UnidadFisica> _unidadesAsignadas = new List<UnidadFisica>();
-    public Usuario? ResponsableEntrega { get; private set; }
-    public DateTime? FechaHoraEntrega { get; private set; }
 
-    public Guid Id { get; } = Guid.NewGuid();
+    public Guid Id { get; private set; } = Guid.NewGuid();
     public EstadoPrestamo Estado { get; private set; } = EstadoPrestamo.Solicitado;
-    public Usuario Solicitante { get; }
-    public TipoEquipamiento TipoEquipamiento { get; }
-    public int CantidadSolicitada { get; }
-    public DateTime FechaHoraPrestamo { get; }
-    public DateTime FechaEsperadaDevolucion { get; }
+    public Usuario Solicitante { get; private set; }
+    public TipoEquipamiento TipoEquipamiento { get; private set; }
+    public int CantidadSolicitada { get; private set; }
+    public DateTime FechaHoraPrestamo { get; private set; }
+    public DateTime FechaEsperadaDevolucion { get; private set; }
     public Usuario? Evaluador { get; private set; }
     public string? MotivoRechazo { get; private set; }
     public IReadOnlyList<UnidadFisica> UnidadesAsignadas => _unidadesAsignadas.AsReadOnly();
+
+    private Prestamo()
+    {
+        Solicitante = null!;
+        TipoEquipamiento = null!;
+    }
 
     public Prestamo(Usuario solicitante, TipoEquipamiento tipoEquipamiento, int cantidadSolicitada,
         DateTime fechaHoraPrestamo)
@@ -38,36 +47,23 @@ public class Prestamo
     {
         ValidarQueEsteSolicitado();
         ValidarQueNoRequieraAprobacion();
-        ValidarUnidades(unidadesFisicas);
-        AsignarUnidades(unidadesFisicas);
-
-        Estado = EstadoPrestamo.Activo;
+        AsignarYActivar(unidadesFisicas);
     }
 
     public void Aprobar(Usuario evaluador, IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         ValidarQueEsteSolicitado();
         ValidarEvaluador(evaluador);
-        ValidarUnidades(unidadesFisicas);
-        AsignarUnidades(unidadesFisicas);
+        AsignarYActivar(unidadesFisicas);
 
-        Estado = EstadoPrestamo.Aprobado;
         Evaluador = evaluador;
-    }
-
-    public void Realizar()
-    {
-        ValidarQueEsteAprobado();
-
-        Estado = EstadoPrestamo.Activo;
     }
 
     public void Rechazar(Usuario evaluador, string motivo)
     {
-        ValidarQueSePuedaRechazar();
+        ValidarQueEsteSolicitado();
         ValidarEvaluador(evaluador);
         ValidarMotivo(motivo);
-        LiberarUnidades();
 
         Estado = EstadoPrestamo.Rechazado;
         Evaluador = evaluador;
@@ -76,19 +72,51 @@ public class Prestamo
 
     public void RechazarPorFaltaDeUnidades()
     {
-        ValidarQueEsteSolicitado();
-
-        Estado = EstadoPrestamo.Rechazado;
-        MotivoRechazo = MotivoFaltaDeUnidades;
+        RechazarDelSistema(MotivoFaltaDeUnidades);
     }
 
-    public void RegistrarEntrega(Usuario responsable, DateTime fechaHoraEntrega)
+    public void RechazarPorTopeDeUnidades()
     {
-        ValidarQueSePuedaEntregar();
-        ValidarResponsable(responsable);
+        RechazarDelSistema(MotivoTopeDeUnidades);
+    }
 
-        ResponsableEntrega = responsable;
-        FechaHoraEntrega = fechaHoraEntrega;
+    public void RechazarPorTopeDePrestamosConcurrentes()
+    {
+        RechazarDelSistema(MotivoTopeDePrestamosConcurrentes);
+    }
+
+    public void ActivarORechazarPorFaltaDeUnidades()
+    {
+        ValidarQueEsteSolicitado();
+        ValidarQueNoRequieraAprobacion();
+
+        List<UnidadFisica> unidades = PrimerasUnidadesDisponibles();
+
+        if (!AlcanzanLasUnidades(unidades))
+        {
+            RechazarPorFaltaDeUnidades();
+        }
+        else
+        {
+            Activar(unidades);
+        }
+    }
+
+    public void AprobarORechazarPorFaltaDeUnidades(Usuario evaluador)
+    {
+        ValidarQueEsteSolicitado();
+        ValidarEvaluador(evaluador);
+
+        List<UnidadFisica> unidades = PrimerasUnidadesDisponibles();
+
+        if (!AlcanzanLasUnidades(unidades))
+        {
+            RechazarPorFaltaDeUnidades();
+        }
+        else
+        {
+            Aprobar(evaluador, unidades);
+        }
     }
 
     public void MarcarDevuelto()
@@ -102,8 +130,12 @@ public class Prestamo
     public bool EstaVigente()
     {
         return Estado == EstadoPrestamo.Solicitado
-               || Estado == EstadoPrestamo.Aprobado
                || Estado == EstadoPrestamo.Activo;
+    }
+
+    public bool EstaVencido(DateTime ahora)
+    {
+        return Estado == EstadoPrestamo.Activo && FechaEsperadaDevolucion < ahora.Date;
     }
 
     private static void ValidarSolicitante(Usuario solicitante)
@@ -211,6 +243,32 @@ public class Prestamo
         }
     }
 
+    private void RechazarDelSistema(string motivo)
+    {
+        ValidarQueEsteSolicitado();
+
+        Estado = EstadoPrestamo.Rechazado;
+        MotivoRechazo = motivo;
+    }
+
+    private List<UnidadFisica> PrimerasUnidadesDisponibles()
+    {
+        return TipoEquipamiento.UnidadesDisponibles().Take(CantidadSolicitada).ToList();
+    }
+
+    private bool AlcanzanLasUnidades(IReadOnlyList<UnidadFisica> unidades)
+    {
+        return unidades.Count >= CantidadSolicitada;
+    }
+
+    private void AsignarYActivar(IReadOnlyList<UnidadFisica> unidadesFisicas)
+    {
+        ValidarUnidades(unidadesFisicas);
+        AsignarUnidades(unidadesFisicas);
+
+        Estado = EstadoPrestamo.Activo;
+    }
+
     private void AsignarUnidades(IReadOnlyList<UnidadFisica> unidadesFisicas)
     {
         foreach (UnidadFisica unidadFisica in unidadesFisicas)
@@ -221,58 +279,16 @@ public class Prestamo
         _unidadesAsignadas.AddRange(unidadesFisicas);
     }
 
-    private void ValidarQueEsteAprobado()
-    {
-        if (Estado != EstadoPrestamo.Aprobado)
-        {
-            throw new DominioException("El prestamo debe estar aprobado");
-        }
-    }
-
-    private void ValidarQueSePuedaRechazar()
-    {
-        if (Estado != EstadoPrestamo.Solicitado && Estado != EstadoPrestamo.Aprobado)
-        {
-            throw new DominioException("Solo se puede rechazar un prestamo solicitado o aprobado");
-        }
-    }
-
     private static void ValidarMotivo(string motivo)
     {
         if (string.IsNullOrWhiteSpace(motivo))
         {
             throw new DominioException("El motivo de rechazo no puede ser vacio");
         }
-    }
 
-    private void LiberarUnidades()
-    {
-        foreach (UnidadFisica unidadFisica in _unidadesAsignadas)
+        if (motivo.Length > LargoMaximoMotivoRechazo)
         {
-            unidadFisica.Disponible();
-        }
-
-        _unidadesAsignadas.Clear();
-    }
-
-    private void ValidarQueSePuedaEntregar()
-    {
-        if (Estado != EstadoPrestamo.Activo)
-        {
-            throw new DominioException("Solo se puede registrar la entrega de un prestamo activo");
-        }
-
-        if (FechaHoraEntrega is not null)
-        {
-            throw new DominioException("La entrega del prestamo ya fue registrada");
-        }
-    }
-
-    private static void ValidarResponsable(Usuario responsable)
-    {
-        if (responsable is null)
-        {
-            throw new DominioException("La entrega debe tener un responsable");
+            throw new DominioException($"El motivo de rechazo no puede superar los {LargoMaximoMotivoRechazo} caracteres");
         }
     }
 

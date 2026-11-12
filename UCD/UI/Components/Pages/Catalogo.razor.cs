@@ -23,51 +23,54 @@ public partial class Catalogo
             return;
         }
 
-        // Foro: Docente y Estudiante solo ven los tipos activos; filtrar por estado es de quien gestiona el catalogo.
+        // Solo quien gestiona el catalogo ve el filtro por estado; los discontinuados los oculta el servicio.
         _puedeFiltrarPorEstado = SesionActual.Usuario!.Permisos.Contains(Permisos.GestionarCatalogo);
-        Consultar();
     }
 
-    private void Consultar()
+    private async Task AlCambiarCatalogoAsync()
+    {
+        CerrarUnidades();
+        if (!HayCatalogoElegido())
+        {
+            _error = null;
+            _tipos = new List<TipoEquipamientoDto>();
+            return;
+        }
+
+        await ConsultarAsync();
+    }
+
+    private async Task ConsultarAsync()
     {
         _error = null;
         // Un filtro vacio (todo en null) trae todos los tipos: el servicio no acepta un filtro null.
         FiltroCatalogoDto filtro = new FiltroCatalogoDto
         {
             Categoria = ValoresDeFiltro.ValorONulo(_categoria),
-            Estado = EstadoAFiltrar(),
+            Estado = ValoresDeFiltro.ValorONulo(_estado),
             MinimoDisponibles = _minimoDisponibles
         };
 
         try
         {
-            _tipos = ServicioCatalogo.ConsultarTipos(filtro);
+            _tipos = ServicioCatalogo.ConsultarTipos(IdCatalogo, filtro, DniUsuario);
             CerrarUnidadesSiElTipoNoEstaEnLaLista();
         }
         catch (ServicioException ex)
         {
-            _error = ex.Message;
             _tipos = new List<TipoEquipamientoDto>();
             CerrarUnidades();
+            await RecargarSelectorAsync();
+            _error = ex.Message;
         }
     }
 
-    private string? EstadoAFiltrar()
-    {
-        if (_puedeFiltrarPorEstado)
-        {
-            return ValoresDeFiltro.ValorONulo(_estado);
-        }
-
-        return EstadosCatalogo.TipoActivo;
-    }
-
-    private void LimpiarFiltros()
+    private async Task LimpiarFiltrosAsync()
     {
         _categoria = string.Empty;
         _estado = string.Empty;
         _minimoDisponibles = null;
-        Consultar();
+        await ConsultarAsync();
     }
 
     private bool HayFiltrosAplicados()
@@ -80,18 +83,20 @@ public partial class Catalogo
         return _minimoDisponibles is not null;
     }
 
-    private void VerUnidades(string nombreTipo)
+    private async Task VerUnidadesAsync(string nombreTipo)
     {
         _error = null;
         try
         {
-            _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(nombreTipo);
+            _unidades = ServicioCatalogo.ObtenerUnidadesDisponibles(IdCatalogo, nombreTipo,
+                DniUsuario);
             _tipoSeleccionado = nombreTipo;
         }
         catch (ServicioException ex)
         {
-            _error = ex.Message;
             CerrarUnidades();
+            await RecargarSelectorAsync();
+            _error = ex.Message;
         }
     }
 

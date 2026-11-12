@@ -1,0 +1,84 @@
+@page "/exportacion"
+@using Servicios
+@inherits PaginaConSesion
+@inject ServicioExportacion ServicioExportacion
+@inject TimeProvider Reloj
+@inject IJSRuntime JS
+
+<PageTitle>UCD · Exportación</PageTitle>
+
+<div class="page-header">
+    <h1>Exportación</h1>
+    <p>
+        Descargá los préstamos (según la fecha de solicitud) y las devoluciones (según la fecha de registro) de
+        todos los catálogos, también de los dados de baja. Las fechas incluyen el día completo.
+    </p>
+</div>
+
+<div class="toolbar">
+    <div>
+        <label class="lbl" for="exportacion-desde">Desde</label>
+        <input id="exportacion-desde" class="field" type="date" disabled="@_descargando"
+               max="@MaximoDeDesde"
+               aria-invalid="@_errores.AriaInvalid(CampoDesde)"
+               aria-describedby="@_errores.IdDelError(CampoDesde, "exportacion-desde")"
+               @bind="_desde" @bind:after="ActualizarCantidades" />
+        <ErrorDeCampo Errores="_errores" Campo="@CampoDesde" IdDelCampo="exportacion-desde" />
+    </div>
+    <div>
+        <label class="lbl" for="exportacion-hasta">Hasta</label>
+        <input id="exportacion-hasta" class="field" type="date" disabled="@_descargando"
+               min="@MinimoDeHasta"
+               aria-invalid="@_errores.AriaInvalid(CampoHasta)"
+               aria-describedby="@_errores.IdDelError(CampoHasta, "exportacion-hasta")"
+               @bind="_hasta" @bind:after="ActualizarCantidades" />
+        <ErrorDeCampo Errores="_errores" Campo="@CampoHasta" IdDelCampo="exportacion-hasta" />
+    </div>
+</div>
+
+@if (_errores.General is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_errores.General</div>
+}
+
+@if (_exito is not null)
+{
+    <div class="alert alert-success mensaje" role="status">@_exito</div>
+}
+
+<div class="card resumen" role="status" aria-live="polite">
+    @if (_cantidades is null)
+    {
+        <p class="hint">Elegí un rango de fechas válido para ver cuántos registros se van a exportar.</p>
+    }
+    else
+    {
+        <p>En ese rango hay <strong>@TextoDeCantidades</strong>.</p>
+        @if (NoHayRegistros)
+        {
+            <p class="hint">No hay registros: los archivos tendrían solo los encabezados.</p>
+        }
+    }
+</div>
+
+<div class="acciones">
+    @foreach (string formato in _formatos)
+    {
+        <button type="button" class="btn btn-primary" disabled="@(!PuedeDescargar)"
+                @onclick="() => Descargar(formato)">
+            Descargar en @formato
+        </button>
+    }
+</div>
+
+@if (_descargando)
+{
+    <p class="hint" role="status">Preparando los archivos…</p>
+}
+else
+{
+    <p class="hint">
+        Se descargan dos archivos, uno de préstamos y otro de devoluciones. Si el navegador pregunta, permití las
+        descargas múltiples de este sitio.
+    </p>
+}

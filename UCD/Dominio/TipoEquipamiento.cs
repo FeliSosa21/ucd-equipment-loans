@@ -5,8 +5,8 @@ namespace Dominio;
 public class TipoEquipamiento
 {
     private const int LargoMinimoNombre = 3;
-    private const int LargoMaximoNombre = 80;
-    private const int LargoMaximoDescripcion = 300;
+    public const int LargoMaximoNombre = 80;
+    public const int LargoMaximoDescripcion = 300;
 
     public string Nombre { get; private set; }
     public string Descripcion { get; private set; }
@@ -15,10 +15,17 @@ public class TipoEquipamiento
     public Categoria Categoria { get; private set; }
     public EstadoTipoEquipamiento Estado { get; private set; } = EstadoTipoEquipamiento.Activo;
     public bool EstaActivo => Estado == EstadoTipoEquipamiento.Activo;
+    public int Id { get; private set; }
 
     private readonly List<UnidadFisica> _unidades = new();
 
     public IReadOnlyCollection<UnidadFisica> Unidades => _unidades.AsReadOnly();
+
+    private TipoEquipamiento()
+    {
+        Nombre = null!;
+        Descripcion = null!;
+    }
 
     public TipoEquipamiento(string nombre, string descripcion, int duracionMaxPrestamo, bool requiereAprobacion,
         Categoria categoria)

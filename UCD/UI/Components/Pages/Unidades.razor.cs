@@ -23,43 +23,58 @@ public partial class Unidades
 
     protected override void OnInitialized()
     {
-        if (RedirigirSiNoTienePermiso(Permisos.GestionarUnidades))
+        RedirigirSiNoTienePermiso(Permisos.GestionarUnidades);
+    }
+
+    private async Task AlCambiarCatalogoAsync()
+    {
+        CerrarTodo();
+        // El tipo elegido en el filtro es de otro catalogo: no existe en el nuevo.
+        _tipoFiltro = string.Empty;
+        if (!HayCatalogoElegido())
         {
+            _tipos = new List<TipoEquipamientoDetalleDto>();
+            _unidades = new List<UnidadDetalleDto>();
             return;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
     // ---------- Listado y filtros ----------
 
-    private void Recargar()
+    private async Task RecargarAsync()
     {
         try
         {
-            _tipos = ServicioTipos.Listar(null, null);
-            _unidades = ServicioUnidades.Listar(ValoresDeFiltro.ValorONulo(_tipoFiltro),
-                ValoresDeFiltro.ValorONulo(_estadoFiltro));
+            _tipos = ServicioTipos.Listar(IdCatalogo, new FiltroTiposDto(), DniUsuario);
+            FiltroUnidadesDto filtro = new FiltroUnidadesDto
+            {
+                NombreTipo = ValoresDeFiltro.ValorONulo(_tipoFiltro),
+                Estado = ValoresDeFiltro.ValorONulo(_estadoFiltro)
+            };
+            _unidades = ServicioUnidades.Listar(IdCatalogo, filtro, DniUsuario);
         }
         catch (ServicioException ex)
         {
             _unidades = new List<UnidadDetalleDto>();
+            await RecargarSelectorAsync();
             _error = ex.Message;
         }
     }
 
     // Al cambiar un filtro no queda en pantalla el mensaje de la accion anterior.
-    private void Filtrar()
+    private async Task FiltrarAsync()
     {
         LimpiarMensajes();
-        Recargar();
+        await RecargarAsync();
     }
 
-    private void LimpiarFiltros()
+    private async Task LimpiarFiltrosAsync()
     {
         _tipoFiltro = string.Empty;
         _estadoFiltro = string.Empty;
-        Filtrar();
+        await FiltrarAsync();
     }
 
     private bool HayFiltrosAplicados()
@@ -128,7 +143,7 @@ public partial class Unidades
         return true;
     }
 
-    private void Guardar()
+    private async Task GuardarAsync()
     {
         // Un doble clic manda dos envios: el segundo llega con el formulario ya cerrado.
         if (!_mostrarFormulario)
@@ -142,12 +157,12 @@ public partial class Unidades
         {
             if (EsAlta())
             {
-                ServicioUnidades.Registrar(_datos, DniUsuario);
+                ServicioUnidades.Registrar(IdCatalogo, _datos, DniUsuario);
                 _exito = $"Se registró la unidad {id}.";
             }
             else
             {
-                ServicioUnidades.Modificar(_datos, DniUsuario);
+                ServicioUnidades.Modificar(IdCatalogo, _datos, DniUsuario);
                 _exito = $"Se guardaron los cambios de la unidad {id}.";
             }
 
@@ -158,7 +173,7 @@ public partial class Unidades
             _error = ex.Message;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
     private void CancelarFormulario()
@@ -169,7 +184,7 @@ public partial class Unidades
 
     // ---------- Cambios de estado ----------
 
-    private void EnviarAMantenimiento(UnidadDetalleDto unidad)
+    private async Task EnviarAMantenimientoAsync(UnidadDetalleDto unidad)
     {
         // Un doble clic manda dos envios: el segundo llega con la unidad ya en mantenimiento.
         if (!SigueEnEstado(unidad, EstadosCatalogo.UnidadDisponible))
@@ -180,7 +195,7 @@ public partial class Unidades
         CerrarTodo();
         try
         {
-            ServicioUnidades.EnviarAMantenimiento(unidad.IdInstitucional, DniUsuario);
+            ServicioUnidades.EnviarAMantenimiento(IdCatalogo, unidad.IdInstitucional, DniUsuario);
             _exito = $"La unidad {unidad.IdInstitucional} pasó a mantenimiento.";
         }
         catch (ServicioException ex)
@@ -188,10 +203,10 @@ public partial class Unidades
             _error = ex.Message;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
-    private void VolverADisponible(UnidadDetalleDto unidad)
+    private async Task VolverADisponibleAsync(UnidadDetalleDto unidad)
     {
         // Un doble clic manda dos envios: el segundo llega con la unidad ya disponible.
         if (!SigueEnEstado(unidad, EstadosCatalogo.UnidadEnMantenimiento))
@@ -202,7 +217,7 @@ public partial class Unidades
         CerrarTodo();
         try
         {
-            ServicioUnidades.VolverADisponible(unidad.IdInstitucional, DniUsuario);
+            ServicioUnidades.VolverADisponible(IdCatalogo, unidad.IdInstitucional, DniUsuario);
             _exito = $"La unidad {unidad.IdInstitucional} volvió a estar disponible.";
         }
         catch (ServicioException ex)
@@ -210,7 +225,7 @@ public partial class Unidades
             _error = ex.Message;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
     // ---------- Baja (con confirmacion: no se puede deshacer) ----------
@@ -221,7 +236,7 @@ public partial class Unidades
         _aDarDeBaja = unidad;
     }
 
-    private void ConfirmarBaja()
+    private async Task ConfirmarBajaAsync()
     {
         // Un doble clic manda dos envios: el segundo llega con la confirmacion ya cerrada.
         if (_aDarDeBaja is null)
@@ -233,7 +248,7 @@ public partial class Unidades
         _aDarDeBaja = null;
         try
         {
-            ServicioUnidades.DarDeBaja(id, DniUsuario);
+            ServicioUnidades.DarDeBaja(IdCatalogo, id, DniUsuario);
             _exito = $"Se dio de baja la unidad {id}.";
         }
         catch (ServicioException ex)
@@ -241,7 +256,7 @@ public partial class Unidades
             _error = ex.Message;
         }
 
-        Recargar();
+        await RecargarAsync();
     }
 
     private void CancelarBaja()

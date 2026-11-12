@@ -6,9 +6,11 @@ namespace Servicios;
 
 public class ServicioSesion
 {
-    private readonly RepositorioUsuario _repositorio;
+    public const string CampoContrasenaActual = "ContrasenaActual";
 
-    public ServicioSesion(RepositorioUsuario repositorio)
+    private readonly RepositorioUsuarioSql _repositorio;
+
+    public ServicioSesion(RepositorioUsuarioSql repositorio)
     {
         _repositorio = repositorio;
     }
@@ -54,17 +56,11 @@ public class ServicioSesion
 
         if (!usuario.ContrasenaEsCorrecta(actual))
         {
-            throw new ServicioException("La contrasena actual es incorrecta");
+            throw new ServicioException(CampoContrasenaActual, "La contrasena actual es incorrecta");
         }
 
-        try
-        {
-            usuario.CambiarContrasena(nueva);
-        }
-        catch (DominioException ex)
-        {
-            throw new ServicioException(ex.Message, ex);
-        }
+        TraduccionDeErrores.Ejecutar(() => usuario.CambiarContrasena(nueva));
+        _repositorio.ActualizarUsuario(usuario);
     }
 
     private static UsuarioSesionDto CrearSesion(Usuario usuario)
@@ -76,15 +72,15 @@ public class ServicioSesion
             Nombre = usuario.Nombre,
             Tipo = usuario.Tipo.Nombre,
             DebeCambiarContrasena = usuario.DebeCambiarContrasena,
-            PendienteDeActivacion = usuario.Tipo == TipoUsuario.SinPermisos,
-            Permisos = PermisosDe(usuario.Tipo)
+            PendienteDeActivacion = usuario.EstaPendienteDeActivacion(),
+            Permisos = PermisosDe(usuario)
         };
     }
 
-    private static List<string> PermisosDe(TipoUsuario tipo)
+    private static List<string> PermisosDe(Usuario usuario)
     {
         return Enum.GetValues<Permiso>()
-            .Where(tipo.TienePermiso)
+            .Where(usuario.TienePermiso)
             .Select(permiso => permiso.ToString())
             .ToList();
     }

@@ -1,0 +1,3 @@
+.alta { padding: 1.25rem; margin-bottom: 1rem; }
+.imagen-edicion { display: flex; align-items: center; gap: .75rem; }
+.imagen-tipo { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; }

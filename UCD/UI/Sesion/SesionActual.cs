@@ -21,11 +21,14 @@ public class SesionActual
 
     private readonly ProtectedLocalStorage _almacenamiento;
     private readonly ServicioSesion _servicioSesion;
+    private readonly ServicioNotificacion _servicioNotificacion;
 
-    public SesionActual(ProtectedLocalStorage almacenamiento, ServicioSesion servicioSesion)
+    public SesionActual(ProtectedLocalStorage almacenamiento, ServicioSesion servicioSesion,
+        ServicioNotificacion servicioNotificacion)
     {
         _almacenamiento = almacenamiento;
         _servicioSesion = servicioSesion;
+        _servicioNotificacion = servicioNotificacion;
     }
 
     public UsuarioSesionDto? Usuario { get; private set; }
@@ -37,6 +40,9 @@ public class SesionActual
 
     // Aviso para la pantalla de ingreso cuando la sesion se cerro sin que el usuario saliera.
     public string? AvisoDeCierre { get; private set; }
+
+    // Catalogo que eligio el usuario en el selector: solo en memoria, para que siga elegido al cambiar de pagina.
+    public int? IdCatalogoElegido { get; set; }
 
     public event Action? Cambio;
 
@@ -62,6 +68,11 @@ public class SesionActual
                 AvisoDeCierre = AvisoCuentaInactiva;
                 await _almacenamiento.DeleteAsync(ClaveDni);
             }
+        }
+
+        if (Usuario is not null)
+        {
+            _servicioNotificacion.GenerarNotificacionesDeVencidos(Usuario.Dni);
         }
 
         Cargada = true;
@@ -100,7 +111,9 @@ public class SesionActual
     {
         Usuario = usuario;
         AvisoDeCierre = null;
+        IdCatalogoElegido = null;
         await _almacenamiento.SetAsync(ClaveDni, usuario.Dni);
+        _servicioNotificacion.GenerarNotificacionesDeVencidos(usuario.Dni);
         Cambio?.Invoke();
     }
 
@@ -137,6 +150,7 @@ public class SesionActual
     public async Task CerrarAsync()
     {
         Usuario = null;
+        IdCatalogoElegido = null;
         await _almacenamiento.DeleteAsync(ClaveDni);
         Cambio?.Invoke();
     }

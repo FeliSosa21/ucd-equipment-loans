@@ -410,7 +410,7 @@ public sealed class UsuarioTests
     {
         Usuario usuario = CrearUsuario();
 
-        Assert.AreEqual(TipoUsuario.SinPermisos, usuario.Tipo);
+        Assert.AreEqual(TipoUsuario.SinPermisos().Nombre, usuario.Tipo.Nombre);
     }
 
     [TestMethod]
@@ -512,13 +512,56 @@ public sealed class UsuarioTests
     }
 
     [TestMethod]
+    public void Eliminar_UsuarioActivo_QuedaEliminado()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.Eliminar();
+
+        Assert.IsTrue(usuario.EstaEliminado);
+    }
+
+    [TestMethod]
+    public void Eliminar_UsuarioActivo_QuedaDesactivado()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.Eliminar();
+
+        Assert.AreEqual(EstadoUsuario.Desactivado, usuario.Estado);
+    }
+
+    [TestMethod]
+    public void Eliminar_UsuarioYaEliminado_SigueEliminado()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.Eliminar();
+
+        usuario.Eliminar();
+
+        Assert.IsTrue(usuario.EstaEliminado);
+    }
+
+    [TestMethod]
+    public void Reactivar_UsuarioEliminado_LanzaDominioExceptionConCampoEstado()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.Eliminar();
+
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => usuario.Reactivar());
+
+        Assert.AreEqual(nameof(Usuario.Estado), excepcion.Campo);
+        Assert.AreEqual(EstadoUsuario.Desactivado, usuario.Estado);
+    }
+
+    [TestMethod]
     public void AsignarTipo_Administrador_TieneTipoAdministrador()
     {
         Usuario usuario = CrearUsuario();
 
-        usuario.AsignarTipo(TipoUsuario.Administrador);
+        usuario.AsignarTipo(TipoUsuario.Administrador());
 
-        Assert.AreEqual(TipoUsuario.Administrador, usuario.Tipo);
+        Assert.AreEqual(TipoUsuario.Administrador().Nombre, usuario.Tipo.Nombre);
     }
 
     [TestMethod]
@@ -527,7 +570,7 @@ public sealed class UsuarioTests
         Usuario usuario = CrearUsuario();
 
         Assert.ThrowsException<DominioException>(() => usuario.AsignarTipo(null!));
-        Assert.AreEqual(TipoUsuario.SinPermisos, usuario.Tipo);
+        Assert.AreEqual(TipoUsuario.SinPermisos().Nombre, usuario.Tipo.Nombre);
     }
 
     [TestMethod]
@@ -558,6 +601,271 @@ public sealed class UsuarioTests
         Usuario usuario = CrearUsuario();
 
         Assert.ThrowsException<DominioException>(() => usuario.CambiarContrasena("corta1A"));
+    }
+
+    [TestMethod]
+    public void Constructor_DniInvalido_ElErrorIndicaElCampoDni()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(dni: "1"));
+
+        Assert.AreEqual("Dni", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Constructor_NombreInvalido_ElErrorIndicaElCampoNombre()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(nombre: "A"));
+
+        Assert.AreEqual("Nombre", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Constructor_ApellidoInvalido_ElErrorIndicaElCampoApellido()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(apellido: "A"));
+
+        Assert.AreEqual("Apellido", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Constructor_CorreoInvalido_ElErrorIndicaElCampoCorreo()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(correo: "sinarroba"));
+
+        Assert.AreEqual("Correo", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Constructor_ContrasenaInvalida_ElErrorIndicaElCampoContrasena()
+    {
+        DominioException excepcion = Assert.ThrowsException<DominioException>(() => CrearUsuario(contrasena: "corta"));
+
+        Assert.AreEqual("Contrasena", excepcion.Campo);
+    }
+
+    [TestMethod]
+    public void Constructor_DatosConEspaciosAlrededor_LosGuardaRecortados()
+    {
+        Usuario usuario = CrearUsuario(nombre: "  Felipe ", apellido: " Sosa  ", correo: " " + CorreoValido + " ");
+
+        Assert.AreEqual(NombreValido, usuario.Nombre);
+        Assert.AreEqual(ApellidoValido, usuario.Apellido);
+        Assert.AreEqual(CorreoValido, usuario.Correo);
+    }
+
+    [TestMethod]
+    public void Constructor_DatosValidos_NoQuedaEliminado()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.IsFalse(usuario.EstaEliminado);
+    }
+
+    [TestMethod]
+    public void ModificarDatos_DatosConEspaciosAlrededor_LosGuardaRecortados()
+    {
+        Usuario usuario = CrearUsuario();
+
+        usuario.ModificarDatos("  Pedro ", " Suarez  ", " pedro@hotmail.com ");
+
+        Assert.AreEqual("Pedro", usuario.Nombre);
+        Assert.AreEqual("Suarez", usuario.Apellido);
+        Assert.AreEqual("pedro@hotmail.com", usuario.Correo);
+    }
+
+    [TestMethod]
+    public void EstaPendienteDeActivacion_UsuarioRecienRegistrado_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.IsTrue(usuario.EstaPendienteDeActivacion());
+    }
+
+    [TestMethod]
+    public void EstaPendienteDeActivacion_ConTipoAsignado_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante());
+
+        Assert.IsFalse(usuario.EstaPendienteDeActivacion());
+    }
+
+    [TestMethod]
+    public void NombreCompleto_DatosValidos_DevuelveNombreYApellido()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.AreEqual($"{NombreValido} {ApellidoValido}", usuario.NombreCompleto);
+    }
+
+    [TestMethod]
+    public void TienePermiso_UsuarioSinPermisos_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.IsFalse(usuario.TienePermiso(Permiso.GestionarUsuarios));
+    }
+
+    [TestMethod]
+    public void TienePermiso_PermisoDeSuTipo_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Administrador());
+
+        Assert.IsTrue(usuario.TienePermiso(Permiso.GestionarUsuarios));
+    }
+
+    [TestMethod]
+    public void TieneTipo_OtraInstanciaConElMismoNombre_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Docente());
+
+        Assert.IsTrue(usuario.TieneTipo(TipoUsuario.Docente()));
+    }
+
+    [TestMethod]
+    public void TieneTipo_OtroTipo_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Docente());
+
+        Assert.IsFalse(usuario.TieneTipo(TipoUsuario.Estudiante()));
+    }
+
+    [TestMethod]
+    public void EstaActivo_UsuarioNuevo_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.IsTrue(usuario.EstaActivo());
+    }
+
+    [TestMethod]
+    public void EstaActivo_UsuarioDesactivado_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.Desactivar();
+
+        Assert.IsFalse(usuario.EstaActivo());
+    }
+
+    [TestMethod]
+    public void PuedeGestionarUsuarios_ActivoConPermiso_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Administrador());
+
+        Assert.IsTrue(usuario.PuedeGestionarUsuarios());
+    }
+
+    [TestMethod]
+    public void PuedeGestionarUsuarios_DesactivadoConPermiso_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Administrador());
+        usuario.Desactivar();
+
+        Assert.IsFalse(usuario.PuedeGestionarUsuarios());
+    }
+
+    [TestMethod]
+    public void PuedeGestionarUsuarios_ActivoSinPermiso_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Docente());
+
+        Assert.IsFalse(usuario.PuedeGestionarUsuarios());
+    }
+
+    [TestMethod]
+    public void NombreCompletoConDni_UsuarioValido_DevuelveNombreApellidoYDni()
+    {
+        Usuario usuario = CrearUsuario();
+
+        Assert.AreEqual("Felipe Sosa (DNI 12345672)", usuario.NombreCompletoConDni);
+    }
+
+    [TestMethod]
+    public void EstaHabilitadoPara_UsuarioActivoConElPermiso_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Supervisor());
+
+        Assert.IsTrue(usuario.EstaHabilitadoPara(Permiso.EvaluarSolicitud));
+    }
+
+    [TestMethod]
+    public void EstaHabilitadoPara_UsuarioDesactivadoConElPermiso_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Supervisor());
+        usuario.Desactivar();
+
+        Assert.IsFalse(usuario.EstaHabilitadoPara(Permiso.EvaluarSolicitud));
+    }
+
+    [TestMethod]
+    public void EstaHabilitadoPara_UsuarioActivoSinElPermiso_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante());
+
+        Assert.IsFalse(usuario.EstaHabilitadoPara(Permiso.EvaluarSolicitud));
+    }
+
+    [TestMethod]
+    public void PermiteUnidades_EstudianteHastaSuMaximo_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante());
+
+        Assert.IsTrue(usuario.PermiteUnidades(2));
+    }
+
+    [TestMethod]
+    public void PermiteUnidades_EstudianteSobreSuMaximo_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante());
+
+        Assert.IsFalse(usuario.PermiteUnidades(3));
+    }
+
+    [TestMethod]
+    public void PermiteUnidades_AdministradorSinTopes_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Administrador());
+
+        Assert.IsTrue(usuario.PermiteUnidades(1000));
+    }
+
+    [TestMethod]
+    public void PuedeAgregarPrestamo_EstudianteDebajoDeSuMaximo_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante());
+
+        Assert.IsTrue(usuario.PuedeAgregarPrestamo(1));
+    }
+
+    [TestMethod]
+    public void PuedeAgregarPrestamo_EstudianteEnSuMaximo_DevuelveFalse()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Estudiante());
+
+        Assert.IsFalse(usuario.PuedeAgregarPrestamo(2));
+    }
+
+    [TestMethod]
+    public void PuedeAgregarPrestamo_AdministradorSinTopes_DevuelveTrue()
+    {
+        Usuario usuario = CrearUsuario();
+        usuario.AsignarTipo(TipoUsuario.Administrador());
+
+        Assert.IsTrue(usuario.PuedeAgregarPrestamo(1000));
     }
 
     private static Usuario CrearUsuario(string? nombre = NombreValido, string? apellido = ApellidoValido,

@@ -15,15 +15,23 @@ public partial class Inventario
 
     protected override void OnInitialized()
     {
-        if (RedirigirSiNoTienePermiso(Permisos.GestionarUnidades))
+        RedirigirSiNoTienePermiso(Permisos.GestionarUnidades);
+    }
+
+    private async Task AlCambiarCatalogoAsync()
+    {
+        if (!HayCatalogoElegido())
         {
+            _error = null;
+            _porCategoria = new List<CantidadesPorEstadoDto>();
+            _porTipo = new List<CantidadesPorEstadoDto>();
             return;
         }
 
-        Consultar();
+        await ConsultarAsync();
     }
 
-    private void Consultar()
+    private async Task ConsultarAsync()
     {
         _error = null;
         FiltroInventarioDto filtro = new FiltroInventarioDto
@@ -34,22 +42,23 @@ public partial class Inventario
 
         try
         {
-            _porCategoria = ServicioInventario.ContarPorCategoria();
-            _porTipo = ServicioInventario.ContarPorTipo(filtro);
+            _porCategoria = ServicioInventario.ContarPorCategoria(IdCatalogo, DniUsuario);
+            _porTipo = ServicioInventario.ContarPorTipo(IdCatalogo, filtro, DniUsuario);
         }
         catch (ServicioException ex)
         {
-            _error = ex.Message;
             _porCategoria = new List<CantidadesPorEstadoDto>();
             _porTipo = new List<CantidadesPorEstadoDto>();
+            await RecargarSelectorAsync();
+            _error = ex.Message;
         }
     }
 
-    private void LimpiarFiltros()
+    private async Task LimpiarFiltrosAsync()
     {
         _categoria = string.Empty;
         _estado = string.Empty;
-        Consultar();
+        await ConsultarAsync();
     }
 
     private bool HayFiltrosAplicados()

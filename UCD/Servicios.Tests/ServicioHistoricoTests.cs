@@ -1,4 +1,3 @@
-using Data;
 using Data.Repositorios;
 using Dominio;
 using DTOs;
@@ -8,31 +7,43 @@ namespace Servicios.Tests;
 [TestClass]
 public sealed class ServicioHistoricoTests
 {
+    private const string TipoConAprobacion = "Proyector Epson";
+    private const string TipoSinAprobacion = "Notebook Lenovo ThinkPad";
+    private const string DniFuncionario = "45678905";
+    private const string DniSupervisor = "89012349";
     private static readonly DateTime FechaFija = new DateTime(2026, 9, 22, 10, 30, 0);
 
-    [TestMethod]
-    public void ListarMovimientos_SinMovimientos_DevuelveListaVacia()
+    private MovimientosSqlDePrueba _datos = null!;
+    private int _idCatalogo;
+
+    [TestInitialize]
+    public void Inicializar()
     {
-        ServicioHistorico servicio = CrearServicio(new Memoria());
+        _datos = new MovimientosSqlDePrueba();
+        _idCatalogo = _datos.GuardarCatalogo("Catalogo de la facultad",
+            CrearTipo(TipoConAprobacion, requiereAprobacion: true, idInstitucional: "EQP-0001"),
+            CrearTipo(TipoSinAprobacion, requiereAprobacion: false, idInstitucional: "EQP-0002"));
+    }
 
-        List<MovimientoDto> movimientos = servicio.ListarMovimientos();
-
-        Assert.AreEqual(0, movimientos.Count);
+    [TestCleanup]
+    public void Limpiar()
+    {
+        _datos.Dispose();
     }
 
     [TestMethod]
     public void ListarMovimientos_MovimientoDePrestamo_DevuelveSusDatos()
     {
-        Memoria memoria = new Memoria();
-        new RepositorioMovimiento(memoria).AgregarMovimiento(new Movimiento(
-            fechaHora: FechaFija,
-            tipo: TipoMovimiento.Prestamo,
-            solicitante: CrearSolicitante(),
-            evaluador: CrearEvaluador(),
-            unidad: CrearUnidad(idInstitucional: "EQP-0001")));
-        ServicioHistorico servicio = CrearServicio(memoria);
+        _datos.GuardarMovimiento(_idCatalogo, TipoConAprobacion, (prestamo, evaluador) =>
+        {
+            UnidadFisica unidad = prestamo.TipoEquipamiento.Unidades.Single();
+            prestamo.Aprobar(evaluador, new List<UnidadFisica> { unidad });
+            return Movimiento.DePrestamo(prestamo, RegistroDeAccion.DeUsuario(evaluador, FechaFija), unidad);
+        });
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        ServicioHistorico servicio = CrearServicio();
 
-        MovimientoDto movimiento = servicio.ListarMovimientos().Single();
+        MovimientoDto movimiento = ListarTodoElCatalogo(servicio).Single();
 
         Assert.AreEqual(FechaFija, movimiento.FechaHora);
         Assert.AreEqual("Prestamo", movimiento.Tipo);
@@ -44,90 +55,191 @@ public sealed class ServicioHistoricoTests
     [TestMethod]
     public void ListarMovimientos_MovimientoSinEvaluadorNiUnidad_DevuelveNulos()
     {
-        Memoria memoria = new Memoria();
-        RegistrarSolicitud(memoria, fechaHora: FechaFija);
-        ServicioHistorico servicio = CrearServicio(memoria);
+        GuardarSolicitud(FechaFija);
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        ServicioHistorico servicio = CrearServicio();
 
-        MovimientoDto movimiento = servicio.ListarMovimientos().Single();
+        MovimientoDto movimiento = ListarTodoElCatalogo(servicio).Single();
 
         Assert.IsNull(movimiento.Evaluador);
         Assert.IsNull(movimiento.Unidad);
     }
 
     [TestMethod]
-    public void ListarMovimientos_VariosMovimientos_DevuelveDelMasRecienteAlMasViejo()
+    public void ListarMovimientos_MovimientoDeUnUsuario_DevuelveSuNombreComoResponsable()
     {
-        Memoria memoria = new Memoria();
-        RegistrarSolicitud(memoria, fechaHora: FechaFija);
-        RegistrarSolicitud(memoria, fechaHora: FechaFija.AddDays(2));
-        RegistrarSolicitud(memoria, fechaHora: FechaFija.AddDays(1));
-        ServicioHistorico servicio = CrearServicio(memoria);
+        GuardarSolicitud(FechaFija);
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        ServicioHistorico servicio = CrearServicio();
 
-        List<MovimientoDto> movimientos = servicio.ListarMovimientos();
+        MovimientoDto movimiento = ListarTodoElCatalogo(servicio).Single();
 
-        CollectionAssert.AreEqual(
-            new List<DateTime> { FechaFija.AddDays(2), FechaFija.AddDays(1), FechaFija },
+        Assert.AreEqual("Ana Perez", movimiento.Responsable);
+    }
+
+    [TestMethod]
+    public void ListarMovimientos_MovimientoDelSistema_DevuelveSistemaComoResponsable()
+    {
+        _datos.GuardarMovimiento(_idCatalogo, TipoSinAprobacion, (prestamo, _) =>
+        {
+            UnidadFisica unidad = prestamo.TipoEquipamiento.Unidades.Single();
+            prestamo.Activar(new List<UnidadFisica> { unidad });
+            return Movimiento.DePrestamo(prestamo, RegistroDeAccion.DelSistema(FechaFija), unidad);
+        });
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        ServicioHistorico servicio = CrearServicio();
+
+        MovimientoDto movimiento = ListarTodoElCatalogo(servicio).Single();
+
+        Assert.AreEqual("Sistema", movimiento.Responsable);
+    }
+
+    [TestMethod]
+    public void ListarMovimientos_UsuarioSinPermisoConsultarHistorico_LanzaServicioException()
+    {
+        _datos.GuardarUsuario(DniFuncionario, TipoUsuario.FuncionarioCE());
+        ServicioHistorico servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniFuncionario));
+    }
+
+    [TestMethod]
+    public void ListarMovimientos_UsuarioInexistente_LanzaServicioException()
+    {
+        ServicioHistorico servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniSupervisor));
+    }
+
+    [TestMethod]
+    public void ListarMovimientos_UsuarioDesactivado_LanzaServicioException()
+    {
+        _datos.GuardarUsuarioDesactivado(DniSupervisor, TipoUsuario.Supervisor());
+        ServicioHistorico servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniSupervisor));
+    }
+
+    [TestMethod]
+    public void ListarMovimientos_CatalogoDadoDeBaja_LanzaServicioException()
+    {
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        _datos.DarDeBajaCatalogo(_idCatalogo);
+        ServicioHistorico servicio = CrearServicio();
+
+        Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniSupervisor));
+    }
+
+    [TestMethod]
+    public void ListarMovimientos_DesdePosteriorAHasta_LanzaServicioExceptionDelCampoDesde()
+    {
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        ServicioHistorico servicio = CrearServicio();
+        FiltroMovimientosDto filtro = new FiltroMovimientosDto { Desde = FechaFija.AddDays(1), Hasta = FechaFija };
+
+        ServicioException error = Assert.ThrowsException<ServicioException>(() =>
+            servicio.ListarMovimientos(_idCatalogo, filtro, DniSupervisor));
+
+        Assert.AreEqual(nameof(FiltroMovimientosDto.Desde), error.Campo);
+    }
+
+    [TestMethod]
+    public void ListarMovimientos_CatalogoYFechas_DevuelveSoloLosDelCatalogoEnElRango()
+    {
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        int idOtroCatalogo = _datos.GuardarCatalogo("Catalogo del laboratorio",
+            CrearTipo("Camara Sony", requiereAprobacion: true, idInstitucional: "EQP-0003"));
+        GuardarSolicitud(FechaFija);
+        GuardarSolicitud(idOtroCatalogo, "Camara Sony", FechaFija.AddHours(1));
+        GuardarSolicitud(FechaFija.AddDays(5));
+        ServicioHistorico servicio = CrearServicio();
+        FiltroMovimientosDto filtro = new FiltroMovimientosDto
+        {
+            Desde = FechaFija.AddDays(-1),
+            Hasta = FechaFija.AddDays(1)
+        };
+
+        List<MovimientoDto> movimientos = servicio.ListarMovimientos(_idCatalogo, filtro, DniSupervisor);
+
+        CollectionAssert.AreEqual(new List<DateTime> { FechaFija },
             movimientos.Select(movimiento => movimiento.FechaHora).ToList());
     }
 
     [TestMethod]
-    public void ListarMovimientos_MovimientosConLaMismaFechaHora_DevuelvePrimeroElUltimoRegistrado()
+    public void ListarMovimientos_MovimientoAlFinalDelDiaHasta_LoIncluyeYExcluyeElDiaSiguiente()
     {
-        Memoria memoria = new Memoria();
-        RegistrarSolicitud(memoria, fechaHora: FechaFija);
-        RegistrarPrestamo(memoria, fechaHora: FechaFija);
-        ServicioHistorico servicio = CrearServicio(memoria);
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        DateTime diaHasta = FechaFija.Date;
+        GuardarSolicitud(diaHasta.AddHours(23).AddMinutes(59));
+        GuardarSolicitud(diaHasta.AddDays(1));
+        ServicioHistorico servicio = CrearServicio();
+        FiltroMovimientosDto filtro = new FiltroMovimientosDto { Desde = diaHasta, Hasta = diaHasta };
 
-        List<MovimientoDto> movimientos = servicio.ListarMovimientos();
+        List<MovimientoDto> movimientos = servicio.ListarMovimientos(_idCatalogo, filtro, DniSupervisor);
 
-        Assert.AreEqual("Prestamo", movimientos[0].Tipo);
+        CollectionAssert.AreEqual(new List<DateTime> { diaHasta.AddHours(23).AddMinutes(59) },
+            movimientos.Select(movimiento => movimiento.FechaHora).ToList());
     }
 
-    private static ServicioHistorico CrearServicio(Memoria memoria)
+    [TestMethod]
+    public void ListarMovimientos_FiltroNulo_LanzaArgumentNullExceptionAntesDeBuscarAlUsuario()
     {
-        return new ServicioHistorico(new RepositorioMovimiento(memoria));
+        ServicioHistorico servicio = CrearServicio();
+
+        Assert.ThrowsException<ArgumentNullException>(() =>
+            servicio.ListarMovimientos(_idCatalogo, null!, DniSupervisor));
     }
 
-    private static void RegistrarSolicitud(Memoria memoria, DateTime fechaHora)
+    [TestMethod]
+    public void ListarMovimientos_HastaEsLaUltimaFecha_DevuelveLosMovimientosSinLimiteSuperior()
     {
-        new RepositorioMovimiento(memoria).AgregarMovimiento(new Movimiento(
-            fechaHora: fechaHora,
-            tipo: TipoMovimiento.Solicitud,
-            solicitante: CrearSolicitante(),
-            evaluador: null,
-            unidad: null));
+        _datos.GuardarUsuario(DniSupervisor, TipoUsuario.Supervisor());
+        GuardarSolicitud(FechaFija);
+        ServicioHistorico servicio = CrearServicio();
+        FiltroMovimientosDto filtro = new FiltroMovimientosDto
+        {
+            Desde = FechaFija.Date,
+            Hasta = DateTime.MaxValue.Date
+        };
+
+        List<MovimientoDto> movimientos = servicio.ListarMovimientos(_idCatalogo, filtro, DniSupervisor);
+
+        CollectionAssert.AreEqual(new List<DateTime> { FechaFija },
+            movimientos.Select(movimiento => movimiento.FechaHora).ToList());
     }
 
-    private static void RegistrarPrestamo(Memoria memoria, DateTime fechaHora)
+    private List<MovimientoDto> ListarTodoElCatalogo(ServicioHistorico servicio)
     {
-        new RepositorioMovimiento(memoria).AgregarMovimiento(new Movimiento(
-            fechaHora: fechaHora,
-            tipo: TipoMovimiento.Prestamo,
-            solicitante: CrearSolicitante(),
-            evaluador: null,
-            unidad: CrearUnidad(idInstitucional: "EQP-0001")));
+        return servicio.ListarMovimientos(_idCatalogo, new FiltroMovimientosDto(), DniSupervisor);
     }
 
-    private static Usuario CrearSolicitante()
+    private ServicioHistorico CrearServicio()
     {
-        Usuario usuario = new Usuario(dni: "12345672", nombre: "Ana", apellido: "Perez",
-            correo: "ana@hotmail.com", contrasena: "VivaLaOrt2026");
-        usuario.AsignarTipo(TipoUsuario.Docente);
-
-        return usuario;
+        return new ServicioHistorico(new RepositorioCatalogoSql(_datos.Contexto),
+            new RepositorioUsuarioSql(_datos.Contexto), new RepositorioMovimientoSql(_datos.Contexto));
     }
 
-    private static Usuario CrearEvaluador()
+    private void GuardarSolicitud(DateTime fechaHora)
     {
-        Usuario usuario = new Usuario(dni: "67890127", nombre: "Felipe", apellido: "Sosa",
-            correo: "felipe@hotmail.com", contrasena: "VivaLaOrt2026");
-        usuario.AsignarTipo(TipoUsuario.Supervisor);
-
-        return usuario;
+        GuardarSolicitud(_idCatalogo, TipoConAprobacion, fechaHora);
     }
 
-    private static UnidadFisica CrearUnidad(string idInstitucional)
+    private void GuardarSolicitud(int idCatalogo, string nombreTipo, DateTime fechaHora)
     {
-        return new UnidadFisica(idInstitucional: idInstitucional, ubiFisica: "Deposito A", numSerie: null);
+        _datos.GuardarMovimiento(idCatalogo, nombreTipo, (prestamo, _) =>
+            Movimiento.DeSolicitud(prestamo, RegistroDeAccion.DeUsuario(prestamo.Solicitante, fechaHora)));
+    }
+
+    private static TipoEquipamiento CrearTipo(string nombre, bool requiereAprobacion, string idInstitucional)
+    {
+        TipoEquipamiento tipo = new TipoEquipamiento(nombre: nombre, descripcion: "Equipo para aulas",
+            duracionMaxPrestamo: 5, requiereAprobacion: requiereAprobacion, categoria: Categoria.Audiovisual);
+        tipo.AgregarUnidad(new UnidadFisica(idInstitucional: idInstitucional, ubiFisica: "Deposito A", numSerie: null));
+
+        return tipo;
     }
 }

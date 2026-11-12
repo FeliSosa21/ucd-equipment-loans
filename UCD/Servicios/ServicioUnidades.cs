@@ -9,23 +9,28 @@ namespace Servicios;
 public class ServicioUnidades
 {
     private const string MensajeSinPermiso = "El usuario no tiene permiso para gestionar unidades";
+    private const string MensajeNoSePudoGuardar =
+        "No se pudieron guardar los cambios; verifique que el id institucional y el numero de serie no esten repetidos";
 
-    private readonly RepositorioCatalogo _repositorioCatalogo;
-    private readonly RepositorioUsuario _repositorioUsuario;
+    private readonly RepositorioCatalogoSql _repositorioCatalogo;
+    private readonly RepositorioUsuarioSql _repositorioUsuario;
 
-    public ServicioUnidades(RepositorioCatalogo repositorioCatalogo, RepositorioUsuario repositorioUsuario)
+    public ServicioUnidades(RepositorioCatalogoSql repositorioCatalogo, RepositorioUsuarioSql repositorioUsuario)
     {
         _repositorioCatalogo = repositorioCatalogo;
         _repositorioUsuario = repositorioUsuario;
     }
 
-    public List<UnidadDetalleDto> Listar(string? nombreTipo, string? estado)
+    public List<UnidadDetalleDto> Listar(int idCatalogo, FiltroUnidadesDto filtro, string dniUsuario)
     {
+        ArgumentNullException.ThrowIfNull(filtro);
+        ValidarResponsable(dniUsuario);
         List<UnidadDetalleDto> resultado = new List<UnidadDetalleDto>();
+        Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
 
-        foreach ((TipoEquipamiento tipo, UnidadFisica unidad) in UnidadesConSuTipo())
+        foreach ((TipoEquipamiento tipo, UnidadFisica unidad) in UnidadesConSuTipo(catalogo))
         {
-            if (CoincideTipo(tipo, nombreTipo) && CoincideEstado(unidad, estado))
+            if (CoincideTipo(tipo, filtro.NombreTipo) && CoincideEstado(unidad, filtro.Estado))
             {
                 resultado.Add(CrearDetalle(tipo, unidad));
             }
@@ -34,38 +39,43 @@ public class ServicioUnidades
         return resultado;
     }
 
-    public void Registrar(DatosUnidadDto datos, string dniResponsable)
+    public void Registrar(int idCatalogo, DatosUnidadDto datos, string dniResponsable)
     {
         ArgumentNullException.ThrowIfNull(datos);
         ValidarResponsable(dniResponsable);
-        TipoEquipamiento tipo = ObtenerTipo(datos.NombreTipo);
+        Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
+        TipoEquipamiento tipo = OperacionesComunes.ObtenerTipo(_repositorioCatalogo, idCatalogo, datos.NombreTipo);
         string idInstitucional = OperacionesComunes.Normalizar(datos.IdInstitucional);
-        string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
+        string? numeroSerie = OperacionesComunes.NormalizarOpcional(datos.NumeroSerie);
         ValidarIdDisponible(idInstitucional);
-        ValidarSerieDisponible(numeroSerie, null);
+        ValidarSerieDisponibleEnElSistema(numeroSerie, null);
         string ubicacionFisica = OperacionesComunes.Normalizar(datos.UbicacionFisica);
 
         TraduccionDeErrores.Ejecutar(() =>
             tipo.AgregarUnidad(new UnidadFisica(idInstitucional, ubicacionFisica, numeroSerie)));
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
-    public void Modificar(DatosUnidadDto datos, string dniResponsable)
+    public void Modificar(int idCatalogo, DatosUnidadDto datos, string dniResponsable)
     {
         ArgumentNullException.ThrowIfNull(datos);
         ValidarResponsable(dniResponsable);
-        UnidadFisica unidad = ObtenerUnidad(datos.IdInstitucional);
-        string? numeroSerie = NormalizarOpcional(datos.NumeroSerie);
-        ValidarSerieDisponible(numeroSerie, unidad);
+        Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
+        UnidadFisica unidad = ObtenerUnidad(catalogo, datos.IdInstitucional);
+        string? numeroSerie = OperacionesComunes.NormalizarOpcional(datos.NumeroSerie);
+        ValidarSerieDisponibleEnElSistema(numeroSerie, unidad.Id);
 
         TraduccionDeErrores.Ejecutar(() =>
             unidad.ModificarInfo(OperacionesComunes.Normalizar(datos.UbicacionFisica), numeroSerie,
-                NormalizarOpcional(datos.Observaciones)));
+                OperacionesComunes.NormalizarOpcional(datos.Observaciones)));
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
-    public void EnviarAMantenimiento(string idInstitucional, string dniResponsable)
+    public void EnviarAMantenimiento(int idCatalogo, string idInstitucional, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        UnidadFisica unidad = ObtenerUnidad(idInstitucional);
+        Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
+        UnidadFisica unidad = ObtenerUnidad(catalogo, idInstitucional);
         // El dominio permite pasar de prestada a mantenimiento, pero eso solo ocurre al registrar la devolucion.
         if (!unidad.EstaDisponible())
         {
@@ -74,12 +84,14 @@ public class ServicioUnidades
         }
 
         TraduccionDeErrores.Ejecutar(unidad.AMantenimiento);
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
-    public void VolverADisponible(string idInstitucional, string dniResponsable)
+    public void VolverADisponible(int idCatalogo, string idInstitucional, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        UnidadFisica unidad = ObtenerUnidad(idInstitucional);
+        Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
+        UnidadFisica unidad = ObtenerUnidad(catalogo, idInstitucional);
         if (unidad.Estado != EstadoUnidadFisica.EnMantenimiento)
         {
             throw new ServicioException(
@@ -87,44 +99,29 @@ public class ServicioUnidades
         }
 
         TraduccionDeErrores.Ejecutar(unidad.Disponible);
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
-    public void DarDeBaja(string idInstitucional, string dniResponsable)
+    public void DarDeBaja(int idCatalogo, string idInstitucional, string dniResponsable)
     {
         ValidarResponsable(dniResponsable);
-        UnidadFisica unidad = ObtenerUnidad(idInstitucional);
+        Catalogo catalogo = ObtenerCatalogoActivo(idCatalogo);
+        UnidadFisica unidad = ObtenerUnidad(catalogo, idInstitucional);
 
         TraduccionDeErrores.Ejecutar(unidad.DarDeBaja);
+        OperacionesComunes.GuardarCambios(_repositorioCatalogo, catalogo, MensajeNoSePudoGuardar);
     }
 
-    // Los campos opcionales en blanco se guardan como null: "sin numero de serie" no es lo mismo que "   ".
-    private static string? NormalizarOpcional(string? texto)
+    private Catalogo ObtenerCatalogoActivo(int idCatalogo)
     {
-        if (string.IsNullOrWhiteSpace(texto))
-        {
-            return null;
-        }
-
-        return texto.Trim();
-    }
-
-    private TipoEquipamiento ObtenerTipo(string nombreTipo)
-    {
-        TipoEquipamiento? tipo = OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo)
-            .BuscarTipoPorNombre(nombreTipo);
-        if (tipo is null)
-        {
-            throw new ServicioException("El tipo de equipamiento no existe");
-        }
-
-        return tipo;
+        return OperacionesComunes.ObtenerCatalogoActivo(_repositorioCatalogo, idCatalogo);
     }
 
     // Cada unidad junto con el tipo al que pertenece, recorriendo todo el catalogo.
-    private List<(TipoEquipamiento Tipo, UnidadFisica Unidad)> UnidadesConSuTipo()
+    private static List<(TipoEquipamiento Tipo, UnidadFisica Unidad)> UnidadesConSuTipo(Catalogo catalogo)
     {
         List<(TipoEquipamiento Tipo, UnidadFisica Unidad)> resultado = new List<(TipoEquipamiento, UnidadFisica)>();
-        foreach (TipoEquipamiento tipo in OperacionesComunes.ObtenerCatalogo(_repositorioCatalogo).Tipos)
+        foreach (TipoEquipamiento tipo in catalogo.Tipos)
         {
             foreach (UnidadFisica unidad in tipo.Unidades)
             {
@@ -135,9 +132,9 @@ public class ServicioUnidades
         return resultado;
     }
 
-    private UnidadFisica? BuscarUnidad(string idInstitucional)
+    private static UnidadFisica? BuscarUnidad(Catalogo catalogo, string idInstitucional)
     {
-        foreach ((TipoEquipamiento _, UnidadFisica unidad) in UnidadesConSuTipo())
+        foreach ((TipoEquipamiento _, UnidadFisica unidad) in UnidadesConSuTipo(catalogo))
         {
             if (unidad.IdInstitucional == idInstitucional)
             {
@@ -148,9 +145,9 @@ public class ServicioUnidades
         return null;
     }
 
-    private UnidadFisica ObtenerUnidad(string idInstitucional)
+    private static UnidadFisica ObtenerUnidad(Catalogo catalogo, string idInstitucional)
     {
-        UnidadFisica? unidad = BuscarUnidad(OperacionesComunes.Normalizar(idInstitucional));
+        UnidadFisica? unidad = BuscarUnidad(catalogo, OperacionesComunes.Normalizar(idInstitucional));
         if (unidad is null)
         {
             throw new ServicioException("La unidad no existe");
@@ -159,35 +156,29 @@ public class ServicioUnidades
         return unidad;
     }
 
+    // El ID institucional es unico en todo el sistema, no solo dentro del catalogo.
     private void ValidarIdDisponible(string idInstitucional)
     {
-        if (BuscarUnidad(idInstitucional) is not null)
+        if (_repositorioCatalogo.ExisteUnidadConIdInstitucional(idInstitucional))
         {
             throw new ServicioException("Ya existe una unidad con ese id institucional");
         }
     }
 
-    private void ValidarSerieDisponible(string? numeroSerie, UnidadFisica? unidadEditada)
+    // El numero de serie, si existe, es unico en todo el sistema (foro 2.3).
+    private void ValidarSerieDisponibleEnElSistema(string? numeroSerie, int? idUnidadExcluida)
     {
-        if (string.IsNullOrWhiteSpace(numeroSerie))
+        if (!string.IsNullOrWhiteSpace(numeroSerie) &&
+            _repositorioCatalogo.ExisteUnidadConNumeroDeSerie(numeroSerie, idUnidadExcluida))
         {
-            return;
-        }
-
-        foreach ((TipoEquipamiento _, UnidadFisica unidad) in UnidadesConSuTipo())
-        {
-            if (unidad != unidadEditada &&
-                string.Equals(unidad.NumSerie, numeroSerie, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new ServicioException("Ya existe una unidad con ese numero de serie");
-            }
+            throw new ServicioException("Ya existe una unidad con ese numero de serie");
         }
     }
 
     private void ValidarResponsable(string dniResponsable)
     {
-        OperacionesComunes.ValidarResponsable(_repositorioUsuario, dniResponsable, Permiso.GestionarUnidades,
-            MensajeSinPermiso);
+        OperacionesComunes.ValidarResponsable(_repositorioUsuario.ObtenerUsuarioPorDni(dniResponsable),
+            Permiso.GestionarUnidades, MensajeSinPermiso);
     }
 
     private static bool CoincideTipo(TipoEquipamiento tipo, string? nombreTipo)

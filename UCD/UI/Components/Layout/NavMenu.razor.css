@@ -26,7 +26,7 @@
 .nav ::deep .nav-item[href="unidades"]::before { content: "▤"; }
 .nav ::deep .nav-item[href="inventario"]::before { content: "▥"; }
 .nav ::deep .nav-item[href="aprobaciones"]::before { content: "✓"; }
-.nav ::deep .nav-item[href="entregas"]::before { content: "→"; }
+.nav ::deep .nav-item[href="prestamos-activos"]::before { content: "→"; }
 .nav ::deep .nav-item[href="devoluciones"]::before { content: "↩"; }
 .nav ::deep .nav-item[href="prestamos"]::before { content: "≡"; }
 .nav ::deep .nav-item[href="auditoria"]::before { content: "◷"; }

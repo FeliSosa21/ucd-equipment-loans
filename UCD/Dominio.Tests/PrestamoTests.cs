@@ -4,10 +4,13 @@
 public sealed class PrestamoTests
 {
     private static readonly DateTime FechaFija = new(2026, 10, 5, 10, 0, 0);
-    private static readonly DateTime FechaDeEntrega = new(2026, 10, 6, 9, 30, 0);
-    private static readonly DateTime SegundaFechaDeEntrega = new(2026, 10, 7, 11, 0, 0);
     private const int CantidadSolicitadaPorDefecto = 2;
     private const string MotivoDeRechazo = "El equipo esta reservado para un examen";
+    private const string MotivoFaltaDeUnidades = "No hay unidades suficientes para el tipo de equipamiento";
+    private const string MotivoTopeDeUnidades =
+        "Supera el maximo de unidades por catalogo al momento de la aprobacion";
+    private const string MotivoTopeDePrestamosConcurrentes =
+        "Supera el maximo de prestamos concurrentes al momento de la aprobacion";
 
     [TestMethod]
     public void Constructor_DatosValidos_NaceSolicitado()
@@ -100,15 +103,6 @@ public sealed class PrestamoTests
         Prestamo prestamo = CrearPrestamo();
 
         Assert.IsNull(prestamo.MotivoRechazo);
-    }
-
-    [TestMethod]
-    public void Constructor_DatosValidos_NaceSinEntrega()
-    {
-        Prestamo prestamo = CrearPrestamo();
-
-        Assert.IsNull(prestamo.ResponsableEntrega);
-        Assert.IsNull(prestamo.FechaHoraEntrega);
     }
 
     [TestMethod]
@@ -322,14 +316,14 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
-    public void Aprobar_SolicitudDeTipoConAprobacion_QuedaAprobado()
+    public void Aprobar_SolicitudDeTipoConAprobacion_QuedaActivo()
     {
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearSolicitudDeTipoConAprobacion();
         Usuario evaluador = CrearEvaluador();
 
         prestamo.Aprobar(evaluador, unidades);
 
-        Assert.AreEqual(EstadoPrestamo.Aprobado, prestamo.Estado);
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
     }
 
     [TestMethod]
@@ -438,26 +432,6 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
-    public void Realizar_PrestamoAprobado_QuedaActivo()
-    {
-        (Prestamo prestamo, _) = CrearPrestamoAprobado();
-
-        prestamo.Realizar();
-
-        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
-    }
-
-    [TestMethod]
-    public void Realizar_PrestamoSolicitado_LanzaExcepcion()
-    {
-        (Prestamo prestamo, _) = CrearSolicitudDeTipoConAprobacion();
-
-        Assert.ThrowsException<DominioException>(() => prestamo.Realizar());
-
-        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
-    }
-
-    [TestMethod]
     public void MarcarDevuelto_PrestamoActivoSinUnidadesPrestadas_QuedaDevuelto()
     {
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
@@ -549,6 +523,34 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
+    public void Rechazar_MotivoDe301Caracteres_LanzaExcepcion()
+    {
+        (Prestamo prestamo, _) = CrearSolicitudDeTipoConAprobacion();
+        Usuario evaluador = CrearEvaluador();
+        string motivoDemasiadoLargo = new string('a', 301);
+
+        Assert.ThrowsException<DominioException>(
+            () => prestamo.Rechazar(evaluador, motivoDemasiadoLargo));
+
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.IsNull(prestamo.MotivoRechazo);
+        Assert.IsNull(prestamo.Evaluador);
+    }
+
+    [TestMethod]
+    public void Rechazar_MotivoDe300Caracteres_QuedaRechazadoConElMotivo()
+    {
+        (Prestamo prestamo, _) = CrearSolicitudDeTipoConAprobacion();
+        Usuario evaluador = CrearEvaluador();
+        string motivoDelMaximo = new string('a', 300);
+
+        prestamo.Rechazar(evaluador, motivoDelMaximo);
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(motivoDelMaximo, prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
     public void Rechazar_EvaluadorNulo_LanzaExcepcion()
     {
         (Prestamo prestamo, _) = CrearSolicitudDeTipoConAprobacion();
@@ -561,44 +563,15 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
-    public void Rechazar_PrestamoAprobado_QuedaRechazadoConEvaluadorYMotivo()
-    {
-        (Prestamo prestamo, _) = CrearPrestamoAprobado();
-        Usuario evaluador = CrearEvaluador();
-
-        prestamo.Rechazar(evaluador, MotivoDeRechazo);
-
-        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
-        Assert.AreSame(evaluador, prestamo.Evaluador);
-        Assert.AreEqual(MotivoDeRechazo, prestamo.MotivoRechazo);
-    }
-
-    [TestMethod]
-    public void Rechazar_PrestamoAprobado_LiberaLasUnidadesYQuedaSinAsignadas()
-    {
-        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoAprobado();
-        Usuario evaluador = CrearEvaluador();
-
-        prestamo.Rechazar(evaluador, MotivoDeRechazo);
-
-        foreach (UnidadFisica unidad in unidades)
-        {
-            Assert.AreEqual(EstadoUnidadFisica.Disponible, unidad.Estado,
-                $"La unidad {unidad.IdInstitucional} deberia quedar disponible");
-        }
-
-        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
-    }
-
-    [TestMethod]
     public void Rechazar_PrestamoActivo_LanzaExcepcion()
     {
         (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
         Usuario evaluador = CrearEvaluador();
 
-        Assert.ThrowsException<DominioException>(
+        DominioException excepcion = Assert.ThrowsException<DominioException>(
             () => prestamo.Rechazar(evaluador, MotivoDeRechazo));
 
+        Assert.AreEqual("El prestamo debe estar solicitado", excepcion.Message);
         Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
 
         foreach (UnidadFisica unidad in unidades)
@@ -664,16 +637,6 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
-    public void EstaVigente_PrestamoAprobado_DevuelveVerdadero()
-    {
-        (Prestamo prestamo, _) = CrearPrestamoAprobado();
-
-        bool vigente = prestamo.EstaVigente();
-
-        Assert.IsTrue(vigente);
-    }
-
-    [TestMethod]
     public void EstaVigente_PrestamoActivo_DevuelveVerdadero()
     {
         (Prestamo prestamo, _) = CrearPrestamoActivo();
@@ -704,88 +667,195 @@ public sealed class PrestamoTests
     }
 
     [TestMethod]
-    public void RegistrarEntrega_PrestamoActivo_GuardaResponsableYFecha()
+    public void EstaVencido_PrestamoActivoDespuesDeLaFechaEsperada_DevuelveVerdadero()
     {
         (Prestamo prestamo, _) = CrearPrestamoActivo();
-        Usuario responsable = CrearResponsableDeEntrega();
+        DateTime diaSiguienteALaFechaEsperada = new DateTime(2026, 10, 13, 9, 0, 0);
 
-        prestamo.RegistrarEntrega(responsable, FechaDeEntrega);
+        bool vencido = prestamo.EstaVencido(diaSiguienteALaFechaEsperada);
 
-        Assert.AreSame(responsable, prestamo.ResponsableEntrega);
-        Assert.AreEqual(FechaDeEntrega, prestamo.FechaHoraEntrega);
+        Assert.IsTrue(vencido);
     }
 
     [TestMethod]
-    public void RegistrarEntrega_PrestamoSolicitado_LanzaExcepcion()
+    public void EstaVencido_PrestamoActivoElDiaDeLaFechaEsperada_DevuelveFalso()
+    {
+        (Prestamo prestamo, _) = CrearPrestamoActivo();
+        DateTime finDelDiaDeLaFechaEsperada = new DateTime(2026, 10, 12, 18, 0, 0);
+
+        bool vencido = prestamo.EstaVencido(finDelDiaDeLaFechaEsperada);
+
+        Assert.IsFalse(vencido);
+    }
+
+    [TestMethod]
+    public void EstaVencido_PrestamoSolicitadoDespuesDeLaFechaEsperada_DevuelveFalso()
     {
         Prestamo prestamo = CrearPrestamo();
-        Usuario responsable = CrearResponsableDeEntrega();
+        DateTime diaSiguienteALaFechaEsperada = new DateTime(2026, 10, 13, 9, 0, 0);
 
-        DominioException excepcion = Assert.ThrowsException<DominioException>(
-            () => prestamo.RegistrarEntrega(responsable, FechaDeEntrega));
+        bool vencido = prestamo.EstaVencido(diaSiguienteALaFechaEsperada);
 
-        Assert.AreEqual("Solo se puede registrar la entrega de un prestamo activo", excepcion.Message);
-        Assert.IsNull(prestamo.ResponsableEntrega);
-        Assert.IsNull(prestamo.FechaHoraEntrega);
+        Assert.IsFalse(vencido);
     }
 
     [TestMethod]
-    public void RegistrarEntrega_PrestamoDevuelto_LanzaExcepcion()
+    public void ActivarORechazarPorFaltaDeUnidades_ConUnidadesSuficientes_QuedaActivoConLasPrimerasUnidades()
     {
-        (Prestamo prestamo, _) = CrearPrestamoDevuelto();
-        Usuario responsable = CrearResponsableDeEntrega();
+        Prestamo prestamo = CrearPrestamo();
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: 3);
 
-        DominioException excepcion = Assert.ThrowsException<DominioException>(
-            () => prestamo.RegistrarEntrega(responsable, FechaDeEntrega));
+        prestamo.ActivarORechazarPorFaltaDeUnidades();
 
-        Assert.AreEqual("Solo se puede registrar la entrega de un prestamo activo", excepcion.Message);
-        Assert.AreEqual(EstadoPrestamo.Devuelto, prestamo.Estado);
-        Assert.IsNull(prestamo.ResponsableEntrega);
-        Assert.IsNull(prestamo.FechaHoraEntrega);
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        CollectionAssert.AreEqual(unidades.Take(CantidadSolicitadaPorDefecto).ToList(),
+            prestamo.UnidadesAsignadas.ToList());
+        Assert.IsNull(prestamo.Evaluador);
+        Assert.IsNull(prestamo.MotivoRechazo);
     }
 
     [TestMethod]
-    public void RegistrarEntrega_PrestamoAprobado_LanzaExcepcion()
+    public void ActivarORechazarPorFaltaDeUnidades_SinUnidadesSuficientes_QuedaRechazadoSinUnidadesNiEvaluador()
     {
-        (Prestamo prestamo, _) = CrearPrestamoAprobado();
-        Usuario responsable = CrearResponsableDeEntrega();
+        Prestamo prestamo = CrearPrestamo();
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: 1);
 
-        DominioException excepcion = Assert.ThrowsException<DominioException>(
-            () => prestamo.RegistrarEntrega(responsable, FechaDeEntrega));
+        prestamo.ActivarORechazarPorFaltaDeUnidades();
 
-        Assert.AreEqual("Solo se puede registrar la entrega de un prestamo activo", excepcion.Message);
-        Assert.AreEqual(EstadoPrestamo.Aprobado, prestamo.Estado);
-        Assert.IsNull(prestamo.ResponsableEntrega);
-        Assert.IsNull(prestamo.FechaHoraEntrega);
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(MotivoFaltaDeUnidades, prestamo.MotivoRechazo);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+        Assert.IsNull(prestamo.Evaluador);
+        Assert.IsTrue(unidades[0].EstaDisponible(), "La unidad deberia seguir disponible");
     }
 
     [TestMethod]
-    public void RegistrarEntrega_EntregaYaRegistrada_LanzaExcepcion()
+    public void ActivarORechazarPorFaltaDeUnidades_PrestamoNoSolicitado_LanzaYNoCambiaNada()
     {
-        (Prestamo prestamo, _) = CrearPrestamoActivo();
-        Usuario primerResponsable = CrearResponsableDeEntrega();
-        Usuario otroResponsable = CrearOtroResponsableDeEntrega();
-        prestamo.RegistrarEntrega(primerResponsable, FechaDeEntrega);
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
 
-        DominioException excepcion = Assert.ThrowsException<DominioException>(
-            () => prestamo.RegistrarEntrega(otroResponsable, SegundaFechaDeEntrega));
+        Assert.ThrowsException<DominioException>(() => prestamo.ActivarORechazarPorFaltaDeUnidades());
 
-        Assert.AreEqual("La entrega del prestamo ya fue registrada", excepcion.Message);
-        Assert.AreSame(primerResponsable, prestamo.ResponsableEntrega);
-        Assert.AreEqual(FechaDeEntrega, prestamo.FechaHoraEntrega);
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        CollectionAssert.AreEqual(unidades, prestamo.UnidadesAsignadas.ToList());
+        Assert.IsNull(prestamo.MotivoRechazo);
+        Assert.IsNull(prestamo.Evaluador);
     }
 
     [TestMethod]
-    public void RegistrarEntrega_ResponsableNulo_LanzaExcepcion()
+    public void ActivarORechazarPorFaltaDeUnidades_TipoQueRequiereAprobacion_LanzaYNoCambiaNada()
     {
-        (Prestamo prestamo, _) = CrearPrestamoActivo();
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: CrearTipoEquipamiento(requiereAprobacion: true));
 
-        DominioException excepcion = Assert.ThrowsException<DominioException>(
-            () => prestamo.RegistrarEntrega(null!, FechaDeEntrega));
+        Assert.ThrowsException<DominioException>(() => prestamo.ActivarORechazarPorFaltaDeUnidades());
 
-        Assert.AreEqual("La entrega debe tener un responsable", excepcion.Message);
-        Assert.IsNull(prestamo.ResponsableEntrega);
-        Assert.IsNull(prestamo.FechaHoraEntrega);
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
+    public void AprobarORechazarPorFaltaDeUnidades_ConUnidadesSuficientes_QuedaActivoConElEvaluadorYLasPrimerasUnidades()
+    {
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: CrearTipoEquipamiento(requiereAprobacion: true));
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: 3);
+        Usuario evaluador = CrearEvaluador();
+
+        prestamo.AprobarORechazarPorFaltaDeUnidades(evaluador);
+
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        CollectionAssert.AreEqual(unidades.Take(CantidadSolicitadaPorDefecto).ToList(),
+            prestamo.UnidadesAsignadas.ToList());
+        Assert.AreSame(evaluador, prestamo.Evaluador);
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
+    public void AprobarORechazarPorFaltaDeUnidades_SinUnidadesSuficientes_QuedaRechazadoSinUnidadesNiEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: CrearTipoEquipamiento(requiereAprobacion: true));
+        List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: 1);
+
+        prestamo.AprobarORechazarPorFaltaDeUnidades(CrearEvaluador());
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(MotivoFaltaDeUnidades, prestamo.MotivoRechazo);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+        Assert.IsNull(prestamo.Evaluador);
+        Assert.IsTrue(unidades[0].EstaDisponible(), "La unidad deberia seguir disponible");
+    }
+
+    [TestMethod]
+    public void AprobarORechazarPorFaltaDeUnidades_EvaluadorNulo_LanzaYNoCambiaNada()
+    {
+        Prestamo prestamo = CrearPrestamo(tipoEquipamiento: CrearTipoEquipamiento(requiereAprobacion: true));
+
+        Assert.ThrowsException<DominioException>(() => prestamo.AprobarORechazarPorFaltaDeUnidades(null!));
+
+        Assert.AreEqual(EstadoPrestamo.Solicitado, prestamo.Estado);
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
+    public void AprobarORechazarPorFaltaDeUnidades_PrestamoNoSolicitado_LanzaYNoCambiaNada()
+    {
+        Prestamo prestamo = CrearPrestamoRechazado();
+        CrearUnidadesDelTipo(tipo: prestamo.TipoEquipamiento, cantidad: 3);
+
+        Assert.ThrowsException<DominioException>(
+            () => prestamo.AprobarORechazarPorFaltaDeUnidades(CrearEvaluador()));
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(MotivoFaltaDeUnidades, prestamo.MotivoRechazo);
+        Assert.AreEqual(0, prestamo.UnidadesAsignadas.Count);
+        Assert.IsNull(prestamo.Evaluador);
+    }
+
+    [TestMethod]
+    public void RechazarPorTopeDeUnidades_PrestamoSolicitado_QuedaRechazadoConSuMotivoYSinEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        prestamo.RechazarPorTopeDeUnidades();
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(MotivoTopeDeUnidades, prestamo.MotivoRechazo);
+        Assert.IsNull(prestamo.Evaluador);
+    }
+
+    [TestMethod]
+    public void RechazarPorTopeDeUnidades_PrestamoNoSolicitado_LanzaYNoCambiaNada()
+    {
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
+
+        Assert.ThrowsException<DominioException>(() => prestamo.RechazarPorTopeDeUnidades());
+
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        CollectionAssert.AreEqual(unidades, prestamo.UnidadesAsignadas.ToList());
+        Assert.IsNull(prestamo.MotivoRechazo);
+    }
+
+    [TestMethod]
+    public void RechazarPorTopeDePrestamosConcurrentes_PrestamoSolicitado_QuedaRechazadoConSuMotivoYSinEvaluador()
+    {
+        Prestamo prestamo = CrearPrestamo();
+
+        prestamo.RechazarPorTopeDePrestamosConcurrentes();
+
+        Assert.AreEqual(EstadoPrestamo.Rechazado, prestamo.Estado);
+        Assert.AreEqual(MotivoTopeDePrestamosConcurrentes, prestamo.MotivoRechazo);
+        Assert.IsNull(prestamo.Evaluador);
+    }
+
+    [TestMethod]
+    public void RechazarPorTopeDePrestamosConcurrentes_PrestamoNoSolicitado_LanzaYNoCambiaNada()
+    {
+        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearPrestamoActivo();
+
+        Assert.ThrowsException<DominioException>(() => prestamo.RechazarPorTopeDePrestamosConcurrentes());
+
+        Assert.AreEqual(EstadoPrestamo.Activo, prestamo.Estado);
+        CollectionAssert.AreEqual(unidades, prestamo.UnidadesAsignadas.ToList());
+        Assert.IsNull(prestamo.MotivoRechazo);
     }
 
     private static Usuario CrearSolicitante()
@@ -797,7 +867,7 @@ public sealed class PrestamoTests
             correo: "renato.alves@ejemplo.com",
             contrasena: "VivalaOrt2026");
 
-        usuario.AsignarTipo(TipoUsuario.Docente);
+        usuario.AsignarTipo(TipoUsuario.Docente());
 
         return usuario;
     }
@@ -811,35 +881,7 @@ public sealed class PrestamoTests
             correo: "sofia.martinez@ejemplo.com",
             contrasena: "VivalaOrt2026");
 
-        usuario.AsignarTipo(TipoUsuario.Supervisor);
-
-        return usuario;
-    }
-
-    private static Usuario CrearResponsableDeEntrega()
-    {
-        Usuario usuario = new Usuario(
-            dni: "23456783",
-            nombre: "Laura",
-            apellido: "Diaz",
-            correo: "laura.diaz@ejemplo.com",
-            contrasena: "VivalaOrt2026");
-
-        usuario.AsignarTipo(TipoUsuario.FuncionarioCE);
-
-        return usuario;
-    }
-
-    private static Usuario CrearOtroResponsableDeEntrega()
-    {
-        Usuario usuario = new Usuario(
-            dni: "90123450",
-            nombre: "Marcos",
-            apellido: "Pereira",
-            correo: "marcos.pereira@ejemplo.com",
-            contrasena: "VivalaOrt2026");
-
-        usuario.AsignarTipo(TipoUsuario.FuncionarioCE);
+        usuario.AsignarTipo(TipoUsuario.Supervisor());
 
         return usuario;
     }
@@ -917,15 +959,6 @@ public sealed class PrestamoTests
         TipoEquipamiento tipo = CrearTipoEquipamiento(requiereAprobacion: true);
         Prestamo prestamo = CrearPrestamo(tipoEquipamiento: tipo);
         List<UnidadFisica> unidades = CrearUnidadesDelTipo(tipo: tipo, cantidad: CantidadSolicitadaPorDefecto);
-
-        return (prestamo, unidades);
-    }
-
-    private static (Prestamo prestamo, List<UnidadFisica> unidades) CrearPrestamoAprobado()
-    {
-        (Prestamo prestamo, List<UnidadFisica> unidades) = CrearSolicitudDeTipoConAprobacion();
-
-        prestamo.Aprobar(CrearEvaluador(), unidades);
 
         return (prestamo, unidades);
     }

@@ -1,0 +1,6 @@
+.toolbar { align-items: flex-start; }
+.mensaje { margin-bottom: 1rem; }
+.resumen { padding: 1rem 1.25rem; margin-bottom: 1rem; }
+.resumen p { margin: 0; }
+.resumen p + p { margin-top: .35rem; }
+.acciones { display: flex; flex-wrap: wrap; gap: .75rem; }

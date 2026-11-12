@@ -1,0 +1,11 @@
+/* Ayuda del campo a la izquierda y contador de caracteres a la derecha */
+.pie-campo {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+}
+
+.contador {
+    white-space: nowrap;
+}

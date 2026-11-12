@@ -1,0 +1,117 @@
+﻿using Dominio;
+using Microsoft.EntityFrameworkCore;
+
+namespace Data.Repositorios;
+
+public class RepositorioCatalogoSql
+{
+    private readonly SqlContext _contexto;
+
+    private IQueryable<UnidadFisica> TodasLasUnidades =>
+        _contexto.Catalogos
+            .SelectMany(catalogo => catalogo.Tipos)
+            .SelectMany(tipo => tipo.Unidades);
+
+    private IQueryable<Catalogo> CatalogosActivos =>
+        _contexto.Catalogos.Where(catalogo => catalogo.Activo);
+
+    public RepositorioCatalogoSql(SqlContext contexto)
+    {
+        _contexto = contexto;
+    }
+
+    public IReadOnlyList<Catalogo> ObtenerCatalogosActivos()
+    {
+        return CatalogosActivos
+            .OrderBy(catalogo => catalogo.Nombre)
+            .ToList();
+    }
+
+    public void AgregarCatalogo(Catalogo catalogo)
+    {
+        ArgumentNullException.ThrowIfNull(catalogo);
+
+        _contexto.Catalogos.Add(catalogo);
+
+        GuardarCambios();
+    }
+
+    public Catalogo? ObtenerCatalogoActivoPorId(int id)
+    {
+        return CatalogosActivos
+            .Include(catalogo => catalogo.Tipos)
+            .ThenInclude(tipo => tipo.Unidades)
+            .FirstOrDefault(catalogo => catalogo.Id == id);
+    }
+
+    public bool ExisteActivoConNombre(string nombre, int? idExcluido)
+    {
+        ArgumentNullException.ThrowIfNull(nombre);
+
+        string nombreBuscado = nombre.Trim().ToLower();
+
+        return CatalogosActivos
+            .Any(catalogo => catalogo.Nombre.Trim().ToLower() == nombreBuscado
+                             && catalogo.Id != idExcluido);
+    }
+
+    public bool ExisteUnidadConIdInstitucional(string idInstitucional)
+    {
+        ArgumentNullException.ThrowIfNull(idInstitucional);
+
+        return TodasLasUnidades
+            .Any(unidad => unidad.IdInstitucional == idInstitucional);
+    }
+
+    public void ActualizarCatalogo(Catalogo catalogo)
+    {
+        ArgumentNullException.ThrowIfNull(catalogo);
+
+        GuardarCambios();
+    }
+
+    public TipoEquipamiento? ObtenerTipoPorNombre(int idCatalogo, string nombre)
+    {
+        ArgumentNullException.ThrowIfNull(nombre);
+
+        string nombreBuscado = nombre.Trim().ToLower();
+
+        return CatalogosActivos
+            .Where(catalogo => catalogo.Id == idCatalogo)
+            .SelectMany(catalogo => catalogo.Tipos)
+            .Include(tipo => tipo.Unidades)
+            .FirstOrDefault(tipo => tipo.Nombre.Trim().ToLower() == nombreBuscado);
+    }
+
+    public IReadOnlyList<Catalogo> ObtenerCatalogosParaExportar()
+    {
+        return _contexto.Catalogos
+            .Include(catalogo => catalogo.Tipos)
+            .ToList();
+    }
+
+    public bool ExisteUnidadConNumeroDeSerie(string numeroDeSerie, int? idUnidadExcluida)
+    {
+        ArgumentNullException.ThrowIfNull(numeroDeSerie);
+
+        string numeroDeSerieBuscado = numeroDeSerie.Trim().ToLower();
+
+        return TodasLasUnidades
+            .Any(unidad => unidad.NumSerie != null
+                           && unidad.NumSerie.Trim().ToLower() == numeroDeSerieBuscado
+                           && unidad.Id != idUnidadExcluida);
+    }
+
+    private void GuardarCambios()
+    {
+        try
+        {
+            _contexto.SaveChanges();
+        }
+        catch (DbUpdateException ex)
+        {
+            _contexto.ChangeTracker.Clear();
+            throw new InvalidOperationException("La base rechazo los cambios del catalogo", ex);
+        }
+    }
+}

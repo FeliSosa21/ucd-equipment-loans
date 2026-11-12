@@ -1,6 +1,7 @@
 using DTOs;
 using Servicios;
 using UI.Components.Shared;
+using UI.Presentacion;
 using UI.Sesion;
 
 namespace UI.Components.Pages;
@@ -10,7 +11,13 @@ public partial class Usuarios
     private List<UsuarioResumenDto> _usuarios = new List<UsuarioResumenDto>();
     private List<string> _tipos = new List<string>();
     private string _busqueda = string.Empty;
+    private string _tipoFiltro = string.Empty;
+    private bool _filtroConCriterios;
     private string? _error;
+    private readonly ErroresDeFormulario _erroresFormulario = new ErroresDeFormulario(
+        CampoDni, nameof(UsuarioDto.Nombre), nameof(UsuarioDto.Apellido), nameof(UsuarioDto.Correo));
+
+    private const string CampoDni = nameof(UsuarioDto.Dni);
     private string? _exito;
     private bool _mostrarAlta;
     private UsuarioDto _nuevo = new UsuarioDto();
@@ -21,11 +28,6 @@ public partial class Usuarios
 
     // Accion delicada que espera que el administrador la confirme antes de ejecutarse.
     private sealed record Confirmacion(string Pregunta, string TextoBoton, Action Accion);
-
-    private IEnumerable<UsuarioResumenDto> UsuariosFiltrados =>
-        _usuarios.Where(usuario => string.IsNullOrWhiteSpace(_busqueda) ||
-                                   $"{usuario.Nombre} {usuario.Apellido} {usuario.Dni} {usuario.Correo}"
-                                       .Contains(_busqueda.Trim(), StringComparison.OrdinalIgnoreCase));
 
     private bool AltaCompleta =>
         !string.IsNullOrWhiteSpace(_nuevo.Dni) &&
@@ -44,6 +46,7 @@ public partial class Usuarios
 
         _tipos = ServicioAdministracion.NombresDeTipos();
         _tipoNuevo = _tipos.First();
+        _tipoFiltro = ServicioAdministracionUsuarios.NombreTipoPendiente;
         Recargar();
     }
 
@@ -75,7 +78,7 @@ public partial class Usuarios
             Correo = _nuevo.Correo.Trim()
         };
 
-        if (Ejecutar(() => ServicioAdministracion.CrearUsuario(datos, _tipoNuevo, DniUsuario)))
+        if (Ejecutar(() => ServicioAdministracion.CrearUsuario(datos, _tipoNuevo, DniUsuario), _erroresFormulario))
         {
             _exito = $"Se creó la cuenta de {datos.Nombre} {datos.Apellido}.";
             _nuevo = new UsuarioDto();
@@ -107,7 +110,7 @@ public partial class Usuarios
         editado.Apellido = editado.Apellido.Trim();
         editado.Correo = editado.Correo.Trim();
 
-        if (Ejecutar(() => ServicioAdministracion.ModificarDatos(editado, DniUsuario)))
+        if (Ejecutar(() => ServicioAdministracion.ModificarDatos(editado, DniUsuario), _erroresFormulario))
         {
             if (EsElMismoDni(editado.Dni))
             {
@@ -208,16 +211,23 @@ public partial class Usuarios
     {
         _error = null;
         _exito = null;
+        _erroresFormulario.Limpiar();
     }
 
-    // Devuelve si la accion se pudo hacer; si no, deja el mensaje del servicio en _error.
-    private bool Ejecutar(Action accion)
+    // Devuelve si la accion se pudo hacer. Si no, el error de un campo va junto a ese campo del formulario
+    // abierto, y el resto queda en _error.
+    private bool Ejecutar(Action accion, ErroresDeFormulario? erroresDelFormulario = null)
     {
         LimpiarMensajes();
         bool exito = true;
         try
         {
             accion();
+        }
+        catch (ServicioException ex) when (erroresDelFormulario is not null && erroresDelFormulario.Muestra(ex.Campo))
+        {
+            erroresDelFormulario.Agregar(ex);
+            exito = false;
         }
         catch (ServicioException ex)
         {
@@ -234,9 +244,12 @@ public partial class Usuarios
     // Si quien mira la lista dejo de ser administrador, el servicio la niega y se muestra el motivo.
     private void Recargar()
     {
+        FiltroUsuariosDto filtro = new FiltroUsuariosDto { Texto = _busqueda, NombreTipo = _tipoFiltro };
+
         try
         {
-            _usuarios = ServicioAdministracion.ListarUsuarios(DniUsuario);
+            _filtroConCriterios = ServicioAdministracion.TieneCriterios(filtro);
+            _usuarios = ServicioAdministracion.ListarUsuarios(filtro, DniUsuario);
         }
         catch (ServicioException ex)
         {

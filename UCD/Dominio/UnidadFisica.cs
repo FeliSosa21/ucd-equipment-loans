@@ -2,18 +2,25 @@ namespace Dominio;
 
 public class UnidadFisica
 {
-    private const int LargoIdInstitucional = 8;
+    public const int LargoIdInstitucional = 8;
     private const int PosicionGuion = 3;
     private const int LargoMinimoUbicacion = 3;
-    private const int LargoMaximoUbicacion = 80;
-    private const int LargoMaxNumSerie = 50;
-    private const int LargoMaxObservaciones = 300;
+    public const int LargoMaximoUbicacion = 80;
+    public const int LargoMaxNumSerie = 50;
+    public const int LargoMaxObservaciones = 300;
 
     public string IdInstitucional { get; private set; }
     public string UbiFisica { get; private set; }
     public string? NumSerie { get; private set; }
     public string? Observaciones { get; private set; }
     public EstadoUnidadFisica Estado { get; private set; }
+    public int Id { get; private set; }
+
+    private UnidadFisica()
+    {
+        IdInstitucional = null!;
+        UbiFisica = null!;
+    }
 
     public UnidadFisica(string idInstitucional, string ubiFisica, string? numSerie)
     {

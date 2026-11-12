@@ -8,3 +8,9 @@ TestResults/
 # Material de trabajo local (no va al repo ni al release)
 Claude outputs/
 cobertura-servicios/
+
+# Archivos de la base de datos del contenedor de Docker (volumen ./data del docker-compose)
+/data/
+
+# Configuracion local de Claude Code (permisos aprobados por cada integrante)
+.claude/settings.local.json

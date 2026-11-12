@@ -18,25 +18,31 @@
     <form class="form-grid" @onsubmit="Cambiar" novalidate>
         <div>
             <label class="lbl" for="actual">Contraseña actual</label>
-            <input id="actual" type="@TipoContrasena" class="field" autocomplete="current-password"
-                   @bind="_actual" @bind:event="oninput" />
+            <input id="actual" type="@TipoContrasena" class="field"
+                   aria-invalid="@_errores.AriaInvalid(CampoActual)" aria-describedby="@_errores.IdDelError(CampoActual, "actual")" autocomplete="current-password"
+                   @bind="_actual" @bind:event="oninput" @bind:after="() => _errores.QuitarDe(CampoActual)" />
+            <ErrorDeCampo Errores="_errores" Campo="@CampoActual" IdDelCampo="actual" />
         </div>
         <div>
             <label class="lbl" for="nueva">Nueva contraseña</label>
-            <input id="nueva" type="@TipoContrasena" class="field" autocomplete="new-password"
-                   @bind="_nueva" @bind:event="oninput" />
+            <input id="nueva" type="@TipoContrasena" class="field"
+                   aria-invalid="@_errores.AriaInvalid(CampoNueva)" aria-describedby="@_errores.IdDelError(CampoNueva, "nueva")" autocomplete="new-password"
+                   @bind="_nueva" @bind:event="oninput" @bind:after="() => _errores.QuitarDe(CampoNueva)" />
+            <ErrorDeCampo Errores="_errores" Campo="@CampoNueva" IdDelCampo="nueva" />
         </div>
         <div>
             <label class="lbl" for="repetir">Repetir nueva contraseña</label>
-            <input id="repetir" type="@TipoContrasena" class="field" autocomplete="new-password"
-                   @bind="_repetir" @bind:event="oninput" />
+            <input id="repetir" type="@TipoContrasena" class="field"
+                   aria-invalid="@_errores.AriaInvalid(CampoRepetir)" aria-describedby="@_errores.IdDelError(CampoRepetir, "repetir")" autocomplete="new-password"
+                   @bind="_repetir" @bind:event="oninput" @bind:after="() => _errores.QuitarDe(CampoRepetir)" />
+            <ErrorDeCampo Errores="_errores" Campo="@CampoRepetir" IdDelCampo="repetir" />
         </div>
 
         <MostrarContrasena @bind-Visible="_mostrarContrasena" Texto="Mostrar contraseñas" />
 
-        @if (_error is not null)
+        @if (_errores.General is not null)
         {
-            <div class="alert alert-error" role="alert">@_error</div>
+            <div class="alert alert-error" role="alert">@_errores.General</div>
         }
         @if (_exito)
         {
@@ -53,7 +59,11 @@
     private string _actual = string.Empty;
     private string _nueva = string.Empty;
     private string _repetir = string.Empty;
-    private string? _error;
+    private readonly ErroresDeFormulario _errores = new ErroresDeFormulario(CampoActual, CampoNueva, CampoRepetir);
+
+    private const string CampoActual = ServicioSesion.CampoContrasenaActual;
+    private const string CampoNueva = nameof(DTOs.UsuarioDto.Contrasena);
+    private const string CampoRepetir = "Repetir";
     private bool _exito;
     private bool _obligatorio;
     private bool _mostrarContrasena;
@@ -81,12 +91,12 @@
             return;
         }
 
-        _error = null;
+        _errores.Limpiar();
         _exito = false;
 
         if (_nueva != _repetir)
         {
-            _error = "Las contraseñas nuevas no coinciden.";
+            _errores.AgregarEnCampo(CampoRepetir, "Las contraseñas nuevas no coinciden.");
             return;
         }
 
@@ -99,7 +109,7 @@
         }
         catch (ServicioException ex)
         {
-            _error = ex.Message;
+            _errores.Agregar(ex);
         }
     }
 

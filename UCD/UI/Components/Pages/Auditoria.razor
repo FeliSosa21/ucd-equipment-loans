@@ -1,7 +1,7 @@
 @page "/auditoria"
 @using DTOs
 @using Servicios
-@inherits PaginaConSesion
+@inherits PaginaConCatalogo
 @inject ServicioHistorico ServicioHistorico
 
 <PageTitle>UCD · Registro histórico</PageTitle>
@@ -11,51 +11,73 @@
     <p>Solicitudes, aprobaciones, rechazos, préstamos y devoluciones registrados en el sistema. Los movimientos no se pueden modificar ni eliminar.</p>
 </div>
 
-<div class="toolbar">
-    <div>
-        <label class="lbl" for="filtro-tipo">Tipo de movimiento</label>
-        <select id="filtro-tipo" class="field" @bind="_tipo">
-            <option value="@TodosLosTipos">Todos</option>
-            @foreach (KeyValuePair<string, string> tipo in NombresDeTipo)
-            {
-                <option value="@tipo.Key">@tipo.Value</option>
-            }
-        </select>
-    </div>
-</div>
+<SelectorCatalogo @ref="Selector" @bind-IdCatalogo="IdCatalogo" @bind-IdCatalogo:after="AlCambiarCatalogoAsync" />
 
-<div class="card table-card">
-    <table>
-        <thead>
-            <tr>
-                <th>Fecha y hora</th>
-                <th>Tipo</th>
-                <th>Solicitante</th>
-                <th>Evaluador</th>
-                <th>Unidad</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (MovimientoDto movimiento in MovimientosFiltrados)
-            {
+@if (_error is not null)
+{
+    <div class="alert alert-error mensaje" role="alert">@_error</div>
+}
+
+@if (!HayCatalogoElegido())
+{
+    @if (HayCatalogosParaElegir())
+    {
+        <div class="card">
+            <EstadoVacio Titulo="Elegí un catálogo para ver sus movimientos"
+                         Mensaje="Cada catálogo tiene su propio registro histórico." />
+        </div>
+    }
+}
+else
+{
+    <div class="toolbar">
+        <div>
+            <label class="lbl" for="filtro-tipo">Tipo de movimiento</label>
+            <select id="filtro-tipo" class="field" @bind="_tipo">
+                <option value="@TodosLosTipos">Todos</option>
+                @foreach (KeyValuePair<string, string> tipo in NombresDeTipo)
+                {
+                    <option value="@tipo.Key">@tipo.Value</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="card table-card">
+        <table>
+            <thead>
                 <tr>
-                    <td>@movimiento.FechaHora.ToString(Formatos.FechaHora)</td>
-                    <td>@TraducirTipo(movimiento.Tipo)</td>
-                    <td>@movimiento.Solicitante</td>
-                    <td>@(movimiento.Evaluador ?? SinDato)</td>
-                    <td class="mono">@(movimiento.Unidad ?? SinDato)</td>
+                    <th>Fecha y hora</th>
+                    <th>Tipo</th>
+                    <th>Solicitante</th>
+                    <th>Evaluador</th>
+                    <th>Responsable</th>
+                    <th>Unidad</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-    @if (!_movimientos.Any())
-    {
-        <EstadoVacio Titulo="Todavía no hay movimientos"
-                     Mensaje="Las solicitudes, aprobaciones, rechazos, préstamos y devoluciones van a aparecer acá a medida que se registren." />
-    }
-    else if (!MovimientosFiltrados.Any())
-    {
-        <EstadoVacio Titulo="No hay movimientos de este tipo"
-                     Mensaje="Probá eligiendo otro tipo o «Todos»." />
-    }
-</div>
+            </thead>
+            <tbody>
+                @foreach (MovimientoDto movimiento in MovimientosFiltrados)
+                {
+                    <tr>
+                        <td>@movimiento.FechaHora.ToString(Formatos.FechaHora)</td>
+                        <td>@TraducirTipo(movimiento.Tipo)</td>
+                        <td>@movimiento.Solicitante</td>
+                        <td>@(movimiento.Evaluador ?? SinDato)</td>
+                        <td>@movimiento.Responsable</td>
+                        <td class="mono">@(movimiento.Unidad ?? SinDato)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (!_movimientos.Any())
+        {
+            <EstadoVacio Titulo="Todavía no hay movimientos"
+                         Mensaje="Las solicitudes, aprobaciones, rechazos, préstamos y devoluciones van a aparecer acá a medida que se registren." />
+        }
+        else if (!MovimientosFiltrados.Any())
+        {
+            <EstadoVacio Titulo="No hay movimientos de este tipo"
+                         Mensaje="Probá eligiendo otro tipo o «Todos»." />
+        }
+    </div>
+}

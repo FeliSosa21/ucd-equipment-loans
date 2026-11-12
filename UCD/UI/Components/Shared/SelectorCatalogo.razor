@@ -1,0 +1,36 @@
+@using DTOs
+@* Desplegable con los catalogos activos. El padre lo usa con @bind-IdCatalogo="_idCatalogo":
+   el selector recibe el id elegido y avisa con IdCatalogoChanged cuando el usuario elige otro. *@
+@if (_error is not null)
+{
+    <div class="alert alert-error selector-aviso" role="alert">@_error</div>
+}
+else if (_catalogos.Count == 0)
+{
+    <div class="alert alert-info selector-aviso" role="status">
+        No hay catálogos activos.
+        @if (PuedeGestionarCatalogos())
+        {
+            <a href="catalogos">Crear un catálogo</a>
+        }
+    </div>
+}
+else
+{
+    <div class="selector-catalogo">
+        <div class="filtro">
+            <label class="lbl" for="@IdDelSelect">Catálogo</label>
+            <select id="@IdDelSelect" class="field" value="@IdCatalogo" @onchange="AlElegir">
+                <option value="@SinCatalogo" disabled>Elegí un catálogo…</option>
+                @foreach (CatalogoDto catalogo in _catalogos)
+                {
+                    <option value="@catalogo.Id">@catalogo.Nombre</option>
+                }
+            </select>
+        </div>
+        @if (NombreElegido() is string nombre)
+        {
+            <p class="catalogo-elegido" role="status">Catálogo: <strong>@nombre</strong></p>
+        }
+    </div>
+}
