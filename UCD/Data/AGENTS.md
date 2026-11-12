@@ -10,7 +10,7 @@ Cada integrante desarrolla **a mano, sin agentes y con TDD** un repositorio con 
 |---|---|---|---|
 | Usuario | `Repositorios/RepositorioUsuarioSql.cs` | `Configuraciones/UsuarioConfiguracion.cs` | `Data.Tests/Repositorios/RepositorioUsuarioSqlTests.cs` |
 | Préstamo | `Repositorios/RepositorioPrestamoSql.cs` | `Configuraciones/ConfiguracionPrestamo.cs` | `Data.Tests/Repositorios/RepositorioPrestamoSqlTests.cs` |
-| Catálogo | `Repositorios/RepositorioCatalogoSql.cs` (cuando exista) | `Configuraciones/ConfiguracionCatalogo.cs` | `Data.Tests/Repositorios/RepositorioCatalogoSqlTests.cs` |
+| Catálogo | `Repositorios/RepositorioCatalogoSql.cs` | `Configuraciones/ConfiguracionCatalogo.cs`, `ConfiguracionTipoEquipamiento.cs` y `ConfiguracionUnidadFisica.cs` | `Data.Tests/Repositorios/RepositorioCatalogoSqlTests.cs` |
 
 Sobre ellos el agente puede: explicar conceptos, mostrar ejemplos análogos con otra entidad inventada (por ejemplo `Producto`), revisar un intento y señalar errores, y correr la skill de calidad en modo solo lectura. Las migraciones de estos cambios las genera el integrante.
 
@@ -25,8 +25,8 @@ El resto (por ejemplo `MovimientoConfiguracion`, `TipoUsuarioConfiguracion`, `Re
 - Comparaciones de texto sin distinguir mayúsculas con `ToLower()`; `string.Equals(..., StringComparison)` no se traduce a SQL.
 - `OrderBy` con desempate (por `Id` u otro campo único).
 - Los filtros por fechas usan `FiltroPorCatalogoYFechas`: `Desde` incluido y `Hasta` excluido.
-- Las consultas para la exportación (req. 2.7), `ObtenerDevoluciones(filtro)` y `ObtenerPrestamos(filtro)`, devuelven todo el rango filtrado aunque el filtro no tenga criterios. Tienen la misma firma en memoria y en EF, acordada con el equipo: no la cambies aunque una revisión lo sugiera.
-- Los seis tipos de usuario y los demás datos de instalación se cargan mediante scripts; no van embebidos en C# ni con `HasData` (foro, d=155847 y d=155880). El root es la excepción permitida por código: debe usar el Administrador ya persistido, sin crear tipos como reparación implícita. Los tests preparan sus propios datos. La retirada de las cargas actuales en memoria y el cambio de `Program.cs` se coordinan con el equipo.
+- Las consultas para la exportación (req. 2.7), `ObtenerDevoluciones(filtro)` y `ObtenerPrestamos(filtro)`, devuelven todo el rango filtrado aunque el filtro no tenga criterios. Su firma fue acordada con el equipo: no la cambies aunque una revisión lo sugiera.
+- Los seis tipos de usuario y los demás datos de instalación se cargan mediante scripts; no van embebidos en C# ni con `HasData` (foro, d=155847 y d=155880). El root es la excepción permitida por código: debe usar el Administrador ya persistido, sin crear tipos como reparación implícita. Los tests preparan sus propios datos.
 
 ## Tests de persistencia
 
